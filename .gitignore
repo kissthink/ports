@@ -6,6 +6,14 @@
 *.tbz2
 *.zip
 *.rpm
-*.txt
 *.patch
 *.diff.gz
+*.otf
+*.ttf
+*.txt
+*.c
+*.cpp
+*.h
+*.spec
+*.desktop
+PKGBUILD

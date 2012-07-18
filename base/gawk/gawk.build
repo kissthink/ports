@@ -1,0 +1,85 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=gawk
+VERSION=4.0.1
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: gawk (pattern scanning and processing language)
+${NAME}:
+${NAME}: Gawk is the GNU Project's implementation of the AWK programming
+${NAME}: language. It conforms to the definition of the language in the POSIX
+${NAME}: 1003.2 Command Language And Utilities Standard. This version in turn
+${NAME}: is based on the description in The AWK Programming Language, by Aho,
+${NAME}: Kernighan, and Weinberger, with the additional features found in the
+${NAME}: System V Release 4 version of UNIX awk. Gawk also provides more
+${NAME}: recent Bell Labs awk extensions, and some GNU-specific extensions.
+${NAME}:
+${NAME}: Homepage: http://www.gnu.org/software/gawk
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://ftp.gnu.org/gnu/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+SRCCOPY[0]="GPL3"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-rpath \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --infodir="${SYS_DIR[info]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --libexecdir=/usr/lib$(libdirsuffix)/exec
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+(
+  cd ${PKG}/usr/bin
+  ln -sf gawk-${SRCVERS[0]} awk
+  ln -sf gawk-${SRCVERS[0]} gawk
+  ln -sf pgawk-${SRCVERS[0]} pgawk
+)
+#FIXME: compatibility symlinks
+install.dir ${PKG}/bin
+(
+  cd ${PKG}/bin
+  ln -sf /usr/bin/gawk-${SRCVERS[0]}
+  ln -sf /usr/bin/gawk-${SRCVERS[0]} gawk
+  ln -sf /usr/bin/gawk-${SRCVERS[0]} awk
+  ln -sf /usr/bin/pgawk-${SRCVERS[0]}
+  ln -sf /usr/bin/pgawk-${SRCVERS[0]} pgawk
+  ln -sf /usr/bin/dgawk
+  ln -sf /usr/bin/igawk
+)
+(
+  cd ${PKG}${SYS_DIR[man]}/man1
+  rm -f pgawk.1
+  echo ".so man1/gawk.1" > awk.1
+  echo ".so man1/gawk.1" > pgawk.1
+  echo ".so man1/gawk.1" > dgawk.1
+)
+}

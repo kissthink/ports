@@ -1,0 +1,65 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=shared_mime_info
+VERSION=1.0
+BUILD=1
+DEPENDS=('glib >= 2.30.2-1' 'libxml >= 2.7.8-1' 'zlib >= 1.2.5-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: shared_mime_info (MIME database)
+${NAME}:
+${NAME}:   The freedesktop.org shared MIME database spec.
+${NAME}:   The merged GNOME and KDE databases, in the new format.
+${NAME}:   The update-mime-database command, used to install new MIME data.
+${NAME}:
+${NAME}: Homepage: http://www.freedesktop.org/standards/shared-mime-info.html
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=shared-mime-info
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://freedesktop.org/~hadess/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+SRCCOPY[0]="LGPL21"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog NEWS
+install.dir ${PKG}/var/log/setup
+install.dir ${PKG}/usr/lib$(libdirsuffix)
+install.dat doinst.sh ${PKG}/install
+install.bin setup.07.update-mime-database ${PKG}/var/log/setup
+mv \
+ ${PKG}/usr/share/pkgconfig \
+ ${PKG}/usr/lib$(libdirsuffix)
+}

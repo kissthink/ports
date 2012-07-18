@@ -1,0 +1,218 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=sdl
+VERSION=1.2.15
+BUILD=1
+DEPENDS=('sound >= 1.0.25-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: SDL (Simple DirectMedia Layer)
+${NAME}:
+${NAME}: SDL is a library which has a generic API that provides low level
+${NAME}: access to audio, keyboard, mouse, joystick, 3D hardware via OpenGL,
+${NAME}: and 2D framebuffer across multiple platforms. It is mostly used for
+${NAME}: games. Since a lot of games and other applications such as avi-xmms
+${NAME}: use this library you probably need to install it.
+${NAME}:
+${NAME}: Homepage: http://libsdl.org
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=SDL
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://www.libsdl.org/release/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --enable-shared=yes \
+ --enable-static=no \
+ --disable-rpath \
+ --disable-nasm \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --with-x \
+ --disable-x11-shared \
+ --disable-video-svga \
+ --disable-video-ggi \
+ --disable-video-aalib \
+ --disable-oss \
+ --disable-esd \
+ --disable-arts \
+ --enable-sdl-dlopen \
+ --enable-video-x11 \
+ --enable-alsa \
+ --enable-pthreads
+# --enable-pulseaudio-shared
+make ${JOBS} CFLAGS="${FLAGS}"
+make install DESTDIR="${PKG}"
+doc CREDITS
+changelog WhatsNew
+mkdir -p ${PKG}/${SYS_DIR[html]}/${SRCNAME[0]}
+install.doc docs.html docs/html/*.html \
+ ${PKG}/${SYS_DIR[html]}/${SRCNAME[0]}
+}
+
+SRCNAME[1]=SDL_mixer
+SRCVERS[1]=1.2.12
+SRCPACK[1]=http://www.libsdl.org/projects/${SRCNAME[1]}/release/${SRCNAME[1]}-${SRCVERS[1]}.tar.gz
+SRCCOPY[1]="ZLIB"
+
+build1()
+{
+SDL_CFLAGS="-D_GNU_SOURCE=1 -D_REENTRANT -I${PKG}/usr/include/SDL" \
+SDL_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lSDL -lpthread" \
+CFLAGS="${FLAGS} -I/usr/include/mad" CXXFLAGS="${FLAGS} -I/usr/include/mad" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --enable-dependency-tracking=no \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --enable-music-mp3-mad-gpl \
+ --enable-music-mod-modplug
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog CHANGES
+}
+
+SRCNAME[2]=SDL_image
+SRCVERS[2]=1.2.12
+SRCPACK[2]=http://www.libsdl.org/projects/${SRCNAME[2]}/release/${SRCNAME[2]}-${SRCVERS[2]}.tar.gz
+SRCCOPY[2]="ZLIB"
+
+build2()
+{
+SDL_CFLAGS="-D_GNU_SOURCE=1 -D_REENTRANT -I${PKG}/usr/include/SDL" \
+SDL_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lSDL -lpthread" \
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --disable-jpg-shared \
+ --disable-png-shared \
+ --disable-tif-shared \
+ --enable-tif \
+ --enable-xcf
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog CHANGES
+}
+
+SRCNAME[3]=SDL_net
+SRCVERS[3]=1.2.8
+SRCPACK[3]=http://www.libsdl.org/projects/${SRCNAME[3]}/release/${SRCNAME[3]}-${SRCVERS[3]}.tar.gz
+SRCCOPY[3]="ZLIB"
+
+build3()
+{
+CPPFLAGS="-I${PKG}/usr/include/SDL" \
+LDFLAGS="-L${PKG}/usr/lib$(libdirsuffix)" \
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackare-linux" \
+ --disable-dependency-tracking \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --with-sdl-prefix="${PKG}/usr" \
+ --with-sdl-exec-prefix="${PKG}/usr" \
+ --disable-sdltest \
+ --disable-gui
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog CHANGES
+}
+
+SRCNAME[4]=SDL_ttf
+SRCVERS[4]=2.0.11
+SRCPACK[4]=http://www.libsdl.org/projects/${SRCNAME[4]}/release/${SRCNAME[4]}-${SRCVERS[4]}.tar.gz
+SRCCOPY[4]="ZLIB"
+
+build4()
+{
+SDL_CFLAGS="-D_GNU_SOURCE=1 -D_REENTRANT -I${PKG}/usr/include/SDL" \
+SDL_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lSDL -lpthread" \
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog CHANGES
+}
+
+SRCNAME[5]=SDL_sound
+SRCVERS[5]=1.0.3
+SRCPACK[5]=http://icculus.org/${SRCNAME[5]}/downloads/${SRCNAME[5]}-${SRCVERS[5]}.tar.gz
+SRCCOPY[5]="LGPL21"
+
+build5()
+{
+CPPFLAGS="-I${PKG}/usr/include/SDL" \
+LDFLAGS="-L${PKG}/usr/lib$(libdirsuffix)" \
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackare-linux" \
+ --disable-dependency-tracking \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --with-sdl-prefix="${PKG}/usr" \
+ --with-sdl-exec-prefix="${PKG}/usr" \
+ --disable-sdltest
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc CREDITS
+changelog CHANGELOG
+rm -f \
+ ${PKG}/usr/bin/playsound*
+}

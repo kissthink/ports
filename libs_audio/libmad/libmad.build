@@ -1,0 +1,77 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=libmad
+VERSION=0.15.1b
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: libmad (MPEG audio library)
+${NAME}:
+${NAME}: A high-quality MPEG audio decoder. It supports MPEG-1 and the MPEG-2
+${NAME}: extension to Lower Sampling Frequencies, as well as the so-called
+${NAME}: MPEG 2.5 format. All three audio layers (Layer I, Layer II and Layer
+${NAME}: ||| a.k.a. MP3) are fully implemented. Because MAD provides full
+${NAME}: 24-bit PCM output, applications using MAD are able to produce
+${NAME}: high-quality audio.
+${NAME}:
+${NAME}: MAD was written by Robert Leslie.
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=${URL[sf]}/mad/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+case "$(cpufamily ${ARCH})" in
+  x86_64)
+    EXTRA="--enable-fpm=64bit"
+  ;;
+  x86)
+    EXTRA="--enable-fpm=intel"
+  ;; 
+esac
+
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-static \
+ --disable-debugging \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --includedir=/usr/include/mad \
+ --localstatedir=/var \
+ --enable-accuracy \
+ "${EXTRA}"
+make -j 2
+make install DESTDIR="${PKG}"
+
+changelog CHANGES
+doc CREDITS
+
+install.dir \
+ ${PKG}/usr/lib$(libdirsuffix)/pkgconfig
+install -m 0644 mad.pc \
+ ${PKG}/usr/lib$(libdirsuffix)/pkgconfig
+}

@@ -1,0 +1,65 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=libmikmod
+VERSION=3.2.0
+BUILD=1
+DEPENDS=('audiofile >= 0.3.4-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: libmikmod
+${NAME}:
+${NAME}: libMikMod is able to play a wide range of module formats, as well as
+${NAME}: digital sound files. It can take advantage of particular features of
+${NAME}: your system, such as sound redirection over the network. And due to 
+${NAME}: its modular nature, the library can be extended to support more
+${NAME}: sound or module formats, as well as new hardware or other sound
+${NAME}: output capabilities, as they appear.
+${NAME}:
+${NAME}: Homepage: http://mikmod.shlomifish.org
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="LGPL21 LGPL2"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --infodir="${SYS_DIR[info]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --enable-oss=no
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+install.dir ${PKG}${SYS_DIR[html]}/libmikmod
+install.dat docs/*.html ${PKG}${SYS_DIR[html]}/libmikmod
+chmod 0755 ${PKG}/usr/lib*/*.so*
+}

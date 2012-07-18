@@ -1,0 +1,116 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=icon_theme
+VERSION=0.8.90
+ARCH=noarch
+BUILD=2
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: icon_theme
+${NAME}:
+${NAME}: The default icon set which is Tango. It follows the icon theme 
+${NAME}: specification. This specification is available at:
+${NAME}:
+${NAME}:   http://www.freedesktop.org/standards/icon-theme-spec
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=hicolor-icon-theme
+SRCVERS[0]=0.12
+SRCPACK[0]=http://icon-theme.freedesktop.org/releases/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var
+make -j 2
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+mkdir -p ${PKG}/var/log/setup
+install.dat doinst.sh ${PKG}/install
+install.bin setup.08.gtk-update-icon-cache ${PKG}/var/log/setup
+}
+
+SRCNAME[1]=tango-icon-theme
+SRCVERS[1]=0.8.90
+SRCPACK[1]=http://tango.freedesktop.org/releases/${SRCNAME[1]}-${SRCVERS[1]}.tar.bz2
+
+build1()
+{
+./configure \
+  --prefix=/usr \
+  --mandir="${SYS_DIR[man]}" \
+  --sysconfdir=/etc \
+  --localstatedir=/var \
+  --enable-png-creation
+make
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog ChangeLog
+rm -rf \
+ ${PKG}/usr/share/locale
+mv \
+ ${PKG}/usr/share/icons/Tango \
+ ${PKG}/usr/share/icons/tango
+}
+
+SRCNAME[2]=tango
+SRCVERS[2]=extras
+SRCPACK[2]=${SRCNAME[2]}-${SRCVERS[2]}.tar.xz
+SRCOPTS[2]="pkgunpack"
+
+linkicon()
+{
+  if [ -e "${1}" ]; then
+    ln -s "../${1}" "${2}"
+  fi
+}
+
+build2()
+{
+cd usr/share/icons/tango
+for size in 16 22 24 32 48 64 72 96 128 scalable; do
+if [[ "${size}" == "scalable" ]]; then
+  SIZEDIR="${size}"
+else
+  SIZEDIR="${size}x${size}"
+fi
+(
+  cd "${SIZEDIR}"
+  linkicon "devices/input-keyboard.png" "apps/preferences-desktop-keyboard.png"
+  linkicon "devices/input-keyboard.svg" "apps/preferences-desktop-keyboard.svg"
+  linkicon "emblems/emblem-symbolic-link.png" "actions/insert-link.png"
+  linkicon "emblems/emblem-symbolic-link.svg" "actions/insert-link.png"
+  linkicon "places/folder.png" "mimetypes/inode-directory.png"
+  linkicon "places/folder.svg" "mimetypes/inode-directory.svg"
+  linkicon "status/network-idle.svg" "apps/preferences-system-network.svg"
+  linkicon "status/network-idle.png" "apps/preferences-system-network.png"
+)
+done
+}

@@ -1,0 +1,58 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=calcurse
+VERSION=3.0.0
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: calcurse (personal organizer)
+${NAME}:
+${NAME}: A console calendar and scheduling application to keep track of
+${NAME}: events, appointments and everyday tasks. A configurable notification
+${NAME}: system reminds of upcoming deadlines, and the interface can be
+${NAME}: customized to suit user needs.
+${NAME}:
+${NAME}: Homepage: http://calcurse.org
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://culot.org/cgi-bin/get.cgi?/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="BSD2"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-rpath \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+}

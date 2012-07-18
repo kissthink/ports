@@ -1,0 +1,91 @@
+#!/bin/sh
+
+CWD=`pwd`
+NAME=midori
+VERSION=20090411
+ARCH=i586
+BUILD=1
+PKGNAME=$NAME
+PKGVER=$VERSION
+BASEDIR=$PKGNAME-$PKGVER
+ARCHIVE=$BASEDIR.tar.bz2
+REPOSITORY=http://goodies.xfce.org/releases/midori
+FLAGS="-O2 -march=pentium -mtune=pentium -fno-strength-reduce \
+ -fomit-frame-pointer -ffast-math"
+PKG=/tmp/package-$NAME
+
+rm -rf $PKG
+mkdir -p $PKG
+
+# Obtain sources
+if [ ! -e $ARCHIVE ]; then
+  if `wget "$REPOSITORY/$ARCHIVE"`; then
+    true
+  else
+    exit 1
+  fi
+fi
+
+# Compile
+cd /tmp
+tar jxvf $CWD/$ARCHIVE
+cd $BASEDIR
+bzcat $CWD/$NAME-$VERSION-stockicons.patch.bz2 | patch -p1 -s
+CFLAGS=$FLAGS CXXFLAGS=$FLAGS ./configure \
+ -pp -d none \
+ --prefix=/usr \
+ --mandir=/usr/man \
+ --docdir=/usr/doc/${NAME}-${VERSION} \
+ --sysconfdir=/etc \
+ --localstatedir=/var \
+ --libdir=/usr/libexec
+make
+
+# Install
+make install DESTDIR=$PKG
+mkdir -p $PKG/install $PKG/usr/doc/$NAME-$VERSION
+cat > $PKG/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+      |-----handy-ruler------------------------------------------------------|
+midori: midori (web browser)
+midori:
+midori: A web browser based on WebKit.
+midori:
+midori: Homepage: http://www.twotoasts.de
+midori:
+midori:
+midori:
+midori:
+midori:
+midori:
+EOF
+
+cat > $PKG/install/slack-required <<EOF
+webkit >= 1.1.4-i486-1
+libunique >= 1.0.8-i486-1
+libidn >= 1.9-i586-1
+EOF
+
+mv ${PKG}/usr/doc/${NAME}-${VERSION}/${NAME}/* \
+ ${PKG}/usr/doc/${NAME}-${VERSION}
+
+rmdir ${PKG}/usr/doc/${NAME}-${VERSION}/${NAME}
+
+strip --strip-unneeded \
+ $PKG/usr/libexec/*/*.so || :
+
+strip \
+ $PKG/usr/bin/* || :
+
+chown -R root.root $PKG
+
+# Make package
+cd $PKG
+cat install/slack-desc | grep "$NAME:" > /tmp/$NAME-$VERSION-$ARCH-$BUILD.txt
+makepkg -l y -c n /tmp/$NAME-$VERSION-$ARCH-$BUILD.tgz

@@ -1,0 +1,123 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=gtk+
+MAJOR=3.4
+VERSION=${MAJOR}.3
+BUILD=1
+DEPENDS=('xorg_libs >= 7.6-6' 'gtk+ >= 2.24.10-1' 'gdk_pixbuf >= 2.26.1-1' 'cairo >= 1.12.2-1' 'atk >= 2.4.0-1' 'pango >= 1.30.0-1')
+OPTIONS="symprepend"
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: GTK+ version 3
+${NAME}:
+${NAME}: This is GTK+, a toolkit for creating graphical user interfaces.
+${NAME}: Offering a complete set of widgets, GTK+ is suitable for projects
+${NAME}: ranging from small one-off projects to complete application suites.
+${NAME}:
+${NAME}: Homepage: http://www.gtk.org
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=${URL[gnome]}/${SRCNAME[0]}/${MAJOR}/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+SRCCOPY[0]="LGPL2"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-shared=yes \
+ --enable-static=no \
+ --enable-introspection=no \
+ --enable-debug=minimum \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --with-html-dir=/usr/share/html \
+ --enable-gtk2-dependency \
+ --enable-x11-backend
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+install.dat doinst.sh ${PKG}/install
+touch ${PKG}/etc/gtk-3.0/gtk.immodules
+# We can include the demos while Gtk+ 3 is not deprecated
+#rm -rf \
+# ${PKG}/usr/share/gtk-3.0/demo \
+# ${PKG}/usr/bin/gtk3-demo* \
+# ${PKG}/usr/bin/gtk3-widget-factory
+}
+
+SRCNAME[1]=gnome-themes-standard
+THEMESM=3.4
+SRCVERS[1]=${THEMESM}.2
+SRCPACK[1]=${URL[gnome]}/${SRCNAME[1]}/${THEMESM}/${SRCNAME[1]}-${SRCVERS[1]}.tar.xz
+SRCCOPY[1]="LGPL21"
+
+build1()
+{
+DEPENDENCIES_CFLAGS="-I${PKG}/usr/include/gtk-3.0 -I/usr/include/glib-2.0 -I/usr/lib64/glib-2.0/include -I/usr/include/pango-1.0 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/atk-1.0 -I/usr/include/cairo" \
+DEPENDENCIES_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lgtk-3" \
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-shared=yes \
+ --enable-static=no \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc/gtk-3.0 \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+}
+
+SRCNAME[2]=clearwaita
+SRCVERS[2]=20120329
+SRCPACK[2]=${SRCNAME[2]}-${SRCVERS[2]}.tar.xz
+SRCOPTS[2]="pkgunpack"
+SRCCOPY[2]="GPL3"
+
+build2()
+{
+install.dir ${PKG}/usr/share/themes/{Slackware,Clearlooks}
+(
+  cd ${PKG}/usr/share/themes/Slackware
+  ln -sf /usr/share/themes/Clearwaita/gtk-3.0
+  cd ${PKG}/usr/share/themes/Clearlooks
+  ln -sf /usr/share/themes/Clearwaita/gtk-3.0
+  cd ${PKG}/usr/share/themes/Clearwaita
+  ln -sf /usr/share/themes/Clearlooks/gtk-2.0
+  ln -sf /usr/share/themes/Clearlooks/xfwm4
+)
+}

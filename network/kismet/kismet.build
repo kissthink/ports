@@ -1,0 +1,76 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=kismet
+VERSION=201103R2
+BUILD=1
+DEPENDS=('tcpip >= 3.2.0-1' 'pcre >= 8.30-1' 'openssl >= 0.9.8t-1' 'compat_tcpip >= 20120202-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: kismet (wireless network scanner)
+${NAME}:
+${NAME}: Kismet is an 802.11 layer2 wireless network detector, sniffer, and
+${NAME}: intrusion detection system. Kismet will work with any wireless card
+${NAME}: which supports raw monitoring (rfmon) mode, and can sniff 802.11b,
+${NAME}: 802.11a, and 802.11g traffic.
+${NAME}:
+${NAME}: Kismet identifies networks by passively collecting packets and
+${NAME}: detecting standard named networks, detecting (and given time,
+${NAME}: decloaking) hidden networks, and infering the presence of
+${NAME}: nonbeaconing networks via data traffic.
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=2011-03-R2
+SRCPACK[0]=http://www.kismetwireless.net/code/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+CPPFLAGS="-fpermissive -I/usr/include/libnl2" \
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc/kismet \
+ --libdir=/usr/lib$(libdirsuffix)/plugins \
+ --localstatedir=/var \
+ --with-pcreheaders=/usr/include/pcre \
+ --with-suidgroup="netdev"
+make ${JOBS} dep
+make ${JOBS}
+make ${JOBS} plugins
+make install suidinstall DESTDIR="${PKG}"
+make plugins-install DESTDIR="${PKG}"
+doc README
+changelog RELEASENOTES.txt
+install.dat doinst.sh ${PKG}/install
+install.dir ${PKG}/usr/share/icons/hicolor/48x48/apps
+install.dat kismet.png ${PKG}/usr/share/icons/hicolor/48x48/apps
+install.dir ${PKG}/usr/share/applications
+install.dat kismet.desktop ${PKG}/usr/share/applications
+install.dir ${PKG}/usr/share/dtds
+install.dat extra/*.{dtd,xsd} ${PKG}/usr/share/dtds
+mv \
+ ${PKG}/etc/kismet/kismet.conf \
+ ${PKG}/etc/kismet/kismet.conf.new
+mv \
+ ${PKG}/etc/kismet/kismet_drone.conf \
+ ${PKG}/etc/kismet/kismet_drone.conf.new
+}

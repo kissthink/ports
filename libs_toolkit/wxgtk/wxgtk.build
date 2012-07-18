@@ -1,0 +1,70 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=wxgtk
+VERSION=2.8.12
+BUILD=1
+DEPENDS=('gtk+ >= 2.24.6-1' 'gstreamer >= 0.10.35-1' 'mesa >= 7.11-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: wxgtk (Gtk+ port of WxWidgets)
+${NAME}:
+${NAME}: A cross-platform C++ framework for writing advanced GUI applications
+${NAME}: using native controls where possible. In addition to common and
+${NAME}: advanced GUI facilities there are wrappers for common file
+${NAME}: operations, and facilities for writing TCP/IP applications, thread
+${NAME}: handling and more. Where certain features are not available on a
+${NAME}: platform, such as MDI and tree controls on UNIX, they are emulated.
+${NAME}:
+${NAME}: Homepage: http://www.wxwidgets.org
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=wxGTK
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=${URL[sf]}/wxwindows/${SRCVERS[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="GPL2 LGPL2"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-rpath \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --disable-optimize \
+ --disable-compat26 \
+ --with-gtk=2 \
+ --with-opengl \
+ --enable-unicode \
+ --enable-graphics_ctx \
+ --enable-mediactrl
+make -j 2
+make install DESTDIR="${PKG}"
+changelog docs/changes.txt
+license docs/preamble.txt COPYING.preamble
+license docs/licence.txt COPYING.wxwindows
+license docs/licendoc.txt COPYING.wxwindowsdocs
+install.dir ${PKG}${SYS_DIR[html]}/wxwidgets
+cp -r docs/html/* ${PKG}${SYS_DIR[html]}/wxwidgets
+}

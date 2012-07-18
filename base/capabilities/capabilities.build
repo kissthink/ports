@@ -1,0 +1,77 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=capabilities
+VERSION=$(date '+%Y%m%d')
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: capabilities
+${NAME}:
+${NAME}: Support for POSIX 1003.1e capabilities. These allow granting only
+${NAME}: a subset of super user privileges to programs instead of granting
+${NAME}: all privileges by default like SETUID.
+${NAME}:
+${NAME}: Homepage: http://sites.google.com/site/fullycapable
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=libcap-ng
+SRCVERS[0]=0.6.6
+SRCPACK[0]=http://people.redhat.com/sgrubb/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="GPL2 LGPL21"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var
+#FIXME: audit should use pkgconfig to find libcap-ng
+#--includedir=/usr/include/cap-ng
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog ChangeLog
+}
+
+SRCNAME[1]=libcap
+SRCVERS[1]=2.22
+SRCPACK[1]=ftp://ftp.kernel.org/pub/linux/libs/security/linux-privs/libcap2/${SRCNAME[1]}-${SRCVERS[1]}.tar.bz2
+SRCCOPY[1]="GPL2"
+
+build1()
+{
+make ${JOBS} CFLAGS="${FLAGS}"
+make install DESTDIR="${PKG}" \
+ RAISE_SETFCAP="no" MANDIR="${PKG}/usr/man" prefix="/usr" 
+doc README
+license License
+chmod 0755 ${PKG}/usr/lib$(libdirsuffix)/libcap.so.?.??
+rm -f ${PKG}/usr/lib$(libdirsuffix)/libcap.a
+}

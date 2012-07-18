@@ -1,0 +1,70 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=cgroup
+VERSION=0.38
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: libcgroup (library and utilities for kernel control groups)
+${NAME}:
+${NAME}: Control Groups provide a mechanism for aggregating/partitioning sets
+${NAME}: of tasks, and all their future children, into hierarchical groups
+${NAME}: with specialized behaviour.  It makes use of a filesystem interface.
+${NAME}: This package contains a library for developing applications that use
+${NAME}: control groups, as well as some basic userspace tools for controlling
+${NAME}: and monitoring control groups.
+${NAME}:
+${NAME}: Homepage: http://libcg.sourceforge.net
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=libcgroup
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=${URL[sf]}/libcg/${SRCNAME[0]}/v${SRCVERS[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCCOPY[0]="LGPL21"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --enable-pam=no
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc README README_daemon
+rmdir \
+ ${PKG}/usr/lib$(libdirsuffix)/security
+install.dir ${PKG}/etc/{rc.d,cgroup}
+install.dat doinst.sh ${PKG}/install
+install.dat scripts/init.d/cgconfig ${PKG}/etc/rc.d/rc.cgconfig.new
+install.dat scripts/init.d/cgred ${PKG}/etc/rc.d/rc.cgred.new
+install.dat samples/cgconfig.conf ${PKG}/etc/cgroup/cgconfig.conf.new
+install.dat samples/cgred.conf ${PKG}/etc/cgroup/cgred.conf.new
+install.dat samples/cgrules.conf ${PKG}/etc/cgroup/cgrules.conf.new
+install.dat samples/cgsnapshot_blacklist.conf ${PKG}/etc/cgroup/cgsnapshot_blacklist.conf.new
+}

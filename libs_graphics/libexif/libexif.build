@@ -1,0 +1,79 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=libexif
+VERSION=0.6.21
+BUILD=1
+DEPENDS=('libjpeg >= 8a-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: libexif (EXIF library)
+${NAME}:
+${NAME}: Most digital cameras produce EXIF files, which are JPEG files with
+${NAME}: extra tags that contain information about the image. The EXIF library
+${NAME}: allows you to parse an EXIF file and read the data from those tags.
+${NAME}:
+${NAME}: Homepage: http://sourceforge.net/projects/libexif
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=${URL[sf]}/${SRCNAME[0]}/${SRCNAME[0]}/${VERSION}/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCCOPY[0]="LGPL21"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --docdir="${SYS_DIR[html]}/${SRCNAME[0]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+rm -rf \
+ ${PKG}/usr/share/doc
+}
+
+SRCNAME[1]=fbida
+SRCVERS[1]=2.09
+SRCPACK[1]=http://dl.bytesex.org/releases/fbida/${SRCNAME[1]}-${SRCVERS[1]}.tar.gz
+
+build1()
+{
+make ${JOBS} verbose=yes \
+ OPTS="${FLAGS} -I${PKG}/usr/include" \
+ EXTRA_LDFLAGS="-L${PKG}/usr/lib$(libdirsuffix)"
+make install DESTDIR="${PKG}" prefix="/usr"
+rm -f \
+ ${PKG}/usr/bin/fb{i,gs} \
+ ${PKG}${SYS_DIR[man]}/man1/fb{i,gs}.1
+}

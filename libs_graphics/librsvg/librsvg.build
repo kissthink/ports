@@ -1,0 +1,74 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=librsvg
+MAJOR=2.36
+VERSION=${MAJOR}.1
+BUILD=1
+DEPENDS=('cairo >= 1.12.2-1' 'libcroco >= 0.6.5-1')
+OPTIONS="symprepend"
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: librsvg (SVG library)
+${NAME}:
+${NAME}: Handles Scalable Vector Graphics (SVG).
+${NAME}:
+${NAME}: Homepage: http://librsvg.sourceforge.net
+${NAME}: 
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+cat >> ${PKG}/install/doinst.sh <<EOF
+# Add the gdk-pixbuf loader to the cache
+if [ -x /usr/bin/gdk-pixbuf-query-loaders ]; then
+  /usr/bin/gdk-pixbuf-query-loaders --update-cache
+fi
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=${URL[gnome]}/${SRCNAME[0]}/${MAJOR}/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+SRCCOPY[0]="LGPL2 GPL2"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-introspection=no \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --with-html-dir="${SYS_DIR[html]}"
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+#rm -rf \
+# ${PKG}/usr/lib$(libdirsuffix)/mozilla
+}

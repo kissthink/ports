@@ -1,0 +1,70 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=lame
+VERSION=3.99.5
+BUILD=1
+DEPENDS=('libsndfile >= 1.0.25-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: lame (MP3 encoder)
+${NAME}:
+${NAME}: LAME is an educational tool to be used for learning about MP3
+${NAME}: encoding. The goal of the LAME project is to use the open source
+${NAME}: model to improve the psycho acoustics, noise shaping and speed of
+${NAME}: MP3. In simple terms, LAME is (not) an MP3 encoder.
+${NAME}:
+${NAME}: http://lame.sourceforge.net
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=${URL[sf]}/lame/files/${SRCNAME[0]}/${SRCVERS[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="LGPL2"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-rpath \
+ --enable-debug=no \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --enable-nasm \
+ --enable-dynamic-frontends \
+ --with-fileio=sndfile
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog 
+install.dir ${PKG}/usr/share/html
+mv \
+ ${PKG}/usr/share/doc/${NAME}/html \
+ ${PKG}/usr/share/html/${NAME}
+rm -rf \
+ ${PKG}/usr/share/doc
+}

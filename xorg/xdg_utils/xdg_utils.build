@@ -1,0 +1,80 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=xdg_utils
+VERSION=1.1.0rc1
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: xdg_utils
+${NAME}:
+${NAME}: A set of command line tools that assist applications with a variety
+${NAME}: of desktop integration tasks. About half of the tools focus on
+${NAME}: tasks commonly required during the installation of a desktop
+${NAME}: application and the other half focuses on integration with the
+${NAME}: desktop environment while the application is running.
+${NAME}:
+${NAME}: Homepage: http://portland.freedesktop.org/wiki
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=xdg-utils
+SRCVERS[0]=1.1.0-rc1
+SRCPACK[0]=http://portland.freedesktop.org/download/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="MIT"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var
+make -j 2
+make install DESTDIR="${PKG}"
+doc README
+changelog ChangeLog
+}
+
+SRCNAME[1]=desktop-file-utils
+SRCVERS[1]=0.18
+SRCPACK[1]=http://www.freedesktop.org/software/${SRCNAME[1]}/releases/${SRCNAME[1]}-${SRCVERS[1]}.tar.bz2
+SRCCOPY[1]="GPL2"
+
+build1()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var
+make -j 2 V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+}

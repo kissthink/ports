@@ -1,0 +1,64 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=glib_json
+VERSION=0.14.2
+BUILD=1
+DEPENDS=('glib >= 2.32.2-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: glib_json
+${NAME}:
+${NAME}: A library that provides serialization and deserialization support for
+${NAME}: the JavaScript Object Notation (JSON) format described by RFC 4627.
+${NAME}: JSON is a lightweight data-interchange format. It is easy for humans
+${NAME}: to read and write. It is easy for machines to parse and generate.
+${NAME}: Based on a subset of JavaScript, it is a text format that is
+${NAME}: completely language independant.
+${NAME}:
+${NAME}: Homepage: http://live.gnome.org/JsonGlib
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=json-glib
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=${URL[gnome]}/${SRCNAME[0]}/${SRCVERS[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+SRCCOPY[0]="LGPL21"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --disable-rpath \
+ --enable-introspection=no \
+ --enable-debug=minimum \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --with-html-dir="${SYS_DIR[html]}"
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+changelog NEWS
+}

@@ -1,0 +1,65 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=distcc
+VERSION=2.18.3
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: distcc (distributed C/C++ compiler/daemon)
+${NAME}:
+${NAME}: distcc allows compilation of C code to be distributed across several
+${NAME}: machines on a network. distcc should always generate the same results
+${NAME}: as a local compile, is simple to install and use, and is often
+${NAME}: significantly faster than a local compile.
+${NAME}:
+${NAME}: IMPORTANT SECURITY NOTE: distccd should only run on trusted networks.
+${NAME}:
+${NAME}: distcc was written by Martin Pool.
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://distcc.googlecode.com/files/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --with-gtk \
+ --without-gnome
+make -j 2
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+install.dir ${PKG}/usr/share/applications
+mv ${PKG}/usr/share/distcc/distccmon-gnome.desktop ${PKG}/usr/share/applications
+install.dir ${PKG}/usr/share/icons/hicolor/64x64/apps
+mv ${PKG}/usr/share/distcc/distccmon-gnome-icon.png ${PKG}/usr/share/icons/hicolor/64x64/apps
+rm -rf \
+ ${PKG}/usr/share/doc \
+ ${PKG}/usr/share/distcc
+}

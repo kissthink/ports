@@ -1,0 +1,102 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=qt
+VERSION=4.7.4
+BUILD=1
+DEPENDS=('xorg_libs >= 7.6-4' 'glib >= 2.28.8-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: Qt (a multi-platform C++ graphical user interface toolkit)
+${NAME}:
+${NAME}: Qt is a complete and well-developed object-oriented framework for
+${NAME}: developing graphical user interface (GUI) applications using C++.
+${NAME}:
+${NAME}: Homepage: http://qt.nokia.com
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}-everywhere-opensource-src
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=ftp://ftp.qt.nokia.com/qt/source/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="GPL3 LGPL2 FDL"
+
+build0()
+{
+export CFLAGS="$FLAGS"
+export CXXFLAGS="$FLAGS"
+export OPENSOURCE_CXXFLAGS="$FLAGS"
+./configure \
+ -confirm-license \
+ -opensource \
+ -release \
+ -prefix /usr \
+ -libdir /usr/lib$(libdirsuffix) \
+ -plugindir /usr/lib$(libdirsuffix)/plugins/qt \
+ -importdir /usr/lib$(libdirsuffix)/plugins/qt/imports \
+ -datadir /usr/share/application-data/qt \
+ -translationdir /usr/share/application-data/qt/translations \
+ -docdir /usr/share/html/qt \
+ -headerdir /usr/include/qt \
+ -sysconfdir /etc/qt \
+ -nomake examples \
+ -nomake demos \
+ -no-separate-debug-info \
+ -no-phonon \
+ -no-rpath \
+ -no-pch \
+ -fast \
+ -webkit \
+ -dbus \
+ -qt-gif \
+ -openssl-linked \
+ -system-libpng \
+ -system-libjpeg \
+ -system-libmng \
+ -system-libtiff \
+ -system-zlib \
+ -system-sqlite \
+ -plugin-sql-sqlite
+sed -i "s|-O2|${FLAGS}|g" mkspecs/common/g++.conf
+make -j 2
+make install INSTALL_ROOT="${PKG}"
+doc LGPL_EXCEPTION.txt
+changelog changes-${VERSION}
+install.dat doinst.sh ${PKG}/install
+install.dir ${PKG}/etc/profile.d
+install.bin qt.sh ${PKG}/etc/profile.d
+install.bin qt.csh ${PKG}/etc/profile.d
+install.dir ${PKG}/usr/share/applications
+#FIXME: add desktop file for qtconfig -> settings
+install.dat desktop/*.desktop ${PKG}/usr/share/applications
+install.dir ${PKG}/usr/share/icons/hicolor/{16x16,32x32,48x48,64x46,128x128}/apps
+install.dat src/gui/dialogs/images/qtlogo-64.png \
+ ${PKG}/usr/share/icons/hicolor/64x64/apps/qtlogo.png
+install.dat tools/assistant/tools/assistant/images/assistant.png \
+ ${PKG}/usr/share/icons/hicolor/32x32/apps
+install.dat tools/designer/src/designer/images/designer.png \
+ ${PKG}/usr/share/icons/hicolor/128x128/apps
+for icon in tools/linguist/linguist/images/icons/linguist-*-32.png ; do
+  size=$(echo $(basename ${icon}) | cut -d- -f2)
+  install.dat ${icon} ${PKG}/usr/share/icons/hicolor/${size}x${size}/apps/linguist.png
+done
+}

@@ -1,0 +1,123 @@
+#!/bin/sh
+
+CWD=`pwd`
+NAME=dovecot
+VERSION=1.0.3
+ARCH=i586
+BUILD=1
+PKGNAME=$NAME
+PKGVER=$VERSION
+BASEDIR=$PKGNAME-$PKGVER
+ARCHIVE=$BASEDIR.tar.gz
+REPOSITORY=http://www.dovecot.org/releases/1.0
+FLAGS="-O2 -march=pentium -mtune=pentium -fno-strength-reduce \
+ -fomit-frame-pointer -ffast-math"
+PKG=/tmp/package-$NAME
+
+rm -rf $PKG
+mkdir -p $PKG
+
+# Obtain sources
+if [ ! -e $ARCHIVE ]; then
+  if `wget "$REPOSITORY/$ARCHIVE"`; then
+    true
+  else
+    exit 1
+  fi
+fi
+
+# Compile
+cd /tmp
+tar zxvf $CWD/$ARCHIVE
+cd $BASEDIR
+bzcat $CWD/$NAME-$VERSION-slackware.patch.bz2 | patch -p1 -s
+CFLAGS=$FLAGS CXXFLAGS=$FLAGS ./configure \
+ --enable-static=no \
+ --prefix=/usr \
+ --sysconfdir=/etc \
+ --localstatedir=/var \
+ --with-ssldir=/etc/ssl \
+ --with-ssl=openssl \
+ --enable-ipv6 \
+ --with-shadow \
+ --without-pam \
+ --with-sql-drivers \
+ --with-sql \
+ --with-mysql \
+ --with-sqlite
+make
+
+# Install
+make install prefix=$PKG/usr
+mkdir -p $PKG/install $PKG/usr/doc $PKG/etc/rc.d \
+ $PKG/var/run/dovecot/login
+cat > $PKG/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description. Line
+# up the first '|' above the ':' following the base package name, and the '|' on
+# the right side marks the last column you can put a character in. You must make
+# exactly 11 lines for the formatting to be correct. It's also customary to
+# leave one space after the ':'.
+
+       |-----handy-ruler------------------------------------------------------|
+dovecot: Dovecot
+dovecot:
+dovecot: Dovecot is an IMAP server written with security primarily in mind.
+dovecot: Although it's written in C, it uses several coding techniques to
+dovecot: avoid the most common pitfalls. Dovecot can work with standard mbox
+dovecot: and maildir formats and is fully compatible with the UW-IMAP and
+dovecot: Courier IMAP servers as well as with mail clients accessing
+dovecot: mailboxes directly.
+dovecot:
+dovecot:
+dovecot:
+EOF
+
+cat > $PKG/install/slack-required <<EOF
+openssl-solibs >= 0.9.8e-i486-1
+EOF
+
+mv $PKG/usr/share/doc/dovecot \
+ $PKG/usr/doc/$NAME-$VERSION
+
+install -m0644 -g0 -o0 AUTHORS ChangeLog README NEWS TODO \
+ dovecot-example.conf doc/*.cnf doc/*.conf doc/mkcert.sh \
+ $PKG/usr/doc/$NAME-$VERSION
+
+gzip -9nf $PKG/usr/doc/$NAME-$VERSION/ChangeLog \
+ $PKG/usr/doc/$NAME-$VERSION/NEWS \
+ $PKG/usr/doc/$NAME-$VERSION/TODO \
+ $PKG/usr/doc/$NAME-$VERSION/dovecot-example.conf
+
+(
+  cd $PKG/usr/doc/$NAME-$VERSION
+  mv wiki dovecot_docs
+  tar -c dovecot_docs > dovecot_docs.tar
+  gzip -9nf dovecot_docs.tar
+  rm -rf dovecot_docs
+)
+
+rm -rf $PKG/usr/share $PKG/usr/include
+rm -f \
+ $PKG/usr/doc/$NAME-$VERSION/securecoding.txt \
+ $PKG/etc/dovecot-example.conf \
+ $PKG/usr/lib/dovecot/*.la \
+ $PKG/usr/lib/dovecot/*/*.la
+
+install -m0644 rc.dovecot $PKG/etc/rc.d/rc.dovecot.new
+install -m0644 dovecot.conf.slack $PKG/etc/dovecot-sample.conf
+install -m0644 doinst.sh $PKG/install
+
+strip --strip-unneeded \
+ $PKG/usr/lib/dovecot/*.so* ||:
+
+strip \
+ $PKG/usr/libexec/dovecot/* \
+ $PKG/usr/sbin/* ||:
+
+chown -R root.root $PKG
+
+# Make package
+cd $PKG
+cat install/slack-desc | grep "$NAME:" > /tmp/$NAME-$VERSION-$ARCH-$BUILD.txt
+makepkg -l y -c n /tmp/$NAME-$VERSION-$ARCH-$BUILD.tgz

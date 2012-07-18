@@ -1,0 +1,68 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=dialog
+VERSION=1.1.20120706
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: dialog (display dialog boxes from shell scripts)
+${NAME}:
+${NAME}: Dialog is a program to present a variety of questions or display
+${NAME}: messages using dialog boxes from a shell script. The Slackware
+${NAME}: package management script "pkgtool" uses this, as do various other
+${NAME}: menu-driven console scripts.
+${NAME}:
+${NAME}: Dialog was originally contributed to Slackware by Savio Lam, and has
+${NAME}: been contributed to by many. Dialog is currently maintained by
+${NAME}: Thomas E. Dickey.
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=1.1-20120706
+SRCPACK[0]=http://invisible-island.net/datafiles/release/${SRCNAME[0]}-${SRCVERS[0]}.tgz
+SRCCOPY[0]="LGPL21"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-rpath-hack \
+ --disable-static \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --enable-nls \
+ --enable-widec \
+ --with-ncursesw
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog CHANGES
+install.dir ${PKG}/etc/conf.d
+install.dat samples/slackware.rc ${PKG}/etc/conf.d/dialog.conf
+#FIXME: compat
+(
+  install.dir ${PKG}/bin
+  cd ${PKG}/bin
+  ln -sf /usr/bin/dialog
+)
+}

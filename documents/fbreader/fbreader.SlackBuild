@@ -1,0 +1,90 @@
+#!/bin/sh
+
+CWD=`pwd`
+NAME=fbreader
+VERSION=0.12.0
+ARCH=i586
+BUILD=1
+PKGNAME=${NAME}
+PKGVER=${VERSION}
+BASEDIR=${PKGNAME}-${PKGVER}
+ARCHIVE=${PKGNAME}-sources-${PKGVER}.tgz
+REPOSITORY=http://www.fbreader.org
+FLAGS="-O2 -march=pentium -mtune=pentium -fno-strength-reduce \
+ -fomit-frame-pointer -ffast-math"
+PKG=/tmp/package-$NAME
+
+rm -rf $PKG
+mkdir -p $PKG
+
+# Obtain sources
+if [ ! -e $ARCHIVE ]; then
+  if `wget "$REPOSITORY/$ARCHIVE"`; then
+    true
+  else
+    exit 1
+  fi
+fi
+
+# Compile
+cd /tmp
+tar zxvf $CWD/$ARCHIVE
+cd $BASEDIR
+lzcat $CWD/$NAME-$VERSION-linuxgtk.patch.xz | patch -p1 -s
+lzcat $CWD/$NAME-$VERSION-sqlite.patch.xz | patch -p1 -s
+lzcat $CWD/$NAME-$VERSION-paths.patch.xz | patch -p1 -s
+lzcat $CWD/$NAME-$VERSION-notsilent.patch.xz | patch -p1 -s
+make OPTS="${FLAGS}"
+
+# Install
+make install DESTDIR=$PKG
+mkdir -p $PKG/install
+cat > $PKG/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+        |-----handy-ruler------------------------------------------------------|
+fbreader: fbreader (e-book viewer)
+fbreader:
+fbreader: An e-book reader able to read many e-book formats.
+fbreader:
+fbreader: Homepage: http://www.fbreader.org
+fbreader:
+fbreader:
+fbreader:
+fbreader:
+fbreader:
+fbreader:
+EOF
+
+cat > $PKG/install/slack-required <<EOF
+gtk+ >= 2.18.4-i486-1
+fribidi >= 0.10.9-i486-1
+liblinebreak >= 1.2-i486-1
+expat >= 2.0.1-i486-1
+zlib >= 1.2.3-i486-2
+bzip2 >= 1.0.5-i486-1
+curl >= 7.19.6-i486-1
+EOF
+
+rm -f \
+ $PKG/usr/libexec/*/*/*.la \
+ $PKG/usr/lib/*.la
+
+strip --strip-unneeded \
+ $PKG/usr/lib/*.so* \
+ $PKG/usr/libexec/*/*/*.so* || :
+
+strip \
+ $PKG/usr/bin/* || :
+
+chown -R root.root $PKG
+
+# Make package
+cd $PKG
+cat install/slack-desc | grep "$NAME:" > /tmp/$NAME-$VERSION-$ARCH-$BUILD.txt
+makepkg -l y -c n /tmp/$NAME-$VERSION-$ARCH-$BUILD.txz

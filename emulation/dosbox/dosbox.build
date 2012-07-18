@@ -1,0 +1,68 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=dosbox
+VERSION=0.74
+BUILD=1
+DEPENDS=('sdl >= 1.2.14-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: DOSBox (DOS emulator)
+${NAME}:
+${NAME}: DOSBox is a DOS emulator using SDL that emulates a 286/386 realmode
+${NAME}: CPU, directory file system, EMS/XMS and a SoundBlaster card for
+${NAME}: excellent sound compatibility with older games. You can re-live the
+${NAME}: "good old days" with the help of DOSBox as it can run plenty of
+${NAME}: classics that don't run on your new computer.
+${NAME}:
+${NAME}: Homepage: http://www.dosbox.com
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=${URL[sf]}/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var
+make -j 2
+make install DESTDIR="${PKG}"
+doc AUTHORS THANKS
+changelog NEWS
+}
+
+SRCNAME[1]=${NAME}
+SRCVERS[1]=desktop
+SRCPACK[1]=${SRCNAME[1]}-${SRCVERS[1]}.tar.xz
+SRCOPTS[1]="pkgunpack"
+
+build1()
+{
+  echo "Nothing to do here!"
+}

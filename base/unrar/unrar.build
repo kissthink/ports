@@ -1,0 +1,49 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=unrar
+VERSION=4.0.7
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: unrar
+${NAME}:
+${NAME}: With this program you will be able to uncompress RAR archives. It may
+${NAME}: be useful to install it also, as other programs may use it to be able
+${NAME}: to handle the decompression of RAR archives.
+${NAME}:
+${NAME}: Homepage: http://www.rarlab.com
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://www.rarlab.com/rar/${SRCNAME[0]}src-${SRCVERS[0]}.tar.gz
+SRCROOT[0]=${NAME}
+
+build0()
+{
+make -j 2 -f makefile.unix CXXFLAGS="${FLAGS}"
+doc readme.txt
+license license.txt
+install.dir ${PKG}/${SYS_DIR[bin]}
+install.bin unrar ${PKG}/${SYS_DIR[bin]}
+}

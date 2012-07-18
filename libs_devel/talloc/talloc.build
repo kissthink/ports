@@ -1,0 +1,63 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=talloc
+VERSION=2.0.7
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: talloc
+${NAME}:
+${NAME}: talloc is a hierarchical, reference counted memory pool system with
+${NAME}: destructors.
+${NAME}:
+${NAME}: Homepage: http://talloc.samba.org/talloc/doc/html/index.html
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://samba.org/ftp/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-rpath \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --includedir=/usr/include/${SRCNAME[0]} \
+ --localstatedir=/var \
+ --disable-python
+make ${JOBS}
+make install DESTDIR="${PKG}"
+rm -f \
+ ${PKG}/usr/lib$(libdirsuffix)/*.a
+(
+  cd ${PKG}/usr/lib$(libdirsuffix)
+  chmod 0755 libtalloc.so.${SRCVERS[0]}
+  ln -s libtalloc.so.${SRCVERS[0]} libtalloc.so
+)
+}

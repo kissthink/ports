@@ -1,0 +1,78 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=gzip
+VERSION=1.5
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: gzip (file compression utility)
+${NAME}:
+${NAME}: Gzip reduces the size of the named files using Lempel-Ziv coding
+${NAME}: (LZ77).  Whenever possible, each file is replaced by one with the
+${NAME}: extension .gz, while keeping the same ownership modes, access and
+${NAME}: modification times.
+${NAME}:
+${NAME}: Homepage: http://www.gnu.org/software/gzip
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=${URL[gnu]}/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+SRCCOPY[0]="GPL3"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --infodir="${SYS_DIR[info]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS THANKS
+changelog NEWS
+# Already included in the ncompress package
+rm -f ${PKG}/usr/bin/uncompress
+#FIXME: compat
+(
+install.dir ${PKG}/bin
+cd ${PKG}/bin
+ln -sf /usr/bin/zcmp
+ln -sf /usr/bin/zfgrep
+ln -sf /usr/bin/zless
+ln -sf /usr/bin/zforce
+ln -sf /usr/bin/gunzip
+ln -sf /usr/bin/zcat
+ln -sf /usr/bin/znew
+ln -sf /usr/bin/gzip
+ln -sf /usr/bin/zdiff
+ln -sf /usr/bin/zegrep
+ln -sf /usr/bin/gzexe
+ln -sf /usr/bin/zmore
+)
+}

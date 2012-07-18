@@ -1,0 +1,108 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=libav
+VERSION=0.7.1
+BUILD=1
+DEPENDS=('orc >= 0.4.14-1' 'lame >= 3.98.4-1' 'libtheora >= 1.1.1-1' 'speex >= 1.2rc2-1' 'xvidcore >= 1.3.2-1' 'schroedinger >= 1.0.10-1' 'libgsm >= 1.0.13-1' 'x264 >= 20110607-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: libav
+${NAME}:
+${NAME}: Libav is a complete solution to record, convert and stream audio and
+${NAME}: video. It includes libavcodec, the leading audio/video codec library.
+${NAME}:
+${NAME}: Homepage: http://www.libav.org
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://www.libav.org/releases/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+SRCCOPY[0]="GPL2 GPL3 LGPL21 LGPL3"
+
+build0()
+{
+case "$(cpufamily ${ARCH})" in
+  x86)
+    OPTARCH=i686
+    OPTCPU=i586
+  ;;
+  x86_64)
+    OPTARCH=x86_64
+    OPTCPU=x86_64
+  ;;
+esac
+./configure \
+ --extra-cflags="-I/usr/include/x264" \
+ --disable-static \
+ --enable-shared \
+ --disable-debug \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --datadir=/usr/share/application-data/${SRCNAME[0]} \
+ --enable-gpl \
+ --enable-version3 \
+ --enable-nonfree \
+ --arch="${OPTARCH}" \
+ --cpu="${OPTCPU}" \
+ --disable-indev=oss \
+ --disable-outdev=oss \
+ --enable-runtime-cpudetect \
+ --enable-pthreads \
+ --enable-postproc \
+ --enable-swscale \
+ --enable-avfilter \
+ --enable-x11grab \
+ --enable-zlib \
+ --enable-bzlib \
+ --enable-libmp3lame \
+ --enable-libspeex \
+ --enable-libtheora \
+ --enable-libvorbis \
+ --enable-libschroedinger \
+ --enable-libvpx \
+ --enable-libxvid \
+ --enable-libx264 \
+ --enable-libgsm
+# --enable-avisynth \
+# --enable-libamr-nb \
+# --enable-libamr-wb \
+# --enable-libdc1394 \
+# --enable-libfaac \
+# --enable-libnut \
+# --enable-libdirac \
+# --enable-libopenjpeg \
+# --enable-librtmp \
+make -j 2 V=1
+make install DESTDIR="${PKG}"
+doc CREDITS RELEASE
+changelog Changelog
+license LICENSE
+if [[ "${ARCH}" == "x86_64" ]]; then
+  mv \
+  ${PKG}/usr/lib/*.so* \
+  ${PKG}/usr/lib$(libdirsuffix)
+  rmdir ${PKG}/usr/lib
+fi
+}

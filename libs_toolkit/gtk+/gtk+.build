@@ -1,0 +1,123 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=gtk+
+MAJOR=2.24
+VERSION=${MAJOR}.10
+BUILD=1
+DEPENDS=('xorg_libs >= 7.6-4' 'gdk_pixbuf >= 2.24.1-1' 'cairo >= 1.10.2-1' 'atk >= 2.2.0-1' 'pango >= 1.28.4-1')
+OPTIONS="symprepend"
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: GTK+ version 2
+${NAME}:
+${NAME}: This is GTK+, a toolkit for creating graphical user interfaces.
+${NAME}: Offering a complete set of widgets, GTK+ is suitable for projects
+${NAME}: ranging from small one-off projects to complete application suites.
+${NAME}:
+${NAME}: Homepage: http://www.gtk.org
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=${URL[gnome]}/${SRCNAME[0]}/${MAJOR}/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+SRCCOPY[0]="LGPL2"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-shared=yes \
+ --enable-static=no \
+ --enable-introspection=no \
+ --enable-debug=minimum \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --with-html-dir=/usr/share/html \
+ --with-xinput=yes
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+install.dir ${PKG}/etc/profile.d
+install.dat doinst.sh ${PKG}/install
+install.bin gtk+.sh $PKG/etc/profile.d
+install.bin gtk+.csh $PKG/etc/profile.d
+touch ${PKG}/etc/gtk-2.0/gtk.immodules
+rm -rf \
+ ${PKG}/usr/lib$(libdirsuffix)/*/*/*/*.a \
+ ${PKG}/usr/man \
+ ${PKG}/usr/share/gtk-2.0 \
+ ${PKG}/usr/bin/gtk-demo
+cp -r \
+ docs/tutorial/html \
+ ${PKG}/usr/share/html/gtk_tutorial
+cp -r \
+ docs/tutorial/html \
+ ${PKG}/usr/share/html/gtk_faq
+}
+
+SRCNAME[1]=gtk-engines
+ENGINESM=2.20
+SRCVERS[1]=${ENGINESM}.2
+SRCPACK[1]=${URL[gnome]}/${SRCNAME[1]}/${ENGINESM}/${SRCNAME[1]}-${SRCVERS[1]}.tar.bz2
+SRCCOPY[1]="LGPL21"
+
+build1()
+{
+GTK_CFLAGS="-I${PKG}/usr/include/gtk-2.0 -I${PKG}/usr/lib64/gtk-2.0/include -I/usr/include/glib-2.0 -I/usr/lib64/glib-2.0/include -I/usr/include/pango-1.0 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/atk-1.0 -I/usr/include/cairo" \
+GTK_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lgtk-x11-2.0" \
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-shared=yes \
+ --enable-static=no \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc/gtk-2.0 \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --enable-animation \
+ --disable-schema
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+}
+
+SRCNAME[2]=${NAME}
+SRCVERS[2]=slackware
+SRCPACK[2]=${SRCNAME[2]}-${SRCVERS[2]}.tar.xz
+SRCOPTS[2]="pkgunpack"
+
+build2()
+{
+  echo "Nothing to do here!"
+}

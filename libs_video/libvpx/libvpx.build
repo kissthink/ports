@@ -1,0 +1,64 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=libvpx
+VERSION=1.1.0
+BUILD=1
+DEPENDS=('glib >= 2.32.3-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: libvpx (WebM VP8 codec)
+${NAME}:
+${NAME}: WebM is an open, royalty-free, media file format designed for the
+${NAME}: web.
+${NAME}:
+${NAME}: WebM defines the file container structure, video and audio formats.
+${NAME}: WebM files consist of video streams compressed with the VP8 video
+${NAME}: codec and audio streams compressed with the Vorbis audio codec. The
+${NAME}: WebM file structure is based on the Matroska container.
+${NAME}:
+${NAME}: Homepage: http://webmproject.org
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=v${VERSION}
+SRCPACK[0]=http://webm.googlecode.com/files/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCCOPY[0]="BSD3"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --prefix=/usr \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --disable-install-docs \
+ --disable-install-srcs \
+ --enable-shared \
+ --enable-pic \
+ --enable-runtime-cpu-detect \
+ --enable-postproc \
+ --enable-vp8 \
+ --enable-vp8-encoder \
+ --enable-vp8-decoder
+make ${JOBS} verbose=1
+make install DIST_DIR="${PKG}/usr"
+doc AUTHORS
+changelog CHANGELOG
+rm -f \
+ ${PKG}/usr/lib$(libdirsuffix)/*.a
+}

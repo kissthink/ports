@@ -1,0 +1,89 @@
+#!/bin/bash
+
+source /usr/src/ports/Build/build.sh
+
+PACKAGER="Witukind <witukind@nsbm.kicks-ass.org>"
+ARCH=i586
+BUILD=1
+
+# Sources
+SRCNAME[0]=silc-toolkit
+SRCVER[0]=1.1.3
+SRCREP[0]=http://silcnet.org/download/toolkit/sources
+SRCPKG[0]=${SRCNAME[0]}-${SRCVER[0]}.tar.bz2
+SRCROOT[0]=${SRCNAME[0]}-${SRCVER[0]}
+
+# Packages
+PKGNAME[0]=libsilc
+PKGVER[0]=${SRCVER[0]}
+PKGARCH[0]=${ARCH}
+
+PKGNAME[1]=${PKGNAME[0]}_dev
+PKGVER[1]=${SRCVER[0]}
+PKGARCH[1]=${ARCH}
+PKGOPTS[1]="nodocdir"
+
+PKGNAME[2]=${PKGNAME[0]}_doc
+PKGVER[2]=${SRCVER[0]}
+PKGARCH[2]=${ARCH}
+PKGOPTS[2]="nodocdir"
+
+begin
+
+(
+  cd ${SRC[0]}
+  CFLAGS=$DISTFLAGS CXXFLAGS=$DISTFLAGS \
+  ./configure \
+  --enable-static=no \
+  --enable-shared=yes \
+  --prefix=/usr \
+  --sysconfdir=/etc \
+  --mandir=/usr/man \
+  --docdir=/srv/www/doc/silc \
+  --includedir=/usr/include/silc \
+  --with-simdir=/usr/libexec/silc \
+  --enable-ipv6 \
+  --with-gmp=/usr \
+  $ARCH-pc-linux-gnu
+  make
+  make install DESTDIR=${PKG[0]}
+
+  mkdir -p \
+   ${PKG[1]}/usr/{lib,doc/${PKGNAME[0]}-${PKGVER[0]}} \
+   ${PKG[2]}/srv/www/doc
+
+  mv \
+   ${PKG[0]}/srv/www/doc/silc/*.txt \
+   ${PKG[1]}/usr/doc/${PKGNAME[0]}-${PKGVER[0]}
+
+  mv \
+   ${PKG[0]}/srv/www/doc/silc/tutorial/mybot \
+   ${PKG[1]}/usr/doc/${PKGNAME[0]}-${PKGVER[0]}/tutorial
+
+  mv \
+   ${PKG[0]}/srv/www/doc/silc/CHANGES \
+   ${PKG[0]}/srv/www/doc/silc/CREDITS \
+   ${PKG[0]}/srv/www/doc/silc/FAQ \
+   ${PKG[0]}/srv/www/doc/silc/README \
+   ${PKG[0]}/srv/www/doc/silc/TODO \
+   ${PKG[0]}/usr/doc/${PKGNAME[0]}-${PKGVER[0]}
+
+  mv \
+   ${PKG[0]}/srv/www/doc/silc/toolkit \
+   ${PKG[2]}/srv/www/doc/silc
+
+  mv \
+   ${PKG[0]}/usr/include \
+   ${PKG[1]}/usr
+
+  mv \
+   ${PKG[0]}/usr/lib/pkgconfig \
+   ${PKG[1]}/usr/lib
+
+  rm -rf \
+   ${PKG[0]}/srv
+
+  chmod 0755 ${PKG[0]}/usr/libexec/silc/*.so*
+)
+
+end

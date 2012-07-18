@@ -1,0 +1,50 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=ruby_cairo
+VERSION=1.10.0
+BUILD=1
+DEPENDS=('ruby >= 1.9.1_p431-1' 'cairo >= 1.12.2-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: ruby_cairo
+${NAME}:
+${NAME}: Cairo bindings for the Ruby scripting language.
+${NAME}:
+${NAME}: Homepage: http://www.cairographics.org/rcairo
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=rcairo
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://cairographics.org/releases/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="GPL2 RUBY"
+
+build0()
+{
+ruby extconf.rb
+make ${JOBS} cflags="${FLAGS}"
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+}

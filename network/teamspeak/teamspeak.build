@@ -1,0 +1,78 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=teamspeak
+MAJOR=3
+VERSION=${MAJOR}.0.1
+BUILD=1
+DEPENDS=('qt >= 4.7.4-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: teamspeak
+${NAME}:
+${NAME}: A Voice over IP client that allows users to speak on a chat channel
+${NAME}: with other users, much like a telephone conference call.
+${NAME}:
+${NAME}: Homepage: http://teamspeak.com
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+#FIXME: architecture kludge
+
+case "$(uname -m)" in
+  x86)
+    MYARCH=i386
+  ;;
+  x86_64)
+    MYARCH=amd64
+  ;;
+esac
+
+SRCNAME[0]=TeamSpeak${MAJOR}-Client-linux_${MYARCH}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://teamspeak.gameserver.gamed.de/ts3/releases/${SRCVERS[0]}/${SRCNAME[0]}-${SRCVERS[0]}.run
+SRCOPTS[0]="nosrcroot nounpack"
+
+build0()
+{
+install.dir ${PKG}/opt/teamspeak
+chmod +x ${CWD}/${SRCNAME[0]}-${SRCVERS[0]}.run
+${CWD}/${SRCNAME[0]}-${SRCVERS[0]}.run --noexec --target ${PKG}/opt/teamspeak
+rm -rf \
+ ${PKG}/opt/teamspeak/{imageformats,accessible} \
+ ${PKG}/opt/teamspeak/libQt*.so.4
+install.dir ${PKG}/usr/bin
+(
+  cd ${PKG}/usr/bin
+  ln -sf /opt/teamspeak/ts3client_runscript.sh teamspeak
+)
+}
+
+SRCNAME[1]=TeamSpeak${MAJOR}-Client
+SRCVERS[1]=extra
+SRCPACK[1]=${SRCNAME[1]}-${SRCVERS[1]}.tar.xz
+SRCOPTS[1]="pkgunpack"
+
+build1()
+{
+echo "Nothing to be done here!"
+}

@@ -1,0 +1,61 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=openal
+VERSION=1.13
+BUILD=1
+DEPENDS=('sound >= 1.0.24-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: openal
+${NAME}:
+${NAME}: An implementation of the OpenAL 3D audio API which allows for
+${NAME}: playing audio in a 3D environment. Distance attenuation, doppler
+${NAME}: shift and directional sound emitters are among the features handled
+${NAME}: by this API. More advanced effects, including air absorption,
+${NAME}: low-pass filters and reverb are available through the EFX extension.
+${NAME}: It also facilitates streaming audio, multi-channel buffers and
+${NAME}: audio capture.
+${NAME}:
+${NAME}: Homepage: http://kcat.strangesoft.net/openal.html
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}-soft
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://kcat.strangesoft.net/openal-releases/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCCOPY[0]="LGPL2"
+
+build0()
+{
+cmake \
+-DCMAKE_BUILD_TYPE:STRING="Release" \
+-DCMAKE_CXX_FLAGS:STRING="${FLAGS}" \
+-DCMAKE_C_FLAGS:STRING="${FLAGS}" \
+-DCMAKE_VERBOSE_MAKEFILE:BOOL="on" \
+-DCMAKE_INSTALL_PREFIX:PATH="/usr" \
+-DLIB_SUFFIX:STRING="$(libdirsuffix)" \
+-DEXAMPLES:BOOL="on" \
+-DALSOFT_CONFIG:BOOL="off" \
+-DPULSEAUDIO:BOOL="off" \
+-DOSS:BOOL="off" \
+-DALSA:BOOL="on" \
+CMakeLists.txt
+make -j 2
+make install DESTDIR="${PKG}"
+doc alsoftrc.sample
+}

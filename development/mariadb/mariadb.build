@@ -1,0 +1,101 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=mariadb
+VERSION=5.3.5
+BUILD=1
+DEPENDS=('openssl >= 0.9.8t-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: mariadb (relational database server)
+${NAME}:
+${NAME}: A true multi-user, multi-threaded SQL database server which is
+${NAME}: a backward compatible, drop-in replacement of the MySQL database
+${NAME}: server. It includes all major open source storage engines, including
+${NAME}: the Maria storage engine.
+${NAME}:
+${NAME}: Homepage: http://mariadb.org
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=5.3.5-ga
+SRCPACK[0]=http://downloads.askmonty.org/f/${SRCNAME[0]}-${SRCVERS[0]}/kvm-tarbake-jaunty-x86/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCOPTS[0]="GPL2"
+# normla nostrip
+
+build0()
+{
+CFLAGS="-fPIC ${FLAGS} -fno-strict-aliasing" \
+CXXFLAGS="-fPIC ${FLAGS} -fno-strict-aliasing -felide-constructors -fno-rtti" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --infodir="${SYS_DIR[info]}" \
+ --sysconfdir=/etc/mariadb \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var/lib/mariadb \
+ --libexecdir=/usr/lib$(libdirsuffix)/exec/mariadb \
+ --without-debug \
+ --without-readline \
+ --enable-assembler \
+ --with-ssl \
+ --with-unix-socket-path=/run/mariadb/mariadb.sock \
+ --with-mysqld-user=mariadb \
+ --with-plugins="xtradb,partition,csv,heap,myisam,myisammrg" \
+ --with-big-tables \
+ --with-charset=utf8 \
+ --with-extra-charsets=complex \
+ --with-collation=utf8_general_ci
+make ${JOBS}
+make install DESTDIR="${PKG}"
+license EXCEPTIONS-CLIENT
+install.dat doinst.sh ${PKG}/install
+install.dir ${PKG}${SYS_DIR[etc]}/rc.d
+install.dat rc.mariadb.new ${PKG}${SYS_DIR[etc]}/rc.d/rc.mariadb.new
+install.dir ${PKG}/var/lib/mariadb
+(
+  cd ${PKG}/usr/lib$(libdirsuffix)
+  rm -f libmysqlclient.so libmysqlclient.so.16
+  ln -sf mysql/libmysqlclient.so .
+  ln -sf mysql/libmysqlclient.so.16 .
+  rm -f libmysqlclient_r.so libmysqlclient_r.so.16
+  ln -sf mysql/libmysqlclient_r.so .
+  ln -sf mysql/libmysqlclient_r.so.16 .
+)
+install.dir ${PKG}${SYS_DIR[etc]}/mariadb
+install.dat support-files/my-*.cnf ${PKG}${SYS_DIR[etc]}/mariadb
+mv ${PKG}/usr/share/mysql/*.ini ${PKG}${SYS_DIR[etc]}/mariadb
+install.dir ${PKG}/usr/src
+mv ${PKG}/usr/sql-bench ${PKG}/usr/src
+# Unneeded stuff
+rm -rf \
+ ${PKG}${SYS_DIR[man]}/man1/{mysqlman,mysql.server,make_win_*,comp_err}.1 \
+ ${PKG}/usr/mysql-test \
+ ${PKG}/usr/share/mysql/*.cnf \
+ ${PKG}/usr/share/mysql/mi_test_all* \
+ ${PKG}/usr/share/mysql/binary-configure \
+ ${PKG}/usr/share/mysql/mysql-log-rotate \
+ ${PKG}/usr/share/mysql/mysql*.server
+}

@@ -1,0 +1,101 @@
+#!/bin/sh
+
+CWD=`pwd`
+NAME=smpeg
+VERSION=0.4.5rev389
+ARCH=i586
+BUILD=1
+PKGNAME=$NAME
+PKGVER=$VERSION
+BASEDIR=$PKGNAME-$PKGVER
+ARCHIVE=$BASEDIR.tar.xz
+REPOSITORY=ftp://sunsite.dk/pub/os/linux/loki/open-source/smpeg
+FLAGS="-O2 -march=pentium -mtune=pentium -fno-strength-reduce \
+ -fomit-frame-pointer -ffast-math"
+PKG=/tmp/package-$NAME
+
+rm -rf $PKG
+mkdir -p $PKG
+
+# Obtain sources
+if [ ! -e $ARCHIVE ]; then
+  if `wget "$REPOSITORY/$ARCHIVE"`; then
+    true
+  else
+    exit 1
+  fi
+fi
+
+# Compile
+cd /tmp
+tar Jxvf $CWD/$ARCHIVE
+cd $BASEDIR
+xzcat $CWD/$NAME-$VERSION-mpegaudio.patch.xz | patch -p1 -s
+xzcat $CWD/$NAME-$VERSION-deprecateflags.patch.xz | patch -p1 -s
+xzcat $CWD/$NAME-$VERSION-norpath.patch.xz | patch -p1 -s
+./autogen.sh
+CFLAGS=$FLAGS CXXFLAGS=$FLAGS ./configure \
+ --build=${ARCH}-slackware-linux \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir=/usr/man \
+ --sysconfdir=/etc \
+ --localstatedir=/var \
+ --enable-mmx \
+ --disable-gtk-player \
+ --disable-opengl-player
+make
+#make CXX="g++ $FLAGS" CC="gcc $FLAGS"
+
+# Install
+make install DESTDIR=$PKG
+mkdir -p $PKG/install $PKG/usr/doc/$NAME-$VERSION
+cat > $PKG/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+     |-----handy-ruler------------------------------------------------------|
+smpeg: smpeg (SDL MPEG library)
+smpeg:
+smpeg: SMPEG is based on UC Berkeley's mpeg_play software MPEG decoder
+smpeg: and SPLAY, an mpeg audio decoder created by Woo-jae Jung. We have
+smpeg: completed the initial work to wed these two projects in order to
+smpeg: create a general purpose MPEG video/audio player for the Linux OS.
+smpeg:
+smpeg:
+smpeg:
+smpeg:
+smpeg:
+EOF
+
+cat > $PKG/install/slack-required <<EOF
+sdl >= 1.2.14-i486-1
+EOF
+
+install -m 0644 -g 0 -o 0 CHANGES \
+ $PKG/usr/doc/$NAME-$VERSION
+
+xz -9f \
+ $PKG/usr/doc/$NAME-$VERSION/CHANGES
+
+# No need for this stuff
+rm -f $PKG/usr/bin/plaympeg
+rm -rf $PKG/usr/man
+
+rm -f \
+ $PKG/usr/lib/*.la
+
+strip --strip-unneeded \
+ $PKG/usr/lib/*.so* || :
+
+chown -R root.root $PKG
+
+# Make package
+cd $PKG
+cat install/slack-desc | grep "$NAME:" > /tmp/$NAME-$VERSION-$ARCH-$BUILD.txt
+makepkg -l y -c n /tmp/$NAME-$VERSION-$ARCH-$BUILD.txz

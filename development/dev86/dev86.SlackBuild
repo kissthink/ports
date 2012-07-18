@@ -1,0 +1,83 @@
+#!/bin/sh
+
+CWD=`pwd`
+NAME=dev86
+VERSION=0.16.16
+ARCH=i586
+BUILD=1
+PKGNAME=Dev86src
+PKGVER=$VERSION
+BASEDIR=$NAME-$PKGVER
+ARCHIVE=$PKGNAME-$PKGVER.tar.gz
+REPOSITORY=http://www.cix.co.uk/~mayday/dev86
+FLAGS="-O2 -march=pentium -mcpu=pentium -fno-strength-reduce \
+ -fomit-frame-pointer -ffast-math"
+PKG=/tmp/package-$NAME
+
+rm -rf $PKG
+mkdir -p $PKG
+
+# Obtain sources
+if [ ! -e $ARCHIVE ]; then
+  if `wget "$REPOSITORY/$ARCHIVE"`; then
+    true
+  else
+    exit 1
+  fi
+fi
+
+# Compile
+cd /tmp
+tar zxvf $CWD/$ARCHIVE
+cd $BASEDIR
+export CFLAGS="$FLAGS"
+make <<EOF
+quit
+EOF
+
+# Install
+mkdir -p $PKG/install $PKG/usr/doc/$NAME-$VERSION $PKG/usr/man/man1 \
+ $PKG/usr/bin $PKG/usr/include/bcc $PKG/usr/lib/bcc
+cat > $PKG/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|' on
+# the right side marks the last column you can put a character in. You must make
+# exactly 11 lines for the formatting to be correct.  It's also customary to
+# leave one space after the ':'.
+
+     |-----handy-ruler------------------------------------------------------|
+dev86: dev86
+dev86:
+dev86: This is a development environment for ELKS-86 and standalone 8086
+dev86: code.
+dev86:
+dev86:
+dev86:
+dev86:
+dev86:
+dev86:
+dev86:
+EOF
+
+install -m644 -g0 -o0 Changes Contributors README \
+ $PKG/usr/doc/$NAME-$VERSION
+
+install -m755 -g0 -o0 bin/* $PKG/usr/bin
+install -m444 -g0 -o0 man/*.1 $PKG/usr/man/man1
+cp -r include/* $PKG/usr/include/bcc
+cp -r lib/* $PKG/usr/lib/bcc
+
+chmod 444 $PKG/usr/man/man?/*.?
+gzip -9nf $PKG/usr/man/man?/*.?
+
+strip $PKG/usr/bin/* ||:
+strip $PKG/usr/lib/bcc/* ||:
+
+chown -R root.root $PKG
+chgrp bin $PKG/usr/bin $PKG/usr/bin/*
+
+# Make package
+cd $PKG
+cat install/slack-desc | grep "$NAME:" > /tmp/$NAME-$VERSION-$ARCH-$BUILD.txt
+makepkg -l y -c n /tmp/$NAME-$VERSION-$ARCH-$BUILD.tgz

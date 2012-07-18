@@ -1,0 +1,49 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=aircrackng
+VERSION=1.1
+BUILD=1
+DEPENDS=('tcpip >= 3.2.0-1' 'wireless >= 20120226-1' 'sqlite >= 3.7.10-1' 'openssl >= 0.9.8t-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: aircrackng (security tool)
+${NAME}:
+${NAME}: Aircrack-ng is an 802.11 WEP and WPA-PSK keys cracking program that
+${NAME}: can ecover keys once enough data packets have been captured. It
+${NAME}: implements the standard FMS attack along with some optimizations
+${NAME}: like KoreK attacks, as well as the all-new PTW attack, thus making
+${NAME}: the attack much faster compared to other WEP cracking tools. In
+${NAME}: fact, Aircrack-ng is a set of tools for auditing wireless networks.
+${NAME}:
+${NAME}: Homepage: http://www.aircrack-ng.org
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=aircrack-ng
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://download.aircrack-ng.org/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+make ${JOBS} COMMON_FLAGS="${FLAGS}" SQLITE="true" prefix="/usr"
+make install DESTDIR="${PKG}" prefix="/usr"
+doc AUTHORS
+changelog ChangeLog
+}

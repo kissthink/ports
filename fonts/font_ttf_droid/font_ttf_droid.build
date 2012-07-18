@@ -1,0 +1,58 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=font_ttf_droid
+VERSION=20110126
+ARCH=noarch
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: font_ttf_droid
+${NAME}:
+${NAME}: A font family intended for use on small screens of mobile handsets.
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=droid
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+SRCCOPY[0]="APACHE2"
+
+build0()
+{
+install -m 0644 doinst.sh ${PKG}/install
+mkdir -p ${PKG}/usr/share/fonts/TTF
+install -m 0644 *.ttf ${PKG}/usr/share/fonts/TTF
+mkdir -p ${PKG}/etc/fonts/conf.{d,avail}
+(
+  for file in *.conf; do
+    install -m 0644 ${file} ${PKG}/etc/fonts/conf.avail
+    (
+      cd ${PKG}/etc/fonts/conf.d
+      ln -sf ../conf.avail/${file}
+    )
+  done
+)
+}

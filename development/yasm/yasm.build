@@ -1,0 +1,58 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=yasm
+VERSION=1.2.0
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: yasm (Assembler)
+${NAME}:
+${NAME}: Yasm is a complete rewrite of the NASM assembler that accepts NASM
+${NAME}: and GAS assembler syntaxes, outputs binary, ELF32, ELF64, 32 and
+${NAME}: 64-bit Mach-O, RDOFF2, COFF, Win32 and Win64 object formats and
+${NAME}: generates source debugging information in STABS, DWARF 2 and
+${NAME}: CodeView 8 formats.
+${NAME}:
+${NAME}: Homepage: http://tortall.net/projects/yasm
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://www.tortall.net/projects/${SRCNAME[0]}/releases/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="GPL2 LGPL2 ARTISTIC BSD2 BSD3"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-rpath \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var
+make -j 2
+make install DESTDIR="${PKG}"
+doc AUTHORS
+rmdir ${PKG}/usr/share
+}

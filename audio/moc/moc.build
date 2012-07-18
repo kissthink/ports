@@ -1,0 +1,80 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=moc
+VERSION=2.5.0alpha4
+BUILD=1
+DEPENDS=('alsa_lib >= 1.0.25-1' 'libsamplerate >= 0.1.8-1' 'curl >= 7.26.0-1')
+OPTDEPENDS=('ffmpeg >= 0.10.3-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: moc (Music on Console)
+${NAME}:
+${NAME}: An audio player for the console that can play many different kinds of
+${NAME}: sound file formats (such as OGG, FLAC and MP3).
+${NAME}:
+${NAME}: Homepage: http://moc.daper.net
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=2.5.0-alpha4
+SRCPACK[0]=ftp://ftp.daper.net/pub/soft/moc/unstable/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+CPPFLAGS="-I/usr/include/mad -I/usr/include/id3tag" \
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --enable-static=no \
+ --enable-shared=yes \
+ --disable-debug \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix)/plugins \
+ --localstatedir=/var \
+ --datadir=/usr/share/application-data \
+ --without-oss \
+ --with-ncurses
+make -j 2
+(
+  cd decoder_plugins/mp3
+  make -j 2
+)
+make install DESTDIR="${PKG}"
+
+changelog NEWS
+doc AUTHORS THANKS config.example keymap.example
+
+install.dir ${PKG}/usr/share/applications
+install -m 0644 moc.desktop ${PKG}/usr/share/applications
+install.bin \
+ decoder_plugins/mp3/.libs/*.so \
+ ${PKG}/usr/lib$(libdirsuffix)/plugins/moc/decoder_plugins
+
+rm -rf \
+ $PKG/usr/share/application-data/doc
+}

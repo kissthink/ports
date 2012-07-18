@@ -1,0 +1,99 @@
+#!/bin/sh
+
+CWD=`pwd`
+NAME=reiser3
+VERSION=3.6.21
+ARCH=i586
+BUILD=1
+PKGNAME=reiserfsprogs
+PKGVER=${VERSION}
+BASEDIR=${PKGNAME}-${PKGVER}
+ARCHIVE=${BASEDIR}.tar.bz2
+REPOSITORY=http://www.kernel.org/pub/linux/utils/fs/reiserfs
+FLAGS="-O2 -march=pentium -mtune=pentium -fno-strength-reduce \
+ -fomit-frame-pointer -ffast-math"
+PKG=/tmp/package-$NAME
+
+rm -rf $PKG
+mkdir -p $PKG
+
+# Obtain sources
+if [ ! -e $ARCHIVE ]; then
+  if `wget "$REPOSITORY/$ARCHIVE"`; then
+    true
+  else
+    exit 1
+  fi
+fi
+
+# Compile
+cd /tmp
+tar jxvf $CWD/$ARCHIVE
+cd $BASEDIR
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" ./configure \
+ --prefix=/usr \
+ --sbindir=/sbin \
+ --mandir=/usr/man \
+ --build=${ARCH}-slackware-linux
+make
+
+# Install
+make install DESTDIR=$PKG
+mkdir -p $PKG/install $PKG/usr/doc/$NAME-$VERSION
+cat > $PKG/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+       |-----handy-ruler------------------------------------------------------|
+reiser3: reiser3 (ReiserFS 3 file system utilities)
+reiser3:
+reiser3: Utilities for ReiserFS 3, a file system based on balanced tree
+reiser3: algorithms.
+reiser3:
+reiser3: Homepage: http://www.namesys.com
+reiser3:
+reiser3:
+reiser3:
+reiser3:
+reiser3:
+EOF
+
+install -m644 -g0 -o0 CREDITS ChangeLog README \
+ $PKG/usr/doc/${NAME}-${VERSION}
+
+gzip -9nf \
+ $PKG/usr/doc/${NAME}-${VERSION}/ChangeLog
+
+chmod 444 ${PKG}/usr/man/man?/*.?
+gzip -9nf ${PKG}/usr/man/man?/*.?
+
+#(
+#  # It should be .reiser3 and not .reiserfs
+#  FSNAME=reiserfs
+#  cd ${PKG}/sbin
+#  mv mkreiserfs mkfs.${FSNAME}
+#  mv reiserfsck fsck.${FSNAME}
+#  mv reiserfstune tunefs.${FSNAME}
+#  mv debugreiserfs debugfs.${FSNAME}
+#  mv resize_reiserfs resizefs.${FSNAME}
+#  cd ${PKG}/usr/man/man8
+#  mv mkreiserfs.8 mkfs.${FSNAME}.8
+#  mv reiserfsck.8 fsck.${FSNAME}.8
+#  mv reiserfstune.8 tunefs.${FSNAME}.8
+#  mv debugfsreiserfs.8 debugfs.${FSNAME}.8
+#  mv resize_reiserfs.8 resizefs.${FSNAME}.8
+#)
+
+strip \
+ ${PKG}/sbin/* || :
+
+chown -R root.root ${PKG}
+
+# Make package
+cd $PKG
+cat install/slack-desc | grep "$NAME:" > /tmp/$NAME-$VERSION-$ARCH-$BUILD.txt
+makepkg -l y -c n /tmp/$NAME-$VERSION-$ARCH-$BUILD.tgz

@@ -1,0 +1,265 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=tcpip
+VERSION=$(date '+%Y%m%d')
+BUILD=1
+DEPENDS=('compat_tcpip >= 20120202-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: tcpip
+${NAME}:
+${NAME}: Basic TCP/IP networking utilities and libraries.
+${NAME}:
+${NAME}: This package must be installed if you want network or Internet
+${NAME}: access.
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=libnl
+SRCVERS[0]=3.2.7
+SRCPACK[0]=http://www.infradead.org/~tgr/libnl/files/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="LGPL21"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/usr/share/net \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+}
+
+SRCNAME[1]=libpcap
+SRCVERS[1]=1.2.1
+SRCPACK[1]=http://www.tcpdump.org/release/${SRCNAME[1]}-${SRCVERS[1]}.tar.gz
+SRCCOPY[1]="BSD3"
+
+build1()
+{
+CPPFLAGS="-I/usr/include/libnl2" \
+CFLAGS="${FLAGS} ${CPPFLAGS}" CXXFLAGS="${FLAGS} ${CPPFLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --enable-ipv6 \
+ --enable-bluetooth
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc CREDITS
+changelog CHANGES
+(
+  cd ${PKG}/usr/man/man3
+  for manpage in *.3pcap; do
+    mv ${manpage} $(basename ${manpage} .3pcap).3
+  done
+)
+# Really delete man1?
+rm -rf \
+ ${PKG}/usr/lib$(libdirsuffix)/*.a \
+ ${PKG}${SYS_DIR[man]}/man1 \
+ ${PKG}/usr/bin
+}
+
+SRCNAME[2]=tcp_wrappers
+SRCVERS[2]=7.6-ipv6.4
+SRCPACK[2]=http://ftp.nluug.nl/security/tcpwrappers/${SRCNAME[2]}-${SRCVERS[2]}.tar.gz
+
+build2()
+{
+make OPTS="${FLAGS}" REAL_DAEMON_DIR=/usr/sbin linux
+make install DESTDIR="${PKG}" MANDIR="${SYS_DIR[man]}"
+doc README
+changelog CHANGES
+}
+
+SRCNAME[3]=host
+SRCVERS[3]=20070128
+SRCPACK[3]=ftp://ftp.weird.com/pub/local/${SRCNAME[3]}-${SRCVERS[3]}.tar.gz
+
+build3()
+{
+make ${JOBS} COPTIM="${FLAGS}"
+make install DESTDIR="${PKG}"
+}
+
+SRCNAME[4]=traceroute
+SRCVERS[4]=2.0.18
+SRCPACK[4]=${URL[sf]}/${SRCNAME[4]}/${SRCNAME[4]}/${SRCNAME[4]}-${SRCVERS[4]}/${SRCNAME[4]}-${SRCVERS[4]}.tar.gz
+SRCCOPY[4]="LGPL21 GPL2"
+
+build4()
+{
+make ${JOBS} CFLAGS+="${FLAGS}"
+make install DESTDIR="${PKG}" \
+ prefix=/usr \
+ mandir="${SYS_DIR[man]}"
+doc CREDITS
+changelog ChangeLog
+(
+  cd ${PKG}/usr/bin
+  ln -sf traceroute traceroute6
+  cd ${PKG}${SYS_DIR[man]}/man1
+  echo ".so man1/traceroute.1" > traceroute6.1
+)
+}
+
+SRCNAME[5]=whois
+SRCVERS[5]=5.0.14
+SRCPACK[5]=http://ftp.debian.org/debian/pool/main/w/${SRCNAME[5]}/${SRCNAME[5]}_${SRCVERS[5]}.tar.gz
+SRCCOPY[5]="GPL2"
+
+build5()
+{
+make ${JOBS} CFLAGS="${FLAGS} -I/usr/include/idn" HAVE_LIBIDN=y
+make install install-pos mandir="${SYS_DIR[man]}" BASEDIR="${PKG}"
+}
+
+SRCNAME[6]=inetutils
+SRCVERS[6]=1.9.1
+SRCPACK[6]=${URL[gnu]}/${SRCNAME[6]}/${SRCNAME[6]}-${SRCVERS[6]}.tar.gz
+SRCCOPY[6]="GPL3"
+
+build6()
+{
+#FIXME: PAM: might need to be enabled
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --disable-rpath \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --infodir="${SYS_DIR[info]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --disable-servers \
+ --disable-hostname \
+ --disable-logger \
+ --disable-ifconfig \
+ --disable-talk \
+ --disable-traceroute \
+ --disable-whois
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS THANKS
+changelog NEWS
+#FIXME: compatibility symlinks
+install.dir ${PKG}/bin
+(
+  cd ${PKG}/bin
+  ln -sf /usr/bin/ftp
+  ln -sf /usr/bin/ping
+  ln -sf /usr/bin/ping6
+  ln -sf /usr/bin/telnet
+)
+chmod 0755 ${PKG}/usr/bin/{ping,ping6,rcp,rsh,rlogin}
+rmdir ${PKG}/usr/libexec
+}
+
+SRCNAME[7]=iputils
+SRCVERS[7]=s20101006
+SRCPACK[7]=http://www.skbuff.net/${SRCNAME[7]}/${SRCNAME[7]}-${SRCVERS[7]}.tar.bz2
+SRCCOPY[7]="BSD4"
+
+build7()
+{
+make ${JOBS} \
+ CCOPT="${FLAGS}" \
+ VPATH="/usr/lib$(libdirsuffix)"
+make install \
+ SBINDIR="/usr/sbin" \
+ DESTDIR="${PKG}"
+changelog RELNOTES
+#FIXME: compatibility symlinks
+install.dir ${PKG}/bin
+(
+  cd ${PKG}/bin
+  ln -s /usr/bin/ipmask
+)
+# These utilities are provided by other packages but leave this just in case
+#chmod 4711 \
+# ${PKG}/bin/ping \
+# ${PKG}/bin/ping6 \
+# ${PKG}/usr/bin/traceroute6
+}
+
+SRCNAME[8]=net-tools
+SRCVERS[8]=20120202
+SRCPACK[8]=http://www.tazenda.demon.co.uk/phil/${SRCNAME[8]}/${SRCNAME[8]}-${SRCVERS[8]}.tar.xz
+SRCCOPY[8]="GPL2"
+
+build8()
+{
+make version.h
+make ${JOBS} CFLAGS="${FLAGS}"
+make install-slattach install-plipconfig installdata \
+ DESTDIR="${PKG}" \
+ MANDIR="${SYS_DIR[man]}" \
+ BINDIR="/usr/bin" \
+ SBINDIR="/usr/sbin"
+}
+
+SRCNAME[9]=iproute2
+SRCVERS[9]=3.2.0
+SRCPACK[9]=http://devresources.linuxfoundation.org/dev/${SRCNAME[9]}/download/${SRCNAME[9]}-${SRCVERS[9]}.tar.xz
+SRCCOPY[9]="GPL2"
+
+build9()
+{
+#FIXME: depends on libnl2
+make ${JOBS} \
+ CCOPTS="${FLAGS} -I/usr/include/libnl2" \
+ CONFDIR="/usr/share/net" \
+ DATADIR="/usr/share/net" \
+ LIBDIR="/usr/lib$(libdirsuffix)/plugins"
+make install \
+ DESTDIR="${PKG}" \
+ CONFDIR="/usr/share/net" \
+ DATADIR="/usr/share/net" \
+ SBINDIR="/usr/sbin" \
+ LIBDIR="/usr/lib$(libdirsuffix)/plugins" \
+ MANDIR="/usr/man" \
+ DOCDIR="/usr/doc/${SRCNAME[9]}-${SRCVERS[9]}/extra"
+rm -rf \
+ ${PKG}/usr/doc/${SRCNAME[9]}-${SRCVERS[9]}/extra
+}

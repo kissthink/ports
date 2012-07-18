@@ -1,0 +1,89 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=fs_ext
+VERSION=1.42.2
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: fs_ext (ext2 and ext3 filesystems utilities)
+${NAME}:
+${NAME}: Utilities needed to create and maintain ext2, ext3 and ext4
+${NAME}: filesystems.
+${NAME}:
+${NAME}: These utilities were written by Remy Card (the developer and
+${NAME}: maintainer of the ext2 fs) and Theodore T'so.
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=e2fsprogs
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=${URL[sf]}/${SRCNAME[0]}/e2fsprogs/${SRCVERS[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="GPL2 LGPL2"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-rpath \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --infodir="${SYS_DIR[info]}" \
+ --docdir="${SYS_DIR[doc]}/${SRCNAME[0]}-${SRCVERS[0]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --enable-elf-shlibs \
+ --disable-libblkid \
+ --disable-libuuid \
+ --disable-uuidd
+make ${JOBS} V=1
+make install install-libs DESTDIR="${PKG}"
+changelog RELEASE-NOTES
+install.dat doinst.sh ${PKG}/install
+mv ${PKG}/etc/mke2fs.conf ${PKG}/etc/mke2fs.conf.new
+(
+  for fstype in ext2 ext3 ext4 ext4dev; do
+    cd ${PKG}/usr/sbin
+    rm -f fsck.${fstype} mkfs.${fstype}
+    ln -sf mke2fs mkfs.${fstype}
+    ln -sf e2fsck fsck.${fstype}
+    cd ${PKG}${SYS_DIR[man]}/man8
+    rm -f fsck.${fstype} mkfs.${fstype}
+    echo ".so man8/mke2fs.8" > mkfs.${fstype}
+    echo ".so man8/e2fsck.8" > fsck.${fstype}
+  done
+)
+(
+  cd ${PKG}/usr/sbin
+  rm -f e2label findfs
+  ln -sf tune2fs e2label
+  ln -sf mke2fs mke3fs
+  ln -sf mke2fs mke4fs
+  cd ${PKG}${SYS_DIR[man]}/man8
+  echo ".so man8/mke2fs.8" > mke3fs.8
+  echo ".so man8/mke2fs.8" > mke4fs.8
+)
+sed -i -e 's/^AWK=.*/AWK=awk/' "${PKG}/usr/bin/compile_et"
+sed -i -e 's#^SS_DIR=.*#SS_DIR="/usr/share/ss"#' "${PKG}/usr/bin/mk_cmds"
+sed -i -e 's#^ET_DIR=.*#ET_DIR="/usr/share/et"#' "${PKG}/usr/bin/compile_et"
+}

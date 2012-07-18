@@ -1,0 +1,144 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=lvm
+VERSION=2.02.93
+BUILD=1
+DEPENDS=('udev >= 173-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: lvm (Logical Volume Manager version 2)
+${NAME}:
+${NAME}: Heinz Mauelshagen's LVM (Logical Volume Manager) for Linux. LVM adds
+${NAME}: an additional layer between the physical peripherals and the
+${NAME}: low-level I/O interface to get a logical view of disks. This allows
+${NAME}: the concatenation of several disks (so-called physical volumes or PVs)
+${NAME}: to form a storage pool (so-called Volume Group or VG) with allocation
+${NAME}: units called physical extents (called PE). With LVM, you can extend,
+${NAME}: resize, or relocate storage dynamically.
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=LVM2
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=ftp://sources.redhat.com/pub/lvm2/${SRCNAME[0]}.${SRCVERS[0]}.tgz
+SRCROOT[0]=${SRCNAME[0]}.${SRCVERS[0]}
+SRCCOPY[0]="GPL2 LGPL21"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --sbindir=/usr/sbin \
+ --disable-readline \
+ --disable-selinux \
+ --enable-cmdlib \
+ --enable-applib \
+ --enable-dmeventd \
+ --enable-static_link \
+ --enable-pkgconfig \
+ --enable-udev_sync \
+ --enable-udev_rules \
+ --with-udev-prefix="/usr" \
+ --with-udevdir="$(pkg-config udev --variable=udevdir)/rules.d" \
+ --with-systemdsystemunitdir="${SYS_DIR[systemdsystemunitdir]}" \
+ --with-default-run-dir=/run \
+ --with-default-locking-dir=/run/lock \
+ --with-dmeventd-pidfile=/run/dmeventd.pid \
+ --with-device-uid=0 \
+ --with-device-gid=6 \
+ --with-device-mode=0644 \
+ --with-staticdir=/usr/sbin \
+ --with-usrsbindir=/usr/sbin \
+ --with-usrlibdir=/usr/lib$(libdirsuffix)
+make ${JOBS}
+make install install_systemd_units DESTDIR="${PKG}"
+doc WHATS_NEW_DM
+changelog WHATS_NEW
+install.dat doinst.sh ${PKG}/install
+#install.dir ${PKG}${SYS_DIR[run]}/lvm
+mv \
+ ${PKG}/etc/lvm/lvm.conf \
+ ${PKG}/etc/lvm/lvm.conf.new
+rm -rf \
+ ${PKG}/usr/lib$(libdirsuffix)/*.a
+#FIXME: compatibility symlinks
+install.dir ${PKG}/sbin
+(
+  cd ${PKG}/sbin
+  ln -sf /usr/sbin/dmeventd
+  ln -sf /usr/sbin/dmeventd.static
+  ln -sf /usr/sbin/lvmdump
+  ln -sf /usr/sbin/lvm
+  ln -sf /usr/sbin/lvm.static
+  ln -sf /usr/sbin/lvmconf
+  ln -sf /usr/sbin/dmsetup
+  ln -sf /usr/sbin/dmsetup.static
+  ln -sf /usr/sbin/vgimportclone
+  ln -sf /usr/sbin/fsadm
+  ln -sf /usr/sbin/lvm lvchange
+  ln -sf /usr/sbin/lvm lvconvert
+  ln -sf /usr/sbin/lvm lvcreate
+  ln -sf /usr/sbin/lvm lvdisplay
+  ln -sf /usr/sbin/lvm lvextend
+  ln -sf /usr/sbin/lvm lvmchange
+  ln -sf /usr/sbin/lvm lvmdiskscan
+  ln -sf /usr/sbin/lvm lvmsadc
+  ln -sf /usr/sbin/lvm lvmsar
+  ln -sf /usr/sbin/lvm lvreduce
+  ln -sf /usr/sbin/lvm lvremove
+  ln -sf /usr/sbin/lvm lvrename
+  ln -sf /usr/sbin/lvm lvresize
+  ln -sf /usr/sbin/lvm lvs
+  ln -sf /usr/sbin/lvm lvscan
+  ln -sf /usr/sbin/lvm pvchange
+  ln -sf /usr/sbin/lvm pvck
+  ln -sf /usr/sbin/lvm pvcreate
+  ln -sf /usr/sbin/lvm pvdisplay
+  ln -sf /usr/sbin/lvm pvmove
+  ln -sf /usr/sbin/lvm pvremove
+  ln -sf /usr/sbin/lvm pvresize
+  ln -sf /usr/sbin/lvm pvs
+  ln -sf /usr/sbin/lvm pvscan
+  ln -sf /usr/sbin/lvm vgcfgbackup
+  ln -sf /usr/sbin/lvm vgcfgrestore
+  ln -sf /usr/sbin/lvm vgchange
+  ln -sf /usr/sbin/lvm vgck
+  ln -sf /usr/sbin/lvm vgconvert
+  ln -sf /usr/sbin/lvm vgcreate
+  ln -sf /usr/sbin/lvm vgdisplay
+  ln -sf /usr/sbin/lvm vgexport
+  ln -sf /usr/sbin/lvm vgextend
+  ln -sf /usr/sbin/lvm vgimport
+  ln -sf /usr/sbin/lvm vgmerge
+  ln -sf /usr/sbin/lvm vgmknodes
+  ln -sf /usr/sbin/lvm vgreduce
+  ln -sf /usr/sbin/lvm vgremove
+  ln -sf /usr/sbin/lvm vgrename
+  ln -sf /usr/sbin/lvm vgs
+  ln -sf /usr/sbin/lvm vgscan
+  ln -sf /usr/sbin/lvm vgsplit
+)
+}

@@ -1,0 +1,97 @@
+#!/bin/sh
+
+CWD=`pwd`
+NAME=uhub
+VERSION=0.2.8
+ARCH=i586
+BUILD=1
+PKGNAME=$NAME
+PKGVER=$VERSION
+BASEDIR=$PKGNAME-$PKGVER
+ARCHIVE=$BASEDIR-src.tar.bz2
+REPOSITORY=http://www.extatic.org/downloads/uhub
+FLAGS="-O2 -march=pentium -mtune=pentium -fno-strength-reduce \
+ -fomit-frame-pointer -ffast-math"
+PKG=/tmp/package-$NAME
+
+rm -rf $PKG
+mkdir -p $PKG
+
+# Obtain sources
+if [ ! -e $ARCHIVE ]; then
+  if `wget "$REPOSITORY/$ARCHIVE"`; then
+    true
+  else
+    exit 1
+  fi
+fi
+
+# Compile
+cd /tmp
+tar jxvf $CWD/$ARCHIVE
+cd $BASEDIR
+bzcat $CWD/$NAME-$VERSION-slackware.patch.bz2 | patch -p1 -s
+bzcat $CWD/$NAME-$VERSION-config.patch.bz2 | patch -p1 -s
+bzcat $CWD/$NAME-$VERSION-optflags.patch.bz2 | patch -p1 -s
+
+function build
+{
+make \
+ SILENT=NO \
+ USE_SSL=YES \
+ STACK_PROTECT=YES \
+ RELEASE=YES \
+ OPTS="${FLAGS}" \
+ ${*}
+}
+
+# Install
+build install DESTDIR=$PKG
+mkdir -p $PKG/install $PKG/usr/doc/$NAME-$VERSION $PKG/etc/rc.d
+cat > $PKG/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description. Line
+# up the first '|' above the ':' following the base package name, and the '|' on
+# the right side marks the last column you can put a character in. You must make
+# exactly 11 lines for the formatting to be correct. It's also customary to
+# leave one space after the ':'.
+
+    |-----handy-ruler------------------------------------------------------|
+uhub: uhub (ADC hub server daemon)
+uhub:
+uhub: uHub is a high performance peer-to-peer hub for the ADC network. Its
+uhub: low memory footprint allows it to handle several thousand users on
+uhub: high-end servers, or a small private hub on embedded hardware.
+uhub:
+uhub: uHub uses the ADC protocol, and is compatible with DC++, jUCy and
+uhub: other ADC clients.
+uhub:
+uhub: Homepage: http://www.extatic.org/uhub
+uhub:
+EOF
+
+cat > $PKG/install/slack-required <<EOF
+libevent >= 1.4.9-i486-1
+openssl-solibs >= 0.9.8i-i486-1
+EOF
+
+install -m 0644 -g 0 -o 0 doinst.sh $PKG/install
+
+install -m 0644 -g 0 -o 0 AUTHORS BUGS ChangeLog README \
+ $PKG/usr/doc/$NAME-$VERSION
+
+gzip -9nf \
+ $PKG/usr/doc/$NAME-$VERSION/ChangeLog
+
+install -m 0755 -g 0 -o 0 rc.uhub.new $PKG/etc/rc.d
+
+rm -f ${PKG}/etc/conf.d/uhub_motd.conf
+
+strip $PKG/usr/sbin/* || :
+
+chown -R root.root $PKG
+
+# Make package
+cd $PKG
+cat install/slack-desc | grep "$NAME:" > /tmp/$NAME-$VERSION-$ARCH-$BUILD.txt
+makepkg -l y -c n /tmp/$NAME-$VERSION-$ARCH-$BUILD.tgz

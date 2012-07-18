@@ -1,0 +1,48 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=dhex
+VERSION=0.67
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: dhex (hex editor)
+${NAME}:
+${NAME}: dhex is more than just another hex editor. It includes a diff mode,
+${NAME}: which can be used to easily and conveniently compare two binary
+${NAME}: files.
+${NAME}:
+${NAME}: Homepage: http://www.dettus.net/dhex
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://www.dettus.net/${SRCNAME[0]}/${SRCNAME[0]}_${SRCVERS[0]}.tar.gz
+SRCROOT[0]=${SRCNAME[0]}_${SRCVERS[0]}
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+make ${JOBS} OPTFLAGS="${FLAGS}"
+make install DESTDIR="${PKG}/usr"
+doc README.txt
+}

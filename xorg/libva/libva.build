@@ -1,0 +1,66 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=libva
+VERSION=1.0.15
+BUILD=1
+DEPENDS=('xorg_libs >= 7.6-5')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: libva (video acceleration API)
+${NAME}:
+${NAME}: A library that implements the Video Acceleration (VA) API. It loads
+${NAME}: a hardware dependent driver.
+${NAME}:
+${NAME}: Homepage: http://freedesktop.org/wiki/Software/vaapi
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://cgit.freedesktop.org/${SRCNAME[0]}/snapshot/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="MIT"
+
+build0()
+{
+#FIXME: autogenerating shit should not happen
+./autogen.sh
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --with-drivers-path="$(pkg-config dri --variable dridriverdir)" \
+ --enable-glx \
+ --enable-dummy-driver \
+ --enable-dummy-backend
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+changelog NEWS
+}

@@ -1,0 +1,71 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=fuse
+VERSION=2.9.0
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: FUSE (Filesystem in Userspace)
+${NAME}:
+${NAME}: FUSE is a simple interface for userspace programs to export a virtual
+${NAME}: filesystem to the Linux kernel. FUSE also aims to provide a secure
+${NAME}: method for non privileged users to create and mount their own
+${NAME}: filesystem implementations.
+${NAME}:
+${NAME}: Homepage: http://fuse.sourceforge.net
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=${url[sf]}/${SRCNAME[0]}/files/fuse-2.X/${SRCVERS[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="GPL2 LGPL2"
+
+build0()
+{
+MOUNT_FUSE_PATH="/usr/sbin" \
+UDEV_RULES_PATH="$(pkg-config udev --variable=udevdir)/rules.d" \
+INIT_D_PATH="/etc/rc.d" \
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-rpath \
+ --disable-static \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --with-pkgconfigdir=/usr/lib$(libdirsuffix)/pkgconfig \
+ --docdir=/usr/doc/${SRCNAME[0]}-${SRCVERS[0]} \
+ --enable-lib \
+ --enable-util
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS FAQ
+changelog ChangeLog
+install.dat doinst.sh ${PKG}/install
+# Move the start|stop script of fuse to the right place.
+mv ${PKG}/etc/rc.d/fuse ${PKG}/etc/rc.d/rc.fuse.new
+# udev handles device node creation
+rm -rf ${PKG}/dev
+}

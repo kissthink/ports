@@ -1,0 +1,79 @@
+#!/bin/sh
+
+CWD=`pwd`
+NAME=nessus_libs
+VERSION=2.3.1
+ARCH=i586
+BUILD=1
+PKGNAME=nessus-libraries
+PKGVER=$VERSION
+BASEDIR=$PKGNAME
+ARCHIVE=$PKGNAME-$PKGVER.tar.gz
+REPOSITORY=http://no/where
+FLAGS="-O2 -march=pentium -mtune=pentium -fno-strength-reduce \
+ -fomit-frame-pointer -ffast-math"
+PKG=/tmp/package-$NAME
+
+rm -rf $PKG
+mkdir -p $PKG
+
+# Obtain sources
+if [ ! -e $ARCHIVE ]; then
+  if `wget "$REPOSITORY/$ARCHIVE"`; then
+    true
+  else
+    exit 1
+  fi
+fi
+
+# Compile
+cd /tmp
+tar zxvf $CWD/$ARCHIVE
+cd $BASEDIR
+CFLAGS=$FLAGS CXXFLAGS=$FLAGS ./configure \
+ --enable-static=no \
+ --prefix=/usr \
+ --mandir=/usr/man \
+ --sysconfdir=/etc/nessus \
+ --enable-cypher
+make
+
+# Install
+make install DESTDIR=$PKG
+mkdir -p $PKG/install
+cat > $PKG/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+           |-----handy-ruler------------------------------------------------------|
+nessus_libs: Nessus libraries
+nessus_libs:
+nessus_libs: The "Nessus" Project was started by Renaud Deraison in 1998 to
+nessus_libs: provide to the internet community a free, powerful, up-to-date and
+nessus_libs: easy to use remote security scanner. Nessus is currently rated among
+nessus_libs: the top products of its type throughout the security industry and is
+nessus_libs: endorsed by professional information security organizations such as
+nessus_libs: the SANS Institute. It is estimated that the Nessus scanner is used
+nessus_libs: by 75,000 organizations world-wide.
+nessus_libs:
+nessus_libs:
+EOF
+
+chmod 444 $PKG/usr/man/man?/*.?
+gzip -9nf $PKG/usr/man/man?/*.?
+
+strip --strip-unneeded \
+ $PKG/usr/lib/*.so* || :
+
+rm -rf $PKG/usr/sbin
+
+chown -R root.root $PKG
+
+# Make package
+cd $PKG
+cat install/slack-desc | grep "$NAME:" > /tmp/$NAME-$VERSION-$ARCH-$BUILD.txt
+makepkg -l y -c n /tmp/$NAME-$VERSION-$ARCH-$BUILD.tgz

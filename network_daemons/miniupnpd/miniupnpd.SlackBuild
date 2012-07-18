@@ -1,0 +1,88 @@
+#!/bin/sh
+
+CWD=`pwd`
+NAME=miniupnpd
+VERSION=1.3
+ARCH=i586
+BUILD=1
+PKGNAME=$NAME
+PKGVER=$VERSION
+BASEDIR=$PKGNAME-$PKGVER
+ARCHIVE=$BASEDIR.tar.gz
+REPOSITORY=http://miniupnp.free.fr/files
+FLAGS="-O2 -march=pentium -mtune=pentium -fno-strength-reduce \
+ -fomit-frame-pointer -ffast-math"
+PKG=/tmp/package-$NAME
+
+rm -rf $PKG
+mkdir -p $PKG
+
+# Obtain sources
+if [ ! -e $ARCHIVE ]; then
+  if `wget "$REPOSITORY/$ARCHIVE"`; then
+    true
+  else
+    exit 1
+  fi
+fi
+
+# Compile
+cd /tmp
+tar zxvf $CWD/$ARCHIVE
+cd $BASEDIR
+bzcat $CWD/$NAME-$VERSION-fixes.patch.bz2 | patch -p1 -s
+bzcat $CWD/$NAME-$VERSION-optflags.patch.bz2 | patch -p1 -s
+bzcat $CWD/$NAME-$VERSION-makefile.patch.bz2 | patch -p1 -s
+bzcat $CWD/$NAME-$VERSION-config.patch.bz2 | patch -p1 -s
+bzcat $CWD/$NAME-$VERSION-etc.patch.bz2 | patch -p1 -s
+bzcat $CWD/$NAME-$VERSION-manpage.patch.bz2 | patch -p1 -s
+bzcat $CWD/$NAME-$VERSION-iptablespath.patch.bz2 | patch -p1 -s
+bzcat $CWD/$NAME-$VERSION-slackware.patch.bz2 | patch -p1 -s
+make -f Makefile.linux OPTFLAGS="${FLAGS} -DIPTABLES_143 -I/usr/src/linux/include"
+
+# Install
+make -f Makefile.linux install PREFIX=$PKG
+mkdir -p $PKG/install $PKG/usr/doc/$NAME-$VERSION
+cat > $PKG/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description. Line
+# up the first '|' above the ':' following the base package name, and the '|' on
+# the right side marks the last column you can put a character in. You must make
+# exactly 11 lines for the formatting to be correct. It's also customary to
+# leave one space after the ':'.
+
+         |-----handy-ruler------------------------------------------------------|
+miniupnpd: miniupnpd (UPnP daemon)
+miniupnpd:
+miniupnpd: The miniUPnP daemon is an UPnP IGD (Internet gateway device) which
+miniupnpd: provides NAT traversal services to any UPnP enabled client on the
+miniupnpd: network. See http://www.upnp.org for more details on UPnP. Later
+miniupnpd: support for the NAT Port Mapping Protocol (NAT-PMP) was added.
+miniupnpd: 
+miniupnpd: Miniupnpd was written by Thomas Bernard. 
+miniupnpd:
+miniupnpd: Homepage: http://miniupnp.free.fr
+miniupnpd:
+EOF
+
+install -m0644 -g0 -o0 slackware/doinst.sh $PKG/install
+
+install -m0644 -g0 -o0 Changelog.txt README \
+ $PKG/usr/doc/$NAME-$VERSION
+
+gzip -9nf \
+ $PKG/usr/doc/$NAME-$VERSION/Changelog.txt
+
+chmod 640 $PKG/etc/conf.d/miniupnpd.conf.new
+
+chmod 444 $PKG/usr/man/man?/*.?
+gzip -9nf $PKG/usr/man/man?/*.?
+
+strip $PKG/usr/sbin/* || :
+
+chown -R root.root $PKG
+
+# Make package
+cd $PKG
+cat install/slack-desc | grep "$NAME:" > /tmp/$NAME-$VERSION-$ARCH-$BUILD.txt
+makepkg -l y -c n /tmp/$NAME-$VERSION-$ARCH-$BUILD.tgz

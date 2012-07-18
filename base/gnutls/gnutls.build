@@ -1,0 +1,64 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=gnutls
+VERSION=3.0.21
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: GnuTLS
+${NAME}:
+${NAME}: GnuTLS is a project that aims to develop a library which provides a
+${NAME}: secure layer, over a reliable transport layer. Currently the GnuTLS
+${NAME}: library implements the proposed standards by the IETF's TLS working
+${NAME}: group. The TLS protocol provides communications privacy over the
+${NAME}: Internet. The protocol allows client/server applications to
+${NAME}: communicate in a way that is designed to prevent eavesdropping,
+${NAME}: tampering, or message forgery.
+${NAME}:
+${NAME}: Homepage: http://www.gnu.org/software/gnutls
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=ftp://ftp.gnutls.org/pub/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+SRCCOPY[0]="GPL3"
+
+build0()
+{
+INCLUDE="-I/usr/include/tasn1 -I/usr/include/idn"
+CFLAGS="${FLAGS} ${INCLUDE}" CXXFLAGS="${FLAGS} ${INCLUDE}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --infodir="${SYS_DIR[info]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --with-html-dir=/usr/share/html \
+ --without-p11-kit
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS THANKS
+changelog NEWS
+}

@@ -1,0 +1,82 @@
+#!/bin/sh
+
+CWD=`pwd`
+NAME=bridge_utils
+VERSION=1.2
+ARCH=i586
+BUILD=1
+PKGNAME=bridge-utils
+PKGVER=$VERSION
+BASEDIR=$PKGNAME-$PKGVER
+ARCHIVE=$BASEDIR.tar.gz
+REPOSITORY=http://belnet.dl.sourceforge.net/sourceforge/bridge
+FLAGS="-O2 -march=pentium -mtune=pentium -fno-strength-reduce \
+ -fomit-frame-pointer -ffast-math"
+PKG=/tmp/package-$NAME
+
+rm -rf $PKG
+mkdir -p $PKG
+
+# Obtain sources
+if [ ! -e $ARCHIVE ]; then
+  if `wget "$REPOSITORY/$ARCHIVE"`; then
+    true
+  else
+    exit 1
+  fi
+fi
+
+# Compile
+cd /tmp
+tar zxvf $CWD/$ARCHIVE
+cd $BASEDIR
+bzcat $CWD/$NAME-$VERSION-autoconf.patch.bz2 | patch -p1 -s
+bzcat $CWD/$NAME-$VERSION-compile.patch.bz2 | patch -p1 -s
+chmod 755 configure
+CFLAGS=$FLAGS CXXFLAGS=$FLAGS ./configure --prefix=/usr --mandir=/usr/man
+make
+
+# Install
+make install DESTDIR=$PKG
+mkdir -p $PKG/install $PKG/usr/doc/$NAME-$VERSION
+cat > $PKG/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+            |-----handy-ruler------------------------------------------------------|
+bridge_utils: Network bridging utilities
+bridge_utils:
+bridge_utils: This package contains the the brctl(8) utility needed to control a
+bridge_utils: Linux ethernet bridge. Usually two ethernet network cards on one
+bridge_utils: machine are on different network segments. Bridging makes those
+bridge_utils: two network segments appear as one. To use network bridging you
+bridge_utils: will need to have bridging support compiled into the kernel.
+bridge_utils:
+bridge_utils:
+bridge_utils:
+bridge_utils:
+EOF
+
+cat > $PKG/install/slack-required <<EOF
+sysfsutils >= 2.1.0-i486-1
+EOF
+
+install -m644 -g0 -o0 AUTHORS ChangeLog README THANKS TODO doc/FAQ \
+ doc/FIREWALL doc/HOWTO doc/PROJECTS doc/SMPNOTES doc/WISHLIST \
+ $PKG/usr/doc/$NAME-$VERSION
+
+chmod 444 $PKG/usr/man/man?/*.?
+gzip -9nf $PKG/usr/man/man?/*.?
+
+strip $PKG/usr/sbin/* || :
+
+chown -R root.root $PKG
+
+# Make package
+cd $PKG
+cat install/slack-desc | grep "$NAME:" > /tmp/$NAME-$VERSION-$ARCH-$BUILD.txt
+makepkg -l y -c n /tmp/$NAME-$VERSION-$ARCH-$BUILD.tgz

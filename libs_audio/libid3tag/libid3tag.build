@@ -1,0 +1,65 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=libid3tag
+VERSION=0.15.1b
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: libid3tag (ID3 tag manipulation library)
+${NAME}:
+${NAME}: Yet another library for reading and (eventually) writing ID3 tags,
+${NAME}: both ID3v1 and the various versions of ID3v2.
+${NAME}:
+${NAME}: Libid3tag was written by Robert Leslie.
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=${URL[sf]}/mad/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-static \
+ --disable-debugging \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --includedir=/usr/include/id3tag \
+ --localstatedir=/var
+make -j 2
+make install DESTDIR="${PKG}"
+doc CREDITS
+changelog CHANGES
+sed -i "s|@LIBDIR@|/usr/lib$(libdirsuffix)|g" id3tag.pc
+install.dir \
+ ${PKG}/usr/lib$(libdirsuffix)/pkgconfig
+install -m 0644 id3tag.pc \
+ ${PKG}/usr/lib$(libdirsuffix)/pkgconfig
+}

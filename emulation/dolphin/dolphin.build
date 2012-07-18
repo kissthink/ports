@@ -1,0 +1,58 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=dolphin
+VERSION=20120514
+BUILD=1
+DEPENDS=('wxgtk >= 2.8.12-1' 'cg_toolkit >= 3.1-1' 'ffmpeg >= 0.10.3-1' 'bluetooth >= 4.98-1' 'sound >= 1.0.25-1' 'openal >= 1.13-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: dolphin (Nintendo Wii & Gamecube emulator)
+${NAME}:
+${NAME}: A Wii and Gamecube emulator which runs most games perfectly or with
+${NAME}: minor bugs. Games are playable at HD quality, up to 1080p. This is a
+${NAME}: remarkable feature the actual Wii or Gamecube consoles are not
+${NAME}: capable of.
+${NAME}:
+${NAME}: Homepage: http://code.google.com/p/dolphin-emu
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}-emu
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+cmake \
+ -DCMAKE_C_FLAGS:STRING="${FLAGS}" \
+ -DCMAKE_CXX_FLAGS:STRING="${FLAGS}" \
+ -DCMAKE_VERBOSE_MAKEFILE:BOOL="on" \
+ -DCMAKE_INSTALL_PREFIX:PATH="/usr" \
+ -Ddatadir:STRING="/usr/share/application-data/dolphin" \
+.
+make ${JOBS}
+make install DESTDIR="${PKG}"
+install.dir ${PKG}/usr/share/applications
+install.dat dolphin.desktop ${PKG}/usr/share/applications
+install.dir ${PKG}/usr/share/icons/hicolor/128x128/apps
+install.dat dolphin.png ${PKG}/usr/share/icons/hicolor/128x128/apps
+}

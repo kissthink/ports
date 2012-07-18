@@ -1,0 +1,64 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=wavpack
+VERSION=4.60.1
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: wavpack (WavPack library)
+${NAME}:
+${NAME}: WavPack is a completely open audio compression format providing
+${NAME}: lossless, high-quality lossy, and a unique hybrid compression mode.
+${NAME}: Although the technology is loosely based on previous versions of
+${NAME}: WavPack, the new version 4 format has been designed from the ground
+${NAME}: up to offer unparalleled performance and functionality.
+${NAME}:
+${NAME}: Homepage: http://www.wavpack.com
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://www.wavpack.com/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --enable-mmx
+make -j 2
+make install DESTDIR="${PKG}"
+
+changelog ChangeLog 
+license license.txt
+
+install.dir ${PKG}/${SYS_DIR[html]}/${NAME}
+install -m 0644 doc/*.css doc/*.html \
+ ${PKG}/${SYS_DIR[html]}/${NAME}
+}

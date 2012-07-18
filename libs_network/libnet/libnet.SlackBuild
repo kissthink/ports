@@ -1,0 +1,89 @@
+#!/bin/sh
+
+CWD=`pwd`
+NAME=libnet
+VERSION=1.1.1
+ARCH=i586
+BUILD=1
+PKGNAME=$NAME
+PKGVER=$VERSION
+BASEDIR=$PKGNAME
+ARCHIVE=$BASEDIR.tar.gz
+REPOSITORY=http://www.packetfactory.net/libnet/dist
+FLAGS="-O2 -march=pentium -mtune=pentium -fno-strength-reduce \
+ -fomit-frame-pointer -ffast-math"
+PKG=/tmp/package-$NAME
+
+rm -rf $PKG
+mkdir -p $PKG
+
+# Obtain sources
+if [ ! -e $ARCHIVE ]; then
+  if `wget "$REPOSITORY/$ARCHIVE"`; then
+    true
+  else
+    exit 1
+  fi
+fi
+
+# Compile
+cd /tmp
+tar zxvf $CWD/$ARCHIVE
+cd $BASEDIR
+CFLAGS=$FLAGS CXXFLAGS=$FLAGS ./configure \
+ --prefix=/usr
+make
+
+# Install
+make install DESTDIR=$PKG
+mkdir -p $PKG/install $PKG/usr/doc/$NAME-$VERSION $PKG/usr/man/man3 \
+ $PKG/usr/bin
+cat > $PKG/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+      |-----handy-ruler------------------------------------------------------|
+libnet: libnet
+libnet:
+libnet: Libnet is a high-level API (toolkit) allowing the application
+libnet: programmer to construct and inject network packets. It provides a
+libnet: portable and simplified interface for low-level network packet
+libnet: shaping, handling and injection. Libnet hides much of the tedium of
+libnet: packet creation from the application programmer such as multiplexing,
+libnet: buffer management, arcane packet header information, byte-ordering,
+libnet: OS-dependent issues, and much more. Libnet features portable packet
+libnet: creation nterfaces at the IP layer and link layer, as well as a host
+libnet: of supplementary and complementary functionality.
+EOF
+
+install -m644 -g0 -o0 README doc/BUGS doc/CHANGELOG doc/CONTRIB doc/MIGRATION \
+ doc/PACKET_BUILDING doc/RAWSOCKET_NON_SEQUITUR doc/TODO \
+ $PKG/usr/doc/$NAME-$VERSION
+
+gzip -9nf \
+ $PKG/usr/doc/$NAME-$VERSION/CHANGELOG
+
+mv doc/html $PKG/usr/doc/$NAME-$VERSION/libnet_docs_html
+
+(
+  cd $PKG/usr/doc/$NAME-$VERSION
+  tar -c libnet_docs_html > libnet_docs_html.tar
+  gzip -9nf libnet_docs_html.tar
+  rm -rf libnet_docs_html
+)
+
+install -m0755 libnet-config $PKG/usr/bin
+
+install -m0444 doc/man/man3/*.3 $PKG/usr/man/man3
+gzip -9nf $PKG/usr/man/man?/*.?
+
+chown -R root.root $PKG
+
+# Make package
+cd $PKG
+cat install/slack-desc | grep "$NAME:" > /tmp/$NAME-$VERSION-$ARCH-$BUILD.txt
+makepkg -l y -c n /tmp/$NAME-$VERSION-$ARCH-$BUILD.tgz

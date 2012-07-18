@@ -1,0 +1,67 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=geoip
+VERSION=1.4.8
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: geoip (GeoIP C API)
+${NAME}:
+${NAME}: A library that maps IP addresses to countries.
+${NAME}:
+${NAME}: Homepage: http://www.maxmind.com/app/c
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=GeoIP
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://geolite.maxmind.com/download/geoip/api/c/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="LGPL21"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc/conf.d \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --datadir=/usr/share/application-data
+make -j 2
+make install DESTDIR="${PKG}"
+doc AUTHORS README
+changelog ChangeLog
+install -m 0644 doinst.sh ${PKG}/install
+mv \
+ ${PKG}/etc/conf.d/GeoIP.conf.default \
+ ${DOC}
+mv \
+ ${PKG}/etc/conf.d/GeoIP.conf \
+ ${PKG}/etc/conf.d/GeoIP.conf.new
+}

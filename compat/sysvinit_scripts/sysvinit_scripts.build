@@ -1,0 +1,46 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=sysvinit_scripts
+MAJOR=1.2
+VERSION=${MAJOR}.43
+BUILD=4
+ARCH=noarch
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: sysvinit_scripts (basic scripts used to boot your machine)
+${NAME}:
+${NAME}: These are the Slackware boot scripts, which are needed to start the
+${NAME}: machine when not using systemd. Sysvinit looks for these in
+${NAME}: /etc/rc.d/.
+${NAME}: 
+${NAME}: This package is obsolete and has been replaced by systemd.
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=sysvinit-scripts
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+
+build0()
+{
+make install DESTDIR="${PKG}"
+}

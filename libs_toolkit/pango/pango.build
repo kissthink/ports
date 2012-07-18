@@ -1,0 +1,74 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=pango
+MAJOR=1.30
+VERSION=${MAJOR}.1
+BUILD=1
+DEPENDS=('glib >= 2.32.2-1' 'cairo >= 1.12.2-1')
+OPTIONS="symprepend"
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: pango
+${NAME}:
+${NAME}: Pango is a library for layout and rendering of text, with an emphasis
+${NAME}: on internationalization. Pango can be used anywhere that text layout
+${NAME}: is needed; however, most of the work on Pango-1.0 was done using the
+${NAME}: GTK+ widget toolkit as a test platform. Pango forms the core of text
+${NAME}: and font handling for GTK+-2.0.
+${NAME}:
+${NAME}: Homepage: http://www.gtk.org
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://download.gnome.org/sources/${SRCNAME[0]}/${MAJOR}/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+SRCCOPY[0]="LGPL2"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-shared=yes \
+ --enable-static=no \
+ --enable-debug=minimum \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc/pango-1.0 \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var/cache/pango-1.0 \
+ --with-html-dir=/usr/share/html
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS THANKS
+changelog NEWS
+install.dir ${PKG}/var/cache/pango-1.0
+install.dat doinst.sh ${PKG}/install
+touch ${PKG}/var/cache/pango-1.0/pango.modules
+mv \
+ ${PKG}/etc/pango-1.0/pango/pangox.aliases \
+ ${PKG}/etc/pango-1.0
+rm -rf \
+ ${PKG}/usr/lib$(libdirsuffix)/*/*/*.a \
+ ${PKG}/etc/pango-1.0/pango
+}

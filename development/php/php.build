@@ -1,0 +1,181 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=php
+VERSION=5.3.10
+BUILD=1
+DEPENDS=('libxml >= 2.8.0-1')
+OPTDEPENDS=('curl >= 7.26.0-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: php (HTML-embedded scripting language)
+${NAME}:
+${NAME}: PHP is an HTML-embedded scripting language. It shares syntax
+${NAME}: characteristics with C, Java, and Perl. The primary objective behind
+${NAME}: this language is to make a fast and easy-to-use scripting language
+${NAME}: for dynamic web sites.
+${NAME}:
+${NAME}: More information can be found online at http://www.php.net
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=ftp://fr2.php.net/mirrors/www.php.net/distributions/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCCOPY[0]="PHP"
+
+configure()
+{
+extensions="--enable-bcmath=shared \
+	--enable-calendar=shared \
+	--enable-ctype=shared \
+	--enable-dba=shared \
+	--enable-exif=shared \
+	--enable-ftp=shared \
+	--enable-gd-native-ttf \
+	--enable-gd-jis-conv \
+	--enable-json=shared \
+	--enable-mbregex=shared \
+	--enable-mbstring=shared \
+	--enable-pdo=shared \
+	--enable-phar \
+	--enable-posix=shared \
+	--enable-session \
+	--enable-shmop=shared \
+	--enable-simplexml \
+	--enable-soap=shared \
+	--enable-sockets=shared \
+	--enable-sqlite-utf8 \
+	--enable-sysvmsg=shared \
+	--enable-sysvsem=shared \
+	--enable-sysvshm=shared \
+	--enable-tokenizer=shared \
+	--enable-wddx=shared \
+	--enable-xml=shared \
+	--enable-zip=shared \
+	--with-bz2=shared,/usr \
+	--with-curl=shared,/usr \
+	--with-curlwrappers \
+	--with-db4=/usr \
+	--with-enchant=shared,/usr \
+	--with-freetype-dir=/usr \
+	--with-gd=shared \
+	--with-gdbm=shared,/usr \
+	--with-gettext=shared,/usr \
+	--with-gmp=shared,/usr \
+	--with-iconv=shared \
+	--with-jpeg-dir=shared,/usr \
+	--with-ldap=shared \
+	--with-libxml-dir=/usr \
+	--with-mhash=shared,/usr \
+	--with-mysql=shared,mysqlnd \
+	--with-mysql-sock=/run/mariadb/mariadb.sock \
+	--with-mysqli=shared,mysqlnd \
+	--with-openssl=shared \
+	--with-pdo-mysql=shared,mysqlnd \
+	--with-pdo-sqlite=shared \
+	--with-png-dir=shared,/usr \
+	--with-readline=shared,/usr \
+	--with-regex=php \
+	--with-sqlite=shared \
+	--with-sqlite3=shared \
+	--with-xpm-dir=/usr \
+	--with-xsl=shared,/usr \
+	--with-zlib=/usr \
+	"
+#FIXME: some PHP extensions are missing
+# --with-imap-ssl=/usr \ # Requires Alpine's c-client.a
+# --with-imap=/usr \
+# --with-t1lib=/usr \
+# --with-mm=/usr \
+# --with-snmp=shared,/usr \
+# --with-pspell=shared,/usr \
+# --enable-simplexml=shared \ # Cannot build SPL as a module
+# --with-pcre-dir=/usr \
+# --with-pcre-regex=/usr \
+
+#FIXME: SQLite3 won't compile and break the build with -ffast-math
+export O_FLAGS="${FLAGS//-ffast-math}"
+
+export EXTENSION_DIR="/usr/lib$(libdirsuffix)/plugins/php"
+#export PEAR_INSTALLDIR="/usr/share/pear"
+
+CFLAGS="${O_FLAGS} -I/usr/include/apr-1" CXXFLAGS="${O_FLAGS} -I/usr/include/apr-1" \
+./configure \
+ ${*} \
+ --prefix=/usr \
+ --sysconfdir=/etc \
+ --libdir=/usr/share/php \
+ --mandir="${SYS_DIR[man]}" \
+ --with-config-file-scan-dir=/etc/php.d \
+ --with-config-file-path=/etc/php.d \
+ --without-pear \
+ --disable-rpath \
+ --disable-debug \
+ --disable-magic-quotes \
+ --disable-safe-mode \
+ --enable-inline-optimization \
+ --enable-static=no \
+ --enable-shared=yes \
+ --enable-sigchild \
+ --enable-filter \
+ --enable-zend-multibyte \
+ --with-pic \
+ --with-gnu-ld \
+ --with-tsrm-pthreads \
+ ${extensions}
+# --with-pear=/usr/share/pear
+# Old stuff
+# --with-shared-layout=PHP
+# --enable-discard-path
+# --enable-force-cgi-redirect
+}
+
+build0()
+{
+#FIXME: config files should be generated to include proper paths
+sed -i "s:@LIBDIR@:lib$(libdirsuffix):g" php.ini-* mod_php.conf.example
+#FIXME: Apache config file hack
+(
+install.dir ${PKG}/etc/apache
+install.dat apache.hack ${PKG}/etc/apache/httpd.conf
+)
+# apache2 + cli build
+configure \
+ --with-apxs2=/usr/bin/apxs \
+ --enable-pcntl
+make ${JOBS} install INSTALL_ROOT="${PKG}"
+make install-cli INSTALL_ROOT="${PKG}"
+#make install-pear INSTALL_ROOT="${PKG}"
+changelog NEWS
+install.dat doinst.sh ${PKG}/install
+install.dir ${PKG}/etc/php.d
+install.dat php.ini-* ${PKG}/etc/php.d
+install.cfg php.ini-development ${PKG}/etc/php.d/php.ini.new
+install.dir ${PKG}/etc/apache/extra
+install.dat mod_php.conf.example \
+ ${PKG}/etc/apache/extra/httpd-mod_php.conf.new
+chmod 0755 \
+ ${PKG}/usr/bin/php \
+ ${PKG}/usr/lib$(libdirsuffix)/plugins/php/*
+rm -f \
+ ${PKG}/etc/php.d/*~ \
+ ${PKG}/etc/apache/httpd*
+}

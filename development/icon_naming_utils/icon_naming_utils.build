@@ -1,0 +1,59 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=icon_naming_utils
+VERSION=0.8.90
+BUILD=1
+ARCH=noarch
+DEPENDS=('perl >= 5.10.1-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: icon_naming_utils (generate icon files for your DE)
+${NAME}:
+${NAME}: A script for maintaining backwards compatibility with current
+${NAME}: desktop icon themes, while migrating to names specified in the Icon
+${NAME}: Naming Specification.
+${NAME}:
+${NAME}: Homepage: http://tango.freedesktop.org
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=icon-naming-utils
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://tango.freedesktop.org/releases/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --libexecdir=/usr/share/icon-naming-utils
+make -j 2
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog ChangeLog
+}

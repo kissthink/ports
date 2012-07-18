@@ -1,0 +1,48 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=font_ttf_excelsior
+VERSION=3.00
+ARCH=noarch
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: font_ttf_excelsior
+${NAME}:
+${NAME}: Fixedsys was one of the first fonts to be included with DOS and
+${NAME}: Windows. It has lasted a long time, maybe due to being perceived
+${NAME}: ideal for consoles and IRC clients, and it's often a favorite among
+${NAME}: programmers. It is monospaced, and contains only the basic western
+${NAME}: Fixedsys Excelsior is a 'pan-unicode' version of Fixedsys.
+${NAME}:
+${NAME}: Homepage: http://www.fixedsysexcelsior.com
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://www.fixedsysexcelsior.com/fonts/FSEX300.ttf
+SRCOPTS[0]="nosrcroot nounpack"
+
+build0()
+{
+install -m 0644 doinst.sh ${PKG}/install
+mkdir -p ${PKG}/usr/share/fonts/TTF
+install -m 0644 ${CWD}/FSEX300.ttf ${PKG}/usr/share/fonts/TTF
+}

@@ -1,0 +1,152 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=libjingle
+VERSION=0.5.6
+BUILD=1
+DEPENDS=('openssl >= 0.9.8n-1' 'expat >= 2.0.1-1' 'sound >= 1.0.24-1' 'udev >= 166-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: libjingle
+${NAME}:
+${NAME}: Google Talk's implementation of Jingle and Jingle-Audio to
+${NAME}: interoperate with Google Talk's peer-to-peer and voice capabilites.
+${NAME}:
+${NAME}: This package also includes the ilbc, srtp and ortp libraries which
+${NAME}: are needed by libjingle. Install this package if you want to do 
+${NAME}: voice calls over the internet with Pidgin.
+${NAME}:
+${NAME}: Homepage: http://code.google.com/p/libjingle
+${NAME}:
+EOF
+
+# Sources
+
+LINPHONEREPO="http://download.savannah.gnu.org/releases-noredirect/linphone/ortp/sources"
+
+SRCNAME[0]=srtp
+SRCVERS[0]=1.4.4-20101004cvs
+SRCPACK[0]=http://srtp.sourceforge.net/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCROOT[0]=${SRCNAME[0]}
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var
+make -j 2 CFLAGS="${FLAGS} -fPIC"
+make install DESTDIR="${PKG}"
+changelog CHANGES
+license LICENSE
+sed -i "s|@LIBDIR@|/usr/lib$(libdirsuffix)|g" libsrtp.pc
+mkdir -p ${PKG}/usr/lib$(libdirsuffix)/pkgconfig
+install -m 0644 libsrtp.pc ${PKG}/usr/lib$(libdirsuffix)/pkgconfig
+(
+  cd ${PKG}/usr/lib$(libdirsuffix)
+  ln -sf libsrtp.so.0.0.0 libsrtp.so
+  ln -sf libsrtp.so.0.0.0 libsrtp.so.0
+)
+}
+
+#SRCNAME[1]=ortp
+#SRCVERS[1]=0.16.5
+#SRCPACK[1]=${LINPHONEREPO}/${SRCNAME[1]}-${SRCVERS[1]}.tar.gz
+#SRCCOPY[1]="LGPL21"
+#
+#build1()
+#{
+## Clever hack so that ortp can find srtp on x86_64
+#if [[ "${ARCH}" == "x86_64" ]]; then
+#(
+#  cd ${PKG}/usr
+#  ln -sf lib64 lib
+#)
+#fi
+#CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+#./configure \
+# --build="${ARCH}-slackware-linux" \
+# --disable-dependency-tracking \
+# --disable-silent-rules \
+# --enable-static=no \
+# --enable-shared=yes \
+# --enable-debug=no \
+# --prefix=/usr \
+# --mandir="${SYS_DIR[man]}" \
+# --sysconfdir=/etc \
+# --libdir=/usr/lib$(libdirsuffix) \
+# --localstatedir=/var \
+# --enable-ipv6 \
+# --with-srtp="${PKG}/usr"
+#make -j 2 V=1
+#make install DESTDIR="${PKG}"
+#doc AUTHORS
+#changelog NEWS
+## Don't leave clues of mischief behind
+#rm -f ${PKG}/lib
+#}
+
+#SRCNAME[3]=msilbc
+#SRCVERS[3]=2.0.3
+#SRCPACK[3]=${LINPHONEREPO}/${SRCNAME[3]}-${SRCVERS[3]}.tar.gz
+#
+#build3()
+#{
+#CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+#./configure \
+# --build="${ARCH}-slackware-linux" \
+# --disable-dependency-tracking \
+# --enable-static=no \
+# --enable-shared=yes \
+# --prefix=/usr \
+# --mandir="${SYS_DIR[man]}" \
+# --sysconfdir=/etc \
+# --libdir=/usr/lib$(libdirsuffix) \
+# --localstatedir=/var
+#make -j 2 V=1
+#make install DESTDIR="${PKG}"
+#}
+
+SRCNAME[2]=${NAME}
+SRCVERS[2]=${VERSION}
+SRCPACK[2]=http://${NAME}.googlecode.com/files/${SRCNAME[2]}-${SRCVERS[2]}.zip
+
+build2()
+{
+chmod 0755 configure
+LIBSRTP_CFLAGS="-I${PKG}/usr/include" \
+LIBSRTP_LIBS="-L${PKG}/usr/lib$(libdirsuffix)" \
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --enable-shared=yes \
+ --enable-static=no \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var
+make -j 2
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog CHANGELOG
+license COPYING
+}

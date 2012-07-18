@@ -1,0 +1,110 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=bluetooth
+VERSION=4.101
+BUILD=1
+DEPENDS=('glib >= 2.32.3-1' 'dbus >= 1.4.20-1' 'libcapng >= 0.6.6-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: bluetooth
+${NAME}:
+${NAME}: A wireless standard for exchanging data over short distances.
+${NAME}:
+${NAME}: This package provides the libraries and utilities and other support
+${NAME}: files to use bluetooth adapters and devices.
+${NAME}:
+${NAME}: Homepage: http://www.bluez.org
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=bluez
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://www.kernel.org/pub/linux/bluetooth/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="GPL2 LGPL21"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-shared=yes \
+ --enable-static=no \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --with-systemdunitdir="${SYS_DIR[systemdsystemunitdir]}" \
+ --enable-alsa \
+ --enable-gstreamer \
+ --enable-usb \
+ --enable-capng \
+ --enable-pnat \
+ --enable-tools \
+ --enable-bccmd \
+ --enable-hid2hci \
+ --enable-dfutool \
+ --enable-hidd \
+ --enable-pand \
+ --enable-dund \
+ --enable-cups \
+ --enable-service \
+ --enable-datafiles
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog ChangeLog
+install.dat doinst.sh ${PKG}/install
+install.dir ${PKG}/usr/lib$(libdirsuffix)/udev/rules.d
+install.bin bluetooth.sh ${PKG}/usr/lib$(libdirsuffix)/udev
+install.bin scripts/bluetooth_serial ${PKG}/usr/lib$(libdirsuffix)/udev
+#FIXME: this will have to go when systemd arrives
+install.dat 97-bluetooth.rules ${PKG}/usr/lib$(libdirsuffix)/udev/rules.d
+install.dir ${PKG}/etc/{rc.d,modprobe.d,bluetooth}
+install.cfg bluetooth.modprobe ${PKG}/etc/modprobe.d/bluetooth.conf.new
+install.cfg rc.bluetooth ${PKG}/etc/rc.d/rc.bluetooth.new
+install.cfg audio/audio.conf \
+ ${PKG}/etc/bluetooth/audio.conf.new
+install.cfg input/input.conf \
+ ${PKG}/etc/bluetooth/input.conf.new
+install.cfg network/network.conf \
+ ${PKG}/etc/bluetooth/network.conf.new
+install.cfg serial/serial.conf \
+ ${PKG}/etc/bluetooth/serial.conf.new
+mv \
+ ${PKG}/etc/bluetooth/main.conf \
+ ${PKG}/etc/bluetooth/main.conf.new
+mv \
+ ${PKG}/etc/bluetooth/rfcomm.conf \
+ ${PKG}/etc/bluetooth/rfcomm.conf.new
+mv \
+ ${PKG}/usr/share/alsa \
+ ${PKG}/etc
+mv \
+ ${PKG}/etc/alsa/bluetooth.conf \
+ ${PKG}/etc/alsa/bluetooth.conf.new
+rmdir \
+ ${PKG}/usr/share
+rm -rf \
+ ${PKG}/usr/lib$(libdirsuffix)/bluetooth
+}

@@ -1,0 +1,113 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=wireless
+VERSION=$(date '+%Y%m%d')
+BUILD=1
+DEPENDS=('tcpip >= 3.2.0-1' 'gnutls >= 3.0.19-1' 'dbus >= 1.4.16-1' 'openssl >= 0.9.8w-1')
+#FIXME: enable gnutls and EAP_FAST
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: wireless
+${NAME}:
+${NAME}: This package includes the central regulatory domain agent (crda),
+${NAME}: the 'iw' command line tool and the 'wpa_supplicant' daemon. It must
+${NAME}: be installed in order for wireless networking (such as WiFi) to work.
+${NAME}:
+${NAME}: Homepage: http://linuxwireless.org
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+REGBINLOCATION="/usr/share/net"
+
+# Sources
+
+SRCNAME[0]=wireless-regdb
+SRCVERS[0]=2011.04.28
+SRCPACK[0]=http://linuxwireless.org/download/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCCOPY[0]="MIT"
+
+build0()
+{
+install.dir ${PKG}${REGBINLOCATION}
+install.dat regulatory.bin ${PKG}${REGBINLOCATION}
+install.dir ${PKG}${SYS_DIR[man]}/man5
+install.man regulatory.bin.5 ${PKG}${SYS_DIR[man]}/man5
+}
+
+SRCNAME[1]=crda
+SRCVERS[1]=1.1.2
+SRCPACK[1]=http://linuxwireless.org/download/${SRCNAME[1]}/${SRCNAME[1]}-${SRCVERS[1]}.tar.bz2
+SRCCOPY[1]="MIT"
+
+build1()
+{
+make ${JOBS} \
+ OPTFLAGS="${FLAGS} -I/usr/include/gcrypt -I/usr/include/gpg-error" \
+ REG_BIN="${PKG}${REGBINLOCATION}/regulatory.bin" \
+ UDEV_RULE_DIR="$(pkg-config udev --variable=udevdir)/rules.d"
+make install DESTDIR="${PKG}" \
+ SBINDIR="/usr/sbin" \
+ UDEV_RULE_DIR="$(pkg-config udev --variable=udevdir)/rules.d"
+#FIXME: packages should never compress manual pages!
+gunzip ${PKG}${SYS_DIR[man]}/man?/*.?.gz
+#FIXME: compat
+install.dir ${PKG}/sbin
+(
+  cd ${PKG}/sbin
+  ln -sf /usr/sbin/crda
+  ln -sf /usr/sbin/regdbdump
+)
+}
+
+SRCNAME[2]=iw
+SRCVERS[2]=3.4
+SRCPACK[2]=http://linuxwireless.org/download/${SRCNAME[2]}/${SRCNAME[2]}-${SRCVERS[2]}.tar.bz2
+SRCCOPY[2]="MIT"
+
+build2()
+{
+make OPTFLAGS="${FLAGS}" V="1"
+make install DESTDIR="${PKG}" MANDIR="${SYS_DIR[man]}" BINDIR="/usr/sbin"
+}
+
+SRCNAME[3]=wpa_supplicant
+SRCVERS[3]=1.0
+SRCPACK[3]=http://hostap.epitest.fi/releases/${SRCNAME[3]}-${SRCVERS[3]}.tar.gz
+SRCCOPY[3]="GPL2 BSD3"
+
+build3()
+{
+( cd wpa_supplicant ; make OPTS="${FLAGS}" )
+(
+cd wpa_supplicant
+make install \
+ DESTDIR="${PKG}" \
+ CONFDIR=/etc/conf.d \
+ MANDIR=/usr/man \
+ DOCDIR=/usr/doc/"${SRCNAME[3]}-${SRCVERS[3]}"
+)
+doc README.slackware
+install.dat doinst.sh ${PKG}/install
+install -m 0600 wpa_supplicant.conf.new ${PKG}/etc/conf.d
+mv \
+ ${PKG}/etc/conf.d/wpa_supplicant.conf \
+ ${PKG}/etc/conf.d/wpa_supplicant.conf.sample
+install -m 0600 wpa_supplicant.conf.new ${PKG}/etc/conf.d
+}

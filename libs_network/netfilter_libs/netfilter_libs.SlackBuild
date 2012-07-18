@@ -1,0 +1,197 @@
+#!/bin/sh
+
+CWD=`pwd`
+NAME=netfilter_libs
+NAMEDEV=netfilter_devel
+VERSION=12.2.0
+ARCH=i586
+BUILD=1
+PKGNAME[0]=libnfnetlink
+PKGVER[0]=0.0.40
+BASEDIR[0]=/tmp/${PKGNAME[0]}-${PKGVER[0]}
+ARCHIVE[0]=${PKGNAME[0]}-${PKGVER[0]}.tar.bz2
+REPOSITORY[0]=http://www.netfilter.org/projects/libnfnetlink/files
+PKGNAME[1]=libnetfilter_log
+PKGVER[1]=0.0.15
+BASEDIR[1]=/tmp/${PKGNAME[1]}-${PKGVER[1]}
+ARCHIVE[1]=${PKGNAME[1]}-${PKGVER[1]}.tar.bz2
+REPOSITORY[1]=http://www.netfilter.org/projects/libnetfilter_log/files
+PKGNAME[2]=libnetfilter_conntrack
+PKGVER[2]=0.0.99
+BASEDIR[2]=/tmp/${PKGNAME[2]}-${PKGVER[2]}
+ARCHIVE[2]=${PKGNAME[2]}-${PKGVER[2]}.tar.bz2
+REPOSITORY[2]=http://www.netfilter.org/projects/libnetfilter_conntrack/files
+PKGNAME[3]=libnetfilter_queue
+PKGVER[3]=0.0.16
+BASEDIR[3]=/tmp/${PKGNAME[3]}-${PKGVER[3]}
+ARCHIVE[3]=${PKGNAME[3]}-${PKGVER[3]}.tar.bz2
+REPOSITORY[3]=http://www.netfilter.org/projects/libnetfilter_queue/files
+FLAGS="-O2 -march=pentium -mtune=pentium -fno-strength-reduce \
+ -fomit-frame-pointer -ffast-math"
+PKG=/tmp/package-$NAME
+PKGDEV=/tmp/package-$NAMEDEV
+
+rm -rf $PKG $PKGDEV
+mkdir -p $PKG $PKGDEV
+
+# Obtain sources
+for((i = 0; i < ${#ARCHIVE[*]}; i++)); do
+  if [ ! -e ${ARCHIVE[$i]} ]; then
+    if `wget "${REPOSITORY[$i]}/${ARCHIVE[$i]}"`; then
+      true
+    else
+      exit 1
+    fi
+  fi
+done
+
+# Compile
+cd /tmp
+tar jxvf $CWD/${ARCHIVE[0]}
+(
+cd ${BASEDIR[0]}
+CFLAGS=$FLAGS CXXFLAGS=$FLAGS ./configure \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir=/usr/man \
+ --sysconfdir=/etc \
+ --localstatedir=/var \
+ --build=${ARCH}-slackware-linux
+make
+make install DESTDIR=$PKG
+)
+(
+tar jxvf $CWD/${ARCHIVE[1]}
+cd ${BASEDIR[1]}
+CFLAGS=$FLAGS CXXFLAGS=$FLAGS \
+LIBNFNETLINK_CFLAGS="-I$PKG/usr/include" \
+LIBNFNETLINK_LIBS="-L$PKG/usr/lib -lnfnetlink" \
+ ./configure \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir=/usr/man \
+ --sysconfdir=/etc \
+ --localstatedir=/var \
+ --build=${ARCH}-slackware-linux
+make
+make install DESTDIR=$PKG
+)
+(
+tar jxvf $CWD/${ARCHIVE[2]}
+cd ${BASEDIR[2]}
+#bzcat $CWD/${PKGNAME[2]}-${PKGVER[2]}-pkgconfig.patch.bz2 | patch -p1 -s
+CFLAGS=$FLAGS CXXFLAGS=$FLAGS ./configure \
+LIBNFNETLINK_CFLAGS="-I$PKG/usr/include" \
+LIBNFNETLINK_LIBS="-L$PKG/usr/lib" \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir=/usr/man \
+ --sysconfdir=/etc \
+ --localstatedir=/var \
+ --libdir=/usr/libexec \
+ --build=${ARCH}-slackware-linux
+make
+make install DESTDIR=$PKG
+)
+(
+tar jxvf $CWD/${ARCHIVE[3]}
+cd ${BASEDIR[3]}
+CFLAGS=$FLAGS CXXFLAGS=$FLAGS ./configure \
+LIBNFNETLINK_CFLAGS="-I$PKG/usr/include" \
+LIBNFNETLINK_LIBS="-L$PKG/usr/lib" \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir=/usr/man \
+ --sysconfdir=/etc \
+ --localstatedir=/var \
+ --build=${ARCH}-slackware-linux
+make
+make install DESTDIR=$PKG
+)
+
+# Install
+
+mkdir -p \
+ $PKG/usr/doc/${PKGNAME[0]}-${PKGVER[0]} \
+ $PKG/usr/doc/${PKGNAME[2]}-${PKGVER[2]} \
+ $PKG/install $PKGDEV/install $PKGDEV/usr/lib
+cat > $PKG/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+              |-----handy-ruler------------------------------------------------------|
+netfilter_libs: netfilter_libs
+netfilter_libs:
+netfilter_libs: Libraries for Netfilter (Linux firewall) userspace tools.
+netfilter_libs:
+netfilter_libs:
+netfilter_libs:
+netfilter_libs:
+netfilter_libs:
+netfilter_libs:
+netfilter_libs:
+netfilter_libs:
+EOF
+
+cat > $PKGDEV/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+               |-----handy-ruler------------------------------------------------------|
+netfilter_devel: netfilter_devel
+netfilter_devel:
+netfilter_devel: Headers for Netfilter (Linux firewall) tools development.
+netfilter_devel:
+netfilter_devel:
+netfilter_devel:
+netfilter_devel:
+netfilter_devel:
+netfilter_devel:
+netfilter_devel:
+netfilter_devel:
+EOF
+
+install -m0644 -g0 -o0 ${BASEDIR[0]}/README \
+ $PKG/usr/doc/${PKGNAME[0]}-${PKGVER[0]}
+
+install -m0644 -g0 -o0 ${BASEDIR[2]}/README \
+ $PKG/usr/doc/${PKGNAME[2]}-${PKGVER[2]}
+
+mv $PKG/usr/libexec/*.so* $PKG/usr/lib
+mv $PKG/usr/libexec/pkgconfig/*.pc $PKG/usr/lib/pkgconfig
+rmdir $PKG/usr/libexec/pkgconfig
+
+strip --strip-unneeded \
+ $PKG/usr/lib/*.so* \
+ $PKG/usr/libexec/*/*.so* || :
+
+rm -f \
+ $PKG/usr/lib/*.la \
+ $PKG/usr/libexec/*.la \
+ $PKG/usr/libexec/libnetfilter_conntrack/*.la
+
+mv $PKG/usr/include $PKGDEV/usr
+mv $PKG/usr/lib/pkgconfig $PKGDEV/usr/lib
+
+chown -R root.root $PKG $PKGDEV
+
+# Make package
+cd $PKG
+cat install/slack-desc | grep "$NAME:" > /tmp/$NAME-$VERSION-$ARCH-$BUILD.txt
+makepkg -l y -c n /tmp/$NAME-$VERSION-$ARCH-$BUILD.tgz
+cd $PKGDEV
+cat install/slack-desc | grep "$NAMEDEV:" > \
+ /tmp/$NAMEDEV-$VERSION-$ARCH-$BUILD.txt
+makepkg -l y -c n /tmp/$NAMEDEV-$VERSION-$ARCH-$BUILD.tgz

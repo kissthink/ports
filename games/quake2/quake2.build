@@ -1,0 +1,59 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=quake2
+VERSION=4.20
+BUILD=1
+DEPENDS=('sdl >= 1.2.15-1' 'sound >= 1.0.25-1' 'libvorbis >= 1.3.2-1' 'openal >= 1.13-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: quake2
+${NAME}:
+${NAME}: Yamagi Quake II is an enhanced client for id Software's Quake II. The
+${NAME}: main focus is an unchanged single player experience like back in
+${NAME}: 1997, thus the gameplay and the graphics are unaltered. Over 1000
+${NAME}: bugs were fixed and an extensive code audit was done, making Yamagi
+${NAME}: Quake II one of the most solid Quake II implementations available.
+${NAME}:
+${NAME}: Homepage: http://www.yamagi.org/quake2
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://deponie.yamagi.org/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+make ${JOBS} VERBOSE=1 \
+OPTS="${FLAGS} -DSYSTEMWIDE -DSYSTEMDIR=\\\"/usr/lib$(libdirsuffix)/plugins/quake2\\\""
+doc README
+changelog CHANGELOG
+install.dir ${PKG}/usr/bin
+install.bin release/quake2 ${PKG}/usr/bin
+install.bin release/q2ded ${PKG}/usr/bin
+install.dir ${PKG}/usr/lib$(libdirsuffix)/plugins/quake2/baseq2
+install.bin release/ref_gl.so ${PKG}/usr/lib$(libdirsuffix)/plugins/quake2
+install.bin release/baseq2/game.so ${PKG}/usr/lib$(libdirsuffix)/plugins/quake2/baseq2
+install.dir ${PKG}/usr/share/applications
+install.dat quake2.desktop ${PKG}/usr/share/applications
+install.dir ${PKG}/usr/share/icons/hicolor/48x48/apps
+install.dat icon/Quake2.png ${PKG}/usr/share/icons/hicolor/48x48/apps/quake2.png
+}

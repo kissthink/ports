@@ -1,0 +1,111 @@
+#!/bin/sh
+
+CWD=`pwd`
+NAME=binutils
+VERSION=2.18.50
+ARCH=i486
+BUILD=1
+PKGNAME=$NAME
+PKGVER=$VERSION
+BASEDIR=$PKGNAME-$PKGVER
+ARCHIVE=$BASEDIR.tar.bz2
+REPOSITORY=ftp://sourceware.org/pub/binutils/snapshots
+FLAGS="-O2 -march=i486 -mtune=i486 -fno-strength-reduce \
+ -fomit-frame-pointer -ffast-math"
+PKG=/tmp/package-$NAME
+
+rm -rf $PKG
+mkdir -p $PKG
+
+# Obtain sources
+if [ ! -e $ARCHIVE ]; then
+  if `wget "$REPOSITORY/$ARCHIVE"`; then
+    true
+  else
+    exit 1
+  fi
+fi
+
+# Compile
+cd /tmp
+tar jxvf $CWD/$ARCHIVE
+cd $NAME-$VERSION
+CFLAGS=$FLAGS CXXFLAGS=$FLAGS ./configure \
+ --prefix=/usr \
+ --mandir=/usr/man \
+ --enable-shared \
+ --enable-targets=$ARCH-slackware-linux \
+ --enable-64-bit-bfd \
+ --build=$ARCH-slackware-linux
+make
+
+# Install
+make install DESTDIR=$PKG
+mkdir -p $PKG/install $PKG/usr/doc/$NAME-$VERSION
+cat > $PKG/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+        |-----handy-ruler------------------------------------------------------|
+binutils: binutils (GNU binary development tools)
+binutils:
+binutils: Binutils is a collection of binary utilities.  It includes "as" (the
+binutils: portable GNU assembler), "ld" (the GNU linker), and other utilities
+binutils: for creating and working with binary programs.
+binutils:
+binutils: These utilities are REQUIRED to compile C, C++, Objective-C, Fortran,
+binutils: and most other programming languages.
+binutils:
+binutils:
+binutils:
+EOF
+
+install -m644 -g0 -o0 binutils/ChangeLog binutils/NEWS binutils/README \
+ $PKG/usr/doc/$NAME-$VERSION
+
+gzip -9nf \
+ $PKG/usr/doc/$NAME-$VERSION/ChangeLog \
+ $PKG/usr/doc/$NAME-$VERSION/NEWS \
+ $PKG/usr/doc/$NAME-$VERSION/README
+
+# Away with the useless stuff
+rm -f \
+ $PKG/usr/man/man1/dlltool.1 \
+ $PKG/usr/man/man1/nlmconv.1 \
+ $PKG/usr/man/man1/windmc.1 \
+ $PKG/usr/man/man1/windres.1 \
+ $PKG/usr/man/man1/strings.1 \
+ $PKG/usr/bin/strings \
+ $PKG/usr/info/dir
+
+chmod 444 $PKG/usr/man/man?/*.?
+gzip -9nf $PKG/usr/man/man?/*.?
+chmod 444 $PKG/usr/info/*.info*
+gzip -9nf $PKG/usr/info/*.info*
+
+install -m 0644 include/libiberty.h $PKG/usr/include
+
+mv $PKG/usr/$ARCH-slackware-linux/lib/ldscripts $PKG/usr/lib
+
+(
+  cd $PKG/usr/$ARCH-slackware-linux/lib
+  ln -sf /usr/lib/ldscripts .
+  cd $PKG/usr/$ARCH-slackware-linux/bin
+  for file in * ; do
+    if [ -r "/usr/bin/$file" ]; then
+      rm $file
+      ln -sf /usr/bin/$file .
+    fi
+  done
+)
+
+chown -R root.root $PKG
+
+# Make package
+cd $PKG
+cat install/slack-desc | grep "$NAME:" > /tmp/$NAME-$VERSION-$ARCH-$BUILD.txt
+makepkg -l y -c n /tmp/$NAME-$VERSION-$ARCH-$BUILD.tgz

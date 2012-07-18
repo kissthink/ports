@@ -1,0 +1,59 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=3ware_raid
+VERSION=10.2
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: 3ware_raid
+${NAME}:
+${NAME}: Command line tool to inspect 3ware RAID arrays.
+${NAME}:
+${NAME}: Homepage: http://www.lsi.com
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=cli_linux
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=${SRCNAME[0]}_${SRCVERS[0]}.zip
+SRCOPTS[0]="nosrcroot"
+
+build0()
+{
+case "$(cpufamily ${ARCH})" in
+  x86)
+    PROGDIR=x86
+  ;;
+  x86_64)
+    PROGDIR=x86_64
+  ;;
+esac
+
+if [[ "${PROGDIR}" ]]; then
+  mkdir -p ${PKG}/usr/man/man8
+  install.man tw_cli.8.nroff ${PKG}/usr/man/man8/tw_cli.8
+  mkdir -p ${PKG}/usr/sbin
+  install.bin ${PROGDIR}/tw_cli ${PKG}/usr/sbin
+fi
+}

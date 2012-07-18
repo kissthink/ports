@@ -1,0 +1,11 @@
+* checksums SHA-*
+* isolate slackware stuff (post/*-depends.sh & post/*-package.sh = post/*-slackware.sh)
+* make generic functions for distro specific stuff that can be used as needed
+* create pacman{-g2} packages
+* fix $(libdirsuffix) mess
+* allow switching compiler
+* GIT support
+* user ${package##*/} as the patch basename
+* If VERSION is not set then use a CONFIG VARIABLE whose default is set to $(date '+YYmmdd')
+  if PKGVERS[*] is not set, then set it to VERSION
+* a configure function/macro which factors the most used stuff

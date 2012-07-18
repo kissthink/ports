@@ -1,0 +1,81 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=gst_plugins_ugly
+VERSION=0.10.19
+BUILD=1
+DEPENDS=('gstreamer >= 0.10.36-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct. It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: gst-plugins-ugly
+${NAME}:
+${NAME}: A set of GStreamer plug-ins with potential patent issues.
+${NAME}:
+${NAME}: Homepage: http://gstreamer.freedesktop.org
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+GSTREAMERREPO="http://gstreamer.freedesktop.org/src"
+
+configure()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-static=no \
+ --enable-shared=yes \
+ --enable-introspection=no \
+ --disable-debug \
+ --disable-rpath \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --localstatedir=/var \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --libexecdir=/usr/lib$(libdirsuffix)/exec \
+ --with-html-dir="${SYS_DIR[html]}" \
+ --enable-docbook=no \
+ --enable-gtk-doc=no \
+ --disable-examples \
+ ${*}
+}
+
+SRCNAME[0]=gst-plugins-ugly
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=${GSTREAMERREPO}/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+SRCCOPY[0]="LGPL21"
+
+build0()
+{
+configure \
+ --enable-orc
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS RELEASE
+changelog NEWS 
+rm -f \
+ ${PKG}/usr/lib$(libdirsuffix)/*.a \
+ ${PKG}/usr/lib$(libdirsuffix)/*/*.a
+}

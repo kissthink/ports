@@ -1,0 +1,65 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=cairo
+VERSION=1.12.2
+BUILD=2
+DEPENDS=('freetype >= 2.4.10-1' 'fontconfig >= 2.8.0-1' 'pixman >= 0.26.0' 'xorg_libs >= 7.7-1' 'libpng >= 1.5.11-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: cairo (graphics library used by GTK+)
+${NAME}:
+${NAME}: Cairo is a vector graphics library designed to provide high-quality
+${NAME}: display and print output. Cairo is designed to produce identical
+${NAME}: output on all output media while taking advantage of display hardware
+${NAME}: acceleration when available (eg. through the X Render Extension or
+${NAME}: OpenGL).
+${NAME}:
+${NAME}: Homepage: http://cairographics.org
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://cairographics.org/releases/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+SRCCOPY[0]="LGPL21 MPL11"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --with-html-dir="${SYS_DIR[html]}" \
+ --disable-gtk-doc \
+ --enable-qt=no
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+license COPYING
+}

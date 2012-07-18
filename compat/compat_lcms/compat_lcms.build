@@ -1,0 +1,62 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=compat_lcms
+VERSION=1.19
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: compat_lcms (Little Color Management System)
+${NAME}:
+${NAME}: Little CMS intends to be a small-footprint, speed optimized color
+${NAME}: management engine in open source form. This version of liblcms is
+${NAME}: obsolete. Please use liblcms 2 instead.
+${NAME}:
+${NAME}: Homepage: http://www.littlecms.com
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=lcms
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://www.littlecms.com/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --includedir=/usr/include/lcms-1.0/lcms \
+ --localstatedir=/var
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+rm -rf \
+ ${PKG}/usr/bin \
+ ${PKG}${SYS_DIR[man]}
+}

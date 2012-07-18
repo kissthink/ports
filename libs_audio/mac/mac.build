@@ -1,0 +1,68 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=mac
+VERSION=3.99u4b5
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: mac (Monkey's Audio Codec)
+${NAME}:
+${NAME}: A lossless audio codec (.ape).
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=3.99-u4-b5
+SRCPACK[0]=${URL[sf]}/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+
+build0()
+{
+CFLAGS="${FLAGS} -DSHNTOOL" CXXFLAGS="${FLAGS} -DSHNTOOL" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --enable-assembly=yes
+make -j 2
+make install DESTDIR="${PKG}"
+
+doc AUTHORS src/Credits.txt
+changelog NEWS
+
+mkdir -p ${PKG}/usr/share/html/${NAME}
+install.doc src/License.htm src/Readme.htm ${PKG}/usr/share/html/${NAME}
+
+(
+  cd ${DOC}
+  ln -sf /usr/share/html/${NAME}/License.htm
+)
+}

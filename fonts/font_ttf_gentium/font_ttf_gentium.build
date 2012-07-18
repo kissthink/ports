@@ -1,0 +1,55 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=font_ttf_gentium
+VERSION=1.504
+ARCH=noarch
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: font_ttf_gentium
+${NAME}:
+${NAME}: Gentium is a typeface family designed to enable the diverse ethnic
+${NAME}: groups around the world who use the Latin and Greek scripts to
+${NAME}: produce readable, high-quality publications. It supports a wide
+${NAME}: range of Latin-based alphabets and includes glyphs that correspond
+${NAME}: to all the Latin ranges of Unicode.
+${NAME}:
+${NAME}: Homepage: http://scripts.sil.org
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=GentiumPlus
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://scripts.sil.org/${SRCNAME[0]}-${SRCVERS[0]}.zip
+SRCCOPY[0]="OFL"
+
+build0()
+{
+changelog FONTLOG.txt
+install -m 0644 doinst.sh ${PKG}/install
+mkdir -p ${PKG}/usr/share/fonts/TTF
+install -m 0644 *.ttf ${PKG}/usr/share/fonts/TTF
+#mkdir -p ${PKG}/etc/fonts/conf.{d,avail}
+#install -m 0644 local.conf ${PKG}/etc/fonts/conf.avail/62-gentium.conf
+#(
+#  cd $PKG/etc/fonts/conf.d
+#  ln -sf ../conf.avail/62-gentium.conf
+#)
+}

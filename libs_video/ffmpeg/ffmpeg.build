@@ -1,0 +1,123 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=ffmpeg
+VERSION=0.11.1
+BUILD=1
+DEPENDS=('orc >= 0.4.16-1' 'lame >= 3.99.5-1' 'libtheora >= 1.1.1-1' 'speex >= 1.2rc1-1' 'xvidcore >= 1.3.2-1' 'schroedinger >= 1.0.11-1' 'libgsm >= 1.0.13-1' 'x264 >= 20120127-1' 'celt >= 0.11.3-1' 'libvpx >= 1.1.0-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: FFMPEG
+${NAME}:
+${NAME}: FFMPEG is a complete solution to record, convert and stream audio and
+${NAME}: video. It includes libavcodec, the leading audio/video codec library.
+${NAME}:
+${NAME}: Homepage: http://www.ffmpeg.org
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://ffmpeg.org/releases/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCCOPY[0]="GPL2 GPL3 LGPL21 LGPL3"
+
+build0()
+{
+case "$(cpufamily ${ARCH})" in
+  x86)
+    OPTARCH=i686
+    OPTCPU=i586
+  ;;
+  x86_64)
+    OPTARCH=x86_64
+    OPTCPU=x86_64
+  ;;
+esac
+./configure \
+ --extra-cflags="-I/usr/include/x264" \
+ --disable-static \
+ --enable-shared \
+ --disable-debug \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --datadir=/usr/share/application-data/${SRCNAME[0]} \
+ --enable-gpl \
+ --enable-version3 \
+ --enable-nonfree \
+ --arch="${OPTARCH}" \
+ --cpu="${OPTCPU}" \
+ --disable-indev=oss \
+ --disable-outdev=oss \
+ --enable-runtime-cpudetect \
+ --enable-pthreads \
+ --enable-postproc \
+ --enable-swscale \
+ --enable-avfilter \
+ --enable-x11grab \
+ --enable-zlib \
+ --enable-bzlib \
+ --enable-gnutls \
+ --enable-openal \
+ --enable-libmp3lame \
+ --enable-libspeex \
+ --enable-libtheora \
+ --enable-libvorbis \
+ --enable-libschroedinger \
+ --enable-libvpx \
+ --enable-libxvid \
+ --enable-libgsm \
+ --enable-librtmp \
+ --enable-libcdio \
+ --enable-libmodplug \
+ --enable-libfreetype \
+ --enable-libcelt \
+ --enable-libv4l2 \
+ --enable-libx264
+# --enable-avisynth \
+# --enable-libamr-nb \
+# --enable-libamr-wb \
+# --enable-libdc1394 \
+# --enable-libfaac \
+# --enable-libnut \
+# --enable-libdirac \
+# --enable-libopenjpeg \
+# --enable-libaacplus \
+# --enable-libass \
+# --enable-libopencv \
+# --enable-libstagefright-h264 \
+# --enable-libutvideo \
+# --enable-libvo-aacenc \
+# --enable-libvo-amrwbenc \
+# --enable-libxavs \
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc CREDITS RELEASE
+changelog Changelog
+license LICENSE
+if [[ "${ARCH}" == "x86_64" ]]; then
+  mv \
+  ${PKG}/usr/lib/*.so* \
+  ${PKG}/usr/lib$(libdirsuffix)
+  rmdir ${PKG}/usr/lib
+fi
+}

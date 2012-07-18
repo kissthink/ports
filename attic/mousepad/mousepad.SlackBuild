@@ -1,0 +1,86 @@
+#!/bin/sh
+
+CWD=`pwd`
+NAME=mousepad
+VERSION=0.2.16
+ARCH=i586
+BUILD=1
+PKGNAME=$NAME
+PKGVER=$VERSION
+BASEDIR=$PKGNAME-$PKGVER
+ARCHIVE=$BASEDIR.tar.bz2
+REPOSITORY=http://mocha.xfce.org/archive/xfce-4.6.0/src
+FLAGS="-O2 -march=pentium -mtune=pentium -fno-strength-reduce \
+ -fomit-frame-pointer -ffast-math"
+PKG=/tmp/package-$NAME
+
+rm -rf $PKG
+mkdir -p $PKG
+
+# Obtain sources
+if [ ! -e $ARCHIVE ]; then
+  if `wget "$REPOSITORY/$ARCHIVE"`; then
+    true
+  else
+    exit 1
+  fi
+fi
+
+# Compile
+cd /tmp
+tar jxvf $CWD/$ARCHIVE
+cd $BASEDIR
+bzcat $CWD/$NAME-$VERSION-icon.patch.bz2 | patch -p1 -s
+CFLAGS=$FLAGS CXXFLAGS=$FLAGS ./configure \
+ --enable-debug=no \
+ --prefix=/usr \
+ --mandir=/usr/man \
+ --sysconfdir=/etc \
+ --localstatedir=/var
+make
+
+# Install
+make install DESTDIR=$PKG
+mkdir -p $PKG/install $PKG/usr/doc/$NAME-$VERSION
+cat > $PKG/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+        |-----handy-ruler------------------------------------------------------|
+mousepad: mousepad (Xfce text editor)
+mousepad:
+mousepad: A simple text editor for Xfce.
+mousepad:
+mousepad:
+mousepad:
+mousepad:
+mousepad:
+mousepad:
+mousepad:
+mousepad:
+EOF
+
+cat > $PKG/install/slack-required <<EOF
+libxfce4util >= 4.6.0-i486-1
+libxfcegui4 >= 4.6.0-i486-1
+EOF
+
+install -m644 -g0 -o0 AUTHORS ChangeLog NEWS README TODO \
+ $PKG/usr/doc/$NAME-$VERSION
+
+gzip -9nf \
+ $PKG/usr/doc/$NAME-$VERSION/ChangeLog
+
+strip \
+ $PKG/usr/bin/* || :
+
+chown -R root.root $PKG
+
+# Make package
+cd $PKG
+cat install/slack-desc | grep "$NAME:" > /tmp/$NAME-$VERSION-$ARCH-$BUILD.txt
+makepkg -l y -c n /tmp/$NAME-$VERSION-$ARCH-$BUILD.tgz

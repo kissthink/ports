@@ -1,0 +1,74 @@
+#!/bin/sh
+
+CWD=`pwd`
+NAME=qca_tls
+VERSION=1.0
+ARCH=i586
+BUILD=1
+PKGNAME=qca-tls
+PKGVER=$VERSION
+BASEDIR=$PKGNAME-$PKGVER
+ARCHIVE=$BASEDIR.tar.bz2
+REPOSITORY=http://psi.affinix.com/beta
+FLAGS="-O2 -march=pentium -mcpu=pentium -fno-strength-reduce \
+ -fomit-frame-pointer -ffast-math"
+PKG=/tmp/package-$NAME
+
+rm -rf $PKG
+mkdir -p $PKG
+
+# Obtain sources
+if [ ! -e $ARCHIVE ]; then
+  if `wget "$REPOSITORY/$ARCHIVE"`; then
+    true
+  else
+    exit 1
+  fi
+fi
+
+# Compile
+cd /tmp
+tar jxvf $CWD/$ARCHIVE
+cd $BASEDIR
+bzcat $CWD/$NAME-$VERSION-slackware.patch.bz2 | patch -p1 -s
+make COPT="$FLAGS"
+
+# Install
+make install INSTALL_ROOT=$PKG
+mkdir -p $PKG/install $PKG/usr/doc/$NAME-$VERSION
+cat > $PKG/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+       |-----handy-ruler------------------------------------------------------|
+qca_tls: QCA TLS
+qca_tls:
+qca_tls: This is a plugin to provide SSL/TLS capability to programs that
+qca_tls: make use of the Qt Cryptographic Architecture (QCA).
+qca_tls:
+qca_tls:
+qca_tls:
+qca_tls:
+qca_tls:
+qca_tls:
+qca_tls:
+EOF
+
+cat > $PKG/install/slack-required <<EOF
+openssl-solibs >= 0.9.7g-i486-1
+qt >= 3.3.4-i486-1
+EOF
+
+install -m644 -g0 -o0 README \
+ $PKG/usr/doc/$NAME-$VERSION
+
+chown -R root.root $PKG
+
+# Make package
+cd $PKG
+cat install/slack-desc | grep "$NAME:" > /tmp/$NAME-$VERSION-$ARCH-$BUILD.txt
+makepkg -l y -c n /tmp/$NAME-$VERSION-$ARCH-$BUILD.tgz

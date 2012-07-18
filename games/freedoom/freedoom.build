@@ -1,0 +1,85 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=freedoom
+VERSION=0.7
+BUILD=1
+DEPENDS=('sdl >= 1.2.14-1' 'pcre >= 8.30-1' 'libmad >= 0.15.1b-1' 'libvorbis >= 1.3.2-1' 'libpng >= 1.5.9-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: FreeDOOM
+${NAME}:
+${NAME}: The Freedoom project aims to create a complete Doom-based game which
+${NAME}: is free software.
+${NAME}:
+${NAME}: This package also includes PrBoom+ which is the culmination of years
+${NAME}: of work by various people and projects on the Doom source code.
+${NAME}:
+${NAME}: Freedoom homepage: http://freedoom.sourceforge.net
+${NAME}: PrBoom+ homepage: http://prboom-plus.sourceforge.net
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}-iwad
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://download.savannah.gnu.org/releases/freedoom/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.zip
+SRCCOPY[0]="BSD3"
+
+build0()
+{
+doc CREDITS
+changelog ChangeLog
+install.dir ${PKG}/usr/share/application-data/freedoom
+install.dat doom2.wad ${PKG}/usr/share/application-data/freedoom
+install.dir ${PKG}/usr/share/{applications,icons/hicolor/48x48/apps}
+install.dat freedoom.desktop ${PKG}/usr/share/applications
+install.dat freedoom.png ${PKG}/usr/share/icons/hicolor/48x48/apps
+}
+
+SRCNAME[1]=prboom-plus
+SRCVERS[1]=2.5.1.3
+SRCPACK[1]=${URL[sf]}/${SRCNAME[1]}/${SRCNAME[1]}/${SRCVERS[1]}/${SRCNAME[1]}-${SRCVERS[1]}.tar.gz
+SRCCOPY[0]="GPL2"
+
+build1()
+{
+CPPFLAGS="-I/usr/include/mad" \
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --with-waddir=/usr/share/application-data/prboom-plus
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+install.dir ${PKG}/usr/share/application-data/prboom-plus
+(
+  cd ${PKG}/usr/share/application-data/prboom-plus
+  ln -s /usr/share/application-data/freedoom/doom2.wad
+)
+rm -rf ${PKG}/usr/share/doc
+}

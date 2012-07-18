@@ -1,0 +1,77 @@
+#!/bin/sh
+
+CWD=`pwd`
+NAME=antiword
+VERSION=0.37
+ARCH=i586
+BUILD=1
+PKGNAME=$NAME
+PKGVER=$VERSION
+BASEDIR=$PKGNAME-$PKGVER
+ARCHIVE=$BASEDIR.tar.gz
+REPOSITORY=http://www.winfield.demon.nl/linux
+FLAGS="-O2 -march=pentium -mtune=pentium -fno-strength-reduce \
+ -fomit-frame-pointer -ffast-math"
+PKG=/tmp/package-$NAME
+
+rm -rf $PKG
+mkdir -p $PKG
+
+# Obtain sources
+if [ ! -e $ARCHIVE ]; then
+  if `wget "$REPOSITORY/$ARCHIVE"`; then
+    true
+  else
+    exit 1
+  fi
+fi
+
+# Compile
+cd /tmp
+tar zxvf $CWD/$ARCHIVE
+cd $BASEDIR
+make OPT="$FLAGS"
+
+# Install
+mkdir -p $PKG/install $PKG/usr/doc/$NAME-$VERSION $PKG/usr/bin \
+ $PKG/usr/man/man1 $PKG/usr/share/antiword
+cat > $PKG/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|' on
+# the right side marks the last column you can put a character in. You must make
+# exactly 11 lines for the formatting to be correct.  It's also customary to
+# leave one space after the ':'.
+
+        |-----handy-ruler------------------------------------------------------|
+antiword: antiword
+antiword:
+antiword: Antiword converts MS Word files (.doc) to text or postcript. Version
+antiword: 2 and version 6 and later Word files are supported. It is a great
+antiword: utility to have to read the contents of Word files on the console,
+antiword: but it can be also useful if you just want to extract the text from
+antiword: Word files and save as it as a plain text file.
+antiword:
+antiword:
+antiword:
+antiword:
+EOF
+
+install -m644 -g0 -o0 Docs/ChangeLog Docs/Emacs Docs/Exmh Docs/FAQ \
+ Docs/History Docs/Mozilla Docs/Mutt Docs/Netscape Docs/QandA Docs/ReadMe \
+ Docs/antiword.php $PKG/usr/doc/$NAME-$VERSION
+
+install -m444 -g0 -o0 Docs/antiword.1 $PKG/usr/man/man1
+gzip -9nf $PKG/usr/man/man?/*.?
+
+install -m755 -g0 -o0 -s antiword $PKG/usr/bin
+
+install -m644 -g0 -o0 Resources/*.txt Resources/Default Resources/Unicode* \
+ Resources/fontnames* $PKG/usr/share/antiword
+install -m644 -g0 -o0 Resources/Example \
+ $PKG/usr/doc/$NAME-$VERSION/Example.fontnames
+
+# Make package
+cd $PKG
+cat install/slack-desc | grep "$NAME:" > /tmp/$NAME-$VERSION-$ARCH-$BUILD.txt
+makepkg -l y -c n /tmp/$NAME-$VERSION-$ARCH-$BUILD.tgz

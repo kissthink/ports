@@ -1,0 +1,59 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=subversion
+VERSION=1.6.16
+BUILD=1
+DEPENDS=('neon >= 0.29.5-1' 'apr >= 1.4.2-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: subversion
+${NAME}:
+${NAME}: A full-featured version control system originally designed to be a
+${NAME}: better CVS. Subversion has since expanded beyond its original goal
+${NAME}: of replacing CVS, but it's basic model, design and interface remain
+${NAME}: heavily influenced by that goal. Even today, Subversion should still
+${NAME}: feel very familiar to CVS users.
+${NAME}:
+${NAME}: Homepage: http://subversion.apache.org
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://subversion.tigris.org/downloads/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var
+make -j 2
+make install DESTDIR="${PKG}"
+doc COMMITTERS
+changelog CHANGES
+license COPYING
+}

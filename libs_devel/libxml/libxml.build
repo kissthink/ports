@@ -1,0 +1,78 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=libxml
+VERSION=2.8.0
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: libxml (XML parser library)
+${NAME}:
+${NAME}: Libxml is a XML C parser library and toolkit. XML itself is a
+${NAME}: metalanguage to design markup languages -- i.e. a text language where
+${NAME}: structures are added to the content using extra "markup" information
+${NAME}: enclosed between angle brackets. HTML is the most well-known markup
+${NAME}: language. Though the library is written in C, a variety of language
+${NAME}: bindings make it available in other environments.
+${NAME}:
+${NAME}: Homepage: http://xmlsoft.org
+${NAME}:
+EOF
+
+LIBDIR=/usr/lib$(libdirsuffix)
+cat >> ${PKG}/install/doinst.sh <<EOF
+rm -f ${LIBDIR}/python26/site-packages/libxml2.pyc
+rm -f ${LIBDIR}/python26/site-packages/drv_libxml2.pyc
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}2
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=ftp://xmlsoft.org/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="MIT"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --docdir="${SYS_DIR[doc]}" \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --with-html-dir="${SYS_DIR[doc]}"
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+mv \
+ ${PKG}/usr/share/gtk-doc/html \
+ ${PKG}/usr/share
+mv \
+ ${DOC}/html/tutorial \
+ ${PKG}${SYS_DIR[html]}/${SRCNAME[0]}-tutorial
+rm -rf \
+ ${PKG}/usr/share/gtk-doc \
+ ${PKG}/usr/share/doc \
+ ${DOC}/html
+}

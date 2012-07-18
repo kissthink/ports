@@ -1,0 +1,95 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=farstream
+VERSION=0.1.2
+BUILD=1
+DEPENDS=('gstreamer >= 0.10.36-1' 'libgupnp >= 0.18.3-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: farsight (audio/video communications framework)
+${NAME}:
+${NAME}: The Farsight project is an effort to create a framework to deal with
+${NAME}: all known audio/video conferencing protocols. On one side it offers
+${NAME}: a generic API that makes it possible to write plug-ins for different
+${NAME}: streaming protocols, on the other side it offers an API for clients
+${NAME}: to use those plug-ins.
+${NAME}:
+${NAME}: Homepage: http://farsight.freedesktop.org/wiki
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=libnice
+SRCVERS[0]=0.1.2
+SRCPACK[0]=http://nice.freedesktop.org/releases/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="LGPL21 MPL11"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+CPPFLAGS="-I/usr/include/gupnp-igd-1.0" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --with-html-dir="${SYS_DIR[html]}" \
+ --with-gstreamer
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+}
+
+SRCNAME[1]=${NAME}
+SRCVERS[1]=${VERSION}
+SRCPACK[1]=http://freedesktop.org/software/${SRCNAME[1]}/releases/${SRCNAME[1]}/${SRCNAME[1]}-${SRCVERS[1]}.tar.gz
+SRCCOPY[1]="LGPL21"
+
+build1()
+{
+PKG_CONFIG_PATH="${PKG}/usr/lib$(libdirsuffix)/pkgconfig" \
+CPPFLAGS="-I${PKG}/usr/include -I${PKG}/usr/include/nice -I/usr/include/gupnp-igd-1.0" \
+LDFLAGS="-L${PKG}/usr/lib$(libdirsuffix)" \
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --datadir=/usr/share/application-data \
+ --with-html-dir="${SYS_DIR[html]}" \
+ --disable-python
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+}

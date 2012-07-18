@@ -1,0 +1,82 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=easytag
+VERSION=2.1.7
+BUILD=1
+DEPENDS=('gtk+ >= 2.24.10-1' 'id3lib >= 3.8.3-1' 'libvorbis >= 1.3.2-1' 'flac >= 1.2.1-1' 'mp4v2 >= 1.9.1-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: EasyTAG
+${NAME}:
+${NAME}: EasyTAG is a utility for editing and viewing the ID3 tags of your
+${NAME}: MP3, MP2, FLAC and OGG files. It supports ID3v1 and ID3v2, auto
+${NAME}: tagging, file renaming from the tags, recursive tagging, playlist
+${NAME}: generation and many more features. It has an easy to use Gtk+-based
+${NAME}: interface.
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=${URL[sf]}/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+CPPFLAGS="-I/usr/include/id3tag" \
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc THANKS
+changelog ChangeLog
+#FIXME: All this shit will have to be fixed someday
+HTMLDIR=${PKG}${SYS_DIR[html]}/${SRCNAME[0]}
+install.dir ${HTMLDIR}
+install.doc \
+ doc/EasyTAG_Documentation.html doc/EasyTAG_Documentation_fr.html \
+ ${HTMLDIR}
+mv doc/users_guide_french ${HTMLDIR}
+mv doc/users_guide_german ${HTMLDIR}
+chmod 0644 \
+ ${HTMLDIR}/*/* \
+ ${HTMLDIR}/*/*/*
+chmod 0755 \
+ ${HTMLDIR}/users_guide_french \
+ ${HTMLDIR}/users_guide_german \
+ ${HTMLDIR}/users_guide_french/images \
+ ${HTMLDIR}/users_guide_german/images
+(
+ cd ${HTMLDIR}
+ chown -R root.root users_guide_french users_guide_german 
+)
+rm -rf \
+ ${PKG}/usr/share/gnome \
+ ${PKG}/usr/share/easytag
+}

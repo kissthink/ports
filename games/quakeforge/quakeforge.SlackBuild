@@ -1,0 +1,119 @@
+#!/bin/sh
+
+CWD=`pwd`
+NAME=quakeforge
+VERSION=20101025
+ARCH=i586
+BUILD=1
+PKGNAME=$NAME
+PKGVER=$VERSION
+BASEDIR=$PKGNAME-$PKGVER
+ARCHIVE=$BASEDIR.tar.xz
+REPOSITORY=http://some/where
+FLAGS="-O2 -march=pentium -mtune=pentium -fno-strength-reduce \
+ -fomit-frame-pointer -ffast-math"
+PKG=/tmp/package-$NAME
+
+rm -rf $PKG
+mkdir -p $PKG
+
+# Obtain sources
+if [ ! -e $ARCHIVE ]; then
+  if `wget "$REPOSITORY/$ARCHIVE"`; then
+    true
+  else
+    exit 1
+  fi
+fi
+
+# Compile
+cd /tmp
+tar Jxvf $CWD/$ARCHIVE
+cd $BASEDIR
+xzcat $CWD/$NAME-$VERSION-icon.patch.xz | patch -p1 -s
+xzcat $CWD/$NAME-$VERSION-samplerate.patch.xz | patch -p1 -s
+#./bootstrap
+CFLAGS=$FLAGS CXXFLAGS=$FLAGS ./configure \
+ --build=${ARCH}-slackware-linux \
+ --enable-shared=yes \
+ --enable-static=no \
+ --disable-Werror \
+ --disable-debug \
+ --prefix=/usr \
+ --mandir=/usr/man \
+ --sysconfdir=/etc/conf.d \
+ --localstatedir=/var \
+ --with-global-cfg=/etc/conf.d/quakeforge.conf \
+ --with-sharepath=/usr/share/application-data/quake \
+ --with-userpath=~/.local/share/quake \
+ --with-plugin-path=/usr/libexec/quakeforge \
+ --disable-xmms \
+ --disable-oss \
+ --disable-dga \
+ --enable-xdg \
+ --with-clients="sgl,glx"
+make
+
+# Install
+make install DESTDIR=$PKG
+mkdir -p $PKG/install $PKG/usr/doc/$NAME-$VERSION $PKG/usr/share/applications \
+ $PKG/usr/share/pixmaps
+cat > $PKG/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+          |-----handy-ruler------------------------------------------------------|
+quakeforge: quakeforge (Quake engine)
+quakeforge:
+quakeforge: An enhanced Quake engine.
+quakeforge:
+quakeforge:
+quakeforge:
+quakeforge:
+quakeforge:
+quakeforge:
+quakeforge:
+quakeforge:
+EOF
+
+cat > $PKG/install/slack-required <<EOF
+sdl >= 1.2.14-i486-1
+alsa_libs >= 1.0.23-i486-1
+EOF
+
+uudecode quake.uu
+install -m 0644 -g 0 -o 0 quake.png \
+ $PKG/usr/share/pixmaps
+
+install -m 0644 -g 0 -o 0 NEWS \
+ $PKG/usr/doc/$NAME-$VERSION
+
+xz -9f \
+ $PKG/usr/doc/$NAME-$VERSION/NEWS
+
+chmod 0444 $PKG/usr/man/man?/*.?
+xz -9f $PKG/usr/man/man?/*.?
+
+rm -f \
+ $PKG/usr/lib/*.la \
+ $PKG/usr/libexec/*/*.la \
+ $PKG/usr/libexec/*/*/*.la
+
+strip --strip-unneeded \
+ $PKG/usr/lib/*.so* \
+ $PKG/usr/libexec/*/*.so* \
+ $PKG/usr/libexec/*/*/*.so* || :
+
+strip \
+ $PKG/usr/bin/* || :
+
+chown -R root.root $PKG
+
+# Make package
+cd $PKG
+cat install/slack-desc | grep "$NAME:" > /tmp/$NAME-$VERSION-$ARCH-$BUILD.txt
+makepkg -l y -c n /tmp/$NAME-$VERSION-$ARCH-$BUILD.txz

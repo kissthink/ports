@@ -1,0 +1,96 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=bzip2
+VERSION=1.0.6
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: bzip2 (a block-sorting file compressor)
+${NAME}:
+${NAME}: Bzip2 compresses files using the Burrows-Wheeler block sorting text
+${NAME}: compression algorithm, and Huffman coding. Compression is generally
+${NAME}: considerably better than that achieved by more conventional LZ77/LZ78-
+${NAME}: based compressors, and approaches the performance of the PPM family of
+${NAME}: statistical compressors.
+${NAME}:
+${NAME}: Homepage: http://www.bzip.org
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://www.bzip.org/${SRCVERS[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="BSD4"
+
+build0()
+{
+make ${JOBS} OPTFLAGS="${FLAGS}" -f Makefile-libbz2_so
+make ${JOBS} OPTFLAGS="${FLAGS}"
+make install install-so DESTDIR="${PKG}" \
+ PREFIX="/usr" \
+ MANDIR="/usr/man" \
+ LIBDIR="/usr/lib$(libdirsuffix)"
+changelog CHANGES
+rm -f \
+ ${PKG}/usr/bin/bzip2
+mv \
+ ${PKG}/usr/bin/bzip2-shared \
+ ${PKG}/usr/bin/sbzip2
+(
+  cd ${PKG}${SYS_DIR[man]}/man1
+  mv bzip2.1 sbzip2.1
+  echo ".so man1/sbzip2.1" > sbzcat.1
+  echo ".so man1/sbzip2.1" > sbunzip2.1
+)
+#FIXME: compat
+install.dir ${PKG}/bin
+(
+  cd ${PKG}/bin
+  ln -sf /usr/bin/bzip2
+  ln -sf /usr/bin/bzip2 bzcat
+  ln -sf /usr/bin/bzip2 bunzip2
+)
+}
+
+SRCNAME[1]=pbzip2
+SRCVERS[1]=1.1.6
+SRCPACK[1]=http://compression.ca/${SRCNAME[1]}/${SRCNAME[1]}-${SRCVERS[1]}.tar.gz
+SRCCOPY[1]="BSD4"
+
+build1()
+{
+
+make ${JOBS} OPTFLAGS="${FLAGS}"
+doc AUTHORS
+changelog ChangeLog
+install.dir ${PKG}/usr/bin
+install.bin pbzip2 ${PKG}/usr/bin/bzip2
+install.dir ${PKG}${SYS_DIR[man]}/man1
+install.man pbzip2.1 ${PKG}${SYS_DIR[man]}/man1
+(
+  cd ${PKG}/usr/bin
+  ln -sf bzip2 pbzip2
+  ln -sf bzip2 pbzcat
+  ln -sf bzip2 pbunzip2
+  cd ${PKG}${SYS_DIR[man]}/man1
+  echo ".so man1/pbzip2.1" > bzip2.1
+)
+
+}

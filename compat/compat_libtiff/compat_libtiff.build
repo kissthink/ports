@@ -1,0 +1,74 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=compat_libtiff
+VERSION=3.9.6
+BUILD=1
+DEPENDS=('libjpeg >= 1.2.0-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: libtiff (a library for reading and writing TIFF files)
+${NAME}:
+${NAME}: This package provides support for the Tag Image File Format (TIFF),
+${NAME}: a widely used format for storing image data. Included is the libtiff
+${NAME}: library (for reading and writing TIFF files), and a collection of
+${NAME}: tools for working with TIFF images.
+${NAME}:
+${NAME}: Homepage: http://www.libtiff.org
+${NAME}:
+${NAME}: This version of libtiff is obsolete. Please use a newer one.
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=tiff
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=ftp://ftp.remotesensing.org/pub/${NAME}/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --with-docdir="${SYS_DIR[html]}"
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYRIGHT
+(
+  cd ${PKG}/usr/man/man3
+  for manpage in *.3tiff; do
+    mv ${manpage} $(basename ${manpage} .3tiff).3
+  done
+)
+# Let's get rid of the html stuff as it doesn't add much & remove stuff not needed
+# for compatibility
+rm -rf \
+ ${PKG}/usr/share \
+ ${PKG}/usr/bin \
+ ${PKG}/usr/include \
+ ${PKG}${SYS_DIR[man]}
+}

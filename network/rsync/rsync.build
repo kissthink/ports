@@ -1,0 +1,56 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=rsync
+VERSION=3.0.9
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: rsync (remote file sync)
+${NAME}:
+${NAME}: rsync is a replacement for rcp that has many more features. It uses
+${NAME}: the "rsync algorithm" which provides a very fast method for bringing
+${NAME}: remote files into sync. It does this by sending just the differences
+${NAME}: in the files across the link, without requiring that both sets of
+${NAME}: files are present at one of the ends of the link beforehand.
+${NAME}:
+${NAME}: rsync was written by Andrew Tridgell and Paul Mackerras.
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://samba.anu.edu.au/ftp/rsync/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="GPL3"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --with-rsyncd-conf=/etc/conf.d
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog NEWS
+}

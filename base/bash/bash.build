@@ -1,0 +1,74 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=bash
+MAJOR=4.2
+VERSION=${MAJOR}.24
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: bash (sh-compatible shell)
+${NAME}:
+${NAME}: The GNU Bourne-Again SHell. Bash is a sh-compatible command
+${NAME}: interpreter that executes commands read from the standard input or
+${NAME}: from a file. Bash also incorporates useful features from the Korn
+${NAME}: and C shells (ksh and csh). Bash is ultimately intended to be a
+${NAME}: conformant implementation of the IEEE Posix Shell and Tools
+${NAME}: specification (IEEE Working Group 1003.2).
+${NAME}:
+${NAME}: Bash must be present for the system to boot properly.
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${MAJOR}
+SRCPACK[0]=ftp://ftp.gnu.org/gnu/bash/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="GPL3"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --infodir="${SYS_DIR[info]}" \
+ --sysconfdir=/etc \
+ --localstatedir=/var \
+ --bindir=/usr/bin \
+ --with-curses
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS COMPAT
+changelog NEWS
+install.dat doinst.sh ${PKG}/install
+install.man doc/*.1 ${PKG}${SYS_DIR[man]}/man1
+mv ${PKG}/usr/bin/bash ${PKG}/usr/bin/bash4.new
+rm -f \
+ ${PKG}/usr/bin/bashbug \
+ ${PKG}${SYS_DIR[man]}/man1/bashbug.1
+install.dir ${PKG}/bin
+(
+  cd ${PKG}/bin
+  ln -sf /usr/bin/bash bash
+)
+(
+  cd ${PKG}/usr/bin
+  ln -sf bash rbash
+)
+}

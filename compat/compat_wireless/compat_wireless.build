@@ -1,0 +1,57 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=compat_wireless
+VERSION=30pre7
+BUILD=6
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: wireless_tools (utilities for wireless networking)
+${NAME}:
+${NAME}: This package contains tools and a library used for configuring
+${NAME}: wireless networking interfaces:
+${NAME}:   iwconfig (the main wireless tool), iwlist (display more detailed
+${NAME}:   information than iwconfig), iwspy (get stats per MAC address and
+${NAME}:   more), iwpriv (set driver private ioctls), iwgetid (show the ESSID
+${NAME}:   or NWID of a device), iwevent (display wireless events), ifrename
+${NAME}:   (rename a network interface).
+${NAME}:
+${NAME}: These tools are obsolete and are replaced by 'iw'.
+EOF
+
+# Sources
+
+SRCNAME[0]=wireless_tools
+SRCVERS[0]=30.pre9
+SRCROOT[0]=${SRCNAME[0]}.30
+SRCPACK[0]=http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/${SRCNAME[0]}.${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+make ${JOBS} CFLAGS="${FLAGS}" PREFIX="/usr"
+make install \
+ PREFIX="${PKG}/usr" \
+ INSTALL_DIR="${PKG}/usr/sbin" \
+ INSTALL_LIB="${PKG}/usr/lib$(libdirsuffix)"
+install.dat doinst.sh ${PKG}/install
+install.dir ${PKG}/etc/rc.d
+install.bin rc.wireless ${PKG}/etc/rc.d/rc.wireless.new
+install -m 0600 rc.wireless.conf ${PKG}/etc/rc.d/rc.wireless.conf.new
+# Don't include man pages in other languages
+rm -rf \
+ ${PKG}${SYS_DIR[man]}/{cs,fr.ISO8859-1,fr.UTF-8}
+}

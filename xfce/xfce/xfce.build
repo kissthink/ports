@@ -1,0 +1,457 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=xfce
+MAJOR=4.10
+VERSION=${MAJOR}
+BUILD=2
+DEPENDS=('gtk+ >= 2.24.10-1' 'icon_theme >= 0.8.90-1' 'glib_dbus >= 0.98-1' 'libwnck >= 2.31.0-1' 'libxklavier >= 5.2.1-1' 'libnotify >= 0.7.5-1' 'libcanberra >= 0.28-1' 'gamin >= 0.1.10-1')
+OPTDEPENDS=('poppler >= 0.20.1-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: Xfce
+${NAME}:
+${NAME}: A lightweight desktop environment based on Gtk+. It is designed for
+${NAME}: loading and executing applications fast while conserving system
+${NAME}: resources.
+${NAME}:
+${NAME}: Homepage: http://www.xfce.org
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+cat >> ${PKG}/install/doinst.sh <<EOF
+if [ ! -e /etc/X11/xinit/xinitrc ]; then
+  ( cd /etc/X11/xinit ; ln -sf xinitrc.xfce xinitrc )
+fi
+EOF
+
+# Sources
+
+XFCEREPO="http://archive.xfce.org/src"
+XFCEREL="http://archive.xfce.org/xfce/${VERSION}/src"
+
+export PKG_CONFIG_PATH="${PKG}/usr/lib$(libdirsuffix)/pkgconfig"
+export LDFLAGS="-L${PKG}/usr/lib$(libdirsuffix)"
+export CPPFLAGS="-I${PKG}/usr/include/tumbler-1 -I${PKG}/usr/include/garcon-1 -I${PKG}/usr/include/exo-1 -I${PKG}/usr/include/xfce4 -I${PKG}/usr/include/xfce4/libxfce4ui-1 -I${PKG}/usr/include/xfce4/xfconf-0 -I${PKG}/usr/include/xfce4/libxfce4kbd-private-2 -I${PKG}/usr/include/xfce4/libxfce4panel-1.0 -I${PKG}/usr/include/thunarx-2"
+
+configure()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+  --build="${ARCH}-slackware-linux" \
+  --disable-dependency-tracking \
+  --disable-silent-rules \
+  --enable-static=no \
+  --enable-shared=yes \
+  --enable-debug=minimum \
+  --prefix=/usr \
+  --mandir="${SYS_DIR[man]}" \
+  --sysconfdir=/etc \
+  --libdir=/usr/lib$(libdirsuffix) \
+  --localstatedir=/var \
+  --with-html-dir="${SYS_DIR[html]}" \
+  --with-helper-path-prefix="/usr/lib$(libdirsuffix)/exec" \
+  ${*}
+}
+
+SRCNAME[0]=libxfce4util
+SRCVERS[0]=${MAJOR}.0
+SRCPACK[0]=${XFCEREL}/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCCOPY[0]="LGPL2"
+
+build0()
+{
+configure
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS THANKS
+changelog NEWS
+rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
+}
+
+SRCNAME[1]=garcon
+GARCONM=0.2
+SRCVERS[1]=${GARCONM}.0
+SRCPACK[1]=${XFCEREL}/${SRCNAME[1]}-${SRCVERS[1]}.tar.bz2
+SRCCOPY[1]="LGPL2 FDL11"
+
+build1()
+{
+configure
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
+}
+
+SRCNAME[2]=tumbler
+TUMBLERM=0.1
+SRCVERS[2]=${TUMBLERM}.25
+SRCPACK[2]=${XFCEREL}/${SRCNAME[2]}-${SRCVERS[2]}.tar.bz2
+SRCCOPY[2]="GPL2"
+
+build2()
+{
+configure \
+ --disable-ffmpeg-thumbnailer
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
+}
+
+SRCNAME[3]=xfconf
+SRCVERS[3]=${MAJOR}.0
+SRCPACK[3]=${XFCEREL}/${SRCNAME[3]}-${SRCVERS[3]}.tar.bz2
+SRCCOPY[3]="GPL2"
+
+build3()
+{
+CPPFLAGS="-I${PKG}/usr/include/xfce4" \
+LDFLAGS="-L${PKG}/usr/lib$(libdirsuffix)" \
+configure
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
+}
+
+SRCNAME[4]=libxfce4ui
+SRCVERS[4]=${MAJOR}.0
+SRCPACK[4]=${XFCEREL}/${SRCNAME[4]}-${SRCVERS[4]}.tar.bz2
+SRCCOPY[4]="LGPL2"
+
+build4()
+{
+configure
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
+}
+
+SRCNAME[5]=exo
+EXOM=0.8
+SRCVERS[5]=${EXOM}.0
+SRCPACK[5]=${XFCEREL}/${SRCNAME[5]}-${SRCVERS[5]}.tar.bz2
+SRCCOPY[5]="GPL2"
+
+build5()
+{
+configure \
+ --enable-python=no \
+ --enable-gio-unix=yes
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS THANKS
+changelog NEWS
+rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
+}
+
+SRCNAME[6]=xfce4-settings
+SRCVERS[6]=${MAJOR}.0
+SRCPACK[6]=${XFCEREL}/${SRCNAME[6]}-${SRCVERS[6]}.tar.bz2
+SRCCOPY[6]="GPL2"
+
+build6()
+{
+configure \
+ --enable-xrandr \
+ --enable-xcursor \
+ --enable-libnotify \
+ --enable-gio-unix \
+ --enable-sound-settings \
+ --enable-pluggable-dialogs \
+ --enable-libxklavier
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
+}
+
+SRCNAME[7]=xfwm4
+SRCVERS[7]=${MAJOR}.0
+SRCPACK[7]=${XFCEREL}/${SRCNAME[7]}-${SRCVERS[7]}.tar.bz2
+SRCCOPY[7]="GPL2"
+
+build7()
+{
+configure \
+ --enable-xsync \
+ --enable-render \
+ --enable-randr \
+ --enable-compositor
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
+}
+
+SRCNAME[8]=xfce4-panel
+SRCVERS[8]=${MAJOR}.0
+SRCPACK[8]=${XFCEREL}/${SRCNAME[8]}-${SRCVERS[8]}.tar.bz2
+SRCCOPY[8]="GPL2 LGPL21"
+
+build8()
+{
+configure \
+ --enable-gio-unix
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS THANKS
+changelog NEWS
+rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
+}
+
+SRCNAME[9]=xfce4-appfinder
+SRCVERS[9]=${MAJOR}.0
+SRCPACK[9]=${XFCEREL}/${SRCNAME[9]}-${SRCVERS[9]}.tar.bz2
+SRCCOPY[9]="GPL2"
+
+build9()
+{
+configure
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
+}
+
+SRCNAME[10]=Thunar
+SRCVERS[10]=1.4.0
+SRCPACK[10]=${XFCEREL}/${SRCNAME[10]}-${SRCVERS[10]}.tar.bz2
+SRCCOPY[10]="GPL2 LGPL2"
+
+build10()
+{
+configure \
+ --docdir="${SYS_DIR[doc]}/${SRCNAME[10],,}-${SRCVERS[10]}" \
+ --enable-gio-unix \
+ --enable-dbus \
+ --enable-gudev \
+ --enable-notifications \
+ --enable-exif \
+ --enable-pcre
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS THANKS
+changelog NEWS
+rm -rf \
+ ${PKG}/usr/lib$(libdirsuffix)/*.la
+}
+
+SRCNAME[11]=xfdesktop
+SRCVERS[11]=${MAJOR}.0
+SRCPACK[11]=${XFCEREL}/${SRCNAME[11]}-${SRCVERS[11]}.tar.bz2
+SRCCOPY[11]="GPL2"
+
+build11()
+{
+configure \
+ --enable-gio-unix \
+ --enable-thunarx \
+ --enable-notifications
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
+}
+
+SRCNAME[12]=xfce4-session
+SRCVERS[12]=${MAJOR}.0
+SRCPACK[12]=${XFCEREL}/${SRCNAME[12]}-${SRCVERS[12]}.tar.bz2
+SRCCOPY[12]="GPL2"
+
+build12()
+{
+configure \
+ --disable-legacy-sm \
+ --enable-libgnome-keyring
+# --with-xession-prefix=WHERE xsession.desktop files go
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+install.dir ${PKG}/etc/X11/xinit
+install.bin xinitrc.xfce ${PKG}/etc/X11/xinit
+rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
+}
+
+SRCNAME[13]=thunar-volman
+VOLMANM=0.8
+SRCVERS[13]=${VOLMANM}.0
+SRCPACK[13]=${XFCEREPO}/apps/${SRCNAME[13]}/${VOLMANM}/${SRCNAME[13]}-${SRCVERS[13]}.tar.bz2
+SRCCOPY[13]="GPL2"
+
+build13()
+{
+configure \
+ --enable-notifications
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS THANKS
+changelog NEWS
+}
+
+SRCNAME[14]=thunar-media-tags-plugin
+MEDIAM=0.2
+SRCVERS[14]=${MEDIAM}.0
+SRCPACK[14]=${XFCEREPO}/apps/${SRCNAME[14]}/${MEDIAM}/${SRCNAME[14]}-${SRCVERS[14]}.tar.bz2
+SRCCOPY[14]="GPL2"
+
+build14()
+{
+configure
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+}
+
+SRCNAME[15]=thunar-archive-plugin
+ARCHVM=0.3
+SRCVERS[15]=${ARCHVM}.0
+SRCPACK[15]=${XFCEREPO}/apps/${SRCNAME[15]}/${ARCHVM}/${SRCNAME[15]}-${SRCVERS[15]}.tar.bz2
+SRCCOPY[15]="GPL2"
+
+build15()
+{
+configure \
+ --libexecdir="/usr/lib$(libdirsuffix)/plugins/xfce4"
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS THANKS
+changelog NEWS
+}
+
+SRCNAME[16]=xfce4-notifyd
+NOTIFM=0.2
+SRCVERS[16]=${NOTIFM}.2
+SRCPACK[16]=${XFCEREPO}/apps/${SRCNAME[16]}/${NOTIFM}/${SRCNAME[16]}-${SRCVERS[16]}.tar.bz2
+
+build16()
+{
+configure
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+}
+
+SRCNAME[17]=xfce4-systemload-plugin
+SYSLOADM=1.1
+SRCVERS[17]=${SYSLOADM}.1
+SRCPACK[17]=${XFCEREPO}/panel-plugins/${SRCNAME[17]}/${SYSLOADM}/${SRCNAME[17]}-${SRCVERS[17]}.tar.bz2
+SRCCOPY[17]="BSD2"
+
+build17()
+{
+configure \
+ --enable-upower
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+}
+
+SRCNAME[18]=xfce4-netload-plugin
+NETLOADM=1.1
+SRCVERS[18]=${NETLOADM}.0
+SRCPACK[18]=${XFCEREPO}/panel-plugins/${SRCNAME[18]}/${NETLOADM}/${SRCNAME[18]}-${SRCVERS[18]}.tar.bz2
+SRCCOPY[18]="GPL2"
+
+build18()
+{
+configure
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+}
+
+SRCNAME[19]=xfce4-sensors-plugin
+SENSORM=1.2
+SRCVERS[19]=${SENSORM}.5
+SRCPACK[19]=${XFCEREPO}/panel-plugins/${SRCNAME[19]}/${SENSORM}/${SRCNAME[19]}-${SRCVERS[19]}.tar.bz2
+SRCCOPY[19]="GPL2"
+
+build19()
+{
+configure
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+mv \
+ ${PKG}/usr/lib$(libdirsuffix)/xfce4/modules/*sensor*.so* \
+ ${PKG}/usr/lib$(libdirsuffix)
+}
+
+SRCNAME[20]=xfce4-weather-plugin
+SRCVERS[20]=20110210
+SRCPACK[20]=${XFCEREPO}/panel-plugins/${SRCNAME[20]}/${SENSORM}/${SRCNAME[20]}-${SRCVERS[20]}.tar.xz
+SRCCOPY[20]="GPL2"
+
+build20()
+{
+configure
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+}
+
+SRCNAME[21]=xfce4-places-plugin
+PLACESM=1.3
+SRCVERS[21]=${PLACESM}.0
+SRCPACK[21]=${XFCEREPO}/panel-plugins/${SRCNAME[21]}/${PLACESM}/${SRCNAME[21]}-${SRCVERS[21]}.tar.bz2
+SRCCOPY[21]="GPL2"
+
+build21()
+{
+configure \
+ --enable-gio-unix \
+ --enable-notifications
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+}
+
+SRCNAME[22]=xfce-slackware
+SRCVERS[22]=${MAJOR}
+SRCPACK[22]=${SRCNAME[22]}-${SRCVERS[22]}.tar.xz
+SRCOPTS[22]="pkgunpack"
+
+build22()
+{
+  cd usr/share/themes
+  mkdir Joy
+  mv Default/xfwm4 Joy
+  cd Default
+  ln -sf ../Clearlooks/xfwm4
+}

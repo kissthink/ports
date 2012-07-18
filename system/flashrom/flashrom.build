@@ -1,0 +1,49 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=flashrom
+VERSION=0.9.3
+BUILD=1
+DEPENDS=('pci >= 20120328-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: flashrom (ROM flashing utility)
+${NAME}:
+${NAME}: A utility to detect, read, write, verify and erase flash chips. It is
+${NAME}: often used to flash BIOS/EFI/coreboot/firmware images in-system using
+${NAME}: a supported mainboard. But it also supports flashing of network cards
+${NAME}: (NICs), SATA controller cards and other external devices which can
+${NAME}: program flash chips.
+${NAME}:
+${NAME}: Homepage: http://www.flashrom.org
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://www.flashrom.org/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+#FIXME: missing pci.h (not installed by pci package)
+make ${JOBS}
+make install DESTDIR="${PKG}/usr"
+changelog ChangeLog
+}

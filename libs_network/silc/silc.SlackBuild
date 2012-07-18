@@ -1,0 +1,93 @@
+#!/bin/sh
+
+CWD=`pwd`
+NAME=silc
+VERSION=1.0
+ARCH=i586
+BUILD=1
+PKGNAME=$NAME
+PKGVER=$VERSION
+BASEDIR=$PKGNAME-toolkit-$PKGVER
+ARCHIVE=$BASEDIR.tar.bz2
+REPOSITORY=ftp://ftp.silcnet.org/silc/toolkit/sources
+FLAGS="-O2 -march=pentium -mcpu=pentium -fno-strength-reduce \
+ -fomit-frame-pointer -ffast-math"
+PKG=/tmp/package-$NAME
+
+rm -rf $PKG
+mkdir -p $PKG
+
+# Obtain sources
+if [ ! -e $ARCHIVE ]; then
+  if `wget "$REPOSITORY/$ARCHIVE"`; then
+    true
+  else
+    exit 1
+  fi
+fi
+
+# Compile
+cd /tmp
+tar jxvf $CWD/$ARCHIVE
+cd $BASEDIR
+bzcat $CWD/$NAME-$VERSION-nodebug.patch.bz2 | patch -p1 -s
+CFLAGS=$FLAGS CXXFLAGS=$FLAGS ./configure --prefix=/usr --enable-ipv6 \
+ --with-perl=no --disable-debug --with-simdir=/usr/libexec/silc \
+ --with-docdir=/usr/doc/silc-$VERSION --includedir=/usr/include/silc
+make
+
+# Install
+make install DESTDIR=$PKG
+mkdir -p $PKG/install $PKG/usr/doc/$NAME-$VERSION
+cat > $PKG/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+    |-----handy-ruler------------------------------------------------------|
+silc: SILC (Secure Internet Live Conferencing)
+silc:
+silc: Secure Internet Live Conferencing, or SILC in short, is a modern
+silc: conferencing protocol which provides rich conferencing features with
+silc: high security. One of the main design principles of the protocol was
+silc: security. Many of the SILC features are found in traditional chat
+silc: protocols such as IRC but many of the SILC features can also be
+silc: found in Instant Message (IM) style protocols.
+silc:
+silc: This package provides the SILC toolkit.
+silc:
+EOF
+
+rm -f \
+ $PKG/usr/doc/$NAME-$VERSION/BSD \
+ $PKG/usr/doc/$NAME-$VERSION/COPYING \
+ $PKG/usr/doc/$NAME-$VERSION/CodingStyle \
+ $PKG/usr/doc/$NAME-$VERSION/GPL \
+ $PKG/usr/doc/$NAME-$VERSION/INSTALL \
+ $PKG/usr/doc/$NAME-$VERSION/README.*
+
+gzip -9nf \
+ $PKG/usr/doc/$NAME-$VERSION/*.txt \
+ $PKG/usr/doc/$NAME-$VERSION/CHANGES \
+ $PKG/usr/doc/$NAME-$VERSION/FAQ
+
+(
+  cd $PKG/usr/doc/$NAME-$VERSION
+  mv toolkit silc_docs_html
+  tar -c silc_docs_html > silc_docs_html.tar
+  gzip -9nf silc_docs_html.tar
+  rm -rf silc_docs_html
+  rm -rf tutorial
+)
+
+strip --strip-unneeded $PKG/usr/libexec/silc/*.so ||:
+
+chown -R root.root $PKG
+
+# Make package
+cd $PKG
+cat install/slack-desc | grep "$NAME:" > /tmp/$NAME-$VERSION-$ARCH-$BUILD.txt
+makepkg -l y -c n /tmp/$NAME-$VERSION-$ARCH-$BUILD.tgz

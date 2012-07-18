@@ -1,0 +1,136 @@
+#!/bin/bash
+
+source /usr/src/ports/Build/build.sh
+
+PACKAGER="Witukind <witukind@nsbm.kicks-ass.org>"
+ARCH=i586
+BUILD=1
+
+# Sources
+SRCNAME[0]=nessus-libraries
+SRCVER[0]=2.3.1
+SRCREP[0]=http://no/where
+SRCPKG[0]=${SRCNAME[0]}-${SRCVER[0]}.tar.gz
+SRCROOT[0]=${SRCNAME[0]}
+
+SRCNAME[1]=libnasl
+SRCVER[1]=${SRCVER[0]}
+SRCREP[1]=http://no/where
+SRCPKG[1]=${SRCNAME[1]}-${SRCVER[1]}.tar.gz
+SRCROOT[1]=${SRCNAME[1]}
+
+SRCNAME[2]=nessus-core
+SRCVER[2]=${SRCVER[0]}
+SRCREP[2]=http://no/where
+SRCPKG[2]=${SRCNAME[2]}-${SRCVER[2]}.tar.gz
+SRCROOT[2]=${SRCNAME[2]}
+
+# Packages
+PKGNAME[0]=nessus
+PKGVER[0]=${SRCVER[0]}
+PKGARCH[0]=${ARCH}
+
+PKGNAME[1]=${PKGNAME[0]}_lib
+PKGVER[1]=${SRCVER[0]}
+PKGARCH[1]=${ARCH}
+PKGOPTS[1]="nodocdir"
+
+PKGNAME[2]=${PKGNAME[0]}_dev
+PKGVER[2]=${SRCVER[0]}
+PKGARCH[2]=${ARCH}
+PKGOPTS[2]="nodocdir"
+
+PKGNAME[3]=nessusd
+PKGVER[3]=${SRCVER[0]}
+PKGARCH[3]=${ARCH}
+PKGOPTS[3]="nodocdir"
+
+PKGNAME[4]=nasl
+PKGVER[4]=${SRCVER[0]}
+PKGARCH[4]=${ARCH}
+PKGOPTS[4]="nodocdir"
+
+begin
+
+(
+  cd ${SRC[0]}
+  CFLAGS=$DISTFLAGS CXXFLAGS=$DISTFLAGS \
+  ./configure \
+  --enable-static=no \
+  --enable-shared=yes \
+  --prefix=/usr \
+  --sysconfdir=/etc \
+  --mandir=/usr/man \
+  --localstatedir=/var \
+  --enable-cypher \
+  $ARCH-pc-linux-gnu
+  make
+  make install DESTDIR=${PKG[1]}
+
+  cd ${SRC[1]}
+  CFLAGS="$DISTFLAGS -I${PKG[1]}/usr/include" \
+  CXXFLAGS="$DISTFLAGS -I${PKG[1]}/usr/include" \
+  LDFLAGS="-L${PKG[1]}/usr/lib" \
+  NESSUSCONFIG=${PKG[1]}/usr/bin/nessus-config \
+  ./configure \
+  --enable-static=no \
+  --enable-shared=yes \
+  --prefix=/usr \
+  --sysconfdir=/etc \
+  --mandir=/usr/man \
+  --localstatedir=/var \
+  $ARCH-pc-linux-gnu
+  make
+  make install DESTDIR=${PKG[1]}
+
+  cd ${SRC[2]}
+  CFLAGS="$DISTFLAGS -I${PKG[1]}/usr/include" \
+  CXXFLAGS="$DISTFLAGS -I${PKG[1]}/usr/include" \
+  LDFLAGS="-L${PKG[1]}/usr/lib" \
+  NESSUSCONFIG=${PKG[1]}/usr/bin/nessus-config \
+  ./configure \
+  --prefix=/usr \
+  --sysconfdir=/etc \
+  --mandir=/usr/man \
+  --localstatedir=/var \
+  --libdir=/usr/libexec \
+  $ARCH-pc-linux-gnu
+  make
+  make install DESTDIR=${PKG[1]}
+
+  mkdir -p \
+   ${PKG[0]}/usr/{bin,man/man1} \
+   ${PKG[2]}/usr/{bin,man/man1} \
+   ${PKG[4]}/usr/{bin,man/man1}
+
+  mv \
+    ${PKG[1]}/usr/bin/*-config \
+    ${PKG[2]}/usr/bin
+ 
+  mv \
+    ${PKG[1]}/usr/man/man1/*-config* \
+    ${PKG[2]}/usr/man/man1
+
+  mv \
+    ${PKG[1]}/usr/include \
+    ${PKG[2]}/usr
+
+  # Nasl
+  mv \
+    ${PKG[1]}/usr/bin/nasl \
+    ${PKG[4]}/usr/bin
+
+  mv \
+    ${PKG[1]}/usr/man/man1/nasl.1 \
+    ${PKG[4]}/usr/man/man1
+
+  mv \
+   ${PKG[1]}/var \
+   ${PKG[0]}
+
+  rm -rf \
+   ${PKG[1]}/usr/sbin
+   ${PKG[1]}/usr/man
+)
+
+end nocleanup

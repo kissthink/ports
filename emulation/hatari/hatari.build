@@ -1,0 +1,68 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=hatari
+VERSION=1.6.1
+BUILD=1
+DEPENDS=('sdl >= 1.2.14-1' 'libpng >= 1.5.9-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: hatari (Atari emulator)
+${NAME}:
+${NAME}: Hatari is an emulator for the Atari ST, STE, TT and Falcon computers. 
+${NAME}: The Atari ST was a 16/32 bit computer system which was first released
+${NAME}: by Atari in 1985. Using the Motorola 68000 CPU, it was a very popular
+${NAME}: computer that had quite a lot of CPU power at that time. Hatari was
+${NAME}: started as a port of the free Windows emulator WinSTon which uses
+${NAME}: UAE's CPU core. It tries to emulate the hardware as closely as 
+${NAME}: possible.
+${NAME}:
+${NAME}: Homepage: http://hatari.tuxfamily.org
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://download.tuxfamily.org/${SRCNAME[0]}/${SRCVERS[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+cmake \
+ -DCMAKE_C_FLAGS:STRING="${FLAGS}" \
+ -DCMAKE_CXX_FLAGS:STRING="${FLAGS}" \
+ -DCMAKE_VERBOSE_MAKEFILE:BOOL="on" \
+ -DCMAKE_INSTALL_PREFIX:PATH="/usr" \
+ -DMANDIR:STRING="man/man1" \
+ -DDOCDIR:STRING="share/html/hatari" \
+.
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc readme.txt doc/{authors,release-notes,keymap-sample,emutos}.txt
+changelog doc/changelog.txt
+install.dat hatari.desktop ${PKG}/usr/share/applications
+mv \
+ ${PKG}/usr/share/icons/hicolor/32x32/apps/hatari-icon.png \
+ ${PKG}/usr/share/icons/hicolor/32x32/apps/hatari.png
+gunzip ${PKG}${SYS_DIR[man]}/man?/*.?.gz
+rm -rf \
+ ${PKG}${SYS_DIR[html]}/hatari/*.txt \
+ ${PKG}/usr/bin/hatariui \
+ ${PKG}${SYS_DIR[man]}/man1/hatariui.1 \
+ ${PKG}/usr/share/applications/hatariui.desktop \
+ ${PKG}/usr/share/hatari/{hatariui,hconsole}
+}

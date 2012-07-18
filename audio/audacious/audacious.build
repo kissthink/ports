@@ -1,0 +1,156 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=audacious
+VERSION=3.2.3
+BUILD=3
+DEPENDS=('gtk+ >= 2.24.10-1' 'dbus_glib >= 0.98-1')
+OPTDEPENDS=('mpg123 >= 1.14.2-1' 'ffmpeg >= 0.11.1-1' 'curl >= 7.26.0-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: audacious (audio player)
+${NAME}:
+${NAME}: An audio player that focuses on audio quality.
+${NAME}:
+${NAME}: Homepage: http://audacious-media-player.org
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=libmowgli
+SRCVERS[0]=1.0.0
+SRCPACK[0]=http://distfiles.atheme.org/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCCOPY[0]="MIT"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+}
+
+SRCNAME[1]=libmcs
+SRCVERS[1]=0.7.2
+SRCPACK[1]=http://distfiles.atheme.org/${SRCNAME[1]}-${SRCVERS[1]}.tbz2
+SRCCOPY[1]="BSD3"
+
+build1()
+{
+PKG_CONFIG_PATH="${PKG}/usr/lib$(libdirsuffix)/pkgconfig" \
+MOWGLI_CFLAGS="-I${PKG}/usr/include/libmowgli" \
+MOWGLI_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lmowgli" \
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --disable-gconf \
+ --disable-kconfig
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+}
+
+SRCNAME[2]=${NAME}
+SRCVERS[2]=${VERSION}
+SRCPACK[2]=http://distfiles.atheme.org/${SRCNAME[2]}-${SRCVERS[2]}.tar.bz2
+SRCCOPY[2]="GPL3"
+
+#MOWGLI_CFLAGS="-I${PKG}/usr/include/libmowgli" \
+#MOWGLI_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lmowgli" \
+
+build2()
+{
+PKG_CONFIG_PATH="${PKG}/usr/lib$(libdirsuffix)/pkgconfig" \
+CPPFLAGS="-I${PKG}/usr/include/libmowgli" \
+LIBMCS_CFLAGS="-I${PKG}/usr/include -I${PKG}/include/libmowgli" \
+LIBMCS_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lmcs -lmowgli" \
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-rpath \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --disable-gtk3 \
+ --with-regexlib=gnu
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+install.dir ${PKG}/usr/share/Thunar/sendto
+install.dat thunar-sendto-audacious-playlist.desktop \
+ ${PKG}/usr/share/Thunar/sendto
+mv \
+ ${PKG}/usr/share/pixmaps/audacious.png \
+ ${PKG}/usr/share/icons/hicolor/48x48/apps
+mv \
+ ${PKG}/usr/share/pixmaps/audacious.svg \
+ ${PKG}/usr/share/icons/hicolor/scalable/apps
+rmdir ${PKG}/usr/share/pixmaps
+}
+
+SRCNAME[3]=${NAME}-plugins
+SRCVERS[3]=${VERSION}
+SRCPACK[3]=http://distfiles.atheme.org/${SRCNAME[3]}-${SRCVERS[3]}.tar.bz2
+
+GTKINC="-I/usr/lib64/gtk-2.0/include -I/usr/include/cairo -I/usr/include/atk-1.0 -I/usr/include/pango-1.0 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/gtk-2.0 -I/usr/include/sndfile -I/usr/include/samplerate"
+
+build3()
+{
+PKG_CONFIG_PATH="${PKG}/usr/lib$(libdirsuffix)/pkgconfig" \
+CPPFLAGS="-I${PKG}/usr/include -I${PKG}/usr/include/libmowgli ${GTKINC}" \
+LDFLAGS="-L${PKG}/usr/lib$(libdirsuffix)" \
+MOWGLI_CFLAGS="-I${PKG}/usr/include/libmowgli" \
+MOWGLI_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lmowgli" \
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-rpath \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --disable-oss \
+ --disable-gtk3 \
+ --enable-ipv6
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+}

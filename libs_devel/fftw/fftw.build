@@ -1,0 +1,63 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=fftw
+VERSION=3.3.1
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: FFTW (Fastest Fourier Transform in the West)
+${NAME}:
+${NAME}: FFTW is a C subroutine library for computing the discrete Fourier
+${NAME}: transform (DFT) in one or more dimensions, of arbitrary input size,
+${NAME}: and of both real and complex data (as well as of even/odd data, i.e.
+${NAME}: the discrete cosine/sine transforms or DCT/DST).
+${NAME}:
+${NAME}: Homepage: http://www.fftw.org
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://www.fftw.org/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --infodir="${SYS_DIR[info]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --includedir=/usr/include/fftw3 \
+ --localstatedir=/var \
+ --enable-threads
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+install.dir ${PKG}/usr/share/html
+cp -r doc/html ${PKG}/usr/share/html/${NAME}
+}

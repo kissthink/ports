@@ -1,0 +1,135 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=mesa
+VERSION=8.0.3
+BUILD=1
+DEPENDS=('xorg_libs >= 7.6-6' 'libdrm >= 2.4.33-1' 'talloc >= 2.0.7-1')
+GALLIUM="r300,r600,nouveau,swrast"
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: mesa (a 3D graphics library)
+${NAME}:
+${NAME}: Mesa is a 3D graphics library with an API very similar to that of
+${NAME}: another well-known 3D graphics library. :-) The Mesa libraries are
+${NAME}: used by X to provide both software and hardware accelerated graphics.
+${NAME}:
+${NAME}: Mesa was written by Brian Paul.
+${NAME}:
+${NAME}: Homepage: http://www.mesa3d.org
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=MesaLib
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=ftp://ftp.freedesktop.org/pub/${NAME}/${VERSION}/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCROOT[0]=Mesa-${SRCVERS[0]}
+SRCCOPY[0]="LGPL2"
+
+build0()
+{
+#FIXME: convert to CMake one of these days
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --prefix=/usr \
+ --docdir="/usr/doc/${NAME}-${VERSION}" \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --with-xorg-driver-dir="/usr/lib$(libdirsuffix)/plugins/xorg/modules/drivers" \
+ --with-dri-driverdir="/usr/lib$(libdirsuffix)/plugins/xorg/modules/dri" \
+ --with-egl-driver-dir="/usr/lib$(libdirsuffix)/plugins/egl" \
+ --with-gallium-drivers="${GALLIUM}" \
+ --enable-shared-glapi \
+ --enable-shared-dricore \
+ --enable-texture-float \
+ --enable-gallium-egl \
+ --enable-gallium-llvm \
+ --enable-dri \
+ --enable-glx \
+ --enable-glx-tls \
+ --enable-osmesa \
+ --enable-gles1 \
+ --enable-gles2 \
+ --enable-egl \
+ --enable-xa
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+install.dir ${DOC}
+install.doc docs/relnotes-${VERSION}.html ${DOC}
+}
+
+SRCNAME[1]=xdriinfo
+SRCVERS[1]=1.0.4
+SRCPACK[1]=http://www.x.org/releases/X11R7.6/src/everything/${SRCNAME[1]}-${SRCVERS[1]}.tar.bz2
+
+build1()
+{
+XDRIINFO_CFLAGS="-I${PKG}/usr/include" \
+XDRIINFO_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lX11 -lglapi" \
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[2]=glew
+SRCVERS[2]=1.7.0
+SRCPACK[2]=${URL[sf]}/${SRCNAME[2]}/${SRCNAME[2]}-${SRCVERS[2]}.tgz
+
+build2()
+{
+make ${JOBS} \
+ CFLAGS.EXTRA="-I${PKG}/usr/include" \
+ LDFLAGS.GL="-L${PKG}/usr/lib$(libdirsuffix) -lGL -lX11 -lglapi" \
+ LDFLAGS.GLU="-lGLU"
+make install GLEW_DEST="${PKG}/usr"
+chmod 0755 ${PKG}/usr/lib$(libdirsuffix)/libGLEW.so.?.?.?
+rm -f ${PKG}/usr/lib$(libdirsuffix)/*.a
+}
+
+SRCNAME[3]=gl-manpages
+SRCVERS[3]=1.0.1
+SRCPACK[3]=ftp://ftp.archlinux.org/other/mesa/${SRCNAME[3]}-${SRCVERS[3]}.tar.bz2
+
+build3()
+{
+./configure \
+  --build="${ARCH}-slackware-linux" \
+  --disable-dependency-tracking \
+  --prefix=/usr \
+  --mandir="${SYS_DIR[man]}" \
+  --sysconfdir=/etc \
+  --localstatedir=/var \
+  --datadir=/usr
+make ${JOBS}
+make install DESTDIR="${PKG}"
+}

@@ -1,0 +1,65 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=pixman
+VERSION=0.26.0
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: pixman
+${NAME}:
+${NAME}: Pixman contains low-level pixel manipulation routines and is used by
+${NAME}: both xorg and cairo.
+${NAME}:
+${NAME}: For more information about the X.Org Foundation (the providers of the
+${NAME}: X.Org implementation of the X Window System), see their website:
+${NAME}:
+${NAME}: http://www.x.org
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://www.cairographics.org/releases/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="MIT"
+
+build0()
+{
+if [[ "${ARCH}" == "x86_64" ]]; then
+  SSE2="--enable-sse2"
+else
+  SSE2="--disable-sse2"
+fi
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-shared=yes \
+ --enable-static=no \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --enable-gtk=no \
+ ${SSE2}
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+}

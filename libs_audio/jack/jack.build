@@ -1,0 +1,60 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=jack
+VERSION=1.9.7
+BUILD=1
+DEPENDS=('libsamplerate >= 0.1.8-1' 'celt >= 0.11.3-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: jack (audio server)
+${NAME}:
+${NAME}: A low latency audio server, written primarily for the Linux operating
+${NAME}: system. It can connect a number of different applications to an audio
+${NAME}: device, as well as allowing them to share audio between themselves.
+${NAME}: It's clients can run in their own processes (i.e. as a normal
+${NAME}: application), or they can run within a JACK server (i.e. a "plugin").
+${NAME}: JACK is different from other audio server efforts in that it has been
+${NAME}: designed from the ground up to be suitable for professional audio
+${NAME}: work. This means that it focuses on two key areas: synchronous
+${NAME}: execution of all clients, and low latency operation.
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://www.grame.fr/~letz/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCCOPY[0]="GPL2 LGPL2"
+
+build0()
+{
+export CPPFLAGS="${FLAGS} -I/usr/include/samplerate -I/usr/include/sndfile"
+./waf configure \
+ --prefix=/usr \
+ --mandir="/man/man1" \
+ --libdir="/lib$(libdirsuffix)" \
+ --alsa \
+ --dbus \
+ --classic
+./waf build -v -j 2
+./waf install --destdir="${PKG}"
+doc README
+changelog ChangeLog
+chmod 0755 \
+ ${PKG}/usr/lib$(libdirsuffix)/jack/*.so \
+ ${PKG}/usr/lib$(libdirsuffix)/*.so*
+}

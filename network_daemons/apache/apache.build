@@ -1,0 +1,107 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=apache
+VERSION=2.4.1
+BUILD=1
+DEPENDS=('apr >= 1.4.5-1' 'expat >= 2.0.1-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: apache (The Apache HTTP Server)
+${NAME}:
+${NAME}: Apache is an HTTP server designed as a plug-in replacement for the
+${NAME}: NCSA HTTP server. It fixes numerous bugs in the NCSA server and
+${NAME}: includes many frequently requested new features, and has an API which
+${NAME}: allows it to be extended to meet users' needs more easily.
+${NAME}:
+${NAME}: Apache is the most popular web server in the known universe; over
+${NAME}: half of the servers on the Internet are running Apache or one of
+${NAME}: its variants.
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=httpd
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://www.apache.org/dist/httpd/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+
+configure()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --enable-so \
+ --with-mpm=worker \
+ --enable-mpms-shared=all \
+ --enable-mods-shared=all \
+ --enable-pie \
+ --enable-ssl \
+ --enable-cgi \
+ --enable-rewrite \
+ --enable-vhost-alias \
+ --enable-proxy \
+ --enable-proxy-http \
+ --enable-proxy-ftp \
+ --enable-proxy-balancer \
+ --enable-cache \
+ --enable-mem-cache \
+ --enable-file-cache \
+ --enable-disk-cache \
+ --enable-authn-anon \
+ --enable-authn-dbd \
+ --enable-authn-dbm \
+ --enable-authz-dbd \
+ --enable-authz-dbm \
+ --enable-dav-fs \
+ --disable-speling \
+ --disable-ldap \
+ --with-libxml2 \
+ ${*}
+ # --enable-authnz-ldap \
+ # --enable-lua \
+ # --enable-luajit \
+}
+
+build0()
+{
+if [ "$(uname -m)" == "x86_64" ]; then
+configure \
+ --enable-layout=Slackware64
+else
+configure \
+ --enable-layout=Slackware
+fi
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc ABOUT_APACHE README
+changelog CHANGES
+license LICENSE
+install.dat doinst.sh ${PKG}/install
+install.dir ${PKG}/etc/rc.d
+install.bin rc.httpd.new ${PKG}/etc/rc.d
+rm -rf \
+ ${PKG}/run
+mv \
+ ${PKG}/etc/apache/httpd.conf \
+ ${PKG}/etc/apache/httpd.conf.default
+mv \
+ ${PKG}/etc/apache/mime.types \
+ ${PKG}/etc/apache/mime.types.default
+mv \
+ ${PKG}/etc/apache/magic \
+ ${PKG}/etc/apache/magic.default
+}

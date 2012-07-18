@@ -1,0 +1,81 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=google_chrome
+VERSION=20.0.1132.57
+BUILD=1
+DEPENDS=('gtk+ >= 2.24.10-1' 'seamonkey_solibs >= 2.10-1' 'gconf >= 3.2.5-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: google_chrome (web browser)
+${NAME}:
+${NAME}: A fast web browser.
+${NAME}:
+${NAME}: Homepage: http://google.com/chrome
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+#FIXME: architecture kludge
+
+SRCNAME[0]=google-chrome
+SRCVERS[0]=stable_current_$(uname -m)
+SRCPACK[0]=${SRCNAME[0]}-${SRCVERS[0]}.rpm
+SRCOPTS[0]="pkgunpack"
+
+build0()
+{
+install.dat doinst.sh ${PKG}/install
+# Symlink the startup script
+install.dir ${PKG}/usr/bin
+( cd ${PKG}/usr/bin ; ln -sf /opt/google/chrome/google-chrome )
+# Symlink the required mozilla libraries
+install.dir ${PKG}/opt/google/chrome/lib
+(
+  cd ${PKG}/opt/google/chrome/lib
+  ln -sf /usr/lib$(libdirsuffix)/seamonkey/libnspr4.so libnspr4.so.0d
+  ln -sf /usr/lib$(libdirsuffix)/seamonkey/libnss3.so libnss3.so.1d
+  ln -sf /usr/lib$(libdirsuffix)/seamonkey/libnssutil3.so libnssutil3.so.1d
+  ln -sf /usr/lib$(libdirsuffix)/seamonkey/libplc4.so libplc4.so.0d
+  ln -sf /usr/lib$(libdirsuffix)/seamonkey/libplds4.so libplds4.so.0d
+  ln -sf /usr/lib$(libdirsuffix)/seamonkey/libsmime3.so libsmime3.so.1d
+)
+# Install properly the desktop file
+install.dir ${PKG}/usr/share/applications
+( cd ${PKG}/usr/share/applications ; ln -sf /opt/google/chrome/google-chrome.desktop )
+# Install properly the icon
+install.dir ${PKG}/usr/share/icons/hicolor
+for size in 256 128 64 48 32 24 22 16; do
+  dir=${PKG}/usr/share/icons/hicolor/${size}x${size}/apps
+  install.dir ${dir}
+  ( cd ${dir} ; ln -sf /opt/google/chrome/product_logo_${size}.png google-chrome.png )
+done
+# Relocate man pages
+mv \
+ ${PKG}/usr/share/man \
+ ${PKG}/usr
+# Delete superfluous stuff
+rm -rf \
+ ${PKG}/etc \
+ ${PKG}/usr/share/gnome-control-center \
+ ${PKG}/opt/google/chrome/google-chrome.desktop~
+}

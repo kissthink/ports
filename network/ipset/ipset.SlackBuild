@@ -1,0 +1,87 @@
+#!/bin/sh
+
+CWD=`pwd`
+NAME=ipset
+VERSION=2.4.7
+ARCH=i586
+BUILD=1
+PKGNAME=$NAME
+PKGVER=$VERSION
+BASEDIR=$PKGNAME-$PKGVER
+ARCHIVE=$BASEDIR.tar.bz2
+REPOSITORY=http://ipset.netfilter.org
+FLAGS="-O2 -march=pentium -mtune=pentium -fno-strength-reduce \
+ -fomit-frame-pointer -ffast-math"
+PKG=/tmp/package-$NAME
+
+rm -rf $PKG
+mkdir -p $PKG
+
+# Obtain sources
+if [ ! -e $ARCHIVE ]; then
+  if `wget "$REPOSITORY/$ARCHIVE"`; then
+    true
+  else
+    exit 1
+  fi
+fi
+
+# Compile
+cd /tmp
+tar jxvf $CWD/$ARCHIVE
+cd $BASEDIR
+bzcat $CWD/$NAME-$VERSION-makefile.patch.bz2 | patch -p1 -s
+bzcat $CWD/$NAME-$VERSION-slackware.patch.bz2 | patch -p1 -s
+make \
+ CCOPTS="${FLAGS}"
+
+# Install
+make install \
+ DESTDIR=$PKG \
+ INSTALL_MOD_PATH=$PKG
+mkdir -p $PKG/install $PKG/usr/doc/$NAME-$VERSION
+cat > $PKG/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|' on
+# the right side marks the last column you can put a character in. You must make
+# exactly 11 lines for the formatting to be correct.  It's also customary to
+# leave one space after the ':'.
+
+     |-----handy-ruler------------------------------------------------------|
+ipset: ipset (administration tool for IP sets)
+ipset:
+ipset: ipset is used to set up, maintain and inspect so called IP sets in
+ipset: the Linux kernel. Depending on the type, an IP set may store IP
+ipset: addresses, (TCP/UDP) port numbers or additional informations besides
+ipset: IP addresses.
+ipset:
+ipset: Homepage: http://ipset.netfilter.org
+ipset:
+ipset:
+ipset:
+EOF
+
+install -m644 -g0 -o0 ChangeLog TODO \
+ README.lnstat $PKG/usr/doc/$NAME-$VERSION
+
+install -m 0755 -g0 -o0 doinst.sh $PKG/install
+
+chmod 444 $PKG/usr/man/man?/*.?
+gzip -9nf $PKG/usr/man/man?/*.?
+
+rm -f $PKG/lib/modules/*/modules.*
+gzip -9nf $PKG/lib/modules/*/*/*.ko
+
+strip --strip-unneeded \
+ $PKG/usr/libexec/*/*.so || :
+
+strip \
+ $PKG/usr/sbin/* || :
+
+chown -R root.root $PKG
+
+# Make package
+cd $PKG
+cat install/slack-desc | grep "$NAME:" > /tmp/$NAME-$VERSION-$ARCH-$BUILD.txt
+makepkg -l y -c n /tmp/$NAME-$VERSION-$ARCH-$BUILD.tgz

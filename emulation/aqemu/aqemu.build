@@ -1,0 +1,61 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=aqemu
+VERSION=20120131
+BUILD=1
+DEPENDS=('qt >= 4.7.4-1' 'libvnc >= 0.9.8.2-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: aqemu
+${NAME}:
+${NAME}: A graphical user interface for the QEMU/KVM emulator with a friendly
+${NAME}: interface that allows to set up the majority of QEMU/KVM options.
+${NAME}:
+${NAME}: Homepage: http://sourceforge.net/projects/aqemu
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=${URL[sf]}/${SRCNAME[0]}/${SRCVERS[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+cmake \
+ -DCMAKE_C_FLAGS:STRING="${FLAGS}" \
+ -DCMAKE_CXX_FLAGS:STRING="${FLAGS}" \
+ -DCMAKE_VERBOSE_MAKEFILE:BOOL="on" \
+ -DCMAKE_INSTALL_PREFIX:PATH="/usr" \
+ -DINSTALL_MAN_DIR:STRING="/usr/man" \
+ -DINSTALL_MAN:BOOL="on" \
+ -DWITHOUT_EMBEDDED_DISPLAY:BOOL="on" \
+ -DMAN_PAGE_COMPRESSOR:STRING="off" \
+ -DDEBUG:BOOL="off" \
+.
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog CHANGELOG
+rm -rf ${PKG}/usr/share/doc
+}

@@ -1,0 +1,60 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=ncdu
+VERSION=1.7
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: ncdu (disk usage analyser)
+${NAME}:
+${NAME}: Find out which directories are using the most disk space.
+${NAME}:
+${NAME}: Homepage: http://dev.yorhel.nl/ncdu
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://dev.yorhel.nl/download/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="MIT"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --with-ncursesw
+make -j 2
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog ChangeLog
+mkdir -p ${PKG}/usr/share/applications
+install -m 0644 ncdu.desktop ${PKG}/usr/share/applications
+}

@@ -1,0 +1,65 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=vsftpd
+VERSION=2.3.5
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: vsftpd (Very Secure FTP Daemon)
+${NAME}:
+${NAME}: vsftpd is an FTP server, or daemon. The 'vs' stands for Very Secure.
+${NAME}: Obviously this is not a guarantee, but a reflection that the entire
+${NAME}: codebase was written with security in mind, and carefully designed to
+${NAME}: be resilient to attack (as well as extremely fast and scalable).
+${NAME}:
+${NAME}: The vsftpd homepage is http://vsftpd.beasts.org
+${NAME}:
+${NAME}: The Very Secure FTP Daemon was written by Chris Evans.
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=https://security.appspot.com/downloads/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+make ${JOBS}
+doc FAQ REWARD TUNING EXAMPLE
+changelog ChangeLog
+install.dir ${PKG}/usr/sbin
+install.bin vsftpd ${PKG}/usr/sbin
+install.dir ${PKG}${SYS_DIR[man]}/man{5,8}
+install.man vsftpd.8 ${PKG}${SYS_DIR[man]}/man8
+install.man vsftpd.conf.5 ${PKG}${SYS_DIR[man]}/man5
+install.dir ${PKG}/etc/vsftpd
+install.cfg vsftpd.conf ${PKG}/etc/vsftpd/vsftpd.conf.new
+install.dat doinst.sh ${PKG}/install
+install.cfg ftpusers.new ${PKG}/etc/vsftpd
+install.cfg user_list.new ${PKG}/etc/vsftpd
+install.dir ${PKG}${SYS_DIR[systemdsystemunitdir]}
+install.dat vsftpd.service ${PKG}${SYS_DIR[systemdsystemunitdir]}
+install.dir ${PKG}/etc/logrotate.d
+install.dat vsftpd.logrotate ${PKG}/etc/logrotate.d/vsftpd.new
+install.dir ${PKG}/srv/ftp/pub
+#FIXME: PAM: modify the builddefs patch to enable PAM support
+#install.dir ${PKG}/etc/pam.d
+#install.dat vsftpd.pam ${PKG}/etc/pam.d/vsftpd
+}

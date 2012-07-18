@@ -1,0 +1,65 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=lbreakout2
+MAJOR=2.6
+VERSION=${MAJOR}.4
+BUILD=1
+DEPENDS=('sdl >= 1.2.15-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: lbreakout2 (arcade game)
+${NAME}:
+${NAME}: A game in which a ball bounces around and the player must use the
+${NAME}: paddle  to keep it in the game. When all bricks are destroyed, the
+${NAME}: next level unlocks.
+${NAME}:
+${NAME}: Homepage: http://lgames.sourceforge.net
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=${URL[sf]}/lgames/${SRCNAME[0]}/${MAJOR}/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-rpath \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var/lib/games \
+ --with-docdir="${SYS_DIR[html]}" \
+ --enable-sdl-net
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog ChangeLog
+rm -rf ${PKG}/usr/share/icons
+install.dir ${PKG}/usr/share/icons/hicolor/48x48/apps
+install.dat lbreakout2.png ${PKG}/usr/share/icons/hicolor/48x48/apps
+}

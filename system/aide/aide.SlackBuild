@@ -1,0 +1,92 @@
+#!/bin/sh
+
+CWD=`pwd`
+NAME=aide
+VERSION=0.13.1
+ARCH=i586
+BUILD=1
+PKGNAME=$NAME
+PKGVER=$VERSION
+BASEDIR=$PKGNAME-$PKGVER
+ARCHIVE=$BASEDIR.tar.gz
+REPOSITORY=http://belnet.dl.sourceforge.net/sourceforge/aide
+FLAGS="-O2 -march=pentium -mtune=pentium -fno-strength-reduce \
+ -fomit-frame-pointer -ffast-math"
+PKG=/tmp/package-$NAME
+
+rm -rf $PKG
+mkdir -p $PKG
+
+# Obtain sources
+if [ ! -e $ARCHIVE ]; then
+  if `wget "$REPOSITORY/$ARCHIVE"`; then
+    true
+  else
+    exit 1
+  fi
+fi
+
+# Compile
+cd /tmp
+tar zxvf $CWD/$NAME-$VERSION.tar.gz
+cd $NAME-$VERSION
+CFLAGS=$FLAGS CXXFLAGS=$FLAGS ./configure \
+ --prefix=/usr \
+ --mandir=/usr/man \
+ --sysconfdir=/etc \
+ --with-config-file=/etc/aide.conf \
+ --with-mhash \
+ --with-zlib \
+# --with-curl \
+ --with-posix-acl \
+ --with-selinux \
+ --with-xattr
+make
+
+# Install
+make install DESTDIR=$PKG
+mkdir -p $PKG/install $PKG/usr/doc/$NAME-$VERSION $PKG/var/lib/aide $PKG/etc
+cat > $PKG/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+    |-----handy-ruler------------------------------------------------------|
+aide: aide (Advanced Intrusion Detection Environment)
+aide:
+aide: Aide is a tool for checking the integrity of files.
+aide:
+aide:
+aide:
+aide:
+aide:
+aide:
+aide:
+aide:
+EOF
+
+install -m644 -g0 -o0 AUTHORS ChangeLog NEWS README Todo doc/manual.html \
+ contrib/*.sh $PKG/usr/doc/$NAME-$VERSION
+
+gzip -9nf \
+ $PKG/usr/doc/$NAME-$VERSION/ChangeLog \
+ $PKG/usr/doc/$NAME-$VERSION/sshaide.sh
+
+chmod 444 $PKG/usr/man/man?/*.?
+gzip -9nf $PKG/usr/man/man?/*.?
+
+chmod 700 $PKG/var/lib/aide
+
+install -m600 doc/aide.conf $PKG/etc/aide.conf.sample
+
+strip $PKG/usr/bin/* || :
+
+chown -R root.root $PKG
+
+# Make package
+cd $PKG
+cat install/slack-desc | grep "$NAME:" > /tmp/$NAME-$VERSION-$ARCH-$BUILD.txt
+makepkg -l y -c n /tmp/$NAME-$VERSION-$ARCH-$BUILD.tgz

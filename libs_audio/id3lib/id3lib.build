@@ -1,0 +1,62 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=id3lib
+VERSION=3.8.3
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: id3lib (ID3 tag handling library)
+${NAME}:
+${NAME}: Id3lib is a library for manipulating ID3v1 and ID3v2 tags. It
+${NAME}: provides a convenient interface for software developers to include
+${NAME}: standards-compliant ID3v1/2 tagging capabilities in their
+${NAME}: applications. Features include identification of valid tags,
+${NAME}: automatic size conversions, (re)synchronization of tag frames,
+${NAME}: seamless tag (de)compression, and optional padding facilities.
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=${URL[sf]}/${NAME}/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="LGPL2"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --enable-static=no \
+ --enable-shared=yes \
+ --enable-debug=minimum \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var
+make -j 2
+make install DESTDIR="${PKG}"
+doc AUTHORS THANKS
+changelog NEWS
+mkdir -p ${PKG}/usr/man/man1
+install -m 0644 doc/man/*.1 ${PKG}/usr/man/man1
+}

@@ -1,0 +1,87 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=fs_ntfs
+VERSION=2012.1.15
+BUILD=1
+DEPENDS=('fuse >= 2.8.7-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: fs_ntfs (NTFS file system)
+${NAME}:
+${NAME}: This package provides support for the NTFS file system. It allows
+${NAME}: accessing Windows NT, 2000, XP, 2003 and Vista partitions.
+${NAME}:
+${NAME}: Homepage: http://www.ntfs-3g.org
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=ntfs-3g_ntfsprogs
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://tuxera.com/opensource/${SRCNAME[0]}-${SRCVERS[0]}.tgz
+SRCCOPY[0]="GPL2 LGPL2"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --exec-prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --with-fuse=external \
+ --enable-extras \
+ --enable-crypto \
+ --disable-ldconfig
+make ${JOBS}
+make install DESTDIR="${PKG}" LIBTOOL="/usr/bin/libtool"
+doc AUTHORS CREDITS
+mv \
+ ${PKG}/sbin/* \
+ ${PKG}/usr/sbin
+(
+  cd ${PKG}/usr/bin
+  ln -s ntfs-3g ntfsmount
+  cd ${PKG}/usr/sbin
+  ln -s /usr/bin/ntfs-3g mount.ntfs-fuse
+  ln -s /usr/bin/ntfs-3g mount.ntfs
+)
+(
+  cd ${PKG}${SYS_DIR[man]}/man8
+  rm -f \
+   mkfs.ntfs.8 \
+   mount.ntfs-3g.8 \
+   mount.lowntfs-3g.8
+  echo ".so man8/mkntfs.8" > mkfs.ntfs.8
+  echo ".so man8/ntfs-3g.8" > mount.ntfs-3g.8
+  echo ".so man8/ntfs-3g.8" > mount.lowntfs-3g.8
+)
+rm -rf \
+ ${PKG}/sbin \
+ ${PKG}/usr/share
+}

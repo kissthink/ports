@@ -1,0 +1,90 @@
+#!/bin/sh
+
+CWD=`pwd`
+NAME=xorg_input_joystick
+VERSION=1.5.0
+ARCH=i586
+BUILD=1
+PKGNAME=xf86-input-joystick
+PKGVER=$VERSION
+BASEDIR=$PKGNAME-$PKGVER
+ARCHIVE=$BASEDIR.tar.bz2
+REPOSITORY=http://xorg.freedesktop.org/archive/individual/driver
+FLAGS="-O2 -march=pentium -mtune=pentium -fno-strength-reduce \
+ -fomit-frame-pointer -ffast-math"
+PKG=/tmp/package-$NAME
+
+rm -rf $PKG
+mkdir -p $PKG
+
+# Obtain sources
+if [ ! -e $ARCHIVE ]; then
+  if `wget "$REPOSITORY/$ARCHIVE"`; then
+    true
+  else
+    exit 1
+  fi
+fi
+
+# Compile
+cd /tmp
+tar jxvf $CWD/$ARCHIVE
+cd $BASEDIR
+CFLAGS=$FLAGS CXXFLAGS=$FLAGS ./configure \
+ --build=${ARCH}-slackware-linux \
+ --enable-static=no \
+ --enable-shared=yes \
+ --enable-debug=no \
+ --prefix=/usr \
+ --mandir=/usr/man \
+ --infodir=/usr/info \
+ --sysconfdir=/etc \
+ --localstatedir=/var
+make
+
+# Install
+make install DESTDIR=$PKG
+mkdir -p $PKG/install $PKG/usr/doc/$NAME-$VERSION
+cat > $PKG/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+                   |-----handy-ruler------------------------------------------------------|
+xorg_input_joystick: xorg_input_joystick
+xorg_input_joystick:
+xorg_input_joystick: xf86-input-keyboard is part of X11.
+xorg_input_joystick:
+xorg_input_joystick: For more information about the X.Org Foundation (the providers of the
+xorg_input_joystick: X.Org implementation of the X Window System), see their website:
+xorg_input_joystick:
+xorg_input_joystick: http://www.x.org
+xorg_input_joystick:
+xorg_input_joystick:
+xorg_input_joystick:
+EOF
+
+install -m 0644 -g 0 -o 0 ChangeLog \
+ $PKG/usr/doc/$NAME-$VERSION
+
+xz -9f \
+ $PKG/usr/doc/$NAME-$VERSION/ChangeLog
+
+chmod 0444 $PKG/usr/man/man?/*.?
+xz -9f $PKG/usr/man/man?/*.?
+
+rm -f \
+ $PKG/usr/lib/*/*/*/*.la
+
+strip --strip-unneeded \
+ $PKG/usr/lib/*/*/*/*.so* || :
+
+chown -R root.root $PKG
+
+# Make package
+cd $PKG
+cat install/slack-desc | grep "$NAME:" > /tmp/$NAME-$VERSION-$ARCH-$BUILD.txt
+makepkg -l y -c n /tmp/$NAME-$VERSION-$ARCH-$BUILD.txz

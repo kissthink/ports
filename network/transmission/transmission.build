@@ -1,0 +1,64 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=transmission
+VERSION=2.52
+BUILD=2
+DEPENDS=('gtk+ >= 2.24.10-1' 'libevent >= 2.0.16-1' 'curl >= 7.26.0-1' 'openssl >= 0.9.8x-1' 'libnotify >= 0.7.5-1' 'libcanberra >= 0.29-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: transmission (BitTorrent client)
+${NAME}:
+${NAME}: Transmission is a fast, lean and easy to use BitTorrent client.
+${NAME}:
+${NAME}: Homepage: http://www.transmissionbt.com
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://mirrors.m0k.org/transmission/files/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+
+build0()
+{
+CPPFLAGS="-I/usr/include/event" \
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --with-gtk=2 \
+ --enable-cli \
+ --enable-daemon
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+}

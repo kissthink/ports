@@ -1,0 +1,86 @@
+#!/bin/sh
+
+CWD=`pwd`
+NAME=xfce4_wavelan
+VERSION=0.5.5
+ARCH=i586
+BUILD=1
+PKGNAME=xfce4-wavelan-plugin
+PKGVER=$VERSION
+BASEDIR=$PKGNAME-$PKGVER
+ARCHIVE=$BASEDIR.tar.bz2
+REPOSITORY=http://goodies.xfce.org/releases/${PKGNAME}
+FLAGS="-O2 -march=pentium -mtune=pentium -fno-strength-reduce \
+ -fomit-frame-pointer -ffast-math"
+PKG=/tmp/package-$NAME
+
+rm -rf $PKG
+mkdir -p $PKG
+
+# Obtain sources
+if [ ! -e $ARCHIVE ]; then
+  if `wget "$REPOSITORY/$ARCHIVE"`; then
+    true
+  else
+    exit 1
+  fi
+fi
+
+# Compile
+cd /tmp
+tar jxvf $CWD/$ARCHIVE
+cd $BASEDIR
+xzcat $CWD/$NAME-$VERSION-tooltipfix.patch.xz | patch -p1 -s
+CFLAGS=$FLAGS CXXFLAGS=$FLAGS ./configure \
+ --build=${ARCH}-slackware-linux \
+ --enable-static=no \
+ --enable-shared=yes \
+ --enable-debug=no \
+ --prefix=/usr \
+ --mandir=/usr/man \
+ --sysconfdir=/etc \
+ --localstatedir=/var
+make
+
+# Install
+make install DESTDIR=$PKG
+mkdir -p $PKG/install $PKG/usr/doc/$NAME-$VERSION
+cat > $PKG/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+             |-----handy-ruler------------------------------------------------------|
+xfce4_wavelan: xfce4_wavelan (Xfce wave LAN panel plugin)
+xfce4_wavelan:
+xfce4_wavelan: A Xfce panel plugin that displays wave LAN information.
+xfce4_wavelan:
+xfce4_wavelan: Homepage: http://goodies.xfce.org
+xfce4_wavelan:
+xfce4_wavelan:
+xfce4_wavelan:
+xfce4_wavelan:
+xfce4_wavelan:
+xfce4_wavelan:
+EOF
+
+cat > $PKG/install/slack-required <<EOF
+libxfcegui4 >= 4.6.4-i486-1
+xfce4_panel >= 4.6.4-i486-1
+EOF
+
+install -m 0644 -g 0 -o 0 AUTHORS ChangeLog NEWS README THANKS \
+ $PKG/usr/doc/$NAME-$VERSION
+
+strip \
+ $PKG/usr/libexec/*/*/* || :
+
+chown -R root.root $PKG
+
+# Make package
+cd $PKG
+cat install/slack-desc | grep "$NAME:" > /tmp/$NAME-$VERSION-$ARCH-$BUILD.txt
+makepkg -l y -c n /tmp/$NAME-$VERSION-$ARCH-$BUILD.txz

@@ -1,0 +1,96 @@
+#!/bin/sh
+
+CWD=`pwd`
+NAME=icu
+VERSION=4.2.1
+ARCH=i586
+BUILD=1
+PKGNAME=icu
+PKGVER=4_2_1
+BASEDIR=${PKGNAME}
+ARCHIVE=${PKGNAME}4c-${PKGVER}-src.tgz
+REPOSITORY=http://download.icu-project.org/files/icu4c/${VERSION}
+FLAGS="-O2 -march=pentium -mtune=pentium -fno-strength-reduce \
+ -fomit-frame-pointer -ffast-math"
+PKG=/tmp/package-$NAME
+
+rm -rf $PKG
+mkdir -p $PKG
+
+# Obtain sources
+if [ ! -e $ARCHIVE ]; then
+  if `wget "$REPOSITORY/$ARCHIVE"`; then
+    true
+  else
+    exit 1
+  fi
+fi
+
+# Compile
+cd /tmp
+tar zxvf $CWD/$ARCHIVE
+cd $BASEDIR
+(
+cd source
+CFLAGS=$FLAGS CXXFLAGS=$FLAGS ./configure \
+ --build=${ARCH}-slackware-linux \
+ --enable-static=no \
+ --enable-shared=yes \
+ --enable-debug=no \
+ --enable-release=yes \
+ --enable-tests=no \
+ --enable-samples=no \
+ --prefix=/usr \
+ --mandir=/usr/man \
+ --sysconfdir=/etc \
+ --localstatedir=/var
+make
+)
+
+# Install
+(
+cd source
+make install DESTDIR=$PKG
+)
+mkdir -p $PKG/install $PKG/usr/share/html/${NAME}
+cat > $PKG/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+   |-----handy-ruler------------------------------------------------------|
+icu: icu (Internationalisation library)
+icu:
+icu: A set of libraries providing Unicode and internationalisation.
+icu:
+icu: Homepage: http://icu-project.org
+icu:
+icu:
+icu:
+icu:
+icu:
+icu:
+EOF
+
+install -m644 -g0 -o0 APIChangeReport*.html icu4c.css \
+ $PKG/usr/share/html/${NAME}
+
+chmod 444 $PKG/usr/man/man?/*.?
+xz -9f $PKG/usr/man/man?/*.?
+
+strip --strip-unneeded \
+ $PKG/usr/lib/*.so* || :
+
+strip \
+ $PKG/usr/bin/* \
+ $PKG/usr/sbin/* || :
+
+chown -R root.root $PKG
+
+# Make package
+cd $PKG
+cat install/slack-desc | grep "$NAME:" > /tmp/$NAME-$VERSION-$ARCH-$BUILD.txt
+makepkg -l y -c n /tmp/$NAME-$VERSION-$ARCH-$BUILD.txz

@@ -1,0 +1,64 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=libgsasl
+VERSION=1.8.0
+BUILD=1
+DEPENDS=('libidn >= 2.4-1' 'libgcrypt >= 1.5.0-1' 'libntlm >= 1.3-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: libgsasl
+${NAME}:
+${NAME}: GNU SASL is an implementation of the Simple Authentication and
+${NAME}: Security Layer framework and a few common SASL mechanisms. SASL is
+${NAME}: used is used by network servers (e.g., IMAP, SMTP) to request
+${NAME}: authentication from clients, and in clients to authenticate against
+${NAME}: servers.
+${NAME}:
+${NAME}: Homepage: http://josefsson.org/libgsasl
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=ftp://ftp.gnu.org/pub/gnu/gsasl/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="GPL3 LGPL21"
+
+build0()
+{
+CPPFLAGS="-I/usr/include/idn -I/usr/include/ntlm -I/usr/include/gcrypt -I/usr/include/gpg-error" \
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-rpath \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --includedir=/usr/include/gsasl \
+ --with-libgcrypt
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS THANKS
+changelog NEWS
+}

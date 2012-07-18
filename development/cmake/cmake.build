@@ -1,0 +1,79 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=cmake
+MAJOR=2.8
+VERSION=${MAJOR}.8
+BUILD=2
+DEPENDS=('libarchive >= 3.0.3-1' 'curl >= 7.26.0-1' 'expat >= 2.0.1-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: CMake (A cross-platform make)
+${NAME}:
+${NAME}: CMake is used to control the software compilation process using
+${NAME}: simple platform and compiler independent configuration files. CMake
+${NAME}: generates native makefiles and workspaces that can be used in the
+${NAME}: environment of your choice. CMake is quite sophisticated: it is
+${NAME}: possible to support complex environments requiring system
+${NAME}: configuration, pre-processor generation, code generation, and
+${NAME}: template instantiation.
+${NAME}:
+${NAME}: Homepage: http://cmake.org
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://www.cmake.org/files/v${MAJOR}/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="BSD3"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --prefix=/usr \
+ --docdir="/doc/${SRCNAME[0],,}-${SRCVERS[0]}" \
+ --datadir="/share/${NAME}" \
+ --system-libs \
+ --no-qt-gui
+make ${JOBS}
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog.txt
+# Documentation stuff
+rm -f \
+ ${DOC}/c*.txt \
+ ${DOC}/*.docbook
+install.dir ${PKG}${SYS_DIR[html]}/${SRCNAME[0]}
+mv \
+ ${DOC}/c*.html \
+ ${PKG}${SYS_DIR[html]}/${SRCNAME[0]}
+# Move includes to the right place
+install.dir ${PKG}/usr/include/${SRCNAME[0]}
+mv \
+ ${PKG}/usr/share/cmake/include/*.h \
+ ${PKG}/usr/include/${SRCNAME[0]}
+rmdir \
+ ${PKG}/usr/share/cmake/include
+(
+  cd ${PKG}/usr/share/cmake
+  ln -s /usr/include/${SRCNAME[0]} include
+)
+# Emacs stuff
+install.dir ${PKG}/usr/share/emacs/site-lisp
+install.dat Docs/cmake-mode.el ${PKG}/usr/share/emacs/site-lisp
+}

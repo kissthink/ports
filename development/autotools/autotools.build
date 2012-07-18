@@ -1,0 +1,114 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=autotools
+VERSION=2.69
+BUILD=2
+DEPENDS=('perl >= 5.12.3-1' 'm4 >= 1.4.16-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: autotools (GNU build system)
+${NAME}:
+${NAME}: Scripts to automate various software build tasks. This package
+${NAME}: includes the following components:
+${NAME}:
+${NAME}:   autoconf, automake, libtool and intltool.
+${NAME}:
+${NAME}: Homepage: http://www.gnu.org
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+configure()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --infodir="${SYS_DIR[info]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ ${*}
+}
+
+SRCNAME[0]=autoconf
+SRCVERS[0]=2.69
+SRCPACK[0]=${URL[gnu]}/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+SRCCOPY[0]="GPL2 GPL3"
+
+build0()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS THANKS
+changelog NEWS
+license COPYING.EXCEPTION COPYING.EXCEPTION
+}
+
+SRCNAME[1]=automake
+SRCVERS[1]=1.12.1
+SRCPACK[1]=${URL[gnu]}/${SRCNAME[1]}/${SRCNAME[1]}-${SRCVERS[1]}.tar.xz
+SRCCOPY[1]="GPL2"
+
+build1()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS THANKS
+changelog NEWS
+}
+
+SRCNAME[2]=libtool
+SRCVERS[2]=2.4.2
+SRCPACK[2]=${URL[gnu]}/${SRCNAME[2]}/${SRCNAME[2]}-${SRCVERS[2]}.tar.xz
+SRCCOPY[2]="GPL2"
+
+build2()
+{
+configure \
+ --disable-dependency-tracking \
+ --enable-shared=yes \
+ --enable-static=no \
+ --enable-ltdl-install
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS THANKS
+changelog NEWS
+rm -rf \
+ ${PKG}/usr/share/doc
+}
+
+SRCNAME[3]=intltool
+INTLTOOLM=0.50
+SRCVERS[3]=${INTLTOOLM}.2
+SRCPACK[3]=http://edge.launchpad.net/intltool/trunk/${SRCVERS[3]}/+download/${SRCNAME[3]}-${SRCVERS[3]}.tar.gz
+SRCCOPY[3]="GPL2"
+
+build3()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog ChangeLog
+}

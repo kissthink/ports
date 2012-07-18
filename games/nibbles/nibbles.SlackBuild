@@ -1,0 +1,72 @@
+#!/bin/sh
+
+CWD=`pwd`
+NAME=nibbles
+VERSION=1.2
+ARCH=i586
+BUILD=1
+PKGNAME=$NAME
+PKGVER=$VERSION
+BASEDIR=$PKGNAME-$PKGVER
+ARCHIVE=$BASEDIR.tar.bz2
+REPOSITORY=http://
+FLAGS="-O2 -march=pentium -mcpu=pentium -fno-strength-reduce \
+ -fomit-frame-pointer -ffast-math"
+PKG=/tmp/package-$NAME
+
+rm -rf $PKG
+mkdir -p $PKG
+
+# Obtain sources
+if [ ! -e $ARCHIVE ]; then
+  if `wget "$REPOSITORY/$ARCHIVE"`; then
+    true
+  else
+    exit 1
+  fi
+fi
+
+# Compile
+cd /tmp
+tar jxvf $CWD/$ARCHIVE
+cd $BASEDIR
+bzcat $CWD/$NAME-$VERSION-compile.patch.bz2 | patch -p1 -s
+make COPTS="$FLAGS"
+
+# Install
+mkdir -p $PKG/install $PKG/usr/games $PKG/usr/man/man6
+cat > $PKG/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+       |-----handy-ruler------------------------------------------------------|
+nibbles: nibbles
+nibbles:
+nibbles: Nibbles is a console arcade game in which the player controls a worm
+nibbles: which is always in motion and whose size increases each time it eats
+nibbles: an apple. Each time the worm eats an apple, one point is scored. If
+nibbles: the worm runs into the edge of the screen or runs into itself then
+nibbles: the game is lost.
+nibbles:
+nibbles:
+nibbles:
+nibbles:
+EOF
+
+install -m0755 nibbles $PKG/usr/games
+install -m0444 nibbles.6 $PKG/usr/man/man6
+
+gzip -9nf $PKG/usr/man/man?/*.?
+
+strip $PKG/usr/games/* || :
+
+chown -R root.root $PKG
+
+# Make package
+cd $PKG
+cat install/slack-desc | grep "$NAME:" > /tmp/$NAME-$VERSION-$ARCH-$BUILD.txt
+makepkg -l y -c n /tmp/$NAME-$VERSION-$ARCH-$BUILD.tgz

@@ -1,0 +1,60 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=whowatch
+VERSION=1.8.3
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: whowatch (real-time user logins monitoring tool)
+${NAME}:
+${NAME}: An interactive who-like program that displays information about the
+${NAME}: users currently logged on to the machine, in real time. Besides
+${NAME}: standard informations (login name, tty, host, user's process), the
+${NAME}: type of the connection (ie. telnet or ssh) is shown. You can toggle
+${NAME}: display between users' command or idle time. You can watch process
+${NAME}: trees, navigate in it and send INT and KILL signals.
+${NAME}:
+${NAME}: Homepage: http://wizard.ae.krakow.pl/~mike/#whowatch
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://wizard.ae.krakow.pl/~mike/download/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var
+make -j 2
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog ChangeLog
+install.dir ${PKG}/usr/bin
+install.bin src/whowatch ${PKG}/usr/bin
+install.dir ${PKG}/usr/man/man1
+install.man whowatch.1 ${PKG}/usr/man/man1
+}

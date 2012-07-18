@@ -1,0 +1,109 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=libjpeg
+VERSION=1.2.0
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: libjpeg (JPEG library)
+${NAME}:
+${NAME}: Libjpeg-turbo is a version of libjpeg which uses MMX, SSE, and SSE2
+${NAME}: SIMD instructions to accelerate baseline JPEG compression/
+${NAME}: decompression by about 2-4x on x86 and x86-64 platforms. It is based
+${NAME}: on libjpeg/SIMD but has numerous enhancements.
+${NAME}:
+${NAME}: Homepage: http://libjpeg-turbo.virtualgl.org
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+JPGLIBS="${PKG}/usr/lib$(libdirsuffix)"
+
+SRCNAME[0]=${NAME}-turbo
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=${URL[sf]}/${SRCNAME[0]}/files/${SRCVERS}/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="LGPL21"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --with-jpeg8
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc README
+changelog ChangeLog.txt
+rm -rf ${PKG}/usr/share
+}
+
+SRCNAME[1]=jpegoptim
+SRCVERS[1]=1.2.4
+SRCPACK[1]=http://www.kokkonen.net/tjko/src/${SRCNAME[1]}-${SRCVERS[1]}.tar.gz
+SRCCOPY[1]="GPL2"
+
+build1()
+{
+LD_LIBRARY_PATH="${PKG}/usr/lib$(libdirsuffix)" \
+LDFLAGS="-L${JPGLIBS}" \
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --with-libjpeg="${PKG}/usr/include"
+make ${JOBS}
+make install INSTALL_ROOT="${PKG}"
+doc README
+}
+
+SRCNAME[2]=jpeginfo
+SRCVERS[2]=1.6.1
+SRCPACK[2]=http://www.kokkonen.net/tjko/src/${SRCNAME[2]}-${SRCVERS[2]}.tar.gz
+SRCCOPY[2]="GPL2"
+
+build2()
+{
+LD_LIBRARY_PATH="${PKG}/usr/lib$(libdirsuffix)" \
+LDFLAGS="-L${JPGLIBS}" \
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --with-libjpeg="${PKG}/usr/include"
+make ${JOBS}
+make install INSTALL_ROOT="${PKG}"
+doc README
+}

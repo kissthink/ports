@@ -1,0 +1,163 @@
+#!/bin/sh
+
+CWD=`pwd`
+NAME=mysql
+VERSION=5.1.51
+ARCH=i586
+BUILD=1
+PKGNAME=$NAME
+PKGVER=$VERSION
+BASEDIR=$PKGNAME-$PKGVER
+ARCHIVE=$BASEDIR.tar.gz
+REPOSITORY=ftp://mir1.ovh.net/ftp.mysql.com/Downloads/MySQL-5.1
+FLAGS="-O2 -march=pentium -mtune=pentium -fno-strength-reduce \
+ -fomit-frame-pointer -ffast-math"
+PKG=/tmp/package-$NAME
+
+rm -rf $PKG
+mkdir -p $PKG
+
+# Obtain sources
+if [ ! -e $ARCHIVE ]; then
+  if `wget "$REPOSITORY/$ARCHIVE"`; then
+    true
+  else
+    exit 1
+  fi
+fi
+
+# Compile
+cd /tmp
+tar zxvf $CWD/$ARCHIVE
+cd $BASEDIR
+xzcat $CWD/$NAME-$VERSION-heimdal.patch.xz | patch -p1 -s
+CFLAGS=$FLAGS CXX=gcc \
+ CXXFLAGS="$FLAGS -felide-constructors -fno-exceptions -fno-rtti" \
+ ./configure \
+ --build=${ARCH}-slackware-linux \
+ --enable-static=no \
+ --enable-shared=yes \
+ --without-debug \
+ --prefix=/usr \
+ --sysconfdir=/etc/mysql \
+ --localstatedir=/var/lib/mysql \
+ --libexecdir=/usr/libexec/mysql \
+ --libdir=/usr/lib \
+ --mandir=/usr/man \
+ --infodir=/usr/info \
+ --with-unix-socket-path=/var/run/mysql/mysql.sock \
+ --with-mysqld-user=mysql \
+ --with-plugin-innobase \
+ --with-plugin-partition \
+ --with-plugin-csv \
+ --with-plugin-heap \
+ --with-plugin-myisam \
+ --with-plugin-myisammrg \
+ --without-readline \
+ --enable-assembler \
+ --enable-largefile \
+ --enable-thread-safe-client \
+ --with-big-tables \
+ --with-charset=utf8 \
+ --with-extra-charsets=complex \
+ --with-vio \
+ --with-ssl \
+ --program-prefix="" \
+ --program-suffix=""
+make
+
+# --with-embedded-server \
+
+# Install
+make install DESTDIR=$PKG
+mkdir -p $PKG/install $PKG/usr/doc/$NAME-$VERSION $PKG/etc/mysql \
+ $PKG/etc/rc.d $PKG/var/lib/mysql $PKG/var/run/mysql
+cat > $PKG/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|' on# the right side marks the last column you can put a character in. You must make# exactly 11 lines for the formatting to be correct.  It's also customary to
+# leave one space after the ':'.
+
+     |-----handy-ruler------------------------------------------------------|
+mysql: mysql (SQL-based relational database server)
+mysql:
+mysql: MySQL is a fast, multi-threaded, multi-user, and robust SQL
+mysql: (Structured Query Language) database server. It comes with a nice API
+mysql: which makes it easy to integrate into other applications.
+mysql:
+mysql: Homepage: http://www.mysql.com
+mysql:
+mysql:
+mysql:
+mysql:
+EOF
+
+cat > $PKG/install/slack-required <<EOF
+openssl-solibs >= 0.9.8n-i486-2
+readline >= 5.2-i486-4
+EOF
+
+install -m 0644 -g 0 -o 0 doinst.sh $PKG/install
+
+# Remove cruft
+#
+# TODO: remove unneeded binaries i.e. "mysql_client_test" and store away
+# all the perl garbage
+
+mv $PKG/usr/share/mysql/my-innodb-heavy-4G.cnf $PKG/etc/mysql 
+mv $PKG/usr/share/mysql/ndb-config-2-node.ini $PKG/etc/mysql
+mv $PKG/usr/share/mysql/mysql_fix_privilege_tables.sql \
+ $PKG/usr/doc/$NAME-$VERSION
+mv $PKG/usr/share/mysql/mysql-log-rotate \
+ $PKG/usr/doc/$NAME-$VERSION
+
+rm -rf $PKG/usr/mysql-test
+rm -f $PKG/usr/share/mysql/*.cnf
+rm -f $PKG/usr/share/mysql/mi_test_all*
+rm -f $PKG/usr/share/mysql/binary-configure
+
+install -m 0644 -g 0 -o 0 EXCEPTIONS-CLIENT ChangeLog \
+ $PKG/usr/doc/$NAME-$VERSION
+
+xz -9f \
+ $PKG/usr/doc/$NAME-$VERSION/ChangeLog
+
+install -m 0644 -g 0 -o 0 rc.mysqld.new $PKG/etc/rc.d/rc.mysqld.new
+
+(
+  cd support-files
+  cp my-huge.cnf my-large.cnf my-medium.cnf my-small.cnf $PKG/etc/mysql
+)
+
+(
+  cd $PKG/usr/lib
+  rm -f libmysqlclient.so libmysqlclient.so.16
+  ln -sf mysql/libmysqlclient.so .
+  ln -sf mysql/libmysqlclient.so.16 .
+  rm -f libmysqlclient_r.so libmysqlclient_r.so.16
+  ln -sf mysql/libmysqlclient_r.so .
+  ln -sf mysql/libmysqlclient_r.so.16 .
+)
+
+rm -f \
+ $PKG/usr/lib/*/*.la \
+ $PKG/usr/lib/*/*/*.la
+
+strip --strip-unneeded \
+ $PKG/usr/lib/*.so* || :
+
+chmod 0444 $PKG/usr/man/man?/*.?
+xz -9f $PKG/usr/man/man?/*.?
+
+rm -f $PKG/usr/info/dir
+chmod 0444 $PKG/usr/info/*.info*
+xz -9f $PKG/usr/info/*.info*
+
+strip $PKG/usr/bin/* || :
+
+chown -R root.root $PKG
+
+# Make package
+cd $PKG
+cat install/slack-desc | grep "$NAME:" > /tmp/$NAME-$VERSION-$ARCH-$BUILD.txt
+makepkg -l y -c n /tmp/$NAME-$VERSION-$ARCH-$BUILD.txz

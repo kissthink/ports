@@ -1,0 +1,75 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=wireshark
+VERSION=1.6.8
+BUILD=1
+DEPENDS=('glib >= 2.32.2-1' 'tcpip >= 3.2.0-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: wireshark (network protocol analyzer)
+${NAME}:
+${NAME}: Wireshark is the world's foremost network protocol analyzer, and is
+${NAME}: the standard in many industries.
+${NAME}:
+${NAME}: It is the continuation of a project that started in 1998. Hundreds of
+${NAME}: developers around the world have contributed to it, and it is still
+${NAME}: under active development.
+${NAME}:
+${NAME}: Homepage: http://www.wireshark.org
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://www.wireshark.org/download/src/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCCOPY[0]="GPL2 BSD3"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --datadir=/usr/share/application-data \
+ --with-plugins=/usr/lib$(libdirsuffix)/plugins/wireshark \
+ --enable-threads \
+ --enable-setcap-install \
+ --with-dumpcap-group=netdev \
+ --with-gnutls=yes \
+ --with-gcrypt=yes \
+ --with-ssl \
+ --with-pcap-remote
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+install.dir ${PKG}/usr/share/applications
+install.dat wireshark.desktop ${PKG}/usr/share/applications
+install.dir ${PKG}/usr/share/icons/hicolor/{16x16,32x32,48x48}/apps
+install.dat image/hi16-app-wireshark.png ${PKG}/usr/share/icons/hicolor/16x16/apps/wireshark.png
+install.dat image/hi32-app-wireshark.png ${PKG}/usr/share/icons/hicolor/32x32/apps/wireshark.png
+install.dat image/hi48-app-wireshark.png ${PKG}/usr/share/icons/hicolor/48x48/apps/wireshark.png
+}

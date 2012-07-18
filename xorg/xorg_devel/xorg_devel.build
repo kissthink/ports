@@ -1,0 +1,452 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=xorg_devel
+VERSION=7.7
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: xorg_devel
+${NAME}:
+${NAME}: Development files and tools needed to build Xorg or compile Xorg
+${NAME}: applications.
+${NAME}:
+${NAME}: Homepage: http://www.x.org
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+export XORGREPO="http://www.x.org/releases/X11R${VERSION}/src/everything"
+export XORGIREPO="http://xorg.freedesktop.org/archive/individual"
+export X_CFLAGS="-I${PKG}/usr/include"
+export X_LIBS="-L${PKG}/usr/lib$(libdirsuffix)"
+
+configure()
+{
+PKG_CONFIG_PATH="${PKG}/usr/lib$(libdirsuffix)/pkgconfig" \
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ ${*}
+}
+
+SRCNAME[0]=util-macros
+SRCVERS[0]=1.17
+SRCPACK[0]=${XORGIREPO}/util/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+
+build0()
+{
+configure
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+install.dir ${PKG}/usr/lib$(libdirsuffix)
+mv \
+ ${PKG}/usr/share/pkgconfig \
+ ${PKG}/usr/lib$(libdirsuffix)
+rm -rf \
+ ${PKG}/usr/share/util-macros
+}
+
+SRCNAME[1]=xproto
+SRCVERS[1]=7.0.23
+SRCPACK[1]=${XORGIREPO}/proto/${SRCNAME[1]}-${SRCVERS[1]}.tar.bz2
+
+build1()
+{
+configure
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[2]=makedepend
+SRCVERS[2]=1.0.4
+SRCPACK[2]=${XORGIREPO}/util/${SRCNAME[2]}-${SRCVERS[2]}.tar.bz2
+
+build2()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+configure
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[3]=xextproto
+SRCVERS[3]=7.2.1
+SRCPACK[3]=${XORGIREPO}/proto/${SRCNAME[3]}-${SRCVERS[3]}.tar.bz2
+
+build3()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[4]=xineramaproto
+SRCVERS[4]=1.2
+SRCPACK[4]=${XORGIREPO}/proto/${SRCNAME[4]}-${SRCVERS[4]}.tar.bz2
+
+build4()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[5]=xf86vidmodeproto
+SRCVERS[5]=2.3
+SRCPACK[5]=${XORGIREPO}/proto/${SRCNAME[5]}-${SRCVERS[5]}.tar.bz2
+
+build5()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[6]=xf86driproto
+SRCVERS[6]=2.1.0
+SRCPACK[6]=${XORGIREPO}/proto/${SRCNAME[6]}-${SRCVERS[6]}.tar.bz2
+
+build6()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[7]=xf86dgaproto
+SRCVERS[7]=2.1
+SRCPACK[7]=${XORGIREPO}/proto/${SRCNAME[7]}-${SRCVERS[7]}.tar.bz2
+
+build7()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[8]=xf86bigfontproto
+SRCVERS[8]=1.2.0
+SRCPACK[8]=${XORGIREPO}/proto/${SRCNAME[8]}-${SRCVERS[8]}.tar.bz2
+
+build8()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[9]=videoproto
+SRCVERS[9]=2.3.1
+SRCPACK[9]=${XORGIREPO}/proto/${SRCNAME[9]}-${SRCVERS[9]}.tar.bz2
+
+build9()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[10]=scrnsaverproto
+SRCVERS[10]=1.2.2
+SRCPACK[10]=${XORGIREPO}/proto/${SRCNAME[10]}-${SRCVERS[10]}.tar.bz2
+
+build10()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[11]=resourceproto
+SRCVERS[11]=1.2.0
+SRCPACK[11]=${XORGIREPO}/proto/${SRCNAME[11]}-${SRCVERS[11]}.tar.bz2
+
+build11()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[12]=renderproto
+SRCVERS[12]=0.11.1
+SRCPACK[12]=${XORGIREPO}/proto/${SRCNAME[12]}-${SRCVERS[12]}.tar.bz2
+
+build12()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[13]=recordproto
+SRCVERS[13]=1.14.2
+SRCPACK[13]=${XORGIREPO}/proto/${SRCNAME[13]}-${SRCVERS[13]}.tar.bz2
+
+build13()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[14]=randrproto
+SRCVERS[14]=1.3.2
+SRCPACK[14]=${XORGIREPO}/proto/${SRCNAME[14]}-${SRCVERS[14]}.tar.bz2
+
+build14()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[15]=kbproto
+SRCVERS[15]=1.0.6
+SRCPACK[15]=${XORGIREPO}/proto/${SRCNAME[15]}-${SRCVERS[15]}.tar.bz2
+
+build15()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[16]=inputproto
+SRCVERS[16]=2.2
+SRCPACK[16]=${XORGIREPO}/proto/${SRCNAME[16]}-${SRCVERS[16]}.tar.bz2
+
+build16()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[17]=glproto
+SRCVERS[17]=1.4.15
+SRCPACK[17]=${XORGIREPO}/proto/${SRCNAME[17]}-${SRCVERS[17]}.tar.bz2
+
+build17()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[18]=fontsproto
+SRCVERS[18]=2.1.2
+SRCPACK[18]=${XORGIREPO}/proto/${SRCNAME[18]}-${SRCVERS[18]}.tar.bz2
+
+build18()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[19]=fixesproto
+SRCVERS[19]=5.0
+SRCPACK[19]=${XORGIREPO}/proto/${SRCNAME[19]}-${SRCVERS[19]}.tar.bz2
+
+build19()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[20]=dri2proto
+SRCVERS[20]=2.6
+SRCPACK[20]=${XORGIREPO}/proto/${SRCNAME[20]}-${SRCVERS[20]}.tar.bz2
+
+build20()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[21]=dmxproto
+SRCVERS[21]=2.3
+SRCPACK[21]=${XORGIREPO}/proto/${SRCNAME[21]}-${SRCVERS[21]}.tar.bz2
+
+build21()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[22]=damageproto
+SRCVERS[22]=1.2.1
+SRCPACK[22]=${XORGIREPO}/proto/${SRCNAME[22]}-${SRCVERS[22]}.tar.bz2
+
+build22()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[23]=compositeproto
+SRCVERS[23]=0.4.2
+SRCPACK[23]=${XORGIREPO}/proto/${SRCNAME[23]}-${SRCVERS[23]}.tar.bz2
+
+build23()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[24]=bigreqsproto
+SRCVERS[24]=1.1.2
+SRCPACK[24]=${XORGIREPO}/proto/${SRCNAME[24]}-${SRCVERS[24]}.tar.bz2
+
+build24()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[25]=xcb-proto
+SRCVERS[25]=1.7.1
+SRCPACK[25]=http://xcb.freedesktop.org/dist/${SRCNAME[25]}-${SRCVERS[25]}.tar.bz2
+
+build25()
+{
+configure \
+ --datadir=/usr/share/application-data
+make ${JOBS}
+make install DESTDIR="${PKG}"
+license COPYING
+rm -f \
+  ${PKG}/usr/lib$(libdirsuffix)/python*/site-packages/xcbgen/*.py?
+}
+
+SRCNAME[26]=libpthread-stubs
+SRCVERS[26]=0.3
+SRCPACK[26]=${XORGIREPO}/lib/${SRCNAME[26]}-${SRCVERS[26]}.tar.bz2
+
+build26()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+}
+
+SRCNAME[27]=xtrans
+SRCVERS[27]=1.2.7
+SRCPACK[27]=${XORGIREPO}/lib/${SRCNAME[27]}-${SRCVERS[27]}.tar.bz2
+
+build27()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+mv \
+ ${PKG}/usr/share/pkgconfig/*.pc \
+ ${PKG}/usr/lib$(libdirsuffix)/pkgconfig
+rm -rf \
+ ${PKG}/usr/share/pkgconfig \
+ ${PKG}/usr/share/doc
+}
+
+SRCNAME[28]=xcmiscproto
+SRCVERS[28]=1.2.2
+SRCPACK[28]=${XORGIREPO}/proto/${SRCNAME[28]}-${SRCVERS[28]}.tar.bz2
+
+build28()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+rm -rf \
+ ${PKG}/usr/share/doc
+}

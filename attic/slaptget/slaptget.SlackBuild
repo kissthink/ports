@@ -1,0 +1,90 @@
+#!/bin/sh
+
+CWD=`pwd`
+NAME=slaptget
+VERSION=0.9.10a
+ARCH=i586
+BUILD=1
+PKGNAME=slapt-get
+PKGVER=$VERSION
+BASEDIR=$PKGNAME-$PKGVER
+ARCHIVE=$BASEDIR.tar.gz
+REPOSITORY=http://software.jaos.org
+FLAGS="-O2 -march=pentium -mcpu=pentium -fno-strength-reduce \
+ -fomit-frame-pointer -ffast-math"
+PKG=/tmp/package-$NAME
+
+rm -rf $PKG
+mkdir -p $PKG
+
+# Obtain sources
+if [ ! -e $ARCHIVE ]; then
+  if `wget "$REPOSITORY/$ARCHIVE"`; then
+    true
+  else
+    exit 1
+  fi
+fi
+
+# Compile
+cd /tmp
+tar zxvf $CWD/$ARCHIVE
+cd $BASEDIR
+#bzcat $CWD/$NAME-$VERSION-fr.patch.bz2 | patch -p1 -s
+bzcat $CWD/$NAME-$VERSION-makefile.patch.bz2 | patch -p1 -s
+bzcat $CWD/$NAME-$VERSION-slackware.patch.bz2 | patch -p1 -s
+make OPTFLAGS="$FLAGS"
+
+# Install
+mkdir -p $PKG/install $PKG/usr/doc/$NAME-$VERSION
+cat > $PKG/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|' on
+# the right side marks the last column you can put a character in. You must make
+# exactly 11 lines for the formatting to be correct.  It's also customary to
+# leave one space after the ':'.
+
+        |-----handy-ruler------------------------------------------------------|
+slaptget: slapt-get
+slaptget:
+slaptget: A Debian APT-like tool for Slackware.
+slaptget:
+slaptget:
+slaptget:
+slaptget:
+slaptget:
+slaptget:
+slaptget:
+slaptget:
+EOF
+
+cat > $PKG/install/slack-required <<EOF
+curl >= 7.12.2-i486-1
+glibc-solibs >= 2.3.4-i486-7
+binutils >= 2.15.92.0.2-i486-1
+openssl >= 0.9.7e-i486-1
+pkgtools >= 10.1.0-i486-1
+zlib >= 1.2.2-i486-1
+libidn >= 0.5.9-i486-1
+EOF
+
+make install DESTDIR=$PKG
+
+install -m644 -g0 -o0 ChangeLog FAQ* README TODO example.slapt-getrc \
+ $PKG/usr/doc/$NAME-$VERSION
+
+gzip -9nf $PKG/usr/doc/$NAME-$VERSION/FAQ* \
+ $PKG/usr/doc/$NAME-$VERSION/ChangeLog
+
+install -m0644 doinst.sh $PKG/install
+
+strip $PKG/usr/sbin/* || :
+
+chown -R root.root $PKG
+chgrp bin $PKG/usr/sbin $PKG/usr/sbin/*
+
+# Make package
+cd $PKG
+cat install/slack-desc | grep "$NAME:" > /tmp/$NAME-$VERSION-$ARCH-$BUILD.txt
+makepkg -l y -c n /tmp/$NAME-$VERSION-$ARCH-$BUILD.tgz

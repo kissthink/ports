@@ -1,0 +1,121 @@
+#!/bin/sh
+
+CWD=`pwd`
+NAME=gftp
+VERSION=2.0.18
+ARCH=i586
+BUILD=1
+PKGNAME=$NAME
+PKGVER=$VERSION
+BASEDIR=$PKGNAME-$PKGVER
+ARCHIVE=$BASEDIR.tar.bz2
+REPOSITORY=ftp://www.gftp.org/pub/gftp
+FLAGS="-O2 -march=pentium -mcpu=pentium -fno-strength-reduce \
+ -fomit-frame-pointer -ffast-math"
+PKG=/tmp/package-$NAME
+
+rm -rf $PKG
+mkdir -p $PKG
+
+# Obtain sources
+if [ ! -e $ARCHIVE ]; then
+  if `wget "$REPOSITORY/$ARCHIVE"`; then
+    true
+  else
+    exit 1
+  fi
+fi
+
+# Compile
+cd /tmp
+tar jxvf $CWD/$ARCHIVE
+cd $BASEDIR
+bzcat $CWD/$NAME-$VERSION-slackware.patch.bz2 | patch -p1 -s
+CFLAGS=$FLAGS CXXFLAGS=$FLAGS ./configure --prefix=/usr \
+ --bindir=/usr/X11R6/bin --mandir=/usr/X11R6/man --sysconfdir=/etc \
+ --disable-textport
+make
+
+# Install
+make install DESTDIR=$PKG
+mkdir -p $PKG/install $PKG/usr/doc/$NAME-$VERSION $PKG/etc/X11/apps/Internet \
+ $PKG/etc/X11/icons
+cat > $PKG/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+    |-----handy-ruler------------------------------------------------------|
+gftp: gFTP
+gftp:
+gftp: gFTP is a multithreaded FTP client for X Windows written using Gtk.
+gftp: It features simultaneous downloads, resuming of interrupted file
+gftp: transfers, file transfer queues, downloading of entire directories,
+gftp: FTP proxy support, remote directory caching, passive and non-passive
+gftp: file transfers, drag-n-drop support, bookmarks menu, stop button, SSL
+gftp: and many more features.
+gftp:
+gftp:
+gftp:
+EOF
+
+cat > $PKG/install/slack-required <<EOF
+openssl-solibs >= 0.9.7d-i486-1
+gtk+ >= 2.4.4-i486-1
+EOF
+
+cat > $PKG/etc/X11/apps/Internet/Gftp.desktop <<EOF
+[Desktop Entry]
+
+Encoding=UTF-8
+Name=Gftp
+GenericName=FTP Client
+GenericName[fr]=Client FTP
+Type=Application
+Exec=gftp
+Icon=/etc/X11/icons/Gftp.png
+Terminal=0
+
+Comment=An FTP client
+Comment[fr]=Un client FTP
+EOF
+
+uudecode gftp.uu
+install -m644 -g0 -o0 Gftp.png $PKG/etc/X11/icons
+
+install -m644 -g0 -o0 ChangeLog* README* THANKS TODO docs/USERS-GUIDE \
+ docs/parse-netrc.pl $PKG/usr/doc/$NAME-$VERSION
+
+gzip -9nf \
+ $PKG/usr/doc/$NAME-$VERSION/ChangeLog* \
+ $PKG/usr/doc/$NAME-$VERSION/README* \
+ $PKG/usr/doc/$NAME-$VERSION/USERS-GUIDE
+
+rm -rf $PKG/usr/share/gnome \
+ $PKG/usr/share/pixmaps
+ $PKG/usr/share/applications
+
+rm -f $PKG/usr/X11R6/bin/gftp
+mv $PKG/usr/X11R6/bin/gftp-gtk $PKG/usr/X11R6/bin/gftp
+
+mv $PKG/usr/X11R6/man/man1/gftp.1 \
+ $PKG/usr/X11R6/man/man1/gftp.1x
+
+chmod 444 $PKG/usr/X11R6/man/man?/*.?x
+gzip -9nf $PKG/usr/X11R6/man/man?/*.?x
+
+# the fact that the Gftp's config files are in /usr/share must be fixed at
+# some point. Also later on we'll need to remove the redundant copy of
+# COPYING.
+
+strip $PKG/usr/X11R6/bin/* || :
+chown -R root.root $PKG
+chgrp bin $PKG/usr/X11R6/bin $PKG/usr/X11R6/bin/*
+
+# Make package
+cd $PKG
+cat install/slack-desc | grep "$NAME:" > /tmp/$NAME-$VERSION-$ARCH-$BUILD.txt
+makepkg -l y -c n /tmp/$NAME-$VERSION-$ARCH-$BUILD.tgz

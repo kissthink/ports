@@ -1,0 +1,73 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=v4l_utils
+VERSION=0.8.8
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: v4l_utils (Video 4 Linux library and utilities)
+${NAME}:
+${NAME}: A collection of libraries that add a thin abstraction layer on top
+${NAME}: of devices supported by Video4Linux2 (V4L2).
+${NAME}:
+${NAME}: Homepage: http://people.atrpms.net/~hdegoede
+${NAME}:
+${NAME}: This package also includes the w_scan utility which allows to do
+${NAME}: frequency scans for DVB and ATSC transmissions.
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=v4l-utils
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://linuxtv.org/downloads/v4l-utils/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCCOPY[0]="LGPL21 GPL2"
+
+build0()
+{
+make ${JOBS} CFLAGS="${FLAGS}" LIBDIR="/usr/lib$(libdirsuffix)" \
+ PREFIX="/usr" LIBSUBDIR="exec/v4l" INCLUDEDIR="/usr/include/v4l" \
+ MANDIR="/usr/man" UDEVRULESDIR="$(pkg-config udev --variable=udevdir)/rules.d"
+make install DESTDIR="${PKG}" LIBDIR="/usr/lib$(libdirsuffix)" \
+ PREFIX="/usr" LIBSUBDIR="exec/v4l" INCLUDEDIR="/usr/include/v4l" \
+ MANDIR="/usr/man" UDEVRULESDIR="$(pkg-config udev --variable=udevdir)/rules.d"
+changelog ChangeLog
+}
+
+SRCNAME[1]=w_scan
+SRCVERS[1]=20120415
+SRCPACK[1]=http://wirbel.htpc-forum.de/w_scan/${SRCNAME[1]}-${SRCVERS[1]}.tar.bz2
+SRCOPTS[1]="nosrcroot"
+
+build1()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc README doc/README.file_formats
+changelog ChangeLog
+}

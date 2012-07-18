@@ -1,0 +1,131 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=avahi
+VERSION=0.6.30
+BUILD=1
+DEPENDS=('libdaemon >= 0.14-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: avahi
+${NAME}:
+${NAME}: A free Zeroconf implementation, including a system for multicast
+${NAME}: DNS/DNS-SD service discovery. It allows programs to publish and
+${NAME}: discover services and hosts running on a local network with no
+${NAME}: specific configuration. For example, a user can plug their computer
+${NAME}: into a network and Avahi automatically finds printers to print to,
+${NAME}: files to look at and people to talk to, as well as advertising the
+${NAME}: network services running on the machine.
+${NAME}:
+${NAME}: Homepage: http://avahi.org
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://avahi.org/download/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="LGPL21"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-static=no \
+ --enable-shared=yes \
+ --enable-introspection=no \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --disable-qt3 \
+ --disable-qt4 \
+ --disable-gtk3 \
+ --disable-python \
+ --disable-python-dbus \
+ --disable-pygtk \
+ --disable-mono \
+ --with-distro=slackware \
+ --with-systemdsystemunitdir="${SYS_DIR[systemdsystemunitdir]}" \
+ --with-xml=expat \
+ --with-avahi-user=avahi \
+ --with-avahi-group=avahi \
+ --with-autoipd-user=autoipd \
+ --with-autoipd-group=autoipd \
+ --with-avahi-priv-access-group=netdev
+make ${JOBS}
+make install DESTDIR="${PKG}"
+install.dat doinst.sh ${PKG}/install
+install.cfg mdns.allow.new ${PKG}/etc
+for manpage in \
+ avahi-browse-domains avahi-publish-address avahi-publish-service \
+ avahi-resolve-address avahi-resolve-host-name bvnc; do
+ rm -f $PKG/usr/man/man?/${manpage}.?
+done
+(
+  cd ${PKG}/usr/man/man1
+  echo ".so man/man1/avahi-browse.1" > avahi-browse-domains.1
+  echo ".so man/man1/avahi-publish.1" > avahi-publish-address.1
+  echo ".so man/man1/avahi-publish.1" > avahi-publish-service.1
+  echo ".so man/man1/avahi-resolve.1" > avahi-resolve-address.1
+  echo ".so man/man1/avahi-resolve.1" > avahi-resolve-host-name.1
+  echo ".so man/man1/bssh.1" > bvnc.1
+)
+mv \
+ ${PKG}/etc/rc.d/rc.avahidaemon \
+ ${PKG}/etc/rc.d/rc.avahidaemon.new
+mv \
+ ${PKG}/etc/rc.d/rc.avahidnsconfd \
+ ${PKG}/etc/rc.d/rc.avahidnsconfd.new
+mv \
+ ${PKG}/etc/avahi/avahi-daemon.conf \
+ ${PKG}/etc/avahi/avahi-daemon.conf.new
+mv \
+ ${PKG}/etc/dbus-1/system.d/avahi-dbus.conf \
+ ${PKG}/etc/dbus-1/system.d/avahi-dbus.conf.new
+rmdir \
+ ${PKG}/var \
+ ${PKG}/usr/lib$(libdirsuffix)/avahi
+}
+
+SRCNAME[1]=nss-mdns
+SRCVERS[1]=0.10
+SRCPACK[1]=http://0pointer.de/lennart/projects/${SRCNAME[1]}/${SRCNAME[1]}-${SRCVERS[1]}.tar.gz
+SRCCOPY[1]="LGPL21"
+
+build1()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --disable-lynx \
+ --enable-avahi
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc README
+}

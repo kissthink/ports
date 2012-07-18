@@ -1,0 +1,171 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=pidgin
+VERSION=2.10.4
+BUILD=1
+DEPENDS=('gtk+ >= 2.24.10-1' 'libxml >= 2.7.8-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: Pidgin (multi-protocol chat client)
+${NAME}:
+${NAME}: Pidgin is an instant message client that supports many protocols,
+${NAME}: including MSN, AIM, Yahoo!, Jabber, ICQ, IRC, Groupwise, SILC,
+${NAME}: Gadu-Gadu and Zephyr.
+${NAME}:
+${NAME}: Homepage: http://pidgin.im
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+export PKG_CONFIG_PATH="${PKG}/usr/lib$(libdirsuffix)/pkgconfig"
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=${URL[sf]}/${SRCNAME[0]}/files/Pidgin/${SRCVERS[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --disable-debug \
+ --disable-perl \
+ --disable-tcl \
+ --disable-startup-notification \
+ --disable-meanwhile \
+ --disable-gtkspell \
+ --enable-gnutls=yes \
+ --enable-cap
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS COPYRIGHT doc/gtkrc-2.0
+changelog ChangeLog
+}
+
+SRCNAME[1]=${NAME}-otr
+SRCVERS[1]=3.2.0
+SRCPACK[1]=${URL[sf]}/${SRCNAME[1]}/${SRCNAME[1]}-${SRCVERS[1]}.tar.gz
+SRCCOPY[1]="GPL2"
+
+build1()
+{
+CPPFLAGS="-I${PKG}/usr/include/pidgin -I${PKG}/usr/include/libpurple" \
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+}
+
+SRCNAME[2]=${NAME}-nudge
+SRCVERS[2]=20101006
+SRCPACK[2]=${SRCNAME[2]}-${SRCVERS[2]}.tar.xz
+
+build2()
+{
+make ${JOBS} CFLAGS="${FLAGS}" Q="" \
+ EXTRA_CFLAGS="-I${PKG}/usr/include/pidgin -I${PKG}/usr/include/libpurple" \
+ EXTRA_LIBS="-L${PKG}/usr/lib$(libdirsuffix)"
+make install DESTDIR="${PKG}" LIBDIR="/usr/lib$(libdirsuffix)"
+}
+
+SRCNAME[3]=pidgin-libnotify-plus
+SRCVERS[3]=20110902
+SRCPACK[3]=${SRCNAME[3]}-${SRCVERS[3]}.tar.xz
+SRCCOPY[3]="GPL3"
+
+build3()
+{
+CPPFLAGS="-I${PKG}/usr/include/pidgin -I${PKG}/usr/include/libpurple" \
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS
+}
+
+SRCNAME[4]=pidgin-musictracker
+SRCVERS[4]=0.4.22
+SRCPACK[4]=http://${SRCNAME[4]}.googlecode.com/files/${SRCNAME[4]}-${SRCVERS[4]}.tar.bz2
+SRCCOPY[4]="GPL2"
+
+build4()
+{
+PIDGIN_CFLAGS="-I${PKG}/usr/include/pidgin -I${PKG}/usr/include/libpurple" \
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog ChangeLog
+}
+
+SRCNAME[5]=pbar
+SRCVERS[5]=0.3
+SRCPACK[5]=${SRCNAME[5]}-${SRCVERS[5]}.tar.xz
+SRCCOPY[5]="GPL3"
+
+build5()
+{
+make ${JOBS} OPTS="${FLAGS}" \
+ EXTRA_CFLAGS="-I${PKG}/usr/include/pidgin -I${PKG}/usr/include/libpurple" \
+ EXTRA_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lpurple"
+make install DESTDIR="${PKG}" PREFIX="/usr"
+changelog ChangeLog
+}

@@ -1,0 +1,49 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=httping
+VERSION=1.5.2
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: httping (ping utility for the HTTP protocol)
+${NAME}:
+${NAME}: Httping is like 'ping' but for HTTP-requests. Give it an URL, and
+${NAME}: it'll show you how long it takes to connect, send a request and
+${NAME}: retrieve the reply.
+${NAME}:
+${NAME}: Httping was written bu Folkert Van Heusden.
+${NAME}:
+${NAME}: Homepage: http://www.vanheusden.com/httping
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://www.vanheusden.com/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tgz
+
+build0()
+{
+make -j 2 OFLAGS="${FLAGS}"
+make install DESTDIR="${PKG}" \
+ MANDIR="${SYS_DIR[man]}" \
+ DOCDIR="bla"
+license license.txt
+rm -rf ${PKG}/bla
+}

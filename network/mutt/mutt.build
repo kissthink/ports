@@ -1,0 +1,91 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=mutt
+VERSION=1.5.21
+BUILD=1
+DEPENDS=('libidn >= 1.24-1' 'gpgme >= 1.3.1-1' 'openssl >= 0.9.8t-1' 'libgsasl >= 1.6.1-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: Mutt (the Mutt mail user agent)
+${NAME}:
+${NAME}: Mutt is a small but very powerful text-based MIME mail client. Mutt
+${NAME}: is highly configurable, and is well suited to the mail power user
+${NAME}: with advanced features like key bindings, keyboard macros, mail
+${NAME}: threading, regular expression searches and a powerful pattern
+${NAME}: matching language for selecting groups of messages.
+${NAME}:
+${NAME}: Homepage: http://www.mutt.org
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=ftp://ftp.mutt.org/mutt/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+CPPFLAGS="-I/usr/include/idn" \
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc/conf.d \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --with-mailpath=/var/spool/mail \
+ --with-docdir=/usr/doc/${NAME}-${VERSION} \
+ --without-wc-funcs \
+ --with-ssl \
+ --enable-locales-fix \
+ --enable-gpgme \
+ --enable-pop \
+ --enable-imap \
+ --enable-smtp \
+ --enable-hcache \
+ --with-curses=/usr \
+ --with-ssl=/usr \
+ --with-sasl=/usr \
+ --with-idn
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc README.SECURITY UPDATING
+changelog NEWS
+install.dat doinst.sh ${PKG}/install
+install.dir ${PKG}/usr/share/html/mutt
+mv \
+ ${DOC}/*.html \
+ ${PKG}/usr/share/html/mutt
+mv \
+ ${PKG}/etc/conf.d/Muttrc \
+ ${PKG}/etc/conf.d/mutt.conf.new
+mv \
+ ${PKG}/etc/conf.d/*.dist \
+ ${DOC}/samples
+rm -rf \
+ ${PKG}/etc/conf.d/mime.types \
+ ${PKG}/usr/bin/flea \
+ ${PKG}/usr/bin/muttbug \
+ ${DOC}/samples/iconv \
+ ${DOC}/{COPYRIGHT,GPL,INSTALL,README,README.SSL,TODO} \
+ ${DOC}/{applying-patches,*-*otes}.txt 
+}

@@ -1,0 +1,664 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=xorg_server
+VERSION=7.7
+BUILD=1
+DEPENDS=('xorg_libs >= 7.7-1' 'mesa >= 8.0.3-1')
+FONTPATH="/usr/share/fonts/local,/usr/share/fonts/TTF,/usr/share/fonts/OTF,/usr/share/fonts/Type1,/usr/share/fonts/misc,/usr/share/fonts/CID,/usr/share/fonts/75dpi/:unscaled,/usr/share/fonts/100dpi/:unscaled,/usr/share/fonts/75dpi,/usr/share/fonts/100dpi,/usr/share/fonts/cyrillic"
+SERVERS="--enable-xorg --enable-dmx --enable-xephyr"
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: xorg_server
+${NAME}:
+${NAME}: The Xorg display server and it's utilities. If you want a graphical
+${NAME}: user interface (GUI), then you should install this package.
+${NAME}:
+${NAME}: Homepage: http://www.x.org
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+export XORGREPO="http://www.x.org/releases/X11R${VERSION}/src/everything"
+export XORGIREPO="http://www.x.org/releases/individual"
+export PKG_CONFIG_PATH="${PKG}/usr/lib$(libdirsuffix)/pkgconfig:/usr/lib$(libdirsuffix)/pkgconfig"
+export MKFONTSCALE="${PKG}/usr/bin/mkfontscale"
+export XCURSORGEN="${PKG}/usr/bin/xcursorgen"
+
+configure()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-shared=yes \
+ --enable-static=no \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ ${*}
+}
+
+SRCNAME[0]=xbitmaps
+SRCVERS[0]=1.1.1
+SRCPACK[0]=${XORGIREPO}/data/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+
+build0()
+{
+./configure \
+  --build="${ARCH}-slackware-linux" \
+  --disable-dependency-tracking \
+  --disable-silent-rules \
+  --prefix=/usr \
+  --mandir="${SYS_DIR[man]}" \
+  --sysconfdir=/etc \
+  --libdir=/usr/lib$(libdirsuffix) \
+  --includedir=/usr/share \
+  --localstatedir=/var
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+mkdir -p ${PKG}/usr/lib$(libdirsuffix)
+mv \
+ ${PKG}/usr/share/pkgconfig \
+ ${PKG}/usr/lib$(libdirsuffix)
+}
+
+SRCNAME[1]=bdftopcf
+SRCVERS[1]=1.0.3
+SRCPACK[1]=${XORGIREPO}/app/${SRCNAME[1]}-${SRCVERS[1]}.tar.bz2
+
+build1()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[2]=iceauth
+SRCVERS[2]=1.0.5
+SRCPACK[2]=${XORGIREPO}/app/${SRCNAME[2]}-${SRCVERS[2]}.tar.bz2
+
+build2()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[3]=luit
+SRCVERS[3]=1.1.1
+SRCPACK[3]=${XORGIREPO}/app/${SRCNAME[3]}-${SRCVERS[3]}.tar.bz2
+
+build3()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[4]=mkfontdir
+SRCVERS[4]=1.0.7
+SRCPACK[4]=${XORGIREPO}/app/${SRCNAME[4]}-${SRCVERS[4]}.tar.bz2
+
+build4()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[5]=mkfontscale
+SRCVERS[5]=1.1.0
+SRCPACK[5]=${XORGIREPO}/app/${SRCNAME[5]}-${SRCVERS[5]}.tar.bz2
+
+build5()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[6]=sessreg
+SRCVERS[6]=1.0.7
+SRCPACK[6]=${XORGIREPO}/app/${SRCNAME[6]}-${SRCVERS[6]}.tar.bz2
+
+build6()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[7]=setxkbmap
+SRCVERS[7]=1.3.0
+SRCPACK[7]=${XORGIREPO}/app/${SRCNAME[7]}-${SRCVERS[7]}.tar.bz2
+
+build7()
+{
+configure
+# --with-xkb-config-root=
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[8]=smproxy
+SRCVERS[8]=1.0.5
+SRCPACK[8]=${XORGIREPO}/app/${SRCNAME[8]}-${SRCVERS[8]}.tar.bz2
+
+build8()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[9]=x11perf
+SRCVERS[9]=1.5.4
+SRCPACK[9]=${XORGIREPO}/app/${SRCNAME[9]}-${SRCVERS[9]}.tar.bz2
+
+build9()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-shared=yes \
+ --enable-static=no \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/share \
+ --localstatedir=/var
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[10]=xauth
+SRCVERS[10]=1.0.7
+SRCPACK[10]=${XORGIREPO}/app/${SRCNAME[10]}-${SRCVERS[10]}.tar.bz2
+
+build10()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[11]=xbacklight
+SRCVERS[11]=1.1.2
+SRCPACK[11]=${XORGIREPO}/app/${SRCNAME[11]}-${SRCVERS[11]}.tar.bz2
+
+build11()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[12]=xcmsdb
+SRCVERS[12]=1.0.4
+SRCPACK[12]=${XORGIREPO}/app/${SRCNAME[12]}-${SRCVERS[12]}.tar.bz2
+
+build12()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[13]=xcursorgen
+SRCVERS[13]=1.0.5
+SRCPACK[13]=${XORGIREPO}/app/${SRCNAME[13]}-${SRCVERS[13]}.tar.bz2
+
+build13()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[14]=xdpyinfo
+SRCVERS[14]=1.3.0
+SRCPACK[14]=${XORGIREPO}/app/${SRCNAME[14]}-${SRCVERS[14]}.tar.bz2
+
+build14()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[15]=xev
+SRCVERS[15]=1.2.0
+SRCPACK[15]=${XORGIREPO}/app/${SRCNAME[15]}-${SRCVERS[15]}.tar.bz2
+
+build15()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[16]=xgamma
+SRCVERS[16]=1.0.5
+SRCPACK[16]=${XORGIREPO}/app/${SRCNAME[16]}-${SRCVERS[16]}.tar.bz2
+
+build16()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[17]=xhost
+SRCVERS[17]=1.0.5
+SRCPACK[17]=${XORGIREPO}/app/${SRCNAME[17]}-${SRCVERS[17]}.tar.bz2
+
+build17()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[18]=xinput
+SRCVERS[18]=1.6.0
+SRCPACK[18]=${XORGIREPO}/app/${SRCNAME[18]}-${SRCVERS[18]}.tar.bz2
+
+build18()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[19]=xkbcomp
+SRCVERS[19]=1.2.4
+SRCPACK[19]=${XORGIREPO}/app/${SRCNAME[19]}-${SRCVERS[19]}.tar.bz2
+
+build19()
+{
+configure
+# --with-xkb-config-root=/usr/share/X11/xkb
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[20]=xkbevd
+SRCVERS[20]=1.1.3
+SRCPACK[20]=${XORGIREPO}/app/${SRCNAME[20]}-${SRCVERS[20]}.tar.bz2
+
+build20()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[21]=xkbutils
+SRCVERS[21]=1.0.3
+SRCPACK[21]=${XORGIREPO}/app/${SRCNAME[21]}-${SRCVERS[21]}.tar.bz2
+
+build21()
+{
+XKBVLEDS_CFLAGS="-I${PKG}/usr/include" \
+XKBBELL_CFLAGS="-I${PKG}/usr/include" \
+XKBWATCH_CFLAGS="-I${PKG}/usr/include" \
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[22]=xkill
+SRCVERS[22]=1.0.3
+SRCPACK[22]=${XORGIREPO}/app/${SRCNAME[22]}-${SRCVERS[22]}.tar.bz2
+
+build22()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[23]=xlsatoms
+SRCVERS[23]=1.1.1
+SRCPACK[23]=${XORGIREPO}/app/${SRCNAME[23]}-${SRCVERS[23]}.tar.bz2
+
+build23()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[24]=xlsclients
+SRCVERS[24]=1.1.2
+SRCPACK[24]=${XORGIREPO}/app/${SRCNAME[24]}-${SRCVERS[24]}.tar.bz2
+
+build24()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[25]=xmodmap
+SRCVERS[25]=1.0.7
+SRCPACK[25]=${XORGIREPO}/app/${SRCNAME[25]}-${SRCVERS[25]}.tar.bz2
+
+build25()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[26]=xpr
+SRCVERS[26]=1.0.4
+SRCPACK[26]=${XORGIREPO}/app/${SRCNAME[26]}-${SRCVERS[26]}.tar.bz2
+
+build26()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[27]=xprop
+SRCVERS[27]=1.2.1
+SRCPACK[27]=${XORGIREPO}/app/${SRCNAME[27]}-${SRCVERS[27]}.tar.bz2
+
+build27()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[28]=xrandr
+SRCVERS[28]=1.3.5
+SRCPACK[28]=${XORGIREPO}/app/${SRCNAME[28]}-${SRCVERS[28]}.tar.bz2
+
+build28()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[29]=xrdb
+SRCVERS[29]=1.0.9
+SRCPACK[29]=${XORGIREPO}/app/${SRCNAME[29]}-${SRCVERS[29]}.tar.bz2
+
+build29()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[30]=xrefresh
+SRCVERS[30]=1.0.4
+SRCPACK[30]=${XORGIREPO}/app/${SRCNAME[30]}-${SRCVERS[30]}.tar.bz2
+
+build30()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[31]=xset
+SRCVERS[31]=1.2.2
+SRCPACK[31]=${XORGIREPO}/app/${SRCNAME[31]}-${SRCVERS[31]}.tar.bz2
+
+build31()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[32]=xsetroot
+SRCVERS[32]=1.1.0
+SRCPACK[32]=${XORGIREPO}/app/${SRCNAME[32]}-${SRCVERS[32]}.tar.bz2
+
+build32()
+{
+XSETROOT_CFLAGS="-I${PKG}/usr/share" \
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[33]=xvinfo
+SRCVERS[33]=1.1.1
+SRCPACK[33]=${XORGIREPO}/app/${SRCNAME[33]}-${SRCVERS[33]}.tar.bz2
+
+build33()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[34]=xwd
+SRCVERS[34]=1.0.5
+SRCPACK[34]=${XORGIREPO}/app/${SRCNAME[34]}-${SRCVERS[34]}.tar.bz2
+
+build34()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[35]=xwininfo
+SRCVERS[35]=1.1.2
+SRCPACK[35]=${XORGIREPO}/app/${SRCNAME[35]}-${SRCVERS[35]}.tar.bz2
+
+build35()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[36]=xwud
+SRCVERS[36]=1.0.4
+SRCPACK[36]=${XORGIREPO}/app/${SRCNAME[36]}-${SRCVERS[36]}.tar.bz2
+
+build36()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[37]=xlsfonts
+SRCVERS[37]=1.0.4
+SRCPACK[37]=${XORGIREPO}/app/${SRCNAME[37]}-${SRCVERS[37]}.tar.bz2
+
+build37()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[38]=encodings
+SRCVERS[38]=1.0.4
+SRCPACK[38]=${XORGIREPO}/font/${SRCNAME[38]}-${SRCVERS[38]}.tar.bz2
+
+build38()
+{
+configure \
+  --with-fontrootdir=/usr/share/fonts
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[39]=font-util
+SRCVERS[39]=1.3.0
+SRCPACK[39]=${XORGIREPO}/font/${SRCNAME[39]}-${SRCVERS[39]}.tar.bz2
+
+build39()
+{
+configure \
+ --with-fontrootdir=/usr/share/fonts
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[40]=xcursor-themes
+SRCVERS[40]=1.0.3
+SRCPACK[40]=${XORGIREPO}/data/${SRCNAME[40]}-${SRCVERS[40]}.tar.bz2
+
+build40()
+{
+configure
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+}
+
+SRCNAME[41]=xorg-server
+SRCVERS[41]=1.12.2
+SRCPACK[41]=${XORGIREPO}/xserver/${SRCNAME[41]}-${SRCVERS[41]}.tar.bz2
+
+build41()
+{
+CPPFLAGS="-I/usr/include/gcrypt -I/usr/include/gpg-error" \
+configure \
+ --host="${ARCH}-slackware-linux" \
+ --disable-static \
+ --with-pic \
+ --with-vendor-name="Slackware Linux Project" \
+ --with-vendor-name-short="Slackware" \
+ --with-vendor-web="http://www.slackware.com" \
+ --with-default-font-path="${FONTPATH}" \
+ --with-module-dir=/usr/lib$(libdirsuffix)/plugins/xorg/modules \
+ --with-xkb-path=/usr/share/X11/xkb \
+ --with-xkb-output=/var/lib/xkb \
+ --with-serverconfig-path=/usr/share/X11 \
+ --with-int10=x86emu \
+ --disable-config-hal \
+ --enable-config-udev \
+ --enable-glx-tls \
+ --enable-install-libxf86config \
+ ${SERVERS}
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+license COPYING
+install.dir ${PKG}/var/log
+rm -rf ${PKG}/usr/share/doc
+install.dir ${PKG}/usr/share/X11/xorg.conf.d
+install.dat 10-quirks.conf ${PKG}/usr/share/X11/xorg.conf.d
+install.dir ${PKG}/etc/tmpfiles.d
+install.cfg x11.conf.tmpfilesd ${PKG}/etc/tmpfiles.d/x11.conf
+}

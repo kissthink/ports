@@ -1,0 +1,69 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=llvm_lua
+VERSION=1.3.1
+BUILD=1
+DEPENDS=('llvm >= 2.8-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: llvm_lua (LUA compiler and interpreter)
+${NAME}:
+${NAME}: Lua is a powerful light-weight programming language designed for
+${NAME}: extending applications. Lua is also frequently used as a
+${NAME}: general-purpose, stand-alone language.
+${NAME}:
+${NAME}: Homepage: http://code.google.com/p/llvm-lua
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://llvm-lua.googlecode.com/files/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+
+build0()
+{
+cmake \
+ -DCMAKE_VERBOSE_MAKEFILE:BOOL="on" \
+ -DCMAKE_BUILD_TYPE:STRING="Release" \
+ -DCMAKE_CXX_FLAGS:STRING="${FLAGS}" \
+ -DCMAKE_C_FLAGS:STRING="${FLAGS}" \
+ -DCMAKE_INSTALL_PREFIX:PATH="/usr" \
+ -DLIB_INSTALL_DIR:PATH="lib$(libdirsuffix)" \
+ -DWANT_SHARED_LIBRARY:BOOL="on" \
+ -DWANT_STATIC_LIBRARY:BOOL="on" \
+ -DLUA_ANSI:BOOL="off" \
+ -DLUA_CPP_SUPPORT:BOOL="off" \
+ -DLUA_USE_APICHECK:BOOL="off" \
+ -DLUA_USE_CURSES:BOOL="on" \
+ -DLUA_USE_DLOPEN:BOOL="on" \
+ -DLUA_USE_ISATTY:BOOL="on" \
+ -DLUA_USE_MKSTEMP:BOOL="on" \
+ -DLUA_USE_POPEN:BOOL="on" \
+ -DLUA_USE_READLINE:BOOL="on" \
+ -DLUA_USE_ULONGJMP:BOOL="on" \
+CMakeLists.txt
+make -j 2
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog ChangeLog
+license COPYRIGHT
+}

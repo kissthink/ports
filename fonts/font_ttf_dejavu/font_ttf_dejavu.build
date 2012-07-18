@@ -1,0 +1,63 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=font_ttf_dejavu
+VERSION=2.33
+ARCH=noarch
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: font_ttf_dejavu
+${NAME}:
+${NAME}: The DejaVu fonts are a font family based on the Bitstream Vera Fonts
+${NAME}: (http://gnome.org/fonts/). Its purpose is to provide a wider range
+${NAME}: of characters (see http://dejavu.sf.net for more information) while
+${NAME}: maintaining the original look and feel.
+${NAME}:
+${NAME}: Homepage: http://dejavu-fonts.org
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=dejavu-fonts-ttf
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=${URL[sf]}/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+
+build0()
+{
+doc AUTHORS
+changelog NEWS
+license LICENSE
+mkdir -p \
+ ${PKG}/usr/share/fonts/TTF \
+ ${PKG}/etc/fonts/conf.avail \
+ ${PKG}/etc/fonts/conf.d
+install -m 0644 doinst.sh ${PKG}/install
+install -m 0644 ttf/*.ttf ${PKG}/usr/share/fonts/TTF
+(
+  cd fontconfig
+  for file in *.conf; do
+    install -m 0644 ${file} ${PKG}/etc/fonts/conf.avail
+    (
+      cd ${PKG}/etc/fonts/conf.d
+      ln -sf ../conf.avail/${file}
+    )
+  done
+)
+}

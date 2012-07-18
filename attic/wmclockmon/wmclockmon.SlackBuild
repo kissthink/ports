@@ -1,0 +1,100 @@
+#!/bin/sh
+
+CWD=`pwd`
+NAME=wmclockmon
+VERSION=0.8.0
+ARCH=i586
+BUILD=1
+PKGNAME=$NAME
+PKGVER=$VERSION
+BASEDIR=$PKGNAME-$PKGVER
+ARCHIVE=$BASEDIR.tar.gz
+REPOSITORY=http://some/where
+FLAGS="-O2 -march=pentium -mcpu=pentium -fno-strength-reduce \
+ -fomit-frame-pointer -ffast-math"
+PKG=/tmp/package-$NAME
+
+rm -rf $PKG
+mkdir -p $PKG
+
+# Obtain sources
+if [ ! -e $ARCHIVE ]; then
+  if `wget "$REPOSITORY/$ARCHIVE"`; then
+    true
+  else
+    exit 1
+  fi
+fi
+
+# Compile
+cd /tmp
+tar zxvf $CWD/$ARCHIVE
+cd $BASEDIR
+CFLAGS=$FLAGS CXXFLAGS=$FLAGS ./configure --prefix=/usr \
+ --bindir=/usr/X11R6/bin --mandir=/usr/X11R6/man --datadir=/usr/share/docklets
+make
+
+# Install
+make install DESTDIR=$PKG
+mkdir -p $PKG/install $PKG/usr/doc/$NAME-$VERSION $PKG/etc/X11/apps/Docklets
+cat > $PKG/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+          |-----handy-ruler------------------------------------------------------|
+wmclockmon: wmclockmon
+wmclockmon:
+wmclockmon: A clock docklet for GNU Window Maker (but it also works with other
+wmclockmon: window managers such as f.ex. AfterStep).
+wmclockmon:
+wmclockmon:
+wmclockmon:
+wmclockmon:
+wmclockmon:
+wmclockmon:
+wmclockmon:
+EOF
+
+cat > $PKG/etc/X11/apps/Docklets/Wmclockmon.desktop <<EOF
+[Desktop Entry]
+
+Encoding=UTF-8
+Name=Clock (Digital)
+GenericName=Clock (Digital)
+GenericName[fr]=Horloge (Digitale)
+Type=Application
+Exec=wmclockmon
+Terminal=0
+Categories=X11;Docklet;Utility;
+
+Comment=A digital clock docklet
+Comment[fr]=Une docklette horloge en digital
+EOF
+
+install -m644 -g0 -o0 AUTHORS ChangeLog THANKS TODO \
+ doc/sample* $PKG/usr/doc/$NAME-$VERSION
+
+(
+  cd $PKG/usr/X11R6/man/man1
+  for file in `ls *.1`; do
+    base=`basename $file .1`
+    mv $file "$base".1x
+  done
+)
+
+chmod 444 $PKG/usr/X11R6/man/man?/*.?x
+gzip -9nf $PKG/usr/X11R6/man/man?/*.?x
+
+strip $PKG/usr/X11R6/bin/* ||:
+
+chown -R root.root $PKG
+chgrp bin $PKG/usr/X11R6/bin/* $PKG/usr/X11R6/bin
+
+# Make package
+cd $PKG
+cat install/slack-desc | grep "$NAME:" > /tmp/$NAME-$VERSION-$ARCH-$BUILD.txt
+makepkg -l y -c n /tmp/$NAME-$VERSION-$ARCH-$BUILD.tgz

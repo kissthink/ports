@@ -1,0 +1,74 @@
+#!/bin/sh
+
+CWD=`pwd`
+NAME=ezipupdate
+VERSION=3.0.11b8
+ARCH=i586
+BUILD=1
+PKGNAME=ez-ipupdate
+PKGVER=$VERSION
+BASEDIR=$PKGNAME-$PKGVER
+ARCHIVE=$BASEDIR.tar.gz
+REPOSITORY=http://
+FLAGS="-O2 -march=pentium -mcpu=pentium -fno-strength-reduce \
+ -fomit-frame-pointer -ffast-math"
+PKG=/tmp/package-$NAME
+
+rm -rf $PKG
+mkdir -p $PKG
+
+# Obtain sources
+if [ ! -e $ARCHIVE ]; then
+  if `wget "$REPOSITORY/$ARCHIVE"`; then
+    true
+  else
+    exit 1
+  fi
+fi
+
+# Compile
+cd /tmp
+tar zxvf $CWD/$ARCHIVE
+cd $BASEDIR
+CFLAGS=$FLAGS CXXFLAGS=$FLAGS ./configure --prefix=/usr
+make
+
+# Install
+make install DESTDIR=$PKG
+mkdir -p $PKG/install $PKG/usr/doc/$NAME-$VERSION
+cat > $PKG/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description. Line
+# up the first '|' above the ':' following the base package name, and the '|' on
+# the right side marks the last column you can put a character in. You must make
+# exactly 11 lines for the formatting to be correct. It's also customary to
+# leave one space after the ':'.
+
+          |-----handy-ruler------------------------------------------------------|
+ezipupdate: EZ IP Update
+ezipupdate:
+ezipupdate: EZ IP Update is a client for dynamic IP services. It supports a
+ezipupdate: large number of those and has many options. You might want to use
+ezipupdate: this with your dial-up or DSL connection so your machine is
+ezipupdate: reachable on the Internet with a permanent host name.
+ezipupdate:
+ezipupdate:
+ezipupdate:
+ezipupdate:
+ezipupdate:
+EOF
+
+install -m644 -g0 -o0 CHANGELOG README example*.conf \
+ $PKG/usr/doc/$NAME-$VERSION
+
+mv $PKG/usr/bin $PKG/usr/sbin
+
+strip $PKG/usr/sbin/* || :
+
+chown -R root.root $PKG
+chgrp bin $PKG/usr/sbin $PKG/usr/sbin/*
+
+# Make package
+cd $PKG
+cat install/slack-desc | grep "$NAME:" > /tmp/$NAME-$VERSION-$ARCH-$BUILD.txt
+makepkg -l y -c n /tmp/$NAME-$VERSION-$ARCH-$BUILD.tgz

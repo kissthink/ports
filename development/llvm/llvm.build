@@ -1,0 +1,98 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=llvm
+VERSION=3.1
+BUILD=2
+DEPENDS=('libffi >= 3.0.11-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: llvm (The Low Level Virtual Machine)
+${NAME}:
+${NAME}: LLVM is a compiler infrastructure designed for compile-time,
+${NAME}: link-time, runtime, and idle-time optimization of programs from
+${NAME}: arbitrary programming languages.
+${NAME}:
+${NAME}: This package includes 'clang', a C, C++, Objective C and Objective
+${NAME}: C++ frontend for the LLVM compiler.
+${NAME}:
+${NAME}: Homepage: http://llvm.org
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=clang
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://llvm.org/releases/${SRCNAME[0]}-${SRCVERS[0]}.src.tar.gz
+SRCROOT[0]=${NAME}-${VERSION}.src
+SRCOPTS[0]="nosrcroot"
+
+build0()
+{
+  install.dir tools
+  mv clang-${VERSION}.src tools/clang
+}
+
+SRCNAME[1]=${NAME}
+SRCVERS[1]=${VERSION}
+SRCPACK[1]=http://llvm.org/releases/${SRCNAME[1]}-${SRCVERS[1]}.src.tar.gz
+SRCROOT[1]=${NAME}-${VERSION}.src
+
+build1()
+{
+#FIXME: convert to CMake one of these days
+sed -i "s|(PROJ_prefix)/lib|(PROJ_prefix)/lib$(libdirsuffix)|g" Makefile.config.in
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-expensive-checks \
+ --disable-debug-runtime \
+ --disable-assertions \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --enable-shared \
+ --enable-optimized \
+ --enable-libffi \
+ --enable-bindings=none \
+ --enable-targets=all \
+ --with-binutils-include=/usr/include \
+ --with-udis86=/usr
+make ${JOBS} VERBOSE=1 REQUIRES_RTTI=1
+make install DESTDIR="${PKG}"
+doc CREDITS.TXT
+license LICENSE.TXT
+# Install also the clang-analyzer
+install.dir ${PKG}/usr/lib$(libdirsuffix)/clang-analyzer
+for f in scan-{build,view}; do
+  mv tools/clang/tools/${f} ${PKG}/usr/lib$(libdirsuffix)/clang-analyzer
+  ln -s /usr/lib$(libdirsuffix)/clang-analyzer/${f}/${f} ${PKG}/usr/bin/${f}
+done
+# LTO
+install.dir ${PKG}/usr/lib$(libdirsuffix)/bfd-plugins
+(
+  cd ${PKG}/usr/lib$(libdirsuffix)/bfd-plugins
+  ln -sf /usr/lib$(libdirsuffix)/LLVMgold.so
+)
+# Clean up cruft
+rm -f \
+ ${PKG}/usr/lib$(libdirsuffix)/*LLVMHello.*
+chmod 0644 \
+ ${PKG}/usr/lib$(libdirsuffix)/*.a
+}

@@ -1,0 +1,184 @@
+#!/bin/sh
+
+CWD=`pwd`
+NAME=windowmaker
+VERSION=0.92.0
+ARCH=i586
+BUILD=1
+PKGNAME=WindowMaker
+PKGVER=$VERSION
+BASEDIR=$PKGNAME-$PKGVER
+ARCHIVE=$BASEDIR.tar.bz2
+REPOSITORY=ftp://windowmaker.org/pub/source/release
+FLAGS="-O2 -march=pentium -mcpu=pentium -fno-strength-reduce \
+ -fomit-frame-pointer -ffast-math"
+PKG=/tmp/package-$NAME
+
+rm -rf $PKG
+mkdir -p $PKG
+
+# Obtain sources
+if [ ! -e $ARCHIVE ]; then
+  if `wget "$REPOSITORY/$ARCHIVE"`; then
+    true
+  else
+    exit 1
+  fi
+fi
+
+# Compile
+cd /tmp
+tar jxvf $CWD/$ARCHIVE
+tar zxvf $CWD/kdelnk2wmaker-0.06.tar.gz
+cd $BASEDIR
+# Hum... On purpose?
+#bzcat $CWD/$NAME-$VERSION-nodebug.patch.bz2 | patch -p1 -s
+bzcat $CWD/$NAME-$VERSION-gnustepdir.patch.bz2 | patch -p1 -s
+bzcat $CWD/$NAME-$VERSION-heimdal.patch.bz2 | patch -p1 -s
+bzcat $CWD/$NAME-$VERSION-randtheme.patch.bz2 | patch -p1 -s
+
+# Check for new languages (another broken shit)
+export LINGUAS="be bg bs ca cs da de el es et fi fr gl hr hu it ja ko ms nl \
+ no pl pt ro ru sk sv tr zh_CN zh_TW"
+
+# Where we want WPrefs to go
+#export GNUSTEP_LOCAL_ROOT="$CWD/toot/opt/GNUstep/Apps"
+
+# Set the compiler flags we want
+export CFLAGS="$FLAGS"
+export CXXFLAGS="$FLAGS"
+
+# Configure & make
+./configure --prefix=/usr --bindir=/usr/X11R6/bin --libdir=/usr/X11R6/lib \
+ --mandir=/usr/X11R6/man --includedir=/usr/X11R6/include --sysconfdir=/etc/X11 \
+ --with-nlsdir=/usr/share/locale --with-pixmapdir=/usr/share/pixmaps \
+ --enable-modelock --enable-xinerama --enable-usermenu --enable-vdesktop
+ # --with-gnustepdir=/opt/GNUstep/Apps
+make
+
+(
+cd ../kdelnk2wmaker-0.06
+bzcat $CWD/kdelnk2wmaker-0.06-heimdal.patch.bz2 | patch -p1 -s
+make CFLAGS="$FLAGS -pipe"
+)
+
+# Install
+make install DESTDIR=$PKG
+mkdir -p $PKG/install $PKG/usr/doc/$NAME-$VERSION/WINGs \
+ $PKG/usr/doc/$NAME-$VERSION/wrlib $PKG/etc/X11/xinit $PKG/usr/lib
+
+cat > $PKG/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+           |-----handy-ruler------------------------------------------------------|
+windowmaker: windowmaker
+windowmaker:
+windowmaker: Window Maker is the GNU window manager for the X Window System. It
+windowmaker: was designed to emulate the look and feel of part of the NEXTSTEP(tm)
+windowmaker: GUI. It's supposed to be relatively fast and small, feature rich,
+windowmaker: easy to configure and easy to use, with a simple and elegant
+windowmaker: appearance borrowed from NEXTSTEP(tm).  Window Maker was designed
+windowmaker: with keeping integration with GNUstep in mind and is the "official"
+windowmaker: window manager for it.
+windowmaker:
+windowmaker:
+EOF
+
+cat > $PKG/install/slack-required <<EOF
+x11 >= 6.8.1-i486-1
+libtiff >= 3.7.1-i486-1
+libpng >= 1.2.8-i486-1
+libjpeg >= 6b-i486-1
+libungif >= 4.1.2-i486-1
+EOF
+
+### Docs
+install -m644 -g0 -o0 AUTHORS BUGFORM BUGS COPYING.WTFPL ChangeLog FAQ* \
+ INSTALL* MIRRORS NEWS README* TODO $PKG/usr/doc/$NAME-$VERSION
+
+### WINGs
+install -m644 -g0 -o0 WINGs/BUGS WINGs/ChangeLog WINGs/NEWS WINGs/README \
+ WINGs/TODO WINGs/Documentation/README* $PKG/usr/doc/$NAME-$VERSION/WINGs
+
+### wrlib
+install -m644 -g0 -o0 wrlib/ChangeLog wrlib/NEWS wrlib/README wrlib/TODO \
+ $PKG/usr/doc/$NAME-$VERSION/wrlib
+
+### WPrefs
+install -m644 -g0 -o0 WPrefs.app/README \
+ $PKG/usr/doc/$NAME-$VERSION/README.WPrefs
+
+### Utils
+install -m644 -g0 -o0 util/README \
+ $PKG/usr/doc/$NAME-$VERSION/README.utils
+
+### Shared
+mv $PKG/usr/share/WindowMaker/README \
+ $PKG/usr/doc/$NAME-$VERSION/README.menus
+mv $PKG/usr/share/WindowMaker/README.themes \
+ $PKG/usr/doc/$NAME-$VERSION
+
+### Script stuff
+mv $PKG/usr/X11R6/bin/wkdemenu.pl \
+ $PKG/usr/doc/$NAME-$VERSION
+mv $PKG/usr/X11R6/bin/wm-oldmenu2new \
+ $PKG/usr/doc/$NAME-$VERSION/wm-oldmenu2new.sh
+
+### Compress
+
+gzip -9nf \
+ $PKG/usr/doc/$NAME-$VERSION/ChangeLog \
+ $PKG/usr/doc/$NAME-$VERSION/FAQ* \
+ $PKG/usr/doc/$NAME-$VERSION/INSTALL* \
+ $PKG/usr/doc/$NAME-$VERSION/NEWS \
+ $PKG/usr/doc/$NAME-$VERSION/README* \
+ $PKG/usr/doc/$NAME-$VERSION/wkdemenu.pl \
+ $PKG/usr/doc/$NAME-$VERSION/WINGs/ChangeLog \
+ $PKG/usr/doc/$NAME-$VERSION/WINGs/NEWS
+
+### End Docs
+
+install -m755 -g0 -o0 ../kdelnk2wmaker-0.06/kdelnk2wmaker \
+ $PKG/usr/X11R6/bin/desktop2wmaker
+
+install -m755 -g0 -o0 wmrandtheme.sh \
+ $PKG/usr/X11R6/bin/wmrandtheme
+
+install -m644 -g0 -o0 WPrefs.app/xpm/*.xpm \
+ $PKG/opt/GNUstep/Apps/WPrefs.app/xpm
+
+mv $PKG/usr/X11R6/lib/pkgconfig $PKG/usr/lib
+
+# Striping
+strip $PKG/opt/GNUstep/Apps/WPrefs.app/WPrefs
+strip $PKG/usr/X11R6/bin/* || :
+
+cat contrib/wmrandtheme.sh > $PKG/usr/X11R6/bin/wmrandomtheme
+cat contrib/xinitrc.wmaker > $PKG/etc/X11/xinit/xinitrc.wmaker
+chmod 755 $PKG/usr/X11R6/bin/wmrandomtheme \
+ $PKG/etc/X11/xinit/xinitrc.wmaker
+
+cat $PKG/etc/X11/WindowMaker/WMRootMenu \
+ | sed 's:/usr/local/GNUstep:/opt/GNUstep:g' \
+ | sed 's:#wmdatadir#:/usr/share/WindowMaker:g' \
+ > WMRootMenu.new
+mv -f WMRootMenu.new $PKG/etc/X11/WindowMaker/WMRootMenu
+
+# Man pages handling
+chmod 444 $PKG/usr/X11R6/man/man?/*.?x
+chmod 444 $PKG/usr/X11R6/man/*/man?/*.?x
+gzip -9nf $PKG/usr/X11R6/man/man?/*.?x
+gzip -9nf $PKG/usr/X11R6/man/*/man?/*.?x
+
+chown -R root.root $PKG
+chgrp bin $PKG/usr/X11R6/bin $PKG/usr/X11R6/bin/*
+
+# Make package
+cd $PKG
+cat install/slack-desc | grep "$NAME:" > /tmp/$NAME-$VERSION-$ARCH-$BUILD.txt
+makepkg -l y -c n /tmp/$NAME-$VERSION-$ARCH-$BUILD.tgz

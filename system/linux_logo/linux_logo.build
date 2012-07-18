@@ -1,0 +1,58 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=linux_logo
+VERSION=5.11
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: linux_logo (displays a linux ASCII banner)
+${NAME}:
+${NAME}: linux_logo is a small utility that displays an ANSI or ASCII logo of
+${NAME}: the Linux penguin (or something else) along with some system
+${NAME}: information:
+${NAME}:
+${NAME}: Homepage: http://www.deater.net/weave/vmwprod/linux_logo
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://www.deater.net/weave/vmwprod/linux_logo/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+./configure \
+ --prefix=/usr
+(
+  cd logos
+  mv banner.logo linux.logo
+  ln -sf distributions/slackware.logo banner.logo
+)
+make ${JOBS} CFLAGS="${FLAGS}"
+make install PREFIX="${PKG}/usr" INSTALL_MANPATH="${PKG}${SYS_DIR[man]}"
+# Don't gzip man pages
+gunzip ${PKG}${SYS_DIR[man]}/man?/*.?.gz
+changelog CHANGES
+install.dir ${PKG}/etc/profile.d
+install.bin linux_logo.{sh,csh} ${PKG}/etc/profile.d
+}

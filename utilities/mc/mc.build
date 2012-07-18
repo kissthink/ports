@@ -1,0 +1,101 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=mc
+VERSION=4.8.1.3
+BUILD=1
+DEPENDS=('glib >= 2.32.0-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: mc (Midnight Commander)
+${NAME}:
+${NAME}: The Midnight Commander is a Norton Commander clone, a program that
+${NAME}: manipulates and manages files and directories. Useful, fast, and has
+${NAME}: color displays on the Linux console. Mouse support is provided
+${NAME}: through the gpm mouse server. This is a lightweight compilation of
+${NAME}: mc for use on the text console or in an xterm.
+${NAME}:
+${NAME}: mc was written by Miguel de Icaza and Mauricio Plaza.
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://www.midnight-commander.org/downloads/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+SRCCOPY[0]="GPL3"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --disable-rpath \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --libexecdir=/usr/lib$(libdirsuffix)/exec \
+ --localstatedir=/var \
+ --enable-mclib \
+ --with-search-engine=glib \
+ --with-screen=ncurses
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+install.dat doinst.sh ${PKG}/install
+mv \
+ ${PKG}/etc/mc/mc.keymap \
+ ${PKG}/etc/mc/mc.keymap.new
+mv \
+ ${PKG}/etc/mc/mc.menu \
+ ${PKG}/etc/mc/mc.menu.new
+mv \
+ ${PKG}/etc/mc/mcedit.menu \
+ ${PKG}/etc/mc/mcedit.menu.new
+mv \
+ ${PKG}/etc/mc/filehighlight.ini \
+ ${PKG}/etc/mc/filehighlight.ini.new
+mv \
+ ${PKG}/etc/mc/sfs.ini \
+ ${PKG}/etc/mc/sfs.ini.new
+mv \
+ ${PKG}/etc/mc/mc.ext \
+ ${PKG}/etc/mc/mc.ext.new
+mv \
+ ${PKG}/etc/mc/edit.indent.rc \
+ ${PKG}/etc/mc/edit.intent.rc.new
+mv \
+ ${PKG}/etc/mc/edit.spell.rc \
+ ${PKG}/etc/mc/edit.spell.rc.new
+install.dir ${PKG}/etc/profile.d
+(
+  cd ${PKG}/etc/profile.d
+  mv ${PKG}/usr/lib64/exec/mc/mc.csh .
+  mv ${PKG}/usr/lib64/exec/mc/mc.sh .
+)
+install.dir ${PKG}/usr/share/applications
+install.dat mc.desktop ${PKG}/usr/share/applications
+install.dir ${PKG}/usr/share/icons/hicolor/32x32/apps
+install.dat mc.png ${PKG}/usr/share/icons/hicolor/32x32/apps
+}

@@ -1,0 +1,62 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=iftop
+VERSION=1.0pre2
+BUILD=1
+DEPENDS=('tcpip >= 3.2.0-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: iftop
+${NAME}:
+${NAME}: Iftop does for network usage what top(1) does for CPU usage. It
+${NAME}: listens to network traffic on a network interface and displays a
+${NAME}: table of current bandwidth usage by pairs of hosts. Handy for
+${NAME}: answering the question: "why is my ADSL link so slow?". But it will
+${NAME}: likely be useful in other situations.
+${NAME}:
+${NAME}: Homepage: http://www.ex-parrot.com/pdw/iftop
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://www.ex-parrot.com/~pdw/iftop/download/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc/conf.d \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --with-resolver=netdb
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog ChangeLog
+# iftop doesn't start as a normal user, capabilities?
+#install.dir ${PKG}/usr/share/applications
+#install.dat iftop.desktop ${PKG}/usr/share/applications
+}

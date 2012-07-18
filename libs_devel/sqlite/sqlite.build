@@ -1,0 +1,67 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=sqlite
+MAJOR=3
+MINOR=7.10
+VERSION=${MAJOR}.${MINOR}
+BUILD=1
+
+# sqlite refuses to compile with -ffast-math
+FLAGS="${CPU_FLAGS[${HOST_ARCH}]} -O2 -fno-strength-reduce -fomit-frame-pointer"
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: SQLite (An embeddable SQL database engine)
+${NAME}:
+${NAME}: SQLite is a small C library that implements a self-contained,
+${NAME}: embeddable, zero-configuration SQL database engine. It implements
+${NAME}: most of SQL92 and has a small memory footprint. It is faster than
+${NAME}: other popular database engines for most common operations and a
+${NAME}: complete database is stored in a single file.
+${NAME}:
+${NAME}: Homepage: http://www.sqlite.org
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}-src
+SRCVERS[0]=3071000
+SRCPACK[0]=http://www.sqlite.org/${SRCNAME[0]}-${SRCVERS[0]}.zip
+
+build0()
+{
+CPPFLAGS="-DSQLITE_ENABLE_COLUMN_METADATA=1 -DSQLITE_DISABLE_DIRSYNC=1 -DSQLITE_ENABLE_FTS3=3 -DSQLITE_ENABLE_RTREE=1 -DSQLITE_SECURE_DELETE=1 -DSQLITE_ENABLE_UNLOCK_NOTIFY=1" \
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --includedir="/usr/include/${NAME}-${MAJOR}" \
+ --localstatedir=/var \
+ --disable-tcl \
+ --enable-threadsafe \
+ --enable-cross-thread-connections \
+ --enable-tempstore \
+ --enable-load-extension
+make ${JOBS}
+make install DESTDIR="${PKG}"
+}

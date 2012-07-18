@@ -1,0 +1,67 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=dmidecode
+VERSION=2.11
+BUILD=2
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: dmidecode (DMI table decoder)
+${NAME}:
+${NAME}: A tool for dumping a computer's DMI table (some say SMBIOS) contents
+${NAME}: in a human-readable format. This table contains a description of the
+${NAME}: system's hardware components, as well as other useful pieces of
+${NAME}: information such as serial numbers and BIOS revision.
+${NAME}:
+${NAME}: This package also includes the cpuid utilities which allows to 
+${NAME}: determine the exact system CPU type.
+${NAME}:
+${NAME}: dmidecode was written by Alan Cox and Jean Delvare.
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=${URL[savannah]}/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+make ${JOBS} OPTS="${FLAGS}"
+make install \
+ prefix="/usr" \
+ mandir="/usr/man" \
+ DESTDIR="${PKG}"
+doc AUTHORS
+changelog CHANGELOG
+}
+
+SRCNAME[1]=cpuid
+SRCVERS[1]=20120225
+SRCPACK[1]=http://www.etallen.com/${SRCNAME[1]}/${SRCNAME[1]}-${SRCVERS[1]}.src.tar.gz
+SRCCOPY[1]="GPL2"
+
+build1()
+{
+make ${JOBS} CFLAGS="${FLAGS}"
+changelog ChangeLog
+install.dir ${PKG}${SYS_DIR[bin]}
+install.bin cpuid ${PKG}${SYS_DIR[bin]}
+install.dir ${PKG}${SYS_DIR[man]}/man1
+install.man cpuid.man ${PKG}${SYS_DIR[man]}/man1/cpuid.1
+}

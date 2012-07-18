@@ -1,0 +1,64 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=reaver
+VERSION=1.4
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: reaver
+${NAME}:
+${NAME}: A tool that implements a brute force attack against WiFi Protected
+${NAME}: Setup (WPS) registrar PINs in order to recover WPA/WPA2 passphrases.
+${NAME}: It has been designed to be a robust and practical attack against WPS,
+${NAME}: and has been tested against a wide variety of access points and WPS
+${NAME}: implementations. On average, Reaver will recover the target AP's
+${NAME}: plain text WPA/WPA2 passphrase in 4 to 10 hours, depending on the AP.
+${NAME}:
+${NAME}: Homepage: http://code.google.com/p/reaver-wps
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://reaver-wps.googlecode.com/files/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+(
+cd src
+CPPFLAGS="-I/usr/include/sqlite-3" \
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/var/lib \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var
+make ${JOBS} V=1
+#make install DESTDIR="${PKG}"
+)
+doc docs/README.{REAVER,WASH}
+install.dir ${PKG}${SYS_DIR[man]}/man1
+zcat docs/reaver.1.gz > ${PKG}${SYS_DIR[man]}/man1/reaver.1
+install.dir ${PKG}/usr/bin
+install.bin src/reaver src/wash ${PKG}/usr/bin
+install.dir ${PKG}/var/lib/reaver
+}

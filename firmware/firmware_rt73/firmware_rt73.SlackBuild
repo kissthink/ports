@@ -1,0 +1,68 @@
+#!/bin/sh
+
+CWD=`pwd`
+NAME=firmware_rt73
+VERSION=1.8
+ARCH=noarch
+BUILD=1
+PKGNAME=RT71W_Firmware
+PKGVER=V${VERSION}
+BASEDIR=${PKGNAME}_${PKGVER}
+ARCHIVE=${BASEDIR}.zip
+REPOSITORY=http://www.ralinktech.com.tw/data
+FLAGS="-O2 -march=pentium -mtune=pentium -fno-strength-reduce \
+ -fomit-frame-pointer -ffast-math"
+PKG=/tmp/package-$NAME
+
+rm -rf $PKG
+mkdir -p $PKG
+
+# Obtain sources
+if [ ! -e $ARCHIVE ]; then
+  if `wget "$REPOSITORY/$ARCHIVE"`; then
+    true
+  else
+    exit 1
+  fi
+fi
+
+# Compile
+cd /tmp
+unzip $CWD/$ARCHIVE
+cd $BASEDIR
+
+# Install
+mkdir -p $PKG/install $PKG/usr/doc/$NAME-$VERSION $PKG/lib/firmware
+cat > $PKG/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+             |-----handy-ruler------------------------------------------------------|
+firmware_rt73: firmware_rt73 (RaLink rt73-based wireless adapter firmware)
+firmware_rt73:
+firmware_rt73: Firmware for RaLink rt73-based USB wireless adapter devices also
+firmware_rt73: known as RT2501USB (RT2571W/RT2671).
+firmware_rt73:
+firmware_rt73: Homepage: http://www.ralinktech.com
+firmware_rt73:
+firmware_rt73:
+firmware_rt73:
+firmware_rt73:
+firmware_rt73:
+EOF
+
+install -m 0644 -g 0 -o 0 LICENSE.ralink-firmware.txt \
+ ${PKG}/usr/doc/${NAME}-${VERSION}/COPYING
+
+install -m 0644 -g 0 -o 0 rt73.bin $PKG/lib/firmware
+
+chown -R root.root $PKG
+
+# Make package
+cd $PKG
+cat install/slack-desc | grep "$NAME:" > /tmp/$NAME-$VERSION-$ARCH-$BUILD.txt
+makepkg -l y -c n /tmp/$NAME-$VERSION-$ARCH-$BUILD.tgz

@@ -1,0 +1,75 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=cdparanoia
+VERSION=10.2
+BUILD=2
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: cdparanoia (digital audio extraction tool)
+${NAME}:
+${NAME}: Cdparanoia is a Compact Disc Digital Audio (CDDA) extraction tool,
+${NAME}: commonly known on the net as a 'ripper'. It reads digital audio data
+${NAME}: from a Compact Disc and saves it to sound files. Cdparanoia has been
+${NAME}: designed to read correct audio data even using cheap CD-ROM drives
+${NAME}: prone to misalignment, frame jitter and loss of streaming.
+${NAME}: Cdparanoia will also read and repair data from CDs that have been
+${NAME}: damaged in some way.
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}-III
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://downloads.xiph.org/releases/${NAME}/${SRCNAME[0]}-${SRCVERS[0]}.src.tgz
+SRCCOPY[0]="LGPL21 GPL2"
+
+build0()
+{
+CFLAGS="${FLAGS} -fPIC" CXXFLAGS="${FLAGS} -fPIC" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --includedir=/usr/include/cdda \
+ --localstatedir=/var
+make -j 2
+make install DESTDIR="${PKG}"
+doc README
+rm -f \
+ ${PKG}/usr/lib$(libdirsuffix)/*.a
+chmod 0755 ${PKG}/usr/lib$(libdirsuffix)/lib*.so*
+}
+
+SRCNAME[1]=cd-discid
+SRCVERS[1]=1.3
+SRCPACK[1]=${SRCNAME[1]}-${SRCVERS[1]}.tar.xz
+SRCCOPY[1]="GPL2"
+
+build1()
+{
+make ${JOBS} CFLAGS="${FLAGS}"
+doc README
+changelog changelog
+install.dir ${PKG}/usr/bin
+install.bin cd-discid ${PKG}/usr/bin
+install.dir ${PKG}${SYS_DIR[man]}/man1
+install.man cd-discid.1 ${PKG}${SYS_DIR[man]}/man1
+}

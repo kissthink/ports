@@ -1,0 +1,110 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=pci
+VERSION=$(date '+%Y%m%d')
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: pci (PCI bus support)
+${NAME}:
+${NAME}: The Peripheral Component Interconnect (PCI) is a bus for attaching
+${NAME}: hardware devices in a computer. The vast majority of today's personal
+${NAME}: computers have this.
+${NAME}:
+${NAME}: This package is a collection of programs and libraries for accessing,  
+${NAME}: inspecting and manipulating configuration of PCI devices.
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=pciutils
+SRCVERS[0]=3.1.10
+SRCPACK[0]=ftp://ftp.kernel.org/pub/software/utils/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+make ${JOBS} \
+ OPT="${FLAGS}" \
+ PREFIX="/usr" \
+ SBINDIR="/usr/sbin" \
+ LIBDIR="/usr/lib$(libdirsuffix)" \
+ SHAREDIR="/usr/share/hwdata" \
+ MANDIR="/usr/man"
+make install \
+ DESTDIR="${PKG}" \
+ PREFIX="/usr" \
+ SBINDIR="/usr/sbin" \
+ LIBDIR="/usr/lib$(libdirsuffix)" \
+ SHAREDIR="/usr/share/hwdata" \
+ MANDIR="/usr/man"
+changelog ChangeLog
+install.dir ${PKG}/usr/bin
+mv \
+ ${PKG}/usr/sbin/lspci \
+ ${PKG}/usr/bin
+rm -f \
+ ${PKG}/usr/share/hwdata/pci.ids.gz
+}
+
+SRCNAME[1]=pciids
+SRCVERS[1]=$(date "+%Y%m%d")
+SRCPACK[1]=http://pciids.sourceforge.net/pci.ids
+SRCOPTS[1]="nosrcroot nounpack"
+
+build1()
+{
+install.dir ${PKG}/usr/share/hwdata
+rm -f ${PKG}/usr/share/hwdata/pci.ids
+install.dat ${CWD}/pci.ids ${PKG}/usr/share/hwdata
+cat ${CWD}/pci.ids | gzip -9nf > ${PKG}/usr/share/hwdata/pci.ids.gz
+#FIXME: compat workaround for The Slackware Mess(tm)
+(
+  cd ${PKG}/usr/share
+  ln -sf hwdata/pci.ids pci.ids
+)
+}
+
+SRCNAME[2]=libpciaccess
+SRCVERS[2]=0.13.1
+SRCPACK[2]=http://xorg.freedesktop.org/archive/individual/lib/${SRCNAME[2]}-${SRCVERS[2]}.tar.bz2
+
+build2()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --with-zlib \
+ --with-pciids-path=/usr/share/hwdata
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog ChangeLog
+license COPYING
+}

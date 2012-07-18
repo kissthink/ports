@@ -1,0 +1,58 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=man
+VERSION=1.6g
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: man (format and display the on-line manual pages)
+${NAME}:
+${NAME}: The man package is a collection of tools used for searching and
+${NAME}: reading the online system documentation. In fact, on most UNIX-like
+${NAME}: operating systems it is the primary means of finding out how
+${NAME}: programs on the system work. For example, 'man man' will display the
+${NAME}: documentation for man itself.
+${NAME}:
+${NAME}: Man requires the groff text processing package.
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://primates.ximian.com/~flucifredi/${NAME}/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+./configure \
+ +lang all \
+ +traditional \
+ -confdir /etc/conf.d
+make CFLAGS="${FLAGS}" -j 2
+make install DESTDIR="${PKG}"
+
+changelog HISTORY
+
+install -m 0644 doinst.sh ${PKG}/install
+
+mv \
+ ${PKG}/etc/conf.d/man.conf \
+ ${PKG}/etc/conf.d/man.conf.new
+}

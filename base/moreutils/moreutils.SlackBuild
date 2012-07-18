@@ -1,0 +1,79 @@
+#!/bin/sh
+
+CWD=`pwd`
+NAME=moreutils
+VERSION=0.40
+ARCH=i586
+BUILD=1
+PKGNAME=$NAME
+PKGVER=$VERSION
+BASEDIR=$PKGNAME
+ARCHIVE=$PKGNAME_$PKGVER.tar.gz
+REPOSITORY=http://ftp.de.debian.org/debian/pool/main/m/moreutils
+FLAGS="-O2 -march=pentium -mtune=pentium -fno-strength-reduce \
+ -fomit-frame-pointer -ffast-math"
+PKG=/tmp/package-$NAME
+
+rm -rf $PKG
+mkdir -p $PKG
+
+# Obtain sources
+if [ ! -e $ARCHIVE ]; then
+  if `wget "$REPOSITORY/$ARCHIVE"`; then
+    true
+  else
+    exit 1
+  fi
+fi
+
+# Compile
+cd /tmp
+tar zxvf $CWD/$ARCHIVE
+cd $BASEDIR
+make CFLAGS=${FLAGS}
+
+# Install
+make install DESTDIR=$PKG
+mkdir -p $PKG/install
+cat > $PKG/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+         |-----handy-ruler------------------------------------------------------|
+moreutils: moreutils (additional shell utilities)
+moreutils:
+moreutils: A growing collection of shell tools including:
+moreutils:
+moreutils:   ifdata, ifne, isutf8, lckdo, mispipe, parallel, pee and sponge.
+moreutils:
+moreutils:
+moreutils: Homepage: http://joey.kitenet.net/code/moreutils
+moreutils:
+moreutils:
+moreutils:
+EOF
+
+# Get rid of all perl shit
+(
+  cd $PKG/usr/bin
+  rm -f combine ts vidir vipe zrun
+  cd $PKG/usr/man/man1
+  rm -f combine.1 ts.1 vidir.1 vipe.1 zrun.1
+)
+
+chmod 0444 $PKG/usr/man/man?/*.?
+xz -9f $PKG/usr/man/man?/*.?
+
+strip \
+ $PKG/usr/bin/* || :
+
+chown -R root.root $PKG
+
+# Make package
+cd $PKG
+cat install/slack-desc | grep "$NAME:" > /tmp/$NAME-$VERSION-$ARCH-$BUILD.txt
+makepkg -l y -c n /tmp/$NAME-$VERSION-$ARCH-$BUILD.txz

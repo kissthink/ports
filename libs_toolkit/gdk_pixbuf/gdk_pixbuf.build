@@ -1,0 +1,72 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=gdk_pixbuf
+MAJOR=2.26
+VERSION=${MAJOR}.1
+BUILD=1
+DEPENDS=('glib >= 2.32.2-1' 'xorg_libs >= 7.6-6')
+OPTIONS="symprepend"
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: gdk_pixbuf
+${NAME}:
+${NAME}: The GDK pixbuf library provides a number of features:
+${NAME}:
+${NAME}:   * Image loading facilites
+${NAME}:   * Rendering of a GdkPixBuf into various formats:
+${NAME}:     drawables (windows, pixmaps), GdkRGB buffers.
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=gdk-pixbuf
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://download.gnome.org/sources/${SRCNAME[0]}/${MAJOR}/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+SRCCOPY[0]="LGPL2"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-shared=yes \
+ --enable-static=no \
+ --enable-introspection=no \
+ --enable-debug=minimum \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --with-html-dir=/usr/share/html \
+ --with-libjasper=yes
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+install.dat doinst.sh ${PKG}/install
+install.dir ${PKG}/var/cache/gdk-pixbuf-2.0/2.10.0
+touch ${PKG}/var/cache/gdk-pixbuf-2.0/2.10.0/loaders.cache
+rm -f \
+ ${PKG}/usr/lib$(libdirsuffix)/*/*/*/*.a
+}

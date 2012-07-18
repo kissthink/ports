@@ -1,0 +1,53 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=rubyripper
+VERSION=0.6.2
+BUILD=1
+ARCH=noarch
+DEPENDS=('ruby_gtk2 >= 1.1.3-1' 'cdparanoia >= 10.2-2')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: rubyripper (audio CD ripper)
+${NAME}:
+${NAME}: Rubyripper aims to deliver high quality rips from audio cd's to your
+${NAME}: computer drive. It tries to do so by ripping the same track with
+${NAME}: cdparanoia multiple times and then comparing the results. It
+${NAME}: currently has a ruby/gtk+2 and a command-line interface.
+${NAME}:
+${NAME}: Homepage: http://code.google.com/p/rubyripper
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://${SRCNAME[0]}.googlecode.com/files/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCCOPY[0]="GPL3"
+
+build0()
+{
+./configure \
+ --prefix=/usr \
+ --enable-lang-all \
+ --enable-gtk2 \
+ --enable-cli
+make install DESTDIR="${PKG}"
+doc README
+}

@@ -1,0 +1,51 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=man_pages
+VERSION=3.41
+BUILD=1
+ARCH=noarch
+OPTIONS="nomanz normla nostrip"
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: man_pages (system documentation)
+${NAME}:
+${NAME}: Man pages are online documentation for Linux. This package includes
+${NAME}: many section 1, 2, 3, 4, 5, 7, and 8 man pages for Linux.
+${NAME}:
+${NAME}: The man-pages distribution is maintained by Michael Kerrisk with
+${NAME}: the help of more writers, editors, and other contributors than we
+${NAME}: can name here.
+${NAME}:
+${NAME}: For more information, see http://www.kernel.org/doc/man-pages
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=man-pages
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://www.kernel.org/pub/linux/docs/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+
+build0()
+{
+make screen xz MANDIR="${SYS_DIR[man]}"
+make install MANDIR="${SYS_DIR[man]}" DESTDIR="${PKG}"
+doc Changes.old
+changelog Changes
+install.dat doinst.sh ${PKG}/install
+install.doc whatis.sample ${PKG}/${SYS_DIR[man]}
+}

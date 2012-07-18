@@ -1,0 +1,51 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=font_ttf_libertine
+VERSION=5.1.3
+ARCH=noarch
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: font_ttf_libertine
+${NAME}:
+${NAME}: Linux Libertine TrueType (TTF) fonts.
+${NAME}:
+${NAME}: Homepage: http://linuxlibertine.sourceforge.net
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=LinLibertineTTF
+SRCVERS[0]=${VERSION}_2011_06_21
+SRCPACK[0]=${SRC[sf]}/linuxlibertine/linuxlibertine/${VERSION}-2/${SRCNAME[0]}_${SRCVERS[0]}.tgz
+SRCCOPY[0]="OFL"
+SRCOPTS[0]="nosrcroot"
+
+build0()
+{
+changelog ChangeLog.txt
+license GPL.txt COPYING.GPL2
+install.dat doinst.sh ${PKG}/install
+install.dir ${PKG}/usr/share/fonts/TTF
+install.dat *.ttf ${PKG}/usr/share/fonts/TTF
+}

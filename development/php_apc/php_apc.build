@@ -1,0 +1,57 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=php_apc
+VERSION=3.1.9
+BUILD=1
+DEPENDS=('php >= 5.3.8-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: php_apc (alternative PHP cache)
+${NAME}:
+${NAME}: APC provides a way of boosting performance of PHP on heavily loaded
+${NAME}: sites by providing a way for scripts to be cached in a compiled
+${NAME}: state so that the overhead of parsing and compiling can be almost
+${NAME}: completely eliminated.
+${NAME}:
+${NAME}: Homepage: http://php.net/apc
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=APC
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://pecl.php.net/get/${SRCNAME[0]}-${SRCVERS[0]}.tgz
+SRCCOPY[0]="PHP"
+
+build0()
+{
+phpize
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --enable-apc=shared,/usr
+make -j 2
+make install INSTALL_ROOT="${PKG}"
+doc INSTALL NOTICE
+changelog CHANGELOG
+install.dat doinst.sh ${PKG}/install
+install.dir ${PKG}/etc/php.d
+install.cfg apc.ini ${PKG}/etc/php.d/apc.ini.new
+}

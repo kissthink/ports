@@ -1,0 +1,103 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=udev
+VERSION=173
+BUILD=2
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: udev (dynamic device directory system)
+${NAME}:
+${NAME}: udev provides a dynamic device directory containing only the files
+${NAME}: for the devices which are actually present. It creates or removes
+${NAME}: device node files usually located in the /dev directory.
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://www.kernel.org/pub/linux/utils/kernel/hotplug/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-shared=yes \
+ --enable-static=yes \
+ --disable-introspection \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --docdir="${SYS_DIR[doc]}/${SRCNAME[0],,}-${SRCVERS[0]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --libexecdir=/usr/lib$(libdirsuffix)/udev \
+ --localstatedir=/var \
+ --sbindir=/usr/sbin \
+ --with-html-dir="${SYS_DIR[html]}" \
+ --with-rootlibdir=/usr/lib$(libdirsuffix) \
+ --with-firmware-path="/usr/lib/firmware:/usr/local/lib/firmware:/lib/firmware" \
+ --with-systemdsystemunitdir="${SYS_DIR[systemdsystemunitdir]}" \
+ --with-pci-ids-path=/usr/share/hwdata \
+ --with-usb-ids-path=/usr/share/hwdata \
+ --enable-udev_acl
+#FIXME: floppy stuff goes in separate a floppy package and also old HD stuff
+#FIXME: remove udev_acl when switching to systemd
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+install.dir ${PKG}/etc/{rc.d,modprobe.d,udev/rules.d}
+install.dat doinst.sh ${PKG}/install
+install.dat config/udev.conf ${PKG}/etc/udev
+install.dat config/rules.d/* ${PKG}/usr/lib$(libdirsuffix)/udev/rules.d
+install.dat config/modprobe.d/* ${PKG}/etc/modprobe.d
+install.bin config/rc.d/rc.udev.new ${PKG}/etc/rc.d
+mv \
+ ${PKG}/usr/share/pkgconfig/* \
+ ${PKG}/usr/lib$(libdirsuffix)/pkgconfig
+mv \
+ ${PKG}/usr/lib/ConsoleKit \
+ ${PKG}/usr/lib$(libdirsuffix)
+rm -rf \
+ ${PKG}/usr/lib \
+ ${PKG}/usr/share/pkgconfig
+#FIXME: compatibility symlinks
+install.dir ${PKG}/sbin
+(
+  cd ${PKG}/sbin
+  ln -sf /usr/sbin/udevd
+  ln -sf /usr/sbin/udevadm
+  ln -sf /usr/lib$(libdirsuffix)/udev/scsi_id
+)
+(
+  cd ${PKG}/usr/sbin
+  ln -sf /usr/lib$(libdirsuffix)/udev/scsi_id
+)
+(
+  cd ${PKG}/usr/lib$(libdirsuffix)
+  src.unpack ${CWD}/udev-fixed-devices.tar.xz
+)
+}

@@ -1,0 +1,64 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=libgcrypt
+VERSION=1.5.0
+BUILD=1
+DEPENDS=('libgpgerror >= 1.10-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: libgcrypt
+${NAME}:
+${NAME}: Libgcrypt is a general purpose crypto library based on the code used
+${NAME}: in GnuPG. We can't start with a new version number because libgcrypt
+${NAME}: was part of GnuPG 1.1 and some applications already used it and
+${NAME}: tested for the version number. We believe that the API can stay as
+${NAME}: it is, except that new functions may be added in the future.
+${NAME}:
+${NAME}: Homepage: http://www.gnupg.org
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=ftp://ftp.gnupg.org/gcrypt/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCCOPY[0]="LGPL21 GPL2"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --infodir="${SYS_DIR[info]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --includedir=/usr/include/gcrypt \
+ --localstatedir=/var \
+ --enable-m-guard \
+ --with-capabilities
+make -j 2
+make install DESTDIR="${PKG}"
+doc AUTHORS THANKS
+changelog NEWS
+}

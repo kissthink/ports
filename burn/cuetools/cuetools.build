@@ -50,7 +50,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --sysconfdir=/etc \
  --libdir=/usr/lib$(libdirsuffix) \
  --localstatedir=/var
-make -j 2
+make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
@@ -63,7 +63,7 @@ SRCCOPY[1]="GPL2"
 
 build1()
 {
-make -j 2 OPTS="${FLAGS}"
+make ${JOBS} OPTS="${FLAGS}"
 make install DESTDIR="${PKG}"
 changelog ChangeLog
 }
@@ -76,7 +76,7 @@ SRCOPTS[2]="nosrcroot"
 
 build2()
 {
-make -j 2 -C src CFLAGS="${FLAGS}"
+make ${JOBS} -C src CFLAGS="${FLAGS}"
 make -C src install DESTDIR="${PKG}" prefix="/usr"
 doc uif2iso.txt
 #FIXME: manual page
@@ -89,7 +89,7 @@ SRCCOPY[3]="GPL2"
 
 build3()
 {
-make -j 2 CFLAGS+="${FLAGS}"
+make ${JOBS} CFLAGS+="${FLAGS}"
 make install PREFIX="/usr" DESTDIR="${PKG}"
 changelog Release-Notes
 rm -rf \

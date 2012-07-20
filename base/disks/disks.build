@@ -7,7 +7,7 @@ source /usr/src/ports/Build/build.sh
 NAME=disks
 VERSION=$(date +%Y%m%d)
 BUILD=1
-DEPENDS=('glib >= 2.30.2-1' 'dbus_glib >= 0.98-1' 'udev >= 173-1' 'polkit >= 0.104-1' 'lvm >= 2.02.93-1' 'parted >= 3.0-1' 'scsi >= 1.33-1')
+DEPENDS=('glib >= 2.32.3-1' 'dbus_glib >= 0.100-1' 'udev >= 173-1' 'polkit >= 0.104-1' 'lvm >= 2.02.93-1' 'parted >= 3.0-1' 'scsi >= 1.33-1')
 
 # Description
 
@@ -36,8 +36,8 @@ EOF
 # Sources
 
 SRCNAME[0]=libatasmart
-SRCVERS[0]=0.18
-SRCPACK[0]=http://0pointer.de/public/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCVERS[0]=0.19
+SRCPACK[0]=http://0pointer.de/public/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
 SRCCOPY[0]="LGPL21"
 
 build0()

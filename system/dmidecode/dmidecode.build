@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=dmidecode
 VERSION=2.11
-BUILD=2
+BUILD=3
 
 # Description
 
@@ -52,7 +52,7 @@ changelog CHANGELOG
 }
 
 SRCNAME[1]=cpuid
-SRCVERS[1]=20120225
+SRCVERS[1]=20120601
 SRCPACK[1]=http://www.etallen.com/${SRCNAME[1]}/${SRCNAME[1]}-${SRCVERS[1]}.src.tar.gz
 SRCCOPY[1]="GPL2"
 

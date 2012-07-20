@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=mc
-VERSION=4.8.1.3
+VERSION=4.8.4
 BUILD=1
-DEPENDS=('glib >= 2.32.0-1')
+DEPENDS=('glib >= 2.32.3-1' 'libssh2 >= 1.4.2-1')
 
 # Description
 
@@ -42,6 +42,7 @@ SRCCOPY[0]="GPL3"
 
 build0()
 {
+CPPFLAGS="-I/usr/include/ssh2" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -91,8 +92,8 @@ mv \
 install.dir ${PKG}/etc/profile.d
 (
   cd ${PKG}/etc/profile.d
-  mv ${PKG}/usr/lib64/exec/mc/mc.csh .
-  mv ${PKG}/usr/lib64/exec/mc/mc.sh .
+  mv ${PKG}/usr/lib$(libdirsuffix)/exec/mc/mc.csh .
+  mv ${PKG}/usr/lib$(libdirsuffix)/exec/mc/mc.sh .
 )
 install.dir ${PKG}/usr/share/applications
 install.dat mc.desktop ${PKG}/usr/share/applications

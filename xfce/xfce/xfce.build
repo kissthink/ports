@@ -8,8 +8,8 @@ NAME=xfce
 MAJOR=4.10
 VERSION=${MAJOR}
 BUILD=3
-DEPENDS=('gtk+ >= 2.24.10-1' 'icon_theme >= 0.8.90-1' 'glib_dbus >= 0.98-1' 'libwnck >= 2.31.0-1' 'libxklavier >= 5.2.1-1' 'libnotify >= 0.7.5-1' 'libcanberra >= 0.28-1' 'gamin >= 0.1.10-1')
-OPTDEPENDS=('poppler >= 0.20.1-1')
+DEPENDS=('gtk+ >= 2.24.10-1' 'icon_theme >= 0.8.90-1' 'dbus_glib >= 0.100-1' 'libwnck >= 2.31.0-1' 'libxklavier >= 5.2.1-1' 'libnotify >= 0.7.5-1' 'libcanberra >= 0.29-1' 'gamin >= 0.1.10-1')
+OPTDEPENDS=('poppler >= 0.20.2-1')
 
 # Description
 

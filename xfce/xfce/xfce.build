@@ -413,7 +413,7 @@ mv \
 
 SRCNAME[20]=xfce4-weather-plugin
 SRCVERS[20]=0.8.0
-SRCPACK[20]=${XFCEREPO}/panel-plugins/${SRCNAME[20]}/${SENSORM}/${SRCNAME[20]}-${SRCVERS[20]}.tar.xz
+SRCPACK[20]=${XFCEREPO}/panel-plugins/${SRCNAME[20]}/${SENSORM}/${SRCNAME[20]}-${SRCVERS[20]}.tar.bz2
 SRCCOPY[20]="GPL2"
 
 build20()

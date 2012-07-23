@@ -7,7 +7,7 @@ source /usr/src/ports/Build/build.sh
 NAME=xfce
 MAJOR=4.10
 VERSION=${MAJOR}
-BUILD=2
+BUILD=3
 DEPENDS=('gtk+ >= 2.24.10-1' 'icon_theme >= 0.8.90-1' 'glib_dbus >= 0.98-1' 'libwnck >= 2.31.0-1' 'libxklavier >= 5.2.1-1' 'libnotify >= 0.7.5-1' 'libcanberra >= 0.28-1' 'gamin >= 0.1.10-1')
 OPTDEPENDS=('poppler >= 0.20.1-1')
 
@@ -379,7 +379,7 @@ changelog NEWS
 }
 
 SRCNAME[18]=xfce4-netload-plugin
-NETLOADM=1.1
+NETLOADM=1.2
 SRCVERS[18]=${NETLOADM}.0
 SRCPACK[18]=${XFCEREPO}/panel-plugins/${SRCNAME[18]}/${NETLOADM}/${SRCNAME[18]}-${SRCVERS[18]}.tar.bz2
 SRCCOPY[18]="GPL2"
@@ -412,7 +412,7 @@ mv \
 }
 
 SRCNAME[20]=xfce4-weather-plugin
-SRCVERS[20]=20110210
+SRCVERS[20]=0.8.0
 SRCPACK[20]=${XFCEREPO}/panel-plugins/${SRCNAME[20]}/${SENSORM}/${SRCNAME[20]}-${SRCVERS[20]}.tar.xz
 SRCCOPY[20]="GPL2"
 

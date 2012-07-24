@@ -87,7 +87,7 @@ rm -rf \
 }
 
 SRCNAME[2]=net-tools
-SRCVERS[2]=${VERSION}
+SRCVERS[2]=20120724
 SRCPACK[2]=http://www.tazenda.demon.co.uk/phil/${SRCNAME[2]}/${SRCNAME[2]}-${SRCVERS[2]}.tar.xz
 
 build2()

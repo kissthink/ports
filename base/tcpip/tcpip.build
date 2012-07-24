@@ -224,7 +224,7 @@ install.dir ${PKG}/bin
 }
 
 SRCNAME[8]=net-tools
-SRCVERS[8]=20120202
+SRCVERS[8]=20120724
 SRCPACK[8]=http://www.tazenda.demon.co.uk/phil/${SRCNAME[8]}/${SRCNAME[8]}-${SRCVERS[8]}.tar.xz
 SRCCOPY[8]="GPL2"
 

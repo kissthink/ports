@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=xorg_video_intel
-VERSION=2.20.0
+VERSION=2.20.1
 BUILD=1
 
 # Description

@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=util_linux
 VERSION=2.21.2
-BUILD=2
+BUILD=3
 DEPENDS=('udev >= 173-1')
 
 # Description
@@ -64,6 +64,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-fs-paths-default="/usr/sbin:/sbin:/sbin/fs.d:/sbin/fs" \
  --enable-libblkid \
  --enable-libmount \
+ --enable-libmount-mount \
  --enable-libuuid \
  --enable-arch \
  --enable-agetty \
@@ -79,10 +80,6 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-use-tty-group
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
-(
-  cd bsdstrings ; make CFLAGS="${FLAGS}" ${JOBS}
-  make install DESTDIR="${PKG}" MANDIR="${SYS_DIR[man]}/man1"
-)
 doc AUTHORS
 changelog NEWS
 rm -rf ${PKG}${SYS_DIR[man]}/ru
@@ -246,4 +243,59 @@ make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS CREDITS docs/libsysfs.txt
 changelog ChangeLog
+}
+
+SRCNAME[5]=slackwareutils
+SRCVERS[5]=1.0.1
+SRCPACK[5]=http://github.com/downloads/cjsthompson/${SRCNAME[5]}/${SRCNAME[5]}-${SRCVERS[5]}.tar.xz
+
+build5()
+{
+make ${JOBS} CFLAGS="${FLAGS}"
+make install DESTDIR="${PKG}" MANDIR="${SYS_DIR[man]}/man1"
+#FIXME: compat
+mv \
+  ${PKG}/usr/bin/mktemp \
+  ${PKG}/usr/bin/mktemp-bsd
+( cd ${PKG}/usr/bin ; ln -sf mktemp-bsd mktemp )
+install.dir ${PKG}/bin
+( cd ${PKG}/bin ; ln -sf /usr/bin/mktemp-bsd mktemp )
+}
+
+SRCNAME[6]=which
+SRCVERS[6]=2.20
+SRCPACK[6]=http://carlo17.home.xs4all.nl/${SRCNAME[6]}/${SRCNAME[6]}-${SRCVERS[6]}.tar.gz
+SRCCOPY[6]="GPL3"
+
+build6()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --infodir="${STS_DIR[info]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+install.dir ${PKG}/bin
+( cd ${PKG}/bin ; ln -sf /usr/bin/which )
+}
+
+SRCNAME[7]=tree
+SRCVERS[7]=1.6.0
+SRCPACK[7]=ftp://mama.indstate.edu/linux/tree/${SRCNAME[7]}-${SRCVERS[7]}.tgz
+SRCCOPY[7]="GPL2"
+
+build7()
+{
+make ${JOBS} OPTS="${FLAGS}"
+make install prefix="${PKG}/usr" MANDIR="${PKG}${SYS_DIR[man]}/man1"
+doc README
+changelog CHANGES
 }

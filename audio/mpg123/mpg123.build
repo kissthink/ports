@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=mpg123
-VERSION=1.14.2
+VERSION=1.14.4
 BUILD=1
 
 # Description

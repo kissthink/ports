@@ -35,7 +35,7 @@ EOF
 # Sources
 
 SRCNAME[0]=libcap-ng
-SRCVERS[0]=0.6.6
+SRCVERS[0]=0.7
 SRCPACK[0]=http://people.redhat.com/sgrubb/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
 SRCCOPY[0]="GPL2 LGPL21"
 

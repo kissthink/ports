@@ -1,0 +1,64 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=gtk_engine_murrine
+MAJOR=0.98
+VERSION=${MAJOR}.2
+BUILD=1
+DEPENDS=('gtk+ >= 2.24.10-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: murrine
+${NAME}:
+${NAME}: A modern, clean and highly customizable gtk+ theme engine that allows
+${NAME}: antialiased widgets using cairo.
+${NAME}:
+${NAME}: Homepage: http://www.cimitan.com/murrine
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=murrine
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=${URL[gnome]}/${SRCNAME[0]}/${MAJOR}/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+SRCCOPY[0]="LGPL3"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --enable-animation \
+ --enable-animationrtl
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+}

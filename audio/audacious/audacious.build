@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=audacious
-VERSION=3.2.3
-BUILD=3
-DEPENDS=('gtk+ >= 2.24.10-1' 'dbus_glib >= 0.98-1')
+VERSION=3.3
+BUILD=1
+DEPENDS=('gtk+ >= 3.4.3-1' 'dbus_glib >= 0.100-1')
 OPTDEPENDS=('mpg123 >= 1.14.2-1' 'ffmpeg >= 0.11.1-1' 'curl >= 7.26.0-1')
 
 # Description
@@ -86,9 +86,6 @@ SRCVERS[2]=${VERSION}
 SRCPACK[2]=http://distfiles.atheme.org/${SRCNAME[2]}-${SRCVERS[2]}.tar.bz2
 SRCCOPY[2]="GPL3"
 
-#MOWGLI_CFLAGS="-I${PKG}/usr/include/libmowgli" \
-#MOWGLI_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lmowgli" \
-
 build2()
 {
 PKG_CONFIG_PATH="${PKG}/usr/lib$(libdirsuffix)/pkgconfig" \
@@ -100,14 +97,11 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --disable-rpath \
- --enable-static=no \
- --enable-shared=yes \
  --prefix=/usr \
  --mandir="${SYS_DIR[man]}" \
  --sysconfdir=/etc \
  --libdir=/usr/lib$(libdirsuffix) \
  --localstatedir=/var \
- --disable-gtk3 \
  --with-regexlib=gnu
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
@@ -115,25 +109,18 @@ doc AUTHORS
 install.dir ${PKG}/usr/share/Thunar/sendto
 install.dat thunar-sendto-audacious-playlist.desktop \
  ${PKG}/usr/share/Thunar/sendto
-mv \
- ${PKG}/usr/share/pixmaps/audacious.png \
- ${PKG}/usr/share/icons/hicolor/48x48/apps
-mv \
- ${PKG}/usr/share/pixmaps/audacious.svg \
- ${PKG}/usr/share/icons/hicolor/scalable/apps
-rmdir ${PKG}/usr/share/pixmaps
 }
 
 SRCNAME[3]=${NAME}-plugins
 SRCVERS[3]=${VERSION}
 SRCPACK[3]=http://distfiles.atheme.org/${SRCNAME[3]}-${SRCVERS[3]}.tar.bz2
 
-GTKINC="-I/usr/lib64/gtk-2.0/include -I/usr/include/cairo -I/usr/include/atk-1.0 -I/usr/include/pango-1.0 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/gtk-2.0 -I/usr/include/sndfile -I/usr/include/samplerate"
+EXTINC="-I/usr/include/sndfile -I/usr/include/samplerate"
 
 build3()
 {
 PKG_CONFIG_PATH="${PKG}/usr/lib$(libdirsuffix)/pkgconfig" \
-CPPFLAGS="-I${PKG}/usr/include -I${PKG}/usr/include/libmowgli ${GTKINC}" \
+CPPFLAGS="-I${PKG}/usr/include -I${PKG}/usr/include/libmowgli ${EXTINC}" \
 LDFLAGS="-L${PKG}/usr/lib$(libdirsuffix)" \
 MOWGLI_CFLAGS="-I${PKG}/usr/include/libmowgli" \
 MOWGLI_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lmowgli" \
@@ -148,7 +135,6 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --libdir=/usr/lib$(libdirsuffix) \
  --localstatedir=/var \
  --disable-oss \
- --disable-gtk3 \
  --enable-ipv6
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"

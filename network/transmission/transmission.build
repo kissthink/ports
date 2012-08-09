@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=transmission
-VERSION=2.52
-BUILD=2
-DEPENDS=('gtk+ >= 2.24.10-1' 'libevent >= 2.0.16-1' 'curl >= 7.26.0-1' 'openssl >= 0.9.8x-1' 'libnotify >= 0.7.5-1' 'libcanberra >= 0.29-1')
+VERSION=2.61
+BUILD=1
+DEPENDS=('gtk+ >= 3.4.3-1' 'libevent >= 2.0.16-1' 'curl >= 7.26.0-1' 'openssl >= 0.9.8x-1')
 
 # Description
 
@@ -54,7 +54,6 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --sysconfdir=/etc \
  --libdir=/usr/lib$(libdirsuffix) \
  --localstatedir=/var \
- --with-gtk=2 \
  --enable-cli \
  --enable-daemon
 make ${JOBS} V=1

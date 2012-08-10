@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=mhwaveedit
-VERSION=1.4.21
+VERSION=1.4.22
 BUILD=1
-DEPENDS=('gtk+ >= 2.24.6-1' 'libsamplerate >= 0.1.8-1' 'sound >= 1.0.24-1' 'jack >= 1.9.7-1')
+DEPENDS=('gtk+ >= 2.24.10-1' 'libsamplerate >= 0.1.8-1' 'sound >= 1.0.24-1' 'jack >= 1.9.7-1')
 
 # Description
 
@@ -46,8 +46,6 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
- --enable-static=no \
- --enable-shared=yes \
  --prefix=/usr \
  --mandir="${SYS_DIR[man]}" \
  --sysconfdir=/etc \
@@ -61,7 +59,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --without-oss \
  --without-esound \
  --without-arts
-make -j 2
+make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS

@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=wireshark
-VERSION=1.6.8
+VERSION=1.8.1
 BUILD=1
 DEPENDS=('glib >= 2.32.2-1' 'tcpip >= 3.2.0-1')
 
@@ -42,6 +42,7 @@ SRCCOPY[0]="GPL2 BSD3"
 
 build0()
 {
+CPPFLAGS="-I/usr/include/gcrypt -I/usr/include/gpg-error" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -55,8 +56,8 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --localstatedir=/var \
  --datadir=/usr/share/application-data \
  --with-plugins=/usr/lib$(libdirsuffix)/plugins/wireshark \
- --enable-threads \
  --enable-setcap-install \
+ --with-gtk3=yes \
  --with-dumpcap-group=netdev \
  --with-gnutls=yes \
  --with-gcrypt=yes \

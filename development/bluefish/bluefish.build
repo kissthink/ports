@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=bluefish
-VERSION=2.2.2
+VERSION=2.2.3
 BUILD=1
-DEPENDS=('gtk+ >= 3.4.0-1' 'enchant >= 1.6.0-1')
+DEPENDS=('gtk+ >= 3.4.3-1' 'enchant >= 1.6.0-1')
 
 # Description
 

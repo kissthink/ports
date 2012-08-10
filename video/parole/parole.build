@@ -5,9 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=parole
-VERSION=20120723
+MAJOR=0.3
+VERSION=${MAJOR}.0
 BUILD=1
-DEPENDS=('xfce >= 4.10-3' 'gstreamer >= 0.10.36-1' 'dbus_glib >= 0.100-1')
+DEPENDS=('xfce >= 4.10-4' 'gstreamer >= 0.10.36-1' 'dbus_glib >= 0.100-1')
 
 # Description
 
@@ -37,7 +38,7 @@ EOF
 
 SRCNAME[0]=${NAME}
 SRCVERS[0]=${VERSION}
-SRCPACK[0]=http://archive.xfce.org/src/apps/${SRCNAME[0]}/${MAJOR}/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+SRCPACK[0]=http://archive.xfce.org/src/apps/${SRCNAME[0]}/${MAJOR}/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
 SRCCOPY[0]="GPL2"
 
 build0()

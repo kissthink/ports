@@ -5,9 +5,8 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=pkgconfig
-VERSION=0.26
+VERSION=0.27.1
 BUILD=1
-DEPENDS=('glib >= 2.28.8-1')
 
 # Description
 
@@ -53,8 +52,9 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --sysconfdir=/etc \
  --libdir=/usr/lib$(libdirsuffix) \
  --localstatedir=/var \
+ --with-internal-glib \
  --with-pc-path=/usr/lib$(libdirsuffix)/pkgconfig
-make -j 2
+make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS

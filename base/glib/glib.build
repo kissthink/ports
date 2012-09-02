@@ -8,7 +8,7 @@ NAME=glib
 MAJOR=2.32
 VERSION=${MAJOR}.3
 BUILD=1
-DEPENDS=('libffi >= 3.0.11-1')
+DEPENDS=('libraries >= 20120902-1')
 OPTIONS="symprepend"
 
 # Description

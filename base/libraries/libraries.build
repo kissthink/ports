@@ -58,7 +58,7 @@ changelog ChangeLog
 
 SRCNAME[1]=gmp
 SRCVERS[1]=5.0.5
-SRCPACK[1]=ftp://ftp.gmplib.org/pub/${SRCNAME[1]}-${SRCVERS[1]}/${SRCNAME[1]}-${SRCVERS[1]}.tar.bz2
+SRCPACK[1]=ftp://ftp.gmplib.org/pub/${SRCNAME[1]}-${SRCVERS[1]}/${SRCNAME[1]}-${SRCVERS[1]}.tar.xz
 SRCCOPY[1]="GPL3 LGPL3"
 
 build1()
@@ -151,7 +151,7 @@ rm -f ${PKG}/usr/lib$(libdirsuffix)/libaio.a
 }
 
 SRCNAME[5]=nettle
-SRCVERS[5]=2.4
+SRCVERS[5]=2.5
 SRCPACK[5]=http://www.lysator.liu.se/~nisse/archive/${SRCNAME[5]}-${SRCVERS[5]}.tar.gz
 SRCCOPY[5]="LGPL21"
 
@@ -173,4 +173,28 @@ make install DESTDIR="${PKG}"
 changelog NEWS
 rm -f ${PKG}/usr/lib$(libdirsuffix)/lib{nettle,hogweed}.a
 chmod 0755 ${PKG}/usr/lib$(libdirsuffix)/*.so*
+}
+
+SRCNAME[6]=libffi
+SRCVERS[6]=3.0.11
+SRCPACK[6]=ftp://sourceware.org/pub/${SRCNAME[6]}/${SRCNAME[6]}-${SRCVERS[6]}.tar.gz
+SRCCOPY[6]="MIT"
+
+build6()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --infodir="${SYS_DIR[info]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog ChangeLog
 }

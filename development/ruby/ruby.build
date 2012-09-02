@@ -4,9 +4,13 @@
 
 source /usr/src/ports/Build/build.sh
 
-NAME=libffi
-VERSION=3.0.11
+NAME=ruby
+MAJOR=1.9
+MINOR=3
+PATCH=194
+VERSION=${MAJOR}.${MINOR}.${PATCH}
 BUILD=1
+DEPENDS=('libraries >= 20120902-1')
 
 # Description
 
@@ -19,15 +23,15 @@ cat > ${PKG}/install/slack-desc <<EOF
 # customary to leave one space after the ':'.
 
 $(padd)|-----handy-ruler------------------------------------------------------|
-${NAME}: libffi (A Portable Foreign Function Interface Library)
+${NAME}: ruby (Interpreted object-oriented scripting language)
 ${NAME}:
-${NAME}: FFI stands for Foreign Function Interface. A foreign function
-${NAME}: interface is the popular name for the interface that allows code
-${NAME}: written in one language to call code written in another language.
-${NAME}: The libffi library really only provides the lowest, machine dependent
-${NAME}: layer of a fully featured foreign function interface.
+${NAME}: Ruby is an interpreted scripting language for quick and easy
+${NAME}: object-oriented programming. It has many features to process text
+${NAME}: files and to do system management tasks (as in Perl). It is simple,
+${NAME}: straight-forward, and extensible.
 ${NAME}:
-${NAME}: Homepage: http://sourceware.org/libffi
+${NAME}: Visit the Ruby project online at http://www.ruby-lang.org
+${NAME}:
 ${NAME}:
 ${NAME}:
 EOF
@@ -35,25 +39,28 @@ EOF
 # Sources
 
 SRCNAME[0]=${NAME}
-SRCVERS[0]=${VERSION}
-SRCPACK[0]=ftp://sourceware.org/pub/${SRCNAME[01]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
-SRCCOPY[0]="MIT"
+SRCVERS[0]=${MAJOR}.${MINOR}-p${PATCH}
+SRCPACK[0]=ftp://ftp.ruby-lang.org/pub/${SRCNAME[0]}/${MAJOR}/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCCOPY[0]="BSD2"
 
 build0()
 {
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
- --disable-dependency-tracking \
- --enable-static=no \
- --enable-shared=yes \
+ --enable-shared \
+ --enable-pthread \
+ --disable-rpath \
  --prefix=/usr \
  --mandir="${SYS_DIR[man]}" \
- --infodir="${SYS_DIR[info]}" \
  --sysconfdir=/etc \
  --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --localstatedir=/var \
+ --disable-install-doc \
+ --with-rubylibprefix=/usr/lib$(libdirsuffix)/plugins/ruby
 make ${JOBS}
-make install DESTDIR="${PKG}"
+make install-nodoc DESTDIR="${PKG}"
+doc NEWS
 changelog ChangeLog
+license COPYING
 }

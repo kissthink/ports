@@ -6,9 +6,9 @@ source /usr/src/ports/Build/build.sh
 
 NAME=networkmanager
 MAJOR=0.9
-VERSION=${MAJOR}.4.0
+VERSION=${MAJOR}.6.0
 BUILD=1
-DEPENDS=('glib >= 2.32.0-1' 'dbus >= 1.4.16-1' 'udev >= 173-1' 'gnutls >= 3.0.19-1' 'tcpip >= 3.2.0-1')
+DEPENDS=('glib >= 2.32.3-1' 'dbus >= 1.4.20-1' 'udev >= 173-1' 'gnutls >= 3.1.0-1' 'tcpip >= 3.2.0-1')
 
 # Description
 
@@ -23,7 +23,7 @@ cat > ${PKG}/install/slack-desc <<EOF
 $(padd)|-----handy-ruler------------------------------------------------------|
 ${NAME}: networkmanager
 ${NAME}:
-${NAME}: NetworkManager attemps to keep an active network connection 
+${NAME}: NetworkManager attempts to keep an active network connection 
 ${NAME}: available at all times. The point of NetworkManager is to make
 ${NAME}: networking configuration and setup as painless and automatic as
 ${NAME}: possible.
@@ -43,6 +43,7 @@ SRCCOPY[0]="GPL2"
 
 build0()
 {
+#FIXME: /sbin/dhcpcd -> /usr/sbin/dhcpcd
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -65,7 +66,8 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --with-pppd-plugin-dir="/usr/lib$(libdirsuffix)/pppd/2.4.5" \
  --with-distro=slackware \
  --with-crypto=gnutls \
- --with-dhclient=no \
+ --with-dhcpcd=/sbin/dhcpcd \
+ --with-dhclient=yes \
  --disable-qt \
  --enable-polkit \
  --enable-ppp \
@@ -78,4 +80,6 @@ install.dat doinst.sh ${PKG}/install
 mv \
  ${PKG}/etc/rc.d/rc.networkmanager \
  ${PKG}/etc/rc.d/rc.networkmanager.new
+chmod 0644 ${PKG}/etc/rc.d/rc.networkmanager.new
+install.cfg NetworkManager.conf.new ${PKG}/etc/NetworkManager
 }

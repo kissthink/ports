@@ -5,8 +5,8 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=coreutils
-VERSION=8.17
-BUILD=2
+VERSION=8.19
+BUILD=1
 
 # Description
 
@@ -56,16 +56,12 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --libdir=/usr/lib$(libdirsuffix) \
  --libexecdir=/usr/lib$(libdirsuffix)/exec \
  --bindir=/usr/bin \
- --enable-no-install-program="hostname,kill,su,uptime" \
+ --enable-no-install-program="hostname,kill,uptime" \
  --without-gmp
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 mv ${PKG}/usr/bin/mktemp ${PKG}/usr/bin/mktemp-gnu
 mv ${PKG}/usr/man/man1/mktemp.1 ${PKG}/usr/man/man1/mktemp-gnu.1
-(
-  cd mktemp ; make ${JOBS} CFLAGS="${FLAGS}"
-  make install DESTDIR="${PKG}" MANDIR="${SYS_DIR[man]}/man1"
-)
 doc AUTHORS THANKS
 changelog NEWS
 install.dir ${PKG}/etc/profile.d
@@ -82,11 +78,7 @@ install.dir ${PKG}/bin
     ln -sf /usr/bin/${file##*/} .
   done
 )
-(
-  cd ${PKG}/bin
-  ln -sf ${PKG}/usr/bin/mktemp-gnu
-  ln -sf ${PKG}/usr/bin/mktemp
-)
+( cd ${PKG}/bin ; ln -sf ${PKG}/usr/bin/mktemp-gnu )
 ( cd ${PKG}/usr/bin ; ln -sf install ginstall )
 ( cd ${PKG}/bin ; ln -sf /usr/bin/install ginstall )
 (

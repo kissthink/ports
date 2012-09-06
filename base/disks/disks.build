@@ -26,7 +26,7 @@ ${NAME}: Utilities and libraries to operate disk mass storage devices such as
 ${NAME}: hard drives or CD drives.
 ${NAME}:
 ${NAME}: This package includes 'libatasmart', 'udisks' as well as the 'hdparm'
-${NAME}: and 'eject' utilities.
+${NAME}: utility.
 ${NAME}:
 ${NAME}:
 ${NAME}:
@@ -72,34 +72,12 @@ changelog Changelog
 license LICENSE.TXT
 }
 
-SRCNAME[2]=eject
-SRCVERS[2]=2.1.5
-SRCPACK[2]=http://www.paldo.org/paldo/sources/${SRCNAME[2]}/${SRCNAME[2]}-${SRCVERS[2]}.tar.bz2
-SRCROOT[2]=${SRCNAME[2]}
+SRCNAME[2]=udisks
+SRCVERS[2]=1.0.4
+SRCPACK[2]=http://hal.freedesktop.org/releases/${SRCNAME[2]}-${SRCVERS[2]}.tar.gz
 SRCCOPY[2]="GPL2"
 
 build2()
-{
-CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
-./configure \
- --build="${ARCH}-slackware-linux" \
- --prefix=/usr \
- --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
-make ${JOBS}
-make install DESTDIR="${PKG}"
-doc AUTHORS
-changelog ChangeLog
-}
-
-SRCNAME[3]=udisks
-SRCVERS[3]=1.0.4
-SRCPACK[3]=http://hal.freedesktop.org/releases/${SRCNAME[3]}-${SRCVERS[3]}.tar.gz
-SRCCOPY[3]="GPL2"
-
-build3()
 {
 LIBATASMART_CFLAGS="-I${PKG}/usr/include/atasmart" \
 LIBATASMART_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -latasmart" \

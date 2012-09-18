@@ -7,7 +7,7 @@ source /usr/src/ports/Build/build.sh
 NAME=xfce
 MAJOR=4.10
 VERSION=${MAJOR}
-BUILD=4
+BUILD=5
 DEPENDS=('gtk+ >= 2.24.10-1' 'icon_theme >= 0.8.90-1' 'dbus_glib >= 0.100-1' 'libwnck >= 2.31.0-1' 'libxklavier >= 5.2.1-1' 'libnotify >= 0.7.5-1' 'libcanberra >= 0.29-1' 'gamin >= 0.1.10-1')
 OPTDEPENDS=('poppler >= 0.20.2-1')
 
@@ -412,7 +412,7 @@ mv \
 }
 
 SRCNAME[20]=xfce4-weather-plugin
-SRCVERS[20]=0.8.0
+SRCVERS[20]=0.8.2
 SRCPACK[20]=${XFCEREPO}/panel-plugins/${SRCNAME[20]}/${SENSORM}/${SRCNAME[20]}-${SRCVERS[20]}.tar.bz2
 SRCCOPY[20]="GPL2"
 
@@ -426,7 +426,7 @@ changelog NEWS
 }
 
 SRCNAME[21]=xfce4-places-plugin
-PLACESM=1.3
+PLACESM=1.4
 SRCVERS[21]=${PLACESM}.0
 SRCPACK[21]=${XFCEREPO}/panel-plugins/${SRCNAME[21]}/${PLACESM}/${SRCNAME[21]}-${SRCVERS[21]}.tar.bz2
 SRCCOPY[21]="GPL2"

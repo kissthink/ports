@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=jack
-VERSION=1.9.7
+VERSION=1.9.8
 BUILD=1
 DEPENDS=('libsamplerate >= 0.1.8-1' 'celt >= 0.11.3-1')
 
@@ -42,6 +42,7 @@ SRCCOPY[0]="GPL2 LGPL2"
 
 build0()
 {
+cd ${SRCNAME[0]}-${SRCVERS[0]}
 export CPPFLAGS="${FLAGS} -I/usr/include/samplerate -I/usr/include/sndfile"
 ./waf configure \
  --prefix=/usr \
@@ -50,11 +51,14 @@ export CPPFLAGS="${FLAGS} -I/usr/include/samplerate -I/usr/include/sndfile"
  --alsa \
  --dbus \
  --classic
-./waf build -v -j 2
+./waf build -v ${JOBS}
 ./waf install --destdir="${PKG}"
 doc README
 changelog ChangeLog
 chmod 0755 \
  ${PKG}/usr/lib$(libdirsuffix)/jack/*.so \
  ${PKG}/usr/lib$(libdirsuffix)/*.so*
+UDEVDIR="$(pkg-config udev --variable=udevdir)"
+install.dir ${PKG}${UDEVDIR}/rules.d
+install.dat 40-hpet-permissions.rules ${PKG}${UDEVDIR}/rules.d
 }

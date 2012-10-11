@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=httping
-VERSION=1.5.2
+VERSION=1.5.4
 BUILD=1
 
 # Description
@@ -40,7 +40,7 @@ SRCPACK[0]=http://www.vanheusden.com/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.t
 
 build0()
 {
-make -j 2 OFLAGS="${FLAGS}"
+make ${JOBS} OFLAGS="${FLAGS}"
 make install DESTDIR="${PKG}" \
  MANDIR="${SYS_DIR[man]}" \
  DOCDIR="bla"

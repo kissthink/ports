@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=xdg_utils
 VERSION=1.1.0rc1
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -48,15 +48,15 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --sysconfdir=/etc \
  --libdir=/usr/lib$(libdirsuffix) \
  --localstatedir=/var
-make -j 2
+make ${JOBS}
 make install DESTDIR="${PKG}"
 doc README
 changelog ChangeLog
 }
 
 SRCNAME[1]=desktop-file-utils
-SRCVERS[1]=0.18
-SRCPACK[1]=http://www.freedesktop.org/software/${SRCNAME[1]}/releases/${SRCNAME[1]}-${SRCVERS[1]}.tar.bz2
+SRCVERS[1]=0.21
+SRCPACK[1]=http://www.freedesktop.org/software/${SRCNAME[1]}/releases/${SRCNAME[1]}-${SRCVERS[1]}.tar.xz
 SRCCOPY[1]="GPL2"
 
 build1()
@@ -73,8 +73,13 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --sysconfdir=/etc \
  --libdir=/usr/lib$(libdirsuffix) \
  --localstatedir=/var
-make -j 2 V=1
+make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
+(
+cd ${PKG}${SYS_DIR[man]}/man1
+rm -f desktop-file-edit.1
+echo ".so man1/desktop-file-install.1" > desktop-file-edit.1
+)
 }

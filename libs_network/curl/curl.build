@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=curl
-VERSION=7.26.0
+VERSION=7.28.0
 BUILD=1
-DEPENDS=('gnutls >= 3.0.20-1' 'ca_certificates >= 20111211-1')
+DEPENDS=('gnutls >= 3.1.1-1' 'ca_certificates >= 20111211-1')
 
 # Description
 

@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=libtiff
 MAJOR=4.0
-VERSION=${MAJOR}.1
-BUILD=2
+VERSION=${MAJOR}.3
+BUILD=1
 DEPENDS=('libjpeg >= 1.2.0-1')
 
 # Description

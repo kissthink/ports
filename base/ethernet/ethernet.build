@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=ethernet
-VERSION=3.5
+VERSION=3.6
 BUILD=1
 
 # Description

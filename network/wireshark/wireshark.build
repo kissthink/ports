@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=wireshark
-VERSION=1.8.2
+VERSION=1.8.3
 BUILD=1
 DEPENDS=('glib >= 2.32.3-1' 'tcpip >= 3.2.0-1')
 

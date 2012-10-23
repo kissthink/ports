@@ -5,10 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=php
-VERSION=5.3.10
+VERSION=5.3.17
 BUILD=1
 DEPENDS=('libxml >= 2.8.0-1')
-OPTDEPENDS=('curl >= 7.26.0-1')
+OPTDEPENDS=('curl >= 7.28.0-1')
 
 # Description
 

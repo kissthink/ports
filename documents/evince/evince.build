@@ -5,11 +5,11 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=evince
-MAJOR=3.4
-VERSION=${MAJOR}.0
-BUILD=2
-DEPENDS=('gtk+ >= 3.4.3-1' 'gnome_keyring >= 3.0.3-1')
-OPTDEPENDS=('poppler >= 0.20.2-1')
+MAJOR=3.6
+VERSION=${MAJOR}.1
+BUILD=1
+DEPENDS=('gtk+ >= 3.6.1-1' 'gnome_keyring >= 3.0.3-1')
+OPTDEPENDS=('poppler >= 0.20.5-1')
 
 # Description
 
@@ -73,9 +73,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-xps \
  --disable-nautilus \
  --disable-thumbnailer \
- --disable-previewer \
- --disable-scrollkeeper \
- --disable-help
+ --disable-previewer
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS

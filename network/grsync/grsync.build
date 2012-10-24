@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=grsync
-VERSION=1.2.1
+VERSION=1.2.2
 BUILD=1
-DEPENDS=('gtk+ >= 2.24.6-1')
+DEPENDS=('gtk+ >= 2.24.10-1')
 
 # Description
 
@@ -52,7 +52,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --libdir=/usr/lib$(libdirsuffix) \
  --localstatedir=/var \
  --enable-unity=no
-make -j 2
+make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS

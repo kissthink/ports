@@ -5,10 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=atk
-MAJOR=2.4
+MAJOR=2.6
 VERSION=${MAJOR}.0
 BUILD=1
-DEPENDS=('glib >= 2.32.0-1')
+DEPENDS=('glib >= 2.34.1-1')
 
 # Description
 

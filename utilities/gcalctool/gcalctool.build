@@ -5,10 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=gcalctool
-MAJOR=6.4
-VERSION=${MAJOR}.2.1
+MAJOR=6.6
+VERSION=${MAJOR}.1
 BUILD=1
-DEPENDS=('gtk+ >= 3.4.3-1')
+DEPENDS=('gtk+ >= 3.6.1-1')
 
 # Description
 
@@ -52,8 +52,6 @@ SRCCOPY[0]="GPL2"
 
 build0()
 {
-#FIXME: hack
-ITSTOOL="/usr/bin/true" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -69,6 +67,4 @@ make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-#FIXME: hack
-rm -rf ${PKG}/usr/share/help
 }

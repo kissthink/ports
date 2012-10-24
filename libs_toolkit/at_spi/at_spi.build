@@ -71,7 +71,7 @@ SRCCOPY[1]="LGPL2"
 build1()
 {
 ATSPI_CFLAGS="-I${PKG}/usr/include/at-spi-2.0" \
-ATSPI_LIBS="-L${PKG}/usr/lib$(libdirsuffix)" \
+ATSPI_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -latspi" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \

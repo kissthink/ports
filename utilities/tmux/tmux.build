@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=tmux
-VERSION=1.6
+VERSION=1.7
 BUILD=1
-DEPENDS=('libevent >= 2.0.16-1')
+DEPENDS=('libevent >= 2.0.20-1')
 
 # Description
 
@@ -51,7 +51,7 @@ CPPFLAGS="-I/usr/include/event" \
  --sysconfdir=/etc \
  --libdir=/usr/lib$(libdirsuffix) \
  --localstatedir=/var
-make -j 2
+make ${JOBS}
 make install DESTDIR="${PKG}"
 doc FAQ
 changelog CHANGES

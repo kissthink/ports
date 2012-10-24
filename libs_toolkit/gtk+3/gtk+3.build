@@ -5,10 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=gtk+
-MAJOR=3.4
-VERSION=${MAJOR}.3
+MAJOR=3.6
+VERSION=${MAJOR}.1
 BUILD=1
-DEPENDS=('xorg_libs >= 7.6-6' 'gtk+ >= 2.24.10-1' 'gdk_pixbuf >= 2.26.1-1' 'cairo >= 1.12.2-1' 'atk >= 2.4.0-1' 'pango >= 1.30.0-1')
+DEPENDS=('xorg_libs >= 7.7-1' 'gtk+ >= 2.24.13-1' 'gdk_pixbuf >= 2.26.4-1' 'cairo >= 1.12.4-1' 'atk >= 2.6.0-1' 'pango >= 1.32.1-1' 'at_spi >= 2.6.1-1')
 OPTIONS="symprepend"
 
 # Description
@@ -75,13 +75,14 @@ touch ${PKG}/etc/gtk-3.0/gtk.immodules
 }
 
 SRCNAME[1]=gnome-themes-standard
-THEMESM=3.4
-SRCVERS[1]=${THEMESM}.2
+THEMESM=3.6
+SRCVERS[1]=${THEMESM}.1
 SRCPACK[1]=${URL[gnome]}/${SRCNAME[1]}/${THEMESM}/${SRCNAME[1]}-${SRCVERS[1]}.tar.xz
 SRCCOPY[1]="LGPL21"
 
 build1()
 {
+PKG_CONFIG_PATH="${PKG}/usr/lib$(libdirsuffix)/pkgconfig" \
 DEPENDENCIES_CFLAGS="-I${PKG}/usr/include/gtk-3.0 -I/usr/include/glib-2.0 -I/usr/lib64/glib-2.0/include -I/usr/include/pango-1.0 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/atk-1.0 -I/usr/include/cairo" \
 DEPENDENCIES_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lgtk-3" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
@@ -100,24 +101,4 @@ make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-}
-
-SRCNAME[2]=clearwaita
-SRCVERS[2]=20120329
-SRCPACK[2]=${SRCNAME[2]}-${SRCVERS[2]}.tar.xz
-SRCOPTS[2]="pkgunpack"
-SRCCOPY[2]="GPL3"
-
-build2()
-{
-install.dir ${PKG}/usr/share/themes/{Slackware,Clearlooks}
-(
-  cd ${PKG}/usr/share/themes/Slackware
-  ln -sf /usr/share/themes/Clearwaita/gtk-3.0
-  cd ${PKG}/usr/share/themes/Clearlooks
-  ln -sf /usr/share/themes/Clearwaita/gtk-3.0
-  cd ${PKG}/usr/share/themes/Clearwaita
-  ln -sf /usr/share/themes/Clearlooks/gtk-2.0
-  ln -sf /usr/share/themes/Clearlooks/xfwm4
-)
 }

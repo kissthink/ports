@@ -6,9 +6,9 @@ source /usr/src/ports/Build/build.sh
 
 NAME=gtk+
 MAJOR=2.24
-VERSION=${MAJOR}.10
+VERSION=${MAJOR}.13
 BUILD=1
-DEPENDS=('xorg_libs >= 7.6-4' 'gdk_pixbuf >= 2.24.1-1' 'cairo >= 1.10.2-1' 'atk >= 2.2.0-1' 'pango >= 1.28.4-1')
+DEPENDS=('xorg_libs >= 7.7-1' 'gdk_pixbuf >= 2.26.4-1' 'cairo >= 1.12.4-1' 'atk >= 2.6.0-1' 'pango >= 1.32.1-1')
 OPTIONS="symprepend"
 
 # Description
@@ -83,9 +83,9 @@ cp -r \
 }
 
 SRCNAME[1]=gtk-engines
-ENGINESM=2.20
-SRCVERS[1]=${ENGINESM}.2
-SRCPACK[1]=${URL[gnome]}/${SRCNAME[1]}/${ENGINESM}/${SRCNAME[1]}-${SRCVERS[1]}.tar.bz2
+ENGINESM=2.21
+SRCVERS[1]=${ENGINESM}.0
+SRCPACK[1]=ftp://ftp.archlinux.org/other/gtk-engines/${SRCNAME[1]}-${SRCVERS[1]}.tar.gz
 SRCCOPY[1]="LGPL21"
 
 build1()

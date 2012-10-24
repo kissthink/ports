@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=xorg_libs
 VERSION=7.7
-BUILD=1
+BUILD=2
 DEPENDS=('freetype >= 2.4.10-1' 'fontconfig >= 2.8.0-1' 'expat >= 2.0.1-1')
 
 # Description
@@ -524,7 +524,7 @@ SRCPACK[27]=${XORGIREPO}/lib/${SRCNAME[27]}-${SRCVERS[27]}.tar.bz2
 build27()
 {
 XTST_CFLAGS="-I${PKG}/usr/include" \
-XTST_LIBS="-L${PKG}/usr/lib$(libdirsuffix)" \
+XTST_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lXext" \
 configure
 make ${JOBS}
 make install DESTDIR="${PKG}"

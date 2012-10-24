@@ -5,8 +5,8 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=glib
-MAJOR=2.32
-VERSION=${MAJOR}.3
+MAJOR=2.34
+VERSION=${MAJOR}.1
 BUILD=1
 DEPENDS=('libraries >= 20120902-1')
 OPTIONS="symprepend"
@@ -54,8 +54,6 @@ SRCCOPY[0]="LGPL2"
 
 build0()
 {
-#LIBFFI_CFLAGS="-I/usr/lib64/libffi-3.0.11/include"
-#LIBFFI_LIBS="-L/usr/lib64 -lffi"
 CPPFLAGS="-I/usr/include/libelf" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
@@ -87,7 +85,7 @@ rm -rf \
 }
 
 SRCNAME[1]=${NAME}-networking
-SRCVERS[1]=${MAJOR}.3
+SRCVERS[1]=${MAJOR}.0
 SRCPACK[1]=${URL[gnome]}/${SRCNAME[1]}/${MAJOR}/${SRCNAME[1]}-${SRCVERS[1]}.tar.xz
 SRCCOPY[1]="LGPL2"
 
@@ -97,6 +95,7 @@ LD_LIBRARY_PATH="${PKG}/usr/lib$(libdirsuffix)" \
 PKG_CONFIG_PATH="${PKG}/usr/lib$(libdirsuffix)/pkgconfig" \
 CPPFLAGS="-I${PKG}/usr/lib$(libdirsuffix)/glib-2.0/include -I${PKG}/usr/include/glib-2.0" \
 LDFLAGS="-L${PKG}/usr/lib$(libdirsuffix)" \
+LIBS="-lgmodule-2.0" \
 MODULE_DIR="${GIO_MODULE_DIR}" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
@@ -110,22 +109,23 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --sysconfdir=/etc \
  --libdir=/usr/lib$(libdirsuffix) \
  --localstatedir=/var \
- --libexecdir=/usr/lib$(libdirsuffix)/exec \
- --with-ca-certifcates=/etc/ssl/certs/ca-certificates.crt
+ --libexecdir=/usr/lib$(libdirsuffix)/exec
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 changelog NEWS
 }
 
-DCONFM=0.12
+DCONFM=0.14
 SRCNAME[2]=dconf
-SRCVERS[2]=${DCONFM}.1
+SRCVERS[2]=${DCONFM}.0
 SRCPACK[2]=${URL[gnome]}/${SRCNAME[2]}/${DCONFM}/${SRCNAME[2]}-${SRCVERS[2]}.tar.xz
 SRCCOPY[2]="LGPL21"
 
 build2()
 {
+LD_LIBRARY_PATH="${PKG}/usr/lib$(libdirsuffix)" \
 LDFLAGS="-L${PKG}/usr/lib$(libdirsuffix)" \
+LIBS="-lglib-2.0 -lgmodule-2.0" \
 CPPFLAGS="-I${PKG}/usr/lib$(libdirsuffix)/glib-2.0/include -I${PKG}/usr/include/glib-2.0" \
 PKG_CONFIG_PATH="${PKG}/usr/lib$(libdirsuffix)/pkgconfig" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \

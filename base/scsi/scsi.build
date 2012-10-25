@@ -5,8 +5,8 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=scsi
-VERSION=1.33
-BUILD=2
+VERSION=1.34
+BUILD=1
 
 # Description
 
@@ -36,7 +36,7 @@ EOF
 
 SRCNAME[0]=sg3_utils
 SRCVERS[0]=${VERSION}
-SRCPACK[0]=http://sg.danny.cz/sg/p/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCPACK[0]=http://sg.danny.cz/sg/p/${SRCNAME[0]}-${SRCVERS[0]}.tgz
 SRCCOPY[0]="GPL2 BSD3"
 
 # lftpget http://www.garloff.de/kurt/linux/rescan-scsi-bus.sh

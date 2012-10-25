@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=libpng
 VERSION=1.5.13
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -87,7 +87,7 @@ rm -f \
 #}
 
 SRCNAME[1]=pngcrush
-SRCVERS[1]=1.7.40
+SRCVERS[1]=1.7.41
 SRCPACK[1]=${URL[sf]}/pmt/${SRCNAME[1]}/${SRCVERS[1]}/${SRCNAME[1]}-${SRCVERS[1]}.tar.xz
 
 build1()

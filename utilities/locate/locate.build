@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=locate
-VERSION=0.25
+VERSION=0.26
 BUILD=1
 
 # Description

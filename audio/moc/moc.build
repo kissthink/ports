@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=moc
-VERSION=2.5.0alpha4
+VERSION=2.5.0beta1
 BUILD=1
-DEPENDS=('alsa_lib >= 1.0.25-1' 'libsamplerate >= 0.1.8-1' 'curl >= 7.26.0-1')
+DEPENDS=('alsa_lib >= 1.0.26-1' 'libsamplerate >= 0.1.8-1' 'curl >= 7.28.0-1')
 OPTDEPENDS=('ffmpeg >= 0.10.3-1')
 
 # Description
@@ -37,7 +37,7 @@ EOF
 # Sources
 
 SRCNAME[0]=${NAME}
-SRCVERS[0]=2.5.0-alpha4
+SRCVERS[0]=2.5.0-beta1
 SRCPACK[0]=ftp://ftp.daper.net/pub/soft/moc/unstable/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
 SRCCOPY[0]="GPL2"
 
@@ -48,6 +48,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
+ --disable-rpath \
  --enable-static=no \
  --enable-shared=yes \
  --disable-debug \
@@ -59,22 +60,21 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --datadir=/usr/share/application-data \
  --without-oss \
  --with-ncurses
-make -j 2
+make ${JOBS}
 (
   cd decoder_plugins/mp3
-  make -j 2
+  make ${JOBS}
+  cd ../aac
+  make ${JOBS}
 )
 make install DESTDIR="${PKG}"
-
 changelog NEWS
 doc AUTHORS THANKS config.example keymap.example
-
 install.dir ${PKG}/usr/share/applications
 install -m 0644 moc.desktop ${PKG}/usr/share/applications
 install.bin \
- decoder_plugins/mp3/.libs/*.so \
+ decoder_plugins/{aac,mp3}/.libs/*.so \
  ${PKG}/usr/lib$(libdirsuffix)/plugins/moc/decoder_plugins
-
 rm -rf \
- $PKG/usr/share/application-data/doc
+ $PKG/usr/share/doc
 }

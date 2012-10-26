@@ -1,0 +1,62 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=sysvinit
+VERSION=2.88dsf
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: sysvinit (init, the parent of all processes)
+${NAME}:
+${NAME}: System V style init programs by Miquel van Smoorenburg that control
+${NAME}: the booting and shutdown of your system. These support a number of
+${NAME}: system runlevels, each with a specific set of utilities spawned.
+${NAME}: For example, the normal system runlevel is 3, which starts agetty
+${NAME}: on virtual consoles tty1 - tty6.  Runlevel 4 starts xdm.
+${NAME}: Runlevel 0 shuts the system down.
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://download.savannah.gnu.org/releases/sysvinit/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+make ${JOBS} CFLAGS="${FLAGS}"
+make install ROOT="${PKG}" MANDIR="${SYS_DIR[man]}"
+doc src/initscript.sample
+changelog doc/Changelog
+install.dat doinst.sh ${PKG}/install
+mv ${PKG}/usr/sbin/init ${PKG}/usr/sbin/init.new
+#FIXME: compat
+(
+install.dir ${PKG}/sbin
+cd ${PKG}/sbin
+for program in bootlogd halt init killall5 shutdown runlevel; do
+  ln -sf /usr/sbin/${program}
+done
+ln -sf /usr/sbin/init telinit
+ln -sf /usr/sbin/halt reboot
+ln -sf /usr/sbin/halt poweroff
+ln -sf /usr/sbin/killall5 pidof
+)
+}

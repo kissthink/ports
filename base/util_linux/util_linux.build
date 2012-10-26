@@ -5,8 +5,8 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=util_linux
-VERSION=2.21.2
-BUILD=3
+VERSION=2.22.1
+BUILD=1
 DEPENDS=('udev >= 173-1')
 
 # Description
@@ -42,6 +42,8 @@ SRCCOPY[0]="GPL3 GPL2 LGPL2 LGPL21 BSD4"
 
 build0()
 {
+#FIXME: PAM: undisable su, sulogin, login when switching
+#FIXME: sysvinit: remove mountpoint from there
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -57,20 +59,19 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --localstatedir=/var \
  --bindir=/usr/bin \
  --sbindir=/usr/sbin \
- --disable-mountpoint \
- --disable-login-utils \
+ --with-systemdsystemunitdir="${SYS_DIR[systemdsystemunitdir]}" \
+ --disable-login \
+ --disable-su \
+ --disable-sulogin \
  --disable-uuidd \
  --disable-last \
  --enable-fs-paths-default="/usr/sbin:/sbin:/sbin/fs.d:/sbin/fs" \
  --enable-libblkid \
  --enable-libmount \
- --enable-libmount-mount \
  --enable-libuuid \
  --enable-arch \
  --enable-agetty \
- --enable-kill \
  --enable-mesg \
- --enable-partx \
  --enable-raw \
  --enable-rename \
  --enable-reset \
@@ -78,12 +79,12 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-wall \
  --enable-write \
  --enable-use-tty-group
+#FIXME: --enable-socket-activation --> when switching to systemd
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
 rm -rf ${PKG}${SYS_DIR[man]}/ru
-#TODO: disable /usr/bin/mountpoint in sysvinit and enable it here
 #TODO: when switching to PAM -> --enable-login-utils and fix up 'shadow'
 #FIXME: compat
 (
@@ -197,7 +198,7 @@ install.dat serial.conf ${PKG}/etc/serial.conf.new
 }
 
 SRCNAME[3]=net-tools
-SRCVERS[3]=20120202
+SRCVERS[3]=20120724
 SRCPACK[3]=http://www.tazenda.demon.co.uk/phil/${SRCNAME[3]}/${SRCNAME[3]}-${SRCVERS[3]}.tar.xz
 
 build3()
@@ -262,12 +263,24 @@ install.dir ${PKG}/bin
 ( cd ${PKG}/bin ; ln -sf /usr/bin/mktemp-bsd mktemp )
 }
 
-SRCNAME[6]=which
-SRCVERS[6]=2.20
-SRCPACK[6]=http://carlo17.home.xs4all.nl/${SRCNAME[6]}/${SRCNAME[6]}-${SRCVERS[6]}.tar.gz
-SRCCOPY[6]="GPL3"
+SRCNAME[6]=tree
+SRCVERS[6]=1.6.0
+SRCPACK[6]=ftp://mama.indstate.edu/linux/tree/${SRCNAME[6]}-${SRCVERS[6]}.tgz
+SRCCOPY[6]="GPL2"
 
 build6()
+{
+make ${JOBS} OPTS="${FLAGS}"
+make install prefix="${PKG}/usr" MANDIR="${PKG}${SYS_DIR[man]}/man1"
+doc README
+changelog CHANGES
+}
+
+SRCNAME[7]=debianutils
+SRCVERS[7]=4.3.2
+SRCPACK[7]=http://ftp.de.debian.org/debian/pool/main/d/${SRCNAME[7]}/${SRCNAME[7]}_${SRCVERS[7]}.tar.gz
+
+build7()
 {
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
@@ -275,7 +288,32 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-dependency-tracking \
  --prefix=/usr \
  --mandir="${SYS_DIR[man]}" \
- --infodir="${STS_DIR[info]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var
+make ${JOBS}
+make install DESTDIR="${PKG}"
+rm -f \
+ ${PKG}/usr/bin/{which,run-parts} \
+ ${PKG}/usr/sbin/installkernel \
+ ${PKG}${SYS_DIR[man]}/man{1,8}/{which,run-parts,installkernel}.? \
+ ${PKG}${SYS_DIR[man]}/??/man{1,8}/{which,run-parts,installkernel}.?
+}
+
+SRCNAME[8]=which
+SRCVERS[8]=2.20
+SRCPACK[8]=http://carlo17.home.xs4all.nl/${SRCNAME[8]}/${SRCNAME[8]}-${SRCVERS[8]}.tar.gz
+SRCCOPY[8]="GPL3"
+
+build8()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --infodir="${SYS_DIR[info]}" \
  --sysconfdir=/etc \
  --libdir=/usr/lib$(libdirsuffix) \
  --localstatedir=/var
@@ -285,17 +323,4 @@ doc AUTHORS
 changelog NEWS
 install.dir ${PKG}/bin
 ( cd ${PKG}/bin ; ln -sf /usr/bin/which )
-}
-
-SRCNAME[7]=tree
-SRCVERS[7]=1.6.0
-SRCPACK[7]=ftp://mama.indstate.edu/linux/tree/${SRCNAME[7]}-${SRCVERS[7]}.tgz
-SRCCOPY[7]="GPL2"
-
-build7()
-{
-make ${JOBS} OPTS="${FLAGS}"
-make install prefix="${PKG}/usr" MANDIR="${PKG}${SYS_DIR[man]}/man1"
-doc README
-changelog CHANGES
 }

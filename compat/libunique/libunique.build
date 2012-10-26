@@ -5,10 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=libunique
-MAJOR=1.0
-VERSION=${MAJOR}.8
+MAJOR=1.1
+VERSION=${MAJOR}.6
 BUILD=1
-DEPENDS=('gtk+ >= 2.22.1-1' 'dbus_glib >= 0.92-1')
+DEPENDS=('gtk+ >= 2.24.13-1')
 
 # Description
 
@@ -47,16 +47,18 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-maintainer-flags=no \
  --enable-static=no \
  --enable-shared=yes \
- --enable-debug=minimum \
  --prefix=/usr \
  --mandir="${SYS_DIR[man]}" \
  --sysconfdir=/etc \
  --libdir=/usr/lib$(libdirsuffix) \
  --localstatedir=/var \
- --with-html-dir="${SYS_DIR[html]}"
-make -j 2
+ --with-html-dir="${SYS_DIR[html]}" \
+ --disable-dbus
+make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS

@@ -5,10 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=xfce_mixer
-MAJOR=4.8
+MAJOR=4.10
 VERSION=${MAJOR}.0
-BUILD=2
-DEPENDS=('xfce >= 4.10-1' 'gstreamer >= 0.10.35-1')
+BUILD=1
+DEPENDS=('xfce >= 4.10-1' 'gstreamer >= 0.10.35-1' 'libunique >= 1.1.6-1')
 
 # Description
 

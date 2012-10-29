@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=transmission
-VERSION=2.61
+VERSION=2.73
 BUILD=1
-DEPENDS=('gtk+ >= 3.4.3-1' 'libevent >= 2.0.16-1' 'curl >= 7.26.0-1' 'openssl >= 0.9.8x-1')
+DEPENDS=('gtk+ >= 3.6.1-1' 'libevent >= 2.0.20-1' 'curl >= 7.28.0-1' 'openssl >= 0.9.8x-1')
 
 # Description
 

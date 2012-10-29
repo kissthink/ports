@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=taglib
-VERSION=1.7.2
+VERSION=1.8
 BUILD=1
 
 # Description
@@ -51,8 +51,6 @@ cmake \
 -DINCLUDE_INSTALL_DIR:PATH="/usr/include" \
 -DLIB_INSTALL_DIR:PATH="/usr/lib" \
 -DLIB_SUFFIX:STRING="$(libdirsuffix)" \
--DWITH_ASF:BOOL="on" \
--DWITH_MP4:BOOL="on" \
 CMakeLists.txt
 make
 make install DESTDIR="${PKG}"

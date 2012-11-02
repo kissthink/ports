@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=qemu
-VERSION=1.1.0
-BUILD=2
-DEPENDS=('glib >= 2.32.2-1' 'sdl >= 1.2.15-1' 'curl >= 7.26.0-1')
+VERSION=1.2.0
+BUILD=1
+DEPENDS=('glib >= 2.34.1-1' 'sdl >= 1.2.15-1' 'curl >= 7.28.0-1')
 
 # Description
 
@@ -37,7 +37,7 @@ EOF
 
 SRCNAME[0]=${NAME}
 SRCVERS[0]=${VERSION}
-SRCPACK[0]=${URL[savannah]}/${SRCNAME[0]}-${SRCVERS[0]}-1.tar.bz2
+SRCPACK[0]=${URL[savannah]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
 SRCCOPY[0]="GPL2 LGPL21 MIT"
 
 build0()

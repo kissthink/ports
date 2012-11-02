@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=vocabbuilder
-VERSION=0.9.25
+VERSION=1.0.0
 BUILD=1
-DEPENDS=('gtk+ >= 2.24.6-1' 'sqlite >= 3.7.7.1-1')
+DEPENDS=('gtk+ >= 2.24.13-1' 'sqlite >= 3.7.10-1')
 
 # Description
 
@@ -56,7 +56,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --sysconfdir=/etc \
  --libdir=/usr/lib$(libdirsuffix) \
  --localstatedir=/var
-make -j 2 V=1
+make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 }

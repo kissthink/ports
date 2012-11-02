@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=quake2
-VERSION=4.20
+VERSION=5.00
 BUILD=1
-DEPENDS=('sdl >= 1.2.15-1' 'sound >= 1.0.25-1' 'libvorbis >= 1.3.2-1' 'openal >= 1.13-1')
+DEPENDS=('sdl >= 1.2.15-1' 'sound >= 1.0.26-1' 'libvorbis >= 1.3.3-1' 'openal >= 1.13-1')
 
 # Description
 
@@ -54,6 +54,6 @@ install.bin release/ref_gl.so ${PKG}/usr/lib$(libdirsuffix)/plugins/quake2
 install.bin release/baseq2/game.so ${PKG}/usr/lib$(libdirsuffix)/plugins/quake2/baseq2
 install.dir ${PKG}/usr/share/applications
 install.dat quake2.desktop ${PKG}/usr/share/applications
-install.dir ${PKG}/usr/share/icons/hicolor/48x48/apps
-install.dat icon/Quake2.png ${PKG}/usr/share/icons/hicolor/48x48/apps/quake2.png
+#install.dir ${PKG}/usr/share/icons/hicolor/48x48/apps
+#install.dat icon/Quake2.png ${PKG}/usr/share/icons/hicolor/48x48/apps/quake2.png
 }

@@ -6,9 +6,9 @@ source /usr/src/ports/Build/build.sh
 
 NAME=networkmanagerapplet
 MAJOR=0.9
-VERSION=${MAJOR}.6.2
+VERSION=${MAJOR}.6.4
 BUILD=1
-DEPENDS=('gtk+ >= 2.24.10-1' 'networkmanager >= 0.9.6.0-1' 'libnotify >= 0.7.5-1' 'gnome_keyring >= 3.0.3-1' 'iso_codes >= 3.32.2-1' 'gconf >= 3.2.5-1')
+DEPENDS=('gtk+ >= 2.24.13-1' 'networkmanager >= 0.9.6.4-1' 'libnotify >= 0.7.5-1' 'gnome_keyring >= 3.0.3-1' 'iso_codes >= 3.32.2-1' 'gconf >= 3.2.5-1')
 
 # Description
 

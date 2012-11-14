@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=ncdc
-VERSION=1.13
+VERSION=1.14
 BUILD=1
-DEPENDS=('glib >= 2.32.3-1' 'bzip2 >= 1.0.6-1' 'sqlite >= 3.7.10-1' 'gnutls >= 3.1.0-1')
+DEPENDS=('glib >= 2.34.1-1' 'bzip2 >= 1.0.6-1' 'sqlite >= 3.7.10-1' 'gnutls >= 3.1.4-1')
 
 # Description
 
@@ -46,12 +46,13 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
+ --disable-silent-rules \
  --prefix=/usr \
  --mandir="${SYS_DIR[man]}" \
  --sysconfdir=/etc \
  --libdir=/usr/lib$(libdirsuffix) \
  --localstatedir=/var
-make ${JOBS}
+make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 changelog ChangeLog
 }

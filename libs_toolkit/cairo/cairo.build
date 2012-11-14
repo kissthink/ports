@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=cairo
-VERSION=1.12.6
+VERSION=1.12.8
 BUILD=1
-DEPENDS=('freetype >= 2.4.10-1' 'fontconfig >= 2.8.0-1' 'pixman >= 0.26.0' 'xorg_libs >= 7.7-1' 'libpng >= 1.5.13-1')
+DEPENDS=('freetype >= 2.4.10-1' 'fontconfig >= 2.8.0-1' 'pixman >= 0.28.0' 'xorg_libs >= 7.7-1' 'libpng >= 1.5.13-1')
 
 # Description
 

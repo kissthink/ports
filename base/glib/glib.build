@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=glib
 MAJOR=2.34
-VERSION=${MAJOR}.1
+VERSION=${MAJOR}.2
 BUILD=1
 DEPENDS=('libraries >= 20120902-1')
 OPTIONS="symprepend"
@@ -85,7 +85,7 @@ rm -rf \
 }
 
 SRCNAME[1]=${NAME}-networking
-SRCVERS[1]=${MAJOR}.0
+SRCVERS[1]=${MAJOR}.2
 SRCPACK[1]=${URL[gnome]}/${SRCNAME[1]}/${MAJOR}/${SRCNAME[1]}-${SRCVERS[1]}.tar.xz
 SRCCOPY[1]="LGPL2"
 
@@ -117,7 +117,7 @@ changelog NEWS
 
 DCONFM=0.14
 SRCNAME[2]=dconf
-SRCVERS[2]=${DCONFM}.0
+SRCVERS[2]=${DCONFM}.1
 SRCPACK[2]=${URL[gnome]}/${SRCNAME[2]}/${DCONFM}/${SRCNAME[2]}-${SRCVERS[2]}.tar.xz
 SRCCOPY[2]="LGPL21"
 

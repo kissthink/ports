@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=pixman
-VERSION=0.26.0
+VERSION=0.28.0
 BUILD=1
 
 # Description
@@ -36,16 +36,11 @@ EOF
 
 SRCNAME[0]=${NAME}
 SRCVERS[0]=${VERSION}
-SRCPACK[0]=http://www.cairographics.org/releases/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCPACK[0]=http://www.cairographics.org/releases/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
 SRCCOPY[0]="MIT"
 
 build0()
 {
-if [[ "${ARCH}" == "x86_64" ]]; then
-  SSE2="--enable-sse2"
-else
-  SSE2="--disable-sse2"
-fi
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -58,8 +53,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --sysconfdir=/etc \
  --libdir=/usr/lib$(libdirsuffix) \
  --localstatedir=/var \
- --enable-gtk=no \
- ${SSE2}
+ --enable-gtk=no
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 }

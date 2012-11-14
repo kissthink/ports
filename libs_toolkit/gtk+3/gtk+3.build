@@ -6,9 +6,9 @@ source /usr/src/ports/Build/build.sh
 
 NAME=gtk+
 MAJOR=3.6
-VERSION=${MAJOR}.1
+VERSION=${MAJOR}.2
 BUILD=1
-DEPENDS=('xorg_libs >= 7.7-1' 'gtk+ >= 2.24.13-1' 'gdk_pixbuf >= 2.26.4-1' 'cairo >= 1.12.4-1' 'atk >= 2.6.0-1' 'pango >= 1.32.1-1' 'at_spi >= 2.6.1-1')
+DEPENDS=('xorg_libs >= 7.7-1' 'gtk+ >= 2.24.13-1' 'gdk_pixbuf >= 2.26.4-1' 'cairo >= 1.12.8-1' 'atk >= 2.6.0-1' 'pango >= 1.32.1-1' 'at_spi >= 2.6.1-1')
 OPTIONS="symprepend"
 
 # Description
@@ -76,15 +76,22 @@ touch ${PKG}/etc/gtk-3.0/gtk.immodules
 
 SRCNAME[1]=gnome-themes-standard
 THEMESM=3.6
-SRCVERS[1]=${THEMESM}.1
+SRCVERS[1]=${THEMESM}.2
 SRCPACK[1]=${URL[gnome]}/${SRCNAME[1]}/${THEMESM}/${SRCNAME[1]}-${SRCVERS[1]}.tar.xz
 SRCCOPY[1]="LGPL21"
 
 build1()
 {
+GTK3_INCS="-I${PKG}/usr/lib$(libdirsuffix)/gtk-3.0/include -I${PKG}/usr/include/gtk-3.0"
+GTK2_INCS="-I/usr/lib$(libdirsuffix)/gtk-2.0/include -I/usr/include/gtk-2.0"
+GTKS_INCS="-I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/atk-1.0"
+GLIB_INCS="-I/usr/lib$(libdirsuffix)/glib-2.0/include -I/usr/include/glib-2.0"
+LDFLAGS="-L${PKG}/usr/lib$(libdirsuffix)" \
 PKG_CONFIG_PATH="${PKG}/usr/lib$(libdirsuffix)/pkgconfig" \
-DEPENDENCIES_CFLAGS="-I${PKG}/usr/include/gtk-3.0 -I/usr/include/glib-2.0 -I/usr/lib64/glib-2.0/include -I/usr/include/pango-1.0 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/atk-1.0 -I/usr/include/cairo" \
+DEPENDENCIES_CFLAGS="${GLIB_INCS} ${GTKS_INCS} ${GTK3_INCS}" \
 DEPENDENCIES_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lgtk-3" \
+HIGHCONTRAST_CFLAGS="${GLIB_INCS} ${GTKS_INCS} ${GTK3_INCS}" \
+GTK2_ENGINE_CFLAGS="${GLIB_INCS} ${GTKS_INCS} ${GTK2_INCS}" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \

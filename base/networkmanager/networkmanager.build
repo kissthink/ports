@@ -6,9 +6,9 @@ source /usr/src/ports/Build/build.sh
 
 NAME=networkmanager
 MAJOR=0.9
-VERSION=${MAJOR}.6.0
+VERSION=${MAJOR}.6.4
 BUILD=1
-DEPENDS=('glib >= 2.32.3-1' 'dbus >= 1.4.20-1' 'udev >= 173-1' 'gnutls >= 3.1.0-1' 'tcpip >= 3.2.0-1')
+DEPENDS=('glib >= 2.34.2-1' 'dbus >= 1.4.20-1' 'udev >= 173-1' 'gnutls >= 3.1.4-1' 'tcpip >= 3.2.0-1')
 
 # Description
 

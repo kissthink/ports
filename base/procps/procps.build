@@ -1,0 +1,134 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=procps
+VERSION=3.3.5
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: procps (utilities for displaying process information)
+${NAME}:
+${NAME}: The procps package provides the classic set of utilities used to
+${NAME}: display information about the processes currently running on the
+${NAME}: machine.
+${NAME}:
+${NAME}: Homepage: https://gitorious.org/procps
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}-ng
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://repository.timesys.com/buildsources/p/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+SRCCOPY[0]="GPL2 LGPL2"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-rpath \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --docdir="${SYS_DIR[doc]}/${SRCNAME[0]}-${SRCVERS[0]}" \
+ --exec-prefix=/ \
+ --disable-kill \
+ --enable-w-from \
+ --enable-watch8bit \
+ --enable-skill
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+#FIXME: exec-prefix doesn't work like it should
+install.dir ${PKG}/usr/{bin,sbin}
+mv ${PKG}/bin/* ${PKG}/usr/bin
+mv ${PKG}/sbin/* ${PKG}/usr/sbin
+rmdir ${PKG}/{bin,sbin}
+#FIXME: compat
+(
+  install.dir ${PKG}/{bin,sbin}
+  cd ${PKG}/bin
+  ln -sf /usr/bin/ps
+  ln -sf /usr/bin/free
+  cd ${PKG}/sbin
+  ln -sf /usr/sbin/sysctl
+)
+# Slackware stuff
+(
+  cd ${PKG}/usr/bin
+  ln -sf pkill pgrep
+  ln -sf skill snice
+)
+}
+
+SRCNAME[1]=procinfo-ng
+SRCVERS[1]=2.0.304
+SRCPACK[1]=${URL[sf]}/procinfo-ng/${SRCNAME[1]}/${SRCVERS[1]}/${SRCNAME[1]}-${SRCVERS[1]}.tar.bz2
+SRCCOPY[1]="GPL2 LGPL21"
+
+build1()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var
+make ${JOBS}
+make install DESTDIR="${PKG}"
+}
+
+SRCNAME[2]=psmisc
+SRCVERS[2]=22.20
+SRCPACK[2]=${URL[sf]}/psmisc/${SRCNAME[2]}/${SRCNAME[2]}-${SRCVERS[2]}.tar.gz
+SRCCOPY[2]="GPL2"
+
+build2()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-rpath \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog ChangeLog
+echo ".so man1/pstree.1" > ${PKG}${SYS_DIR[man]}/man1/pstree.x11.1
+#FIXME: compat
+(
+  install.dir ${PKG}/bin
+  cd ${PKG}/bin ; ln -sf /usr/bin/killall
+)
+}

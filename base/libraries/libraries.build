@@ -112,7 +112,7 @@ changelog NEWS
 }
 
 SRCNAME[3]=libtasn1
-SRCVERS[3]=2.13
+SRCVERS[3]=3.2
 SRCPACK[3]=http://ftp.gnupg.org/pub/gnutls/${SRCNAME[3]}/${SRCNAME[3]}-${SRCVERS[3]}.tar.gz
 SRCCOPY[3]="LGPL21 GPL3"
 

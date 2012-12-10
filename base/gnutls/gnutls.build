@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=gnutls
-VERSION=3.1.4
+VERSION=3.1.5
 BUILD=1
-DEPENDS=('libraries >= 20120902-1')
+DEPENDS=('libraries >= 20121210-1')
 
 # Description
 

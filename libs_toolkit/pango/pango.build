@@ -6,9 +6,9 @@ source /usr/src/ports/Build/build.sh
 
 NAME=pango
 MAJOR=1.32
-VERSION=${MAJOR}.1
+VERSION=${MAJOR}.3
 BUILD=1
-DEPENDS=('glib >= 2.34.1-1' 'cairo >= 1.12.4-1' 'harfbuzz >= 0.9.5-1')
+DEPENDS=('glib >= 2.34.2-1' 'cairo >= 1.12.8-1' 'harfbuzz >= 0.9.9-1')
 OPTIONS="symprepend"
 
 # Description

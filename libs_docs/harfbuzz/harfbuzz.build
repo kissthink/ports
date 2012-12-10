@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=harfbuzz
-VERSION=0.9.5
+VERSION=0.9.9
 BUILD=1
-DEPENDS=('glib >= 2.34.1-1')
+DEPENDS=('glib >= 2.34.2-1')
 
 # Description
 

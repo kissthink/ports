@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=kmod
-VERSION=11
+VERSION=12
 BUILD=1
-DEPENDS=('xz >= 5.0.3-1')
+DEPENDS=('xz >= 5.0.4-1')
 
 # Description
 

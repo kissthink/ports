@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=pcre
-VERSION=8.31
+VERSION=8.32
 BUILD=1
 
 # Description
@@ -45,6 +45,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
+ --disable-silent-rules \
  --enable-static=yes \
  --enable-shared=yes \
  --prefix=/usr \
@@ -56,11 +57,12 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --localstatedir=/var \
  --enable-jit \
  --enable-pcre16 \
+ --enable-pcre32 \
  --enable-utf \
  --enable-unicode-properties \
  --enable-pcregrep-libz \
  --enable-pcregrep-libbz2
-make ${JOBS}
+make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS

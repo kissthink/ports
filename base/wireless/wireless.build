@@ -7,7 +7,7 @@ source /usr/src/ports/Build/build.sh
 NAME=wireless
 VERSION=$(date '+%Y%m%d')
 BUILD=1
-DEPENDS=('tcpip >= 3.2.0-1' 'gnutls >= 3.0.19-1' 'dbus >= 1.4.16-1' 'openssl >= 0.9.8w-1')
+DEPENDS=('tcpip >= 3.2.0-1' 'gnutls >= 3.1.5-1' 'dbus >= 1.4.20-1' 'openssl >= 0.9.8x-1')
 #FIXME: enable gnutls and EAP_FAST
 
 # Description
@@ -77,7 +77,7 @@ install.dir ${PKG}/sbin
 }
 
 SRCNAME[2]=iw
-SRCVERS[2]=3.4
+SRCVERS[2]=3.7
 SRCPACK[2]=http://linuxwireless.org/download/${SRCNAME[2]}/${SRCNAME[2]}-${SRCVERS[2]}.tar.bz2
 SRCCOPY[2]="MIT"
 
@@ -88,7 +88,7 @@ make install DESTDIR="${PKG}" MANDIR="${SYS_DIR[man]}" BINDIR="/usr/sbin"
 }
 
 SRCNAME[3]=wpa_supplicant
-SRCVERS[3]=1.0
+SRCVERS[3]=1.1
 SRCPACK[3]=http://hostap.epitest.fi/releases/${SRCNAME[3]}-${SRCVERS[3]}.tar.gz
 SRCCOPY[3]="GPL2 BSD3"
 
@@ -110,4 +110,6 @@ mv \
  ${PKG}/etc/conf.d/wpa_supplicant.conf \
  ${PKG}/etc/conf.d/wpa_supplicant.conf.sample
 install -m 0600 wpa_supplicant.conf.new ${PKG}/etc/conf.d
+install.dir ${PKG}/etc/logrotate.d
+install.cfg wpa_supplicant.logrotate ${PKG}/etc/logrotate.d/wpa_supplicant.new
 }

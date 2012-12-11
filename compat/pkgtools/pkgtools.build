@@ -1,0 +1,56 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=pkgtools
+VERSION=14.0
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: pkgtools (The Slackware package maintenance system)
+${NAME}:
+${NAME}: This package contains utilities for handling Slackware packages.
+${NAME}: Included are the command line utilities 'installpkg', 'removepkg',
+${NAME}: 'makepkg', 'explodepkg', and 'upgradepkg' that install, remove,
+${NAME}: build, examine, and upgrade software packages. Also included are
+${NAME}: 'pkgtool', a menu based program for installing packages, removing
+${NAME}: packages, or viewing the packages that are installed on the system,
+${NAME}: documentation (man pages), and a few other system admin scripts.
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+
+build0()
+{
+make install DESTDIR="${PKG}"
+#FIXME: compat
+install.dir ${PKG}/sbin
+(
+  cd ${PKG}/sbin
+  ln -sf /usr/sbin/makebootdisk
+  ln -sf /usr/sbin/makepkg
+  ln -sf /usr/sbin/removepkg
+  ln -sf /usr/sbin/installpkg
+  ln -sf /usr/sbin/explodepkg
+  ln -sf /usr/sbin/pkgtool
+  ln -sf /usr/sbin/upgradepkg
+)
+}

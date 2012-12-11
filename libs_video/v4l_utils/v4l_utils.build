@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=v4l_utils
-VERSION=0.8.8
+VERSION=0.8.9
 BUILD=1
 
 # Description
@@ -51,9 +51,8 @@ changelog ChangeLog
 }
 
 SRCNAME[1]=w_scan
-SRCVERS[1]=20120415
+SRCVERS[1]=20121111
 SRCPACK[1]=http://wirbel.htpc-forum.de/w_scan/${SRCNAME[1]}-${SRCVERS[1]}.tar.bz2
-SRCOPTS[1]="nosrcroot"
 
 build1()
 {

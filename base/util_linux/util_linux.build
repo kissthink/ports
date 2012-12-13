@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=util_linux
-VERSION=2.22.1
+VERSION=2.22.2
 BUILD=1
 DEPENDS=('udev >= 173-1')
 
@@ -100,18 +100,7 @@ rm -rf ${PKG}${SYS_DIR[man]}/ru
   cd ${PKG}/usr/man/man8
   echo ".so man1/hwclock.8" > clock.8
 
-  install.dir ${PKG}/{bin,sbin}
-  cd ${PKG}/bin
-  ln -sf /usr/bin/getopt
-  ln -sf /usr/bin/setterm
-  ln -sf /usr/bin/mount
-  ln -sf /usr/bin/umount
-  ln -sf /usr/bin/findmnt
-  ln -sf /usr/bin/more
-  ln -sf /usr/bin/arch
-  ln -sf /usr/bin/lsblk
-  ln -sf /usr/bin/kill
-  ln -sf /usr/bin/dmesg
+  install.dir ${PKG}/sbin
   cd ${PKG}/sbin
   ln -sf /usr/bin/mount
   ln -sf /usr/bin/umount
@@ -210,16 +199,6 @@ make install-hostname \
  MANDIR="${SYS_DIR[man]}" \
  BINDIR="/usr/bin" \
  SBINDIR="/usr/sbin"
-#FIXME: compatibility symlinks
-(
-install.dir ${PKG}/bin
-cd ${PKG}/bin
-ln -sf /usr/bin/hostname
-ln -sf /usr/bin/hostname domainname
-ln -sf /usr/bin/hostname dnsdomainname
-ln -sf /usr/bin/hostname ypdomainname
-ln -sf /usr/bin/hostname nisdomainname
-)
 }
 
 SRCNAME[4]=sysfsutils
@@ -259,8 +238,6 @@ mv \
   ${PKG}/usr/bin/mktemp \
   ${PKG}/usr/bin/mktemp-bsd
 ( cd ${PKG}/usr/bin ; ln -sf mktemp-bsd mktemp )
-install.dir ${PKG}/bin
-( cd ${PKG}/bin ; ln -sf /usr/bin/mktemp-bsd mktemp )
 }
 
 SRCNAME[6]=tree
@@ -321,6 +298,4 @@ make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-install.dir ${PKG}/bin
-( cd ${PKG}/bin ; ln -sf /usr/bin/which )
 }

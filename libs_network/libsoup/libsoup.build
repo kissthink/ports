@@ -5,10 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=libsoup
-MAJOR=2.38
-VERSION=${MAJOR}.0
+MAJOR=2.40
+VERSION=${MAJOR}.2
 BUILD=1
-DEPENDS=('glib >= 2.32.0-1' 'libxml >= 2.7.8-1')
+DEPENDS=('glib >= 2.34.2-1' 'libxml >= 2.9.0-1')
 
 # Description
 

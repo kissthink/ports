@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=libxml
-VERSION=2.8.0
+VERSION=2.9.0
 BUILD=1
 
 # Description
@@ -32,12 +32,6 @@ ${NAME}: Homepage: http://xmlsoft.org
 ${NAME}:
 EOF
 
-LIBDIR=/usr/lib$(libdirsuffix)
-cat >> ${PKG}/install/doinst.sh <<EOF
-rm -f ${LIBDIR}/python26/site-packages/libxml2.pyc
-rm -f ${LIBDIR}/python26/site-packages/drv_libxml2.pyc
-EOF
-
 # Sources
 
 SRCNAME[0]=${NAME}2
@@ -60,19 +54,16 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --sysconfdir=/etc \
  --libdir=/usr/lib$(libdirsuffix) \
  --localstatedir=/var \
- --with-html-dir="${SYS_DIR[doc]}"
+ --with-html-dir="${SYS_DIR[html]}" \
+ --with-html-subdir="${SRCNAME[0]}-tutorial"
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
 mv \
- ${PKG}/usr/share/gtk-doc/html \
- ${PKG}/usr/share
-mv \
- ${DOC}/html/tutorial \
- ${PKG}${SYS_DIR[html]}/${SRCNAME[0]}-tutorial
+ ${PKG}/usr/share/gtk-doc/html/libxml2 \
+ ${PKG}${SYS_DIR[html]}
 rm -rf \
  ${PKG}/usr/share/gtk-doc \
- ${PKG}/usr/share/doc \
- ${DOC}/html
+ ${PKG}${SYS_DIR[html]}/${SRCNAME[0]}-tutorial/html
 }

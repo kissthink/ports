@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=obex
-VERSION=0.44
+VERSION=0.48
 BUILD=1
-DEPENDS=('libusb >= 1.0.8-1' 'bluetooth >= 4.98-1')
+DEPENDS=('usb >= 1.0.11-1' 'bluetooth >= 4.101-1')
 
 # Description
 

@@ -5,7 +5,8 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=atkmm
-VERSION=2.22.6
+MAJOR=2.22
+VERSION=${MAJOR}.6
 BUILD=1
 DEPENDS=('atk >= 2.6.0-1' 'glibmm >= 2.34.1-1')
 

@@ -6,9 +6,9 @@ source /usr/src/ports/Build/build.sh
 
 NAME=gdk_pixbuf
 MAJOR=2.26
-VERSION=${MAJOR}.4
+VERSION=${MAJOR}.5
 BUILD=1
-DEPENDS=('glib >= 2.34.1-1' 'xorg_libs >= 7.7-1')
+DEPENDS=('glib >= 2.34.3-1' 'xorg_libs >= 7.7-1')
 OPTIONS="symprepend"
 
 # Description

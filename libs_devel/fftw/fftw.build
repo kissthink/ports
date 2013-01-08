@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=fftw
 VERSION=3.3.3
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -38,7 +38,7 @@ SRCNAME[0]=${NAME}
 SRCVERS[0]=${VERSION}
 SRCPACK[0]=http://www.fftw.org/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
 
-build0()
+configure()
 {
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
@@ -53,7 +53,18 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --libdir=/usr/lib$(libdirsuffix) \
  --includedir=/usr/include/fftw3 \
  --localstatedir=/var \
+ ${*}
+}
+
+build0()
+{
+configure \
  --enable-threads
+make ${JOBS}
+make install DESTDIR="${PKG}"
+make distclean
+configure \
+ --enable-float
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS

@@ -5,8 +5,8 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=parole
-MAJOR=0.3
-VERSION=${MAJOR}.0.3
+MAJOR=0.4
+VERSION=${MAJOR}.0
 BUILD=1
 DEPENDS=('xfce >= 4.10-4' 'gstreamer >= 0.10.36-1' 'dbus_glib >= 0.100-1')
 
@@ -57,9 +57,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --sysconfdir=/etc \
  --libdir=/usr/lib$(libdirsuffix) \
  --localstatedir=/var \
- --with-html-dir="${SYS_DIR[html]}" \
- --enable-libnotify=yes \
- --enable-taglib=yes
+ --with-html-dir="${SYS_DIR[html]}"
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS THANKS

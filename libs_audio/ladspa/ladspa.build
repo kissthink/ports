@@ -1,0 +1,54 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=ladspa
+VERSION=1.13
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: ladspa
+${NAME}:
+${NAME}: A library for the Linux Audio Developer's Simple Plugin API (LADSPA).
+${NAME}:
+${NAME}: Homepage: http://www.ladspa.org
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}_sdk
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://www.ladspa.org/download/${SRCNAME[0]}_${SRCVERS[0]}.tgz
+SRCROOT[0]=${SRCNAME[0]}
+SRCCOPY[0]="LGPL21"
+
+build0()
+{
+(
+cd src
+make targets OPTS="${CFLAGS}" \
+ INSTALL_PLUGINS_DIR="/usr/lib$(libdirsuffix)/ladspa/"
+make install \
+ INSTALL_PLUGINS_DIR="${PKG}/usr/lib$(libdirsuffix)/ladspa/" \
+ INSTALL_INCLUDE_DIR="${PKG}/usr/include/" \
+ INSTALL_BINARY_DIR="${PKG}/usr/bin/"
+)
+}

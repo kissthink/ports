@@ -7,7 +7,7 @@ source /usr/src/ports/Build/build.sh
 NAME=disks
 VERSION=$(date +%Y%m%d)
 BUILD=1
-DEPENDS=('glib >= 2.34.1-1' 'dbus_glib >= 0.100-1' 'udev >= 173-1' 'polkit >= 0.104-1' 'lvm >= 2.02.93-1' 'parted >= 3.0-1' 'scsi >= 1.33-1')
+DEPENDS=('glib >= 2.34.3-1' 'udev >= 173-1' 'polkit >= 0.104-1')
 
 # Description
 
@@ -61,7 +61,7 @@ rm -rf ${PKG}/usr/share
 }
 
 SRCNAME[1]=hdparm
-SRCVERS[1]=9.42
+SRCVERS[1]=9.43
 SRCPACK[1]=http://downloads.sourceforge.net/project/${SRCNAME[1]}/${SRCNAME[1]}/${SRCNAME[1]}-${SRCVERS[1]}.tar.gz
 
 build1()
@@ -73,9 +73,9 @@ license LICENSE.TXT
 }
 
 SRCNAME[2]=udisks
-SRCVERS[2]=1.0.4
-SRCPACK[2]=http://hal.freedesktop.org/releases/${SRCNAME[2]}-${SRCVERS[2]}.tar.gz
-SRCCOPY[2]="GPL2"
+SRCVERS[2]=2.0.1
+SRCPACK[2]=http://udisks.freedesktop.org/releases/${SRCNAME[2]}-${SRCVERS[2]}.tar.bz2
+SRCCOPY[2]="LGPL2 GPL2"
 
 build2()
 {
@@ -88,47 +88,16 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --enable-man-pages=no \
  --prefix=/usr \
  --mandir="${SYS_DIR[man]}" \
  --sysconfdir=/etc \
  --libdir=/usr/lib$(libdirsuffix) \
  --libexec=/usr/lib$(libdirsuffix)/exec \
  --localstatedir=/var \
- --sbindir=/usr/sbin \
- --with-html-dir="${SYS_DIR[html]}" \
- --enable-lvm2 \
- --enable-dmmp
-sed -i "s|@udevdir@|$(pkg-config udev --variable=udevdir)|g" data/80-udisks.rules
+ --with-html-dir="${SYS_DIR[html]}"
+# --with-systemdsystemunitdir="${SYS_DIR[systemdsystemunitdir]}"
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-#FIXME: pkgconfig dir
-#FIXME: bash completion dir
-install.dir ${PKG}/${SYS_DIR[bashcompletiondir]}
-install.dir ${PKG}/usr/lib$(libdirsuffix)/pkgconfig
-mv \
- ${PKG}/etc/profile.d/*.sh \
- ${PKG}/${SYS_DIR[bashcompletiondir]}
-mv \
- ${PKG}/usr/share/pkgconfig/*.pc \
- ${PKG}/usr/lib$(libdirsuffix)/pkgconfig
-mv \
- ${PKG}/lib/* \
- ${PKG}/usr/lib$(libdirsuffix)
-rm -rf \
- ${PKG}/lib \
- ${PKG}/usr/man \
- ${PKG}/etc/profile.d \
- ${PKG}/usr/share/pkgconfig
-#FIXME: compat
-install.dir ${PKG}/usr/sbin
-mv \
-  ${PKG}/sbin/umount.udisks \
-  ${PKG}/usr/sbin
-(
-  cd ${PKG}/sbin
-  ln -sf /usr/sbin/umount.udisks
-)
 }

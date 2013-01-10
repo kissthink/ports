@@ -5,8 +5,8 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=gvfs
-MAJOR=1.12
-VERSION=${MAJOR}.0
+MAJOR=1.14
+VERSION=${MAJOR}.2
 BUILD=1
 
 # Description
@@ -50,7 +50,7 @@ SRCCOPY[0]="GPL2"
 
 build0()
 {
-CPPFLAGS="-I/usr/include/archive" \
+CPPFLAGS="-I/usr/include/archive -I/usr/include/gpg-error -I/usr/include/gcrypt" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -64,14 +64,11 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --libdir=/usr/lib$(libdirsuffix) \
  --libexecdir=/usr/lib$(libdirsuffix)/exec \
  --localstatedir=/var \
- --with-bash-completion-dir="${SYS_DIR[bashcompletiondir]}" \
- --with-html-dir="${SYS_DIR[html]}" \
- --disable-hal
+ --with-html-dir="${SYS_DIR[html]}"
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS MAINTAINERS
 changelog NEWS
-chmod 0755 ${PKG}${SYS_DIR[bashcompletiondir]}/*.sh
 mv \
  ${PKG}/usr/share/dbus-1/services/gvfs-daemon.service \
  ${PKG}/usr/share/dbus-1/services/org.gtk.vfs.Daemon.service

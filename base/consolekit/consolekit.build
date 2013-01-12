@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=consolekit
-VERSION=0.4.5
+VERSION=0.4.6
 BUILD=1
 
 # Description
@@ -36,12 +36,11 @@ EOF
 
 SRCNAME[0]=ConsoleKit
 SRCVERS[0]=${VERSION}
-SRCPACK[0]=http://www.freedesktop.org/software/ConsoleKit/dist/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCPACK[0]=http://www.freedesktop.org/software/ConsoleKit/dist/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
 SRCCOPY[0]="GPL2"
 
 build0()
 {
-#FIXME: enable PAM some day maybe
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -55,7 +54,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --libdir=/usr/lib$(libdirsuffix) \
  --libexecdir=/usr/lib$(libdirsuffix)/exec \
  --localstatedir=/var \
- --with-systemdsystemunitdir="${SYS_DIR[systemdsystemunitdir]}" \
+ --without-systemdsystemunitdir \
  --with-pid-file=/run/ConsoleKit/consolekit.pid \
  --enable-pam-module=no
 make ${JOBS} V=1
@@ -75,5 +74,6 @@ mv \
  ${PKG}/etc/dbus-1/system.d/ConsoleKit.conf \
  ${PKG}/etc/dbus-1/system.d/org.freedesktop.ConsoleKit.conf
 rm -rf \
+ ${PKG}/var/run \
  ${PKG}/usr/man
 }

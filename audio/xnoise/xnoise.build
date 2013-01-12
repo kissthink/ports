@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=xnoise
-VERSION=0.2.13
+VERSION=0.2.14
 BUILD=1
-DEPENDS=('gtk+ >= 3.6.1-1' 'gstreamer >= 0.10.36-1' 'sqlite >= 3.7.10-1' 'taglib >= 1.8-1' 'libxml >= 2.8.0-1')
+DEPENDS=('gtk+ >= 3.6.4-1' 'gstreamer >= 0.10.36-1' 'sqlite >= 3.7.10-1' 'taglib >= 1.8-1' 'libxml >= 2.9.0-1')
 
 # Description
 

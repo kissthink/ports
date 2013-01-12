@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=policykit
 VERSION=0.105
-BUILD=1
+BUILD=2
 DEPENDS=('glib >= 2.34.3-1')
 
 # Description

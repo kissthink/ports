@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=policykit
-VERSION=0.104
+VERSION=0.105
 BUILD=1
-DEPENDS=('glib >= 2.30.2-1')
+DEPENDS=('glib >= 2.34.3-1')
 
 # Description
 
@@ -65,6 +65,8 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 changelog NEWS
+install.dat doinst.sh ${PKG}/install
+install.dat *.pkla.new ${PKG}/etc/polkit-1/localauthority/50-local.d
 # Fix your scripty shit polkit people
 rm -rf ${PKG}/usr/man
 #FIXME: pam support

@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=gtk_polkit
-VERSION=0.102
+VERSION=0.105
 BUILD=1
-DEPENDS=('gtk+ >= 2.24.6-1' 'polkit >= 0.102-1')
+DEPENDS=('gtk+ >= 3.6.4-1' 'polkit >= 0.105-1')
 
 # Description
 
@@ -37,7 +37,7 @@ EOF
 
 SRCNAME[0]=polkit-gnome
 SRCVERS[0]=${VERSION}
-SRCPACK[0]=http://hal.freedesktop.org/releases/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCPACK[0]=http://hal.freedesktop.org/releases/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
 SRCCOPY[0]="LGPL2"
 
 build0()
@@ -58,7 +58,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --libexecdir=/usr/lib$(libdirsuffix)/exec \
  --localstatedir=/var \
  --with-html-dir="${SYS_DIR[html]}"
-make -j 2 V=1
+make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS

@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=consolekit
 VERSION=0.4.6
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -55,7 +55,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --libexecdir=/usr/lib$(libdirsuffix)/exec \
  --localstatedir=/var \
  --without-systemdsystemunitdir \
- --with-pid-file=/run/ConsoleKit/consolekit.pid \
+ --with-pid-file=/run/consolekit/consolekit.pid \
  --enable-pam-module=no
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"

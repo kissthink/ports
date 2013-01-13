@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=consolekit
 VERSION=0.4.6
-BUILD=2
+BUILD=3
 
 # Description
 
@@ -55,7 +55,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --libexecdir=/usr/lib$(libdirsuffix)/exec \
  --localstatedir=/var \
  --without-systemdsystemunitdir \
- --with-pid-file=/run/consolekit/consolekit.pid \
+ --with-pid-file=/var/run/ConsoleKit/consolekit.pid \
  --enable-pam-module=no
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
@@ -74,6 +74,5 @@ mv \
  ${PKG}/etc/dbus-1/system.d/ConsoleKit.conf \
  ${PKG}/etc/dbus-1/system.d/org.freedesktop.ConsoleKit.conf
 rm -rf \
- ${PKG}/var/run \
  ${PKG}/usr/man
 }

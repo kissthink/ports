@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=dbus
 VERSION=1.4.24
-BUILD=3
+BUILD=4
 
 # Description
 
@@ -62,7 +62,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-x11-autolaunch \
  --with-init-scripts=slackware \
  --with-system-pid-file=/run/dbus/dbus.pid \
- --with-system-socket=/run/dbus/system_bus_socket \
+ --with-system-socket=/var/run/dbus/system_bus_socket \
  --with-xml=expat \
  --with-console-auth-dir=/run/consolekit \
  --with-systemdsystemunitdir="${SYS_DIR[systemdsystemunitdir]}"
@@ -84,8 +84,7 @@ rm -rf \
  ${PKG}/etc/rc.d/rc.messagebus \
  ${PKG}/usr/sbin \
  ${PKG}/usr/share/{dbus-1,doc} \
- ${PKG}/usr/lib$(libdirsuffix)/exec/dbus-1 \
- ${PKG}/var/run
+ ${PKG}/usr/lib$(libdirsuffix)/exec/dbus-1
 mv \
  ${PKG}/etc/dbus-1/session.conf \
  ${PKG}/etc/dbus-1/session.conf.new

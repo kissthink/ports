@@ -4,11 +4,11 @@
 
 source /usr/src/ports/Build/build.sh
 
-NAME=terminal
-MAJOR=0.4
-VERSION=${MAJOR}.8
-BUILD=2
-DEPENDS=('xfce >= 4.10-1' 'vte >= 0.28.2-1' 'dbus_glib >= 0.98-1')
+NAME=xfce_terminal
+MAJOR=0.6
+VERSION=${MAJOR}.1
+BUILD=1
+DEPENDS=('xfce >= 4.10-5' 'vte >= 0.28.2-1')
 
 # Description
 
@@ -36,7 +36,7 @@ EOF
 
 # Sources
 
-SRCNAME[0]=Terminal
+SRCNAME[0]=xfce4-terminal
 SRCVERS[0]=${VERSION}
 SRCPACK[0]=http://archive.xfce.org/src/apps/${NAME}/${MAJOR}/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
 SRCCOPY[0]="GPL2"
@@ -55,7 +55,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --libdir=/usr/lib$(libdirsuffix) \
  --libexecdir=/usr/lib$(libdirsuffix)/exec \
  --localstatedir=/var
-make ${JOBS}
+make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 changelog NEWS
 rm -rf \

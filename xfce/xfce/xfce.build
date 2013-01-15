@@ -7,8 +7,8 @@ source /usr/src/ports/Build/build.sh
 NAME=xfce
 MAJOR=4.10
 VERSION=${MAJOR}
-BUILD=5
-DEPENDS=('gtk+ >= 2.24.10-1' 'icon_theme >= 0.8.90-1' 'dbus_glib >= 0.100-1' 'libwnck >= 2.31.0-1' 'libxklavier >= 5.2.1-1' 'libnotify >= 0.7.5-1' 'libcanberra >= 0.29-1' 'gamin >= 0.1.10-1')
+BUILD=6
+DEPENDS=('gtk+ >= 2.24.14-1' 'icon_theme >= 0.8.90-1' 'dbus_glib >= 0.100-1' 'libwnck >= 2.31.0-1' 'libxklavier >= 5.2.1-1' 'libnotify >= 0.7.5-1' 'libcanberra >= 0.29-1' 'gamin >= 0.1.10-1')
 OPTDEPENDS=('poppler >= 0.20.2-1')
 
 # Description
@@ -103,7 +103,7 @@ rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
 
 SRCNAME[2]=tumbler
 TUMBLERM=0.1
-SRCVERS[2]=${TUMBLERM}.25
+SRCVERS[2]=${TUMBLERM}.27
 SRCPACK[2]=${XFCEREL}/${SRCNAME[2]}-${SRCVERS[2]}.tar.bz2
 SRCCOPY[2]="GPL2"
 
@@ -151,8 +151,8 @@ rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
 }
 
 SRCNAME[5]=exo
-EXOM=0.8
-SRCVERS[5]=${EXOM}.0
+EXOM=0.10
+SRCVERS[5]=${EXOM}.2
 SRCPACK[5]=${XFCEREL}/${SRCNAME[5]}-${SRCVERS[5]}.tar.bz2
 SRCCOPY[5]="GPL2"
 
@@ -241,7 +241,7 @@ rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
 }
 
 SRCNAME[10]=Thunar
-SRCVERS[10]=1.4.0
+SRCVERS[10]=1.6.2
 SRCPACK[10]=${XFCEREL}/${SRCNAME[10]}-${SRCVERS[10]}.tar.bz2
 SRCCOPY[10]="GPL2 LGPL2"
 
@@ -426,7 +426,7 @@ changelog NEWS
 }
 
 SRCNAME[21]=xfce4-places-plugin
-PLACESM=1.4
+PLACESM=1.5
 SRCVERS[21]=${PLACESM}.0
 SRCPACK[21]=${XFCEREPO}/panel-plugins/${SRCNAME[21]}/${PLACESM}/${SRCNAME[21]}-${SRCVERS[21]}.tar.bz2
 SRCCOPY[21]="GPL2"

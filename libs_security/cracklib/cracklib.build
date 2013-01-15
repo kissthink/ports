@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=cracklib
 VERSION=2.8.22
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -64,9 +64,9 @@ install.dat doinst.sh ${PKG}/install
 install.dir ${PKG}${SYS_DIR[man]}/man{3,8}
 install.man man/*.3 ${PKG}${SYS_DIR[man]}/man3
 install.man man/*.8 ${PKG}${SYS_DIR[man]}/man8
-install.dir ${PKG}/etc/{cron.daily,conf.d}
+install.dir ${PKG}/etc/{cron.daily,security}
 install.bin util/cracklib-runtime.cron.daily ${PKG}/etc/cron.daily/cracklib
-install.dat util/cracklib.conf ${PKG}/etc/conf.d
+install.dat util/cracklib.conf ${PKG}/etc/security/cracklib.conf.new
 install.bin util/update-cracklib ${PKG}/usr/sbin
 install.man util/update-cracklib.8 ${PKG}${SYS_DIR[man]}/man8
 install.dat extra-dicts/* ${PKG}/usr/share/dict/cracklib

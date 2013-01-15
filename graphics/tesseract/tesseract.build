@@ -5,8 +5,8 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=tesseract
-VERSION=3.01
-BUILD=2
+VERSION=3.02.02
+BUILD=1
 DEPENDS=('leptonica >= 1.69-1')
 
 # Description
@@ -35,9 +35,10 @@ EOF
 
 # Sources
 
-SRCNAME[0]=${NAME}
+SRCNAME[0]=${NAME}-ocr
 SRCVERS[0]=${VERSION}
 SRCPACK[0]=http://tesseract-ocr.googlecode.com/files/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCROOT[0]=${SRCNAME[0]}
 SRCCOPY[0]="APACHE2"
 
 build0()

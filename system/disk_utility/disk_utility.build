@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=disk_utility
-VERSION=2.32.0
-BUILD=2
-DEPENDS=('gtk+ >= 2.24.10-1' 'libunique >= 1.0.8-1' 'libnotify >= 0.7.5-1' 'dbus_glib >= 0.98-1' 'disks >= 20120308-1' 'avahi >= 0.6.30-1')
+VERSION=3.6.1
+BUILD=1
+DEPENDS=('gtk+ >= 3.6.4-1' 'disks >= 20130110-1' 'libsecret >= 0.12-1' 'pwquality >= 1.2.1-1')
 
 # Description
 
@@ -34,20 +34,24 @@ ${NAME}:
 EOF
 
 cat > ${PKG}/install/doinst.sh <<EOF
+if [ -x /usr/bin/glib-compile-schemas ]; then
+  /usr/bin/glib-compile-schemas /usr/share/glib-2.0/schemas
+fi
+
 if [ -x /usr/bin/update-desktop-database ]; then
   /usr/bin/update-desktop-database -q usr/share/applications >/dev/null 2>&1
 fi
 
 if [ -e usr/share/icons/hicolor/icon-theme.cache ]; then
   if [ -x /usr/bin/gtk-update-icon-cache ]; then
-    /usr/bin/gtk-update-icon-cache usr/share/icons/hicolor >/dev/null 2>&1
+    /usr/bin/gtk-update-icon-cache -q usr/share/icons/hicolor >/dev/null 2>&1
   fi
 fi
 EOF
 
 # Sources
 
-SRCNAME[0]=disk-utility
+SRCNAME[0]=gnome-disk-utility
 SRCVERS[0]=${VERSION}
 SRCPACK[0]=${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
 SRCCOPY[0]="GPL2"
@@ -66,11 +70,9 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --sysconfdir=/etc \
  --libdir=/usr/lib$(libdirsuffix) \
  --libexecdir=/usr/lib$(libdirsuffix)/exec \
- --localstatedir=/var \
- --disable-nautilus
+ --localstatedir=/var
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-install.dat doinst.sh ${PKG}/install
 }

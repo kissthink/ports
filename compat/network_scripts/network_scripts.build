@@ -1,0 +1,63 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=network_scripts
+VERSION=14.00
+BUILD=1
+ARCH=noarch
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: network-scripts (Scripts to configure a network)
+${NAME}:
+${NAME}: These are the basic scripts and files used to define a network and
+${NAME}: configure network interfaces on Linux. Most of the original /etc
+${NAME}: files were written by Fred N. van Kempen, or borrowed from BSD. The
+${NAME}: rc.inet1 and rc.inet2 scripts were mostly written by Patrick
+${NAME}: Volkerding, with suggestions and fixes from hundreds of contributors
+${NAME}: over the years.
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=network-scripts
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+
+build0()
+{
+make install SBINDIR="/usr/sbin" DESTDIR="${PKG}"
+install.dat doinst.sh ${PKG}/install
+for file in \
+ etc/HOSTNAME \
+ etc/host.conf \
+ etc/hosts \
+ etc/hosts.allow \
+ etc/hosts.deny \
+ etc/hosts.equiv \
+ etc/networks \
+ etc/protocols \
+ etc/nntpserver \
+ etc/resolv.conf \
+ etc/rc.d/rc.inet1.conf \
+ etc/rc.d/rc.inet1 \
+ etc/rc.d/rc.inet2 \
+ etc/rc.d/rc.ip_forward; do
+  mv ${PKG}/${file} ${PKG}/${file}.new
+done
+}

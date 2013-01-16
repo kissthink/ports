@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=procps
-VERSION=3.3.5
+VERSION=3.3.6
 BUILD=1
 
 # Description
@@ -36,7 +36,7 @@ EOF
 
 SRCNAME[0]=${NAME}-ng
 SRCVERS[0]=${VERSION}
-SRCPACK[0]=http://repository.timesys.com/buildsources/p/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+SRCPACK[0]=${URL[sf]}/${SRCNAME[0]}/Production/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
 SRCCOPY[0]="GPL2 LGPL2"
 
 build0()
@@ -54,7 +54,6 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --libdir=/usr/lib$(libdirsuffix) \
  --localstatedir=/var \
  --docdir="${SYS_DIR[doc]}/${SRCNAME[0]}-${SRCVERS[0]}" \
- --exec-prefix=/ \
  --disable-kill \
  --enable-w-from \
  --enable-watch8bit \
@@ -63,20 +62,9 @@ make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-#FIXME: exec-prefix doesn't work like it should
-install.dir ${PKG}/usr/{bin,sbin}
-mv ${PKG}/bin/* ${PKG}/usr/bin
-mv ${PKG}/sbin/* ${PKG}/usr/sbin
-rmdir ${PKG}/{bin,sbin}
-#FIXME: compat
-(
-  install.dir ${PKG}/{bin,sbin}
-  cd ${PKG}/bin
-  ln -sf /usr/bin/ps
-  ln -sf /usr/bin/free
-  cd ${PKG}/sbin
-  ln -sf /usr/sbin/sysctl
-)
+#FIXME: everything should end up in /usr not /usr/usr
+mv ${PKG}/usr/usr/bin/* ${PKG}/usr/bin
+rm -rf ${PKG}/usr/usr
 # Slackware stuff
 (
   cd ${PKG}/usr/bin
@@ -126,9 +114,4 @@ make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog ChangeLog
 echo ".so man1/pstree.1" > ${PKG}${SYS_DIR[man]}/man1/pstree.x11.1
-#FIXME: compat
-(
-  install.dir ${PKG}/bin
-  cd ${PKG}/bin ; ln -sf /usr/bin/killall
-)
 }

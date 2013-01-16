@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=font_ttf_liberation
-VERSION=1.07.2
+VERSION=2.00.1
 ARCH=noarch
 BUILD=1
 
@@ -44,7 +44,7 @@ build0()
 {
 doc AUTHORS
 changelog ChangeLog
-license License.txt
+license LICENSE
 install.dat doinst.sh ${PKG}/install
 install.dir ${PKG}/usr/share/fonts/TTF
 install.dat *.ttf ${PKG}/usr/share/fonts/TTF

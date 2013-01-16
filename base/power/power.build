@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=power
-VERSION=0.9.17
+VERSION=0.9.19
 BUILD=1
-DEPENDS=('glib >= 2.32.3-1' 'dbus_glib >= 0.100-1' 'udev >= 173-1' 'polkit >= 0.104-1' 'usb >= 1.0.11-1')
+DEPENDS=('glib >= 2.34.3-1' 'dbus_glib >= 0.100-1' 'udev >= 173-1' 'polkit >= 0.105-1' 'usb >= 1.0.11-1')
 
 # Description
 
@@ -61,6 +61,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --with-html-dir="${SYS_DIR[html]}" \
  --with-systemdsystemunitdir="${SYS_DIR[systemdsystemunitdir]}" \
  --with-backend=linux
+#FIXME: systemd
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
@@ -72,9 +73,7 @@ mv \
 mv \
  ${PKG}/lib/* \
  ${PKG}/usr/lib$(libdirsuffix)
-rm -rf \
- ${PKG}/lib \
- ${PKG}/usr/man
+rmdir ${PKG}/lib
 }
 
 SRCNAME[1]=cpufrequtils
@@ -92,4 +91,45 @@ make install DESTDIR="${PKG}" libdir="/usr/lib$(libdirsuffix)"
 doc AUTHORS
 rm -f \
  ${PKG}/usr/lib$(libdirsuffix)/*.a
+}
+
+SRCNAME[2]=pm-utils
+SRCVERS[2]=1.4.1
+SRCPACK[2]=http://pm-utils.freedesktop.org/releases/${SRCNAME[2]}-${SRCVERS[2]}.tar.gz
+SRCCOPY[2]="GPL2"
+
+PMUTILSLIBDIR=/usr/share/pm-utils
+
+build2()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/share \
+ --localstatedir=/var \
+ --docdir=${SYS_DIR[doc]}/${SRCNAME[2]}-${SRCVERS[2]}
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS README.SLACKWARE
+changelog ChangeLog
+rm -f ${PKG}${PMUTILSLIBDIR}/{sleep.d/55NetworkManager,power.d/{harddrive,disable_wol,hal-cd-polling}}
+mv \
+ ${PKG}/usr/share/pkgconfig/*.pc \
+ ${PKG}/usr/lib$(libdirsuffix)/pkgconfig
+rmdir ${PKG}/usr/share/pkgconfig
+}
+
+SRCNAME[3]=pm-quirks
+SRCVERS[3]=20100619
+SRCPACK[3]=http://pm-utils.freedesktop.org/releases/${SRCNAME[3]}-${SRCVERS[3]}.tar.gz
+SRCROOT[3]=video-quirks
+
+build3()
+{
+install.dir ${PKG}${PMUTILSLIBDIR}/video-quirks
+install.dat *.quirkdb ${PKG}${PMUTILSLIBDIR}/video-quirks
 }

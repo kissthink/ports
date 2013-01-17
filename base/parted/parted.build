@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=parted
-VERSION=3.0
+VERSION=3.1
 BUILD=1
-DEPENDS=('udev >= 166-1' 'lvm >= 2.02.88-1')
+DEPENDS=('udev >= 173-1' 'lvm >= 2.02.98-1')
 
 # Description
 
@@ -49,6 +49,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --disable-silent-rules \
+ --disable-rpath \
  --enable-static=no \
  --enable-shared=yes \
  --enable-debug=no \
@@ -58,7 +59,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --sysconfdir=/etc \
  --libdir=/usr/lib$(libdirsuffix) \
  --localstatedir=/var
-make -j 2 V=1
+make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS THANKS
 changelog NEWS

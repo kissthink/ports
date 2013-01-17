@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=fontconfig
 VERSION=2.10.91
-BUILD=1
+BUILD=2
 DEPENDS=('libxml >= 2.9.0-2')
 
 # Description
@@ -78,7 +78,6 @@ install.bin setup.05.fontconfig ${PKG}/var/log/setup
   for conffile in \
     20-fix-globaladvance.conf \
     20-unhint-small-vera.conf \
-    29-replace-bitmap-fonts.conf \
     30-urw-aliases.conf \
     30-metric-aliases.conf \
     40-nonlatin.conf \

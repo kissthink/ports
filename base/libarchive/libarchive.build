@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=libarchive
-VERSION=3.0.3
+VERSION=3.0.4
 BUILD=1
-DEPENDS=('libxml >= 2.7.8-1' 'xz >= 5.0.3-1' 'bzip2 >= 1.0.6-1')
+DEPENDS=('libxml >= 2.9.0-2' 'xz >= 5.0.4-1' 'bzip2 >= 1.0.6-1')
 
 # Description
 
@@ -27,7 +27,7 @@ ${NAME}: streaming archive formats, including most popular TAR variants,
 ${NAME}: several CPIO formats and both BSD and GNU AR variants. It can also
 ${NAME}: write shar archives and read ISO9660 CDROM images and ZIP archives.
 ${NAME}:
-${NAME}: Homepage: http://libarchive.googlecode.com
+${NAME}: Homepage: http://libarchive.github.com
 ${NAME}:
 ${NAME}:
 ${NAME}:

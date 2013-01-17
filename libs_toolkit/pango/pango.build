@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=pango
 MAJOR=1.32
-VERSION=${MAJOR}.5
+VERSION=${MAJOR}.6
 BUILD=1
 DEPENDS=('glib >= 2.34.3-1' 'cairo >= 1.12.8-1' 'harfbuzz >= 0.9.10-1')
 OPTIONS="symprepend"
@@ -65,10 +65,6 @@ changelog NEWS
 install.dir ${PKG}/var/cache/pango-1.0
 install.dat doinst.sh ${PKG}/install
 touch ${PKG}/var/cache/pango-1.0/pango.modules
-#mv \
-# ${PKG}/etc/pango-1.0/pango/pangox.aliases \
-# ${PKG}/etc/pango-1.0
 rm -rf \
- ${PKG}/usr/lib$(libdirsuffix)/*/*/*.a \
- ${PKG}/etc/pango-1.0/pango
+ ${PKG}/usr/lib$(libdirsuffix)/*/*/*.a
 }

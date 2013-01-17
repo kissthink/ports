@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=xorg_input_evdev
-VERSION=2.7.0
+VERSION=2.7.3
 BUILD=1
 
 # Description
@@ -35,7 +35,7 @@ EOF
 # Sources
 
 SRCNAME[0]=mtdev
-SRCVERS[0]=1.1.2
+SRCVERS[0]=1.1.3
 SRCPACK[0]=http://bitmath.org/code/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
 
 build0()

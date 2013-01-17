@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=fs_ntfs
-VERSION=2012.1.15
+VERSION=2013.1.13
 BUILD=1
-DEPENDS=('fuse >= 2.8.7-1')
+DEPENDS=('fuse >= 2.9.2-1')
 
 # Description
 

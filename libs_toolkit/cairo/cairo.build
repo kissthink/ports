@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=cairo
-VERSION=1.12.8
+VERSION=1.12.10
 BUILD=1
-DEPENDS=('freetype >= 2.4.10-1' 'fontconfig >= 2.8.0-1' 'pixman >= 0.28.0' 'xorg_libs >= 7.7-1' 'libpng >= 1.5.13-1')
+DEPENDS=('freetype >= 2.4.11-1' 'fontconfig >= 2.10.91-1' 'pixman >= 0.28.2' 'xorg_libs >= 7.7-3' 'libpng >= 1.5.13-2')
 
 # Description
 
@@ -56,7 +56,14 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --localstatedir=/var \
  --with-html-dir="${SYS_DIR[html]}" \
  --disable-gtk-doc \
- --enable-qt=no
+ --enable-qt=no \
+ --enable-tee \
+ --enable-gl \
+ --enable-ft \
+ --enable-xlib \
+ --enable-pdf \
+ --enable-svg \
+ --enable-gobject
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS

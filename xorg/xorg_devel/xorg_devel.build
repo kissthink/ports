@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=xorg_devel
 VERSION=7.7
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -246,7 +246,7 @@ license COPYING
 }
 
 SRCNAME[14]=randrproto
-SRCVERS[14]=1.3.2
+SRCVERS[14]=1.4.0
 SRCPACK[14]=${XORGIREPO}/proto/${SRCNAME[14]}-${SRCVERS[14]}.tar.bz2
 
 build14()
@@ -285,7 +285,7 @@ license COPYING
 }
 
 SRCNAME[17]=glproto
-SRCVERS[17]=1.4.15
+SRCVERS[17]=1.4.16
 SRCPACK[17]=${XORGIREPO}/proto/${SRCNAME[17]}-${SRCVERS[17]}.tar.bz2
 
 build17()
@@ -325,7 +325,7 @@ license COPYING
 }
 
 SRCNAME[20]=dri2proto
-SRCVERS[20]=2.6
+SRCVERS[20]=2.8
 SRCPACK[20]=${XORGIREPO}/proto/${SRCNAME[20]}-${SRCVERS[20]}.tar.bz2
 
 build20()
@@ -392,7 +392,7 @@ license COPYING
 }
 
 SRCNAME[25]=xcb-proto
-SRCVERS[25]=1.7.1
+SRCVERS[25]=1.8
 SRCPACK[25]=http://xcb.freedesktop.org/dist/${SRCNAME[25]}-${SRCVERS[25]}.tar.bz2
 
 build25()

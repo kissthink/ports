@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=grsync
-VERSION=1.2.2
+VERSION=1.2.3
 BUILD=1
-DEPENDS=('gtk+ >= 2.24.10-1')
+DEPENDS=('gtk+ >= 2.24.14-1')
 
 # Description
 

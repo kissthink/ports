@@ -5,10 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=mesa
-VERSION=8.0.3
+VERSION=9.0.1
 BUILD=1
-DEPENDS=('xorg_libs >= 7.6-6' 'libdrm >= 2.4.33-1' 'talloc >= 2.0.7-1')
-GALLIUM="r300,r600,nouveau,swrast"
+DEPENDS=('xorg_libs >= 7.7-3' 'libdrm >= 2.4.41-1' 'talloc >= 2.0.8-1')
+GALLIUM="r300,r600,radeonsi,nouveau,svga,swrast"
 
 # Description
 
@@ -56,10 +56,10 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --localstatedir=/var \
  --with-xorg-driver-dir="/usr/lib$(libdirsuffix)/plugins/xorg/modules/drivers" \
  --with-dri-driverdir="/usr/lib$(libdirsuffix)/plugins/xorg/modules/dri" \
- --with-egl-driver-dir="/usr/lib$(libdirsuffix)/plugins/egl" \
  --with-gallium-drivers="${GALLIUM}" \
+ --with-egl-driver-dir="/usr/lib$(libdirsuffix)/plugins/egl" \
+ --with-egl-platforms="x11,drm" \
  --enable-shared-glapi \
- --enable-shared-dricore \
  --enable-texture-float \
  --enable-gallium-egl \
  --enable-gallium-llvm \
@@ -70,11 +70,15 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-gles1 \
  --enable-gles2 \
  --enable-egl \
- --enable-xa
+ --enable-xa \
+ --enable-gbm \
+ --enable-xvmc \
+ --enable-vdpau
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 install.dir ${DOC}
 install.doc docs/relnotes-${VERSION}.html ${DOC}
+rm -f ${PKG}/usr/lib*/*.la
 }
 
 SRCNAME[1]=xdriinfo
@@ -95,17 +99,42 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --sysconfdir=/etc \
  --libdir=/usr/lib$(libdirsuffix) \
  --localstatedir=/var
-make ${JOBS}
+make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 changelog ChangeLog
 license COPYING
 }
 
-SRCNAME[2]=glew
-SRCVERS[2]=1.7.0
-SRCPACK[2]=${URL[sf]}/${SRCNAME[2]}/${SRCNAME[2]}-${SRCVERS[2]}.tgz
+SRCNAME[2]=glu
+SRCVERS[2]=9.0.0
+SRCPACK[2]=http://cgit.freedesktop.org/mesa/glu/snapshot/${SRCNAME[2]}-${SRCVERS[2]}.tar.gz
 
 build2()
+{
+chmod 0755 configure
+GL_CFLAGS="-I${PKG}/usr/include" \
+GL_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lGL" \
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-shared=yes \
+ --enable-static=no \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+}
+
+SRCNAME[3]=glew
+SRCVERS[3]=1.9.0
+SRCPACK[3]=${URL[sf]}/${SRCNAME[3]}/${SRCNAME[3]}-${SRCVERS[3]}.tgz
+
+build3()
 {
 make ${JOBS} \
  CFLAGS.EXTRA="-I${PKG}/usr/include" \
@@ -116,11 +145,11 @@ chmod 0755 ${PKG}/usr/lib$(libdirsuffix)/libGLEW.so.?.?.?
 rm -f ${PKG}/usr/lib$(libdirsuffix)/*.a
 }
 
-SRCNAME[3]=gl-manpages
-SRCVERS[3]=1.0.1
-SRCPACK[3]=ftp://ftp.archlinux.org/other/mesa/${SRCNAME[3]}-${SRCVERS[3]}.tar.bz2
+SRCNAME[4]=gl-manpages
+SRCVERS[4]=1.0.1
+SRCPACK[4]=ftp://ftp.archlinux.org/other/mesa/${SRCNAME[4]}-${SRCVERS[4]}.tar.bz2
 
-build3()
+build4()
 {
 ./configure \
   --build="${ARCH}-slackware-linux" \

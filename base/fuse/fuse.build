@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=fuse
-VERSION=2.9.0
+VERSION=2.9.2
 BUILD=1
 
 # Description

@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=lvm
-VERSION=2.02.93
+VERSION=2.02.98
 BUILD=1
 DEPENDS=('udev >= 173-1')
 
@@ -64,6 +64,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --with-udev-prefix="/usr" \
  --with-udevdir="$(pkg-config udev --variable=udevdir)/rules.d" \
  --with-systemdsystemunitdir="${SYS_DIR[systemdsystemunitdir]}" \
+ --with-tmpfilesdir="/etc/tmpfiles.d" \
  --with-default-run-dir=/run \
  --with-default-locking-dir=/run/lock \
  --with-dmeventd-pidfile=/run/dmeventd.pid \
@@ -78,6 +79,7 @@ make install install_systemd_units DESTDIR="${PKG}"
 doc WHATS_NEW_DM
 changelog WHATS_NEW
 install.dat doinst.sh ${PKG}/install
+#FIXME: systemd (make install_systemd_generators)
 #install.dir ${PKG}${SYS_DIR[run]}/lvm
 mv \
  ${PKG}/etc/lvm/lvm.conf \

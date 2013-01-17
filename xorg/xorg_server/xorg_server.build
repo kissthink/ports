@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=xorg_server
 VERSION=7.7
-BUILD=1
-DEPENDS=('xorg_libs >= 7.7-1' 'mesa >= 8.0.3-1')
+BUILD=2
+DEPENDS=('xorg_libs >= 7.7-3' 'mesa >= 9.0.1-1')
 FONTPATH="/usr/share/fonts/local,/usr/share/fonts/TTF,/usr/share/fonts/OTF,/usr/share/fonts/Type1,/usr/share/fonts/misc,/usr/share/fonts/CID,/usr/share/fonts/75dpi/:unscaled,/usr/share/fonts/100dpi/:unscaled,/usr/share/fonts/75dpi,/usr/share/fonts/100dpi,/usr/share/fonts/cyrillic"
 SERVERS="--enable-xorg --enable-dmx --enable-xephyr"
 
@@ -87,7 +87,7 @@ mv \
 }
 
 SRCNAME[1]=bdftopcf
-SRCVERS[1]=1.0.3
+SRCVERS[1]=1.0.4
 SRCPACK[1]=${XORGIREPO}/app/${SRCNAME[1]}-${SRCVERS[1]}.tar.bz2
 
 build1()
@@ -230,7 +230,7 @@ license COPYING
 }
 
 SRCNAME[11]=xbacklight
-SRCVERS[11]=1.1.2
+SRCVERS[11]=1.2.0
 SRCPACK[11]=${XORGIREPO}/app/${SRCNAME[11]}-${SRCVERS[11]}.tar.bz2
 
 build11()
@@ -627,7 +627,7 @@ license COPYING
 }
 
 SRCNAME[41]=xorg-server
-SRCVERS[41]=1.12.2
+SRCVERS[41]=1.13.1
 SRCPACK[41]=${XORGIREPO}/xserver/${SRCNAME[41]}-${SRCVERS[41]}.tar.bz2
 
 build41()
@@ -647,6 +647,9 @@ configure \
  --with-serverconfig-path=/usr/share/X11 \
  --with-int10=x86emu \
  --disable-config-hal \
+ --disable-xfbdev \
+ --disable-xfake \
+ --enable-xcsecurity \
  --enable-config-udev \
  --enable-glx-tls \
  --enable-install-libxf86config \

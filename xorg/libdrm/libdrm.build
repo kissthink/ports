@@ -5,11 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=libdrm
-VERSION=2.4.37
+VERSION=2.4.41
 BUILD=1
-DEPENDS=('udev >= 173-1' 'pci >= 20120615-1')
-
-#NOTE: cairo is just used for tests, it can therefore safely be ignored
+DEPENDS=('udev >= 173-1' 'pci >= 20120628-1')
 
 # Description
 
@@ -41,6 +39,8 @@ SRCNAME[0]=${NAME}
 SRCVERS[0]=${VERSION}
 SRCPACK[0]=http://dri.freedesktop.org/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
 
+#NOTE: cairo is just used for tests, it can therefore safely be ignored
+
 build0()
 {
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
@@ -56,8 +56,8 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --libdir=/usr/lib$(libdirsuffix) \
  --localstatedir=/var \
  --with-kernel-source=/usr/src/linux \
- --enable-udev \
- --enable-vmwgfx-experimental-api
+ --enable-cairo-tests=no \
+ --enable-udev
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 }

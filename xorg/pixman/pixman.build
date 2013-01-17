@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=pixman
-VERSION=0.28.0
+VERSION=0.28.2
 BUILD=1
 
 # Description
@@ -36,7 +36,7 @@ EOF
 
 SRCNAME[0]=${NAME}
 SRCVERS[0]=${VERSION}
-SRCPACK[0]=http://www.cairographics.org/releases/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCPACK[0]=http://www.cairographics.org/releases/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
 SRCCOPY[0]="MIT"
 
 build0()

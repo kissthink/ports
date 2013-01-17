@@ -35,7 +35,7 @@ EOF
 # Sources
 
 SRCNAME[0]=libcap-ng
-SRCVERS[0]=0.7
+SRCVERS[0]=0.7.3
 SRCPACK[0]=http://people.redhat.com/sgrubb/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
 SRCCOPY[0]="GPL2 LGPL21"
 
@@ -51,7 +51,8 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --mandir="${SYS_DIR[man]}" \
  --sysconfdir=/etc \
  --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --localstatedir=/var \
+ --with-python=no
 #FIXME: audit should use pkgconfig to find libcap-ng
 #--includedir=/usr/include/cap-ng
 make ${JOBS}

@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=coreutils
-VERSION=8.19
+VERSION=8.20
 BUILD=1
 
 # Description
@@ -60,27 +60,16 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --without-gmp
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
-mv ${PKG}/usr/bin/mktemp ${PKG}/usr/bin/mktemp-gnu
-mv ${PKG}/usr/man/man1/mktemp.1 ${PKG}/usr/man/man1/mktemp-gnu.1
 doc AUTHORS THANKS
 changelog NEWS
-install.dir ${PKG}/etc/profile.d
+install.dir ${PKG}/etc/{profile.d,conf.d}
 install.dat doinst.sh ${PKG}/install
-install.cfg DIR_COLORS ${PKG}/etc/DIR_COLORS.new
+install.cfg dircolors.conf ${PKG}/etc/conf.d/dircolors.conf.new
 install.bin coreutils-dircolors.sh ${PKG}/etc/profile.d
 install.bin coreutils-dircolors.csh ${PKG}/etc/profile.d
 rm -rf \
  ${PKG}/usr/share/locale/*/LC_TIME
-install.dir ${PKG}/bin
-(
-  cd ${PKG}/bin
-  for file in ${PKG}/usr/bin/*; do
-    ln -sf /usr/bin/${file##*/} .
-  done
-)
-( cd ${PKG}/bin ; ln -sf ${PKG}/usr/bin/mktemp-gnu )
 ( cd ${PKG}/usr/bin ; ln -sf install ginstall )
-( cd ${PKG}/bin ; ln -sf /usr/bin/install ginstall )
 (
   cd ${PKG}/usr/man/man1
   echo ".so man1/install.1" > ginstall.1

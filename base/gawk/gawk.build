@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=gawk
-VERSION=4.0.1
+VERSION=4.0.2
 BUILD=1
 
 # Description
@@ -62,18 +62,6 @@ changelog NEWS
   ln -sf gawk-${SRCVERS[0]} awk
   ln -sf gawk-${SRCVERS[0]} gawk
   ln -sf pgawk-${SRCVERS[0]} pgawk
-)
-#FIXME: compatibility symlinks
-install.dir ${PKG}/bin
-(
-  cd ${PKG}/bin
-  ln -sf /usr/bin/gawk-${SRCVERS[0]}
-  ln -sf /usr/bin/gawk-${SRCVERS[0]} gawk
-  ln -sf /usr/bin/gawk-${SRCVERS[0]} awk
-  ln -sf /usr/bin/pgawk-${SRCVERS[0]}
-  ln -sf /usr/bin/pgawk-${SRCVERS[0]} pgawk
-  ln -sf /usr/bin/dgawk
-  ln -sf /usr/bin/igawk
 )
 (
   cd ${PKG}${SYS_DIR[man]}/man1

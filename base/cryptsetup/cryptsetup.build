@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=cryptsetup
-VERSION=1.4.1
+VERSION=1.6.0
 BUILD=1
-DEPENDS=('lvm >= 2.02.93-1' 'nettle >= 2.4-1')
+DEPENDS=('lvm >= 2.02.98-1' 'libpwquality >= 1.2.1-1')
 
 # Description
 
@@ -55,9 +55,10 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --libdir=/usr/lib$(libdirsuffix) \
  --localstatedir=/var \
  --with-crypto_backend=nettle \
+ --enable-cryptsetup-reencrypt \
  --disable-selinux
+#FIXME: --enable-pwquality ?
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS FAQ docs/*-ReleaseNotes
-changelog ChangeLog
 }

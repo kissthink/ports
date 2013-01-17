@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=avahi
-VERSION=0.6.30
+VERSION=0.6.31
 BUILD=1
 DEPENDS=('libdaemon >= 0.14-1')
 
@@ -57,11 +57,11 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --localstatedir=/var \
  --disable-qt3 \
  --disable-qt4 \
- --disable-gtk3 \
  --disable-python \
  --disable-python-dbus \
  --disable-pygtk \
  --disable-mono \
+ --disable-monodoc \
  --with-distro=slackware \
  --with-systemdsystemunitdir="${SYS_DIR[systemdsystemunitdir]}" \
  --with-xml=expat \
@@ -70,6 +70,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --with-autoipd-user=autoipd \
  --with-autoipd-group=autoipd \
  --with-avahi-priv-access-group=netdev
+#FIXME: dbus socket will go in /run one day
 make ${JOBS}
 make install DESTDIR="${PKG}"
 install.dat doinst.sh ${PKG}/install
@@ -97,9 +98,6 @@ mv \
 mv \
  ${PKG}/etc/avahi/avahi-daemon.conf \
  ${PKG}/etc/avahi/avahi-daemon.conf.new
-mv \
- ${PKG}/etc/dbus-1/system.d/avahi-dbus.conf \
- ${PKG}/etc/dbus-1/system.d/avahi-dbus.conf.new
 rmdir \
  ${PKG}/var \
  ${PKG}/usr/lib$(libdirsuffix)/avahi

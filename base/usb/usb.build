@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=usb
 MAJOR=1.0
-VERSION=${MAJOR}.12
+VERSION=${MAJOR}.14
 BUILD=1
 
 # Description
@@ -90,7 +90,7 @@ changelog NEWS
 }
 
 SRCNAME[2]=usbutils
-SRCVERS[2]=005
+SRCVERS[2]=006
 SRCPACK[2]=http://www.kernel.org/pub/linux/utils/usb/usbutils/${SRCNAME[2]}-${SRCVERS[2]}.tar.xz
 SRCCOPY[2]="GPL2"
 
@@ -110,14 +110,14 @@ LDFLAGS="-L${PKG}/lib$(libdirsuffix)" \
  --sysconfdir=/etc \
  --libdir=/usr/lib$(libdirsuffix) \
  --localstatedir=/var \
- --datadir=/usr/share/hwdata
+ --datadir=/usr/share/hwdata \
+ --disable-usbids
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-mv \
- ${PKG}/usr/sbin/update-usbids.sh \
- ${PKG}/usr/sbin/update-usbids
+sed "s|@usbids@|/usr/share/hwdata/usb.ids|g" update-usbids.sh.in > ${PKG}/usr/sbin/update-usbids
+chmod 0755 ${PKG}/usr/sbin/update-usbids
 install.dir ${PKG}/usr/lib$(libdirsuffix)
 mv \
  ${PKG}/usr/share/pkgconfig/*.pc \

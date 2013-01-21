@@ -7,7 +7,7 @@ source /usr/src/ports/Build/build.sh
 NAME=vim
 MAJOR=7.3
 VERSION=${MAJOR}.773
-BUILD=1
+BUILD=3
 
 # Description
 
@@ -41,6 +41,7 @@ SRCPACK[0]=http://ftp.vim.org/pub/vim/unix/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
 SRCROOT[0]=${NAME}73
 
 # Syntax file updates: ftp://ftp.vim.org/pub/vim/runtime/syntax
+# autoconf: cd src/auto ; autoconf ../configure.in > configure
 
 configure()
 {

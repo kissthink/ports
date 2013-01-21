@@ -52,7 +52,6 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --sysconfdir=/etc \
  --libdir=/usr/lib$(libdirsuffix) \
  --localstatedir=/var/lib/vim \
- --with-global-runtime=/usr/share/vim \
  --with-compiledby="<cjsthompson@gmail.com>" \
  --with-features=huge \
  ${*}
@@ -74,7 +73,7 @@ configure \
  --enable-acl \
  --enable-multibyte \
  --enable-cscope
-make ${JOBS} VIMRCLOC="/etc" VIMRTLOC="/usr/share/vim"
+make ${JOBS} VIMRCLOC="/etc" VIMRTLOC="/usr/share/vim" VIMRUNTIMEDIR="/usr/share/vim"
 make install VIMRCLOC="/etc" VIMRTLOC="/usr/share/vim" DESTDIR="${PKG}"
 doc README.txt
 ( cd ${DOC} ; ln -sf /usr/share/vim/doc/uganda.txt COPYING )

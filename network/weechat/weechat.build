@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=weechat
-VERSION=0.3.9.2
+VERSION=0.4.0
 BUILD=1
-DEPENDS=('gnutls >= 3.1.5-1' 'curl >= 7.28.0-1')
+DEPENDS=('gnutls >= 3.1.6-1' 'curl >= 7.28.0-1')
 OPTDEPENDS=('perl >= 5.2.13-1' 'python >= 2.6.6-1' 'ruby >= 1.9.1_p431-1' 'tcl >= 8.5.9-1')
 
 # Description
@@ -43,27 +43,19 @@ SRCCOPY[0]="GPL3"
 
 build0()
 {
-CPPFLAGS="-I/usr/include/gcrypt -I/usr/include/gpg-error" \
-WEECHAT_HOME="~/.config/weechat" \
-CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
-./configure \
- --build="${ARCH}-slackware-linux" \
- --disable-dependency-tracking \
- --enable-static=no \
- --enable-shared=yes \
- --with-debug=0 \
- --prefix=/usr \
- --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --disable-guile
-# --with-lua-lib=/usr/lib$(libdirsuffix) \
-# --with-lua-inc=/usr/include/lua \
-# --with-lua-suffix=""
+cmake \
+-DCMAKE_CXX_FLAGS:STRING="${FLAGS}" \
+-DCMAKE_C_FLAGS:STRING="${FLAGS}" \
+-DCMAKE_VERBOSE_MAKEFILE:BOOL="on" \
+-DCMAKE_INSTALL_PREFIX:PATH="/usr" \
+-DLIBDIR:PATH="/usr/lib$(libdirsuffix)" \
+-DMANDIR:PATH="${SYS_DIR[man]}" \
+-DPLUGINDIR:PATH="/usr/lib$(libdirsuffix)/plugins/weechat" \
+-DWEECHAT_HOME:STRING="~/.config/weechat" \
+CMakeLists.txt
 make ${JOBS}
 make install DESTDIR="${PKG}"
-doc AUTHORS NEWS UPGRADE*
+doc AUTHORS NEWS
 changelog ChangeLog 
 install.dir ${PKG}/usr/share/applications
 install.dat weechat.desktop \
@@ -71,9 +63,6 @@ install.dat weechat.desktop \
 install.dir ${PKG}/usr/share/icons/hicolor/32x32/apps
 install.dat weechat_icon_32.png \
  ${PKG}/usr/share/icons/hicolor/32x32/apps/weechat.png
-install.dir ${PKG}/usr/man/man1
-install.dat doc/weechat-curses.1 \
- ${PKG}/usr/man/man1
 (
   cd ${PKG}/usr/bin
   ln -sf weechat-curses weechat

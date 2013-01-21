@@ -7,7 +7,7 @@ source /usr/src/ports/Build/build.sh
 NAME=vim
 MAJOR=7.3
 VERSION=${MAJOR}.773
-BUILD=3
+BUILD=4
 
 # Description
 
@@ -53,6 +53,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --sysconfdir=/etc \
  --libdir=/usr/lib$(libdirsuffix) \
  --localstatedir=/var/lib/vim \
+ --localedir=/usr/share/locale \
  --with-compiledby="<cjsthompson@gmail.com>" \
  --with-features=huge \
  ${*}

@@ -6,10 +6,10 @@ source /usr/src/ports/Build/build.sh
 
 NAME=elinks
 MAJOR=0.13
-MINOR=20110902
+MINOR=20130121
 VERSION=${MAJOR}.${MINOR}
 BUILD=1
-DEPENDS=('openssl >= 0.9.8r-1' 'gpm >= 1.20.1-5' 'bzip2 >= 1.0.6-1' 'expat >= 2.0.1-1' 'zlib >= 1.2.3-1')
+DEPENDS=('gnutls >= 3.1.6-1' 'gpm >= 1.20.7-2' 'bzip2 >= 1.0.6-1' 'xz >= 5.0.4-1' 'expat >= 2.0.1-1')
 
 # Description
 
@@ -64,11 +64,12 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-html-highlight \
  --enable-no-root \
  --enable-fastmem \
- --with-openssl=/usr \
- --without-gnutls \
+ --with-lzma \
+ --with-gnutls \
+ --without-openssl \
  --without-lua \
  --without-x
-make -j 2 V=1
+make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS THANKS
 changelog NEWS

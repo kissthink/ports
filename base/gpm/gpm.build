@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=gpm
 VERSION=1.20.7
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -67,5 +67,9 @@ install.dir ${PKG}/usr/share/emacs/site-lisp
 install.dat contrib/emacs/t-mouse.el ${PKG}/usr/share/emacs/site-lisp
 install.dir ${PKG}${SYS_DIR[systemdsystemunitdir]}
 install.dat gpm.service ${PKG}${SYS_DIR[systemdsystemunitdir]}
-chmod 0755 ${PKG}/usr/lib$(libdirsuffix)/lib*.so.*
+(
+  cd ${PKG}/usr/lib$(libdirsuffix)
+  chmod 0755 libgpm.so.?.?.?
+  ln -sf libgpm.so.?.?.? libgpm.so
+)
 }

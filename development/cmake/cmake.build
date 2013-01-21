@@ -6,9 +6,9 @@ source /usr/src/ports/Build/build.sh
 
 NAME=cmake
 MAJOR=2.8
-VERSION=${MAJOR}.8
-BUILD=2
-DEPENDS=('libarchive >= 3.0.3-1' 'curl >= 7.26.0-1' 'expat >= 2.0.1-1')
+VERSION=${MAJOR}.10.2
+BUILD=1
+DEPENDS=('libarchive >= 3.0.4-1' 'curl >= 7.28.0-1' 'expat >= 2.0.1-1')
 
 # Description
 
@@ -57,23 +57,14 @@ changelog ChangeLog.txt
 # Documentation stuff
 rm -f \
  ${DOC}/c*.txt \
- ${DOC}/*.docbook
+ ${DOC}/*.docbook \
+ ${PKG}/usr/share/vim
 install.dir ${PKG}${SYS_DIR[html]}/${SRCNAME[0]}
 mv \
  ${DOC}/c*.html \
  ${PKG}${SYS_DIR[html]}/${SRCNAME[0]}
-# Move includes to the right place
-install.dir ${PKG}/usr/include/${SRCNAME[0]}
-mv \
- ${PKG}/usr/share/cmake/include/*.h \
- ${PKG}/usr/include/${SRCNAME[0]}
-rmdir \
- ${PKG}/usr/share/cmake/include
 (
   cd ${PKG}/usr/share/cmake
   ln -s /usr/include/${SRCNAME[0]} include
 )
-# Emacs stuff
-install.dir ${PKG}/usr/share/emacs/site-lisp
-install.dat Docs/cmake-mode.el ${PKG}/usr/share/emacs/site-lisp
 }

@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=sqlite
 MAJOR=3
-MINOR=7.10
+MINOR=7.15.2
 VERSION=${MAJOR}.${MINOR}
 BUILD=1
 
@@ -40,7 +40,7 @@ EOF
 # Sources
 
 SRCNAME[0]=${NAME}-src
-SRCVERS[0]=3071000
+SRCVERS[0]=3071502
 SRCPACK[0]=http://www.sqlite.org/${SRCNAME[0]}-${SRCVERS[0]}.zip
 
 build0()

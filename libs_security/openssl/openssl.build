@@ -1,0 +1,83 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=openssl
+VERSION=1.0.1c
+BUILD=1
+
+# These are the known patent issues with OpenSSL:
+# name   #          expires
+# RC5:   5,724,428  2015-03-03, not included.
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: openssl (Secure Sockets Layer toolkit)
+${NAME}:
+${NAME}: The OpenSSL certificate management tool and the shared libraries that
+${NAME}: provide various encryption and decryption algorithms and protocols.
+${NAME}:
+${NAME}: This product includes software developed by the OpenSSL Project for
+${NAME}: use in the OpenSSL Toolkit (http://www.openssl.org). This product
+${NAME}: includes cryptographic software written by Eric Young
+${NAME}: (eay@cryptsoft.com).  This product includes software written by Tim
+${NAME}: Hudson (tjh@cryptsoft.com).
+${NAME}:
+EOF
+
+# $(uname -m) here is a kludge because we should take care of the arch stuff
+# before we get to this point. I.e. ${ARCH} should work here.
+case "$(uname -m)" in
+  x86)
+    OPENSSLTARGET="linux-elf"
+    OPTIONS=""
+  ;;
+  x86_64)
+    OPENSSLTARGET="linux-x86_64"
+    OPTIONS="enable-ec_nistp_64_gcc_128"
+  ;;
+esac
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://www.openssl.org/source/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+
+build0()
+{
+sed -i "s|@OPTFLAGS@|${FLAGS}|g" Configure
+./Configure \
+ --prefix=/usr \
+ --openssldir=/etc/ssl \
+ --libdir=lib$(libdirsuffix) \
+ shared zlib-dynamic \
+ no-rc5 no-mdc2 no-ec no-ec2m no-ecdh no-ecdsa no-srp no-sse2 \
+ enable-md2 enable-tlsext enable-cms enable-rfc3779 ${OPTIONS} \
+ "${OPENSSLTARGET}"
+# ${JOBS}
+make depend
+make
+make install INSTALL_PREFIX="${PKG}" MANDIR="${SYS_DIR[man]}"
+doc ACKNOWLEDGMENTS FAQ 
+changelog NEWS
+license LICENSE
+install.dat doinst.sh ${PKG}/install
+install.dir ${PKG}/etc/cron.daily
+install.bin certwatch ${PKG}/etc/cron.daily/certwatch.new
+( cd ${PKG}/usr/lib$(libdirsuffix) ; ldconfig -l lib*.so* )
+mv \
+ ${PKG}/etc/ssl/openssl.cnf \
+ ${PKG}/etc/ssl/openssl.cnf.new
+}

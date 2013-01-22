@@ -6,9 +6,9 @@ source /usr/src/ports/Build/build.sh
 
 NAME=networkmanager
 MAJOR=0.9
-VERSION=${MAJOR}.6.4
+VERSION=${MAJOR}.7.995
 BUILD=1
-DEPENDS=('glib >= 2.34.2-1' 'dbus >= 1.4.20-1' 'udev >= 173-1' 'gnutls >= 3.1.4-1' 'tcpip >= 3.2.0-1')
+DEPENDS=('glib >= 2.34.3-1' 'dbus >= 1.4.24-1' 'udev >= 173-1' 'gnutls >= 3.1.6-1' 'tcpip >= 20130122-1' 'libsoup >= 2.40.2-1')
 
 # Description
 
@@ -43,7 +43,7 @@ SRCCOPY[0]="GPL2"
 
 build0()
 {
-#FIXME: /sbin/dhcpcd -> /usr/sbin/dhcpcd
+#FIXME: systemd
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -64,11 +64,14 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --with-systemdsystemunitdir="${SYS_DIR[systemdsystemunitdir]}" \
  --with-udev-dir="$(pkg-config udev --variable=udevdir)" \
  --with-pppd-plugin-dir="/usr/lib$(libdirsuffix)/pppd/2.4.5" \
- --with-distro=slackware \
+ --with-session-tracking=consolekit \
+ --with-suspend-resume=upower \
  --with-crypto=gnutls \
- --with-dhcpcd=/sbin/dhcpcd \
+ --with-libnl=3 \
+ --with-dhcpcd=/usr/sbin/dhcpcd \
  --with-dhclient=yes \
  --disable-qt \
+ --enable-modify-system \
  --enable-polkit \
  --enable-ppp \
  --enable-concheck
@@ -77,9 +80,7 @@ make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
 install.dat doinst.sh ${PKG}/install
-mv \
- ${PKG}/etc/rc.d/rc.networkmanager \
- ${PKG}/etc/rc.d/rc.networkmanager.new
-chmod 0644 ${PKG}/etc/rc.d/rc.networkmanager.new
+install.dir ${PKG}/etc/rc.d
+install.dat rc.networkmanager.new ${PKG}/etc/rc.d
 install.cfg NetworkManager.conf.new ${PKG}/etc/NetworkManager
 }

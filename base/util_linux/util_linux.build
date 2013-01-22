@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=util_linux
 VERSION=2.22.2
-BUILD=1
+BUILD=2
 DEPENDS=('udev >= 173-1')
 
 # Description
@@ -187,7 +187,7 @@ install.dat serial.conf ${PKG}/etc/serial.conf.new
 }
 
 SRCNAME[3]=net-tools
-SRCVERS[3]=20120724
+SRCVERS[3]=20130121
 SRCPACK[3]=http://www.tazenda.demon.co.uk/phil/${SRCNAME[3]}/${SRCNAME[3]}-${SRCVERS[3]}.tar.xz
 
 build3()

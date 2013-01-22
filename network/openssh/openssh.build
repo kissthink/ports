@@ -70,6 +70,8 @@ install.dir ${PKG}/etc/rc.d
 install.bin rc.sshd.new ${PKG}/etc/rc.d
 install.bin contrib/ssh-copy-id ${PKG}/usr/bin
 install.man contrib/ssh-copy-id.1 ${PKG}${SYS_DIR[man]}/man1
+install.dir ${PKG}${SYS_DIR[systemdsystemunitdir]}
+install.cfg systemd/* ${PKG}${SYS_DIR[systemdsystemunitdir]}
 (
   cd ${PKG}/etc/ssh
   rm -f ssh_host*key.*

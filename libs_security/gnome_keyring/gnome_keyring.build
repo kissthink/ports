@@ -5,10 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=gnome_keyring
-MAJOR=3.4
-VERSION=${MAJOR}.0
+MAJOR=3.6
+VERSION=${MAJOR}.2
 BUILD=1
-DEPENDS=('gtk+ >= 2.24.10-1')
+DEPENDS=('gcr >= 3.6.2-1' 'capabilities >= 20130117-1')
 
 # Description
 
@@ -34,15 +34,6 @@ ${NAME}: Homepage: http://live.gnome.org/GnomeKeyring
 ${NAME}:
 EOF
 
-cat >> ${PKG}/install/doinst.sh <<EOF
-#!/bin/sh
-
-# Compile settings data schemas
-if [ -x /usr/bin/glib-compile-schemas ]; then
-  /usr/bin/glib-compile-schemas /usr/share/glib-2.0/schemas
-fi
-EOF
-
 # Sources
 
 SRCNAME[0]=gnome-keyring
@@ -60,6 +51,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
+ --enable-debug=no \
  --prefix=/usr \
  --mandir="${SYS_DIR[man]}" \
  --sysconfdir=/etc \
@@ -68,20 +60,22 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --localstatedir=/var \
  --with-html-dir="${SYS_DIR[html]}" \
  --with-root-certs=/etc/ssl/certs \
- --with-gtk=2 \
+ --with-pkcs11-modules=/usr/lib$(libdirsuffix)/plugins/pkcs11 \
  --disable-schemas-compile \
  --disable-pam
+#FIXME: PAM
+# --with-pam-dir=/usr/lib$(libdirsuffix)/security
+#FIXME: Change run dir to /run ?
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
 rm -rf \
  ${PKG}/usr/share/gnome-keyring/introspect
-# ${PKG}/usr/share/GConf
 }
 
 SRCNAME[1]=libgnome-keyring
-SRCVERS[1]=${VERSION}
+SRCVERS[1]=${MAJOR}.0
 SRCPACK[1]=${URL[gnome]}/${SRCNAME[1]}/${MAJOR}/${SRCNAME[1]}-${SRCVERS[1]}.tar.xz
 SRCCOPY[1]="GPL2 LGPL2"
 
@@ -95,10 +89,12 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
+ --enable-debug=no \
  --prefix=/usr \
  --mandir="${SYS_DIR[man]}" \
  --sysconfdir=/etc \
  --libdir=/usr/lib$(libdirsuffix) \
+ --libexecdir=/usr/lib$(libdirsuffix)/exec \
  --localstatedir=/var \
  --with-html-dir="${SYS_DIR[html]}"
 make ${JOBS} V=1

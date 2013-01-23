@@ -1,0 +1,59 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=google_talkplugin
+VERSION=3.10.2.0
+BUILD=1
+DEPENDS=('gtk+ >= 2.24.14-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: google_talkplugin
+${NAME}:
+${NAME}: Voice and video capabilities for Google websites and more.
+${NAME}:
+${NAME}: Homepage: http://www.google.fr/talk
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+#FIXME: architecture kludge
+
+SRCNAME[0]=google-talkplugin
+SRCVERS[0]=current_$(uname -m)
+SRCPACK[0]=${SRCNAME[0]}_${SRCVERS[0]}.rpm
+SRCOPTS[0]="pkgunpack"
+
+build0()
+{
+# Install cron script properly
+install.dir ${PKG}/etc/cron.daily
+install.bin opt/google/talkplugin/cron/google-talkplugin ${PKG}/etc/cron.daily
+rm -rf ${PKG}/opt/google/talkplugin/cron
+# Install plugin properly
+rm -rf ${PKG}/usr/lib64
+install.dir ${PKG}/usr/lib$(libdirsuffix)/plugins/mozilla
+(
+  cd ${PKG}/usr/lib$(libdirsuffix)/plugins/mozilla
+  ln -sf /opt/google/talkplugin/libnpgoogletalk.so
+  ln -sf /opt/google/talkplugin/libnpgtpo3dautoplugin.so
+)
+}

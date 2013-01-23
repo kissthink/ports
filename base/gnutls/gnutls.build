@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=gnutls
 VERSION=3.1.6
-BUILD=1
-DEPENDS=('libraries >= 20121210-1')
+BUILD=2
+DEPENDS=('libraries >= 20121210-1' 'p11kit >= 0.14-1')
 
 # Description
 
@@ -56,8 +56,7 @@ CFLAGS="${FLAGS} ${INCLUDE}" CXXFLAGS="${FLAGS} ${INCLUDE}" \
  --sysconfdir=/etc \
  --libdir=/usr/lib$(libdirsuffix) \
  --localstatedir=/var \
- --with-html-dir=/usr/share/html \
- --without-p11-kit
+ --with-html-dir=/usr/share/html
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS THANKS

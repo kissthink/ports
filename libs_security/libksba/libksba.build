@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=libksba
-VERSION=1.2.0
+VERSION=1.3.0
 BUILD=1
 DEPENDS=('libgpgerror >= 1.10-1')
 
@@ -38,7 +38,7 @@ EOF
 SRCNAME[0]=${NAME}
 SRCVERS[0]=${VERSION}
 SRCPACK[0]=ftp://ftp.gnupg.org/gcrypt/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
-SRCCOPY[0]="GPL3"
+SRCCOPY[0]="LGPL3 GPL2"
 
 build0()
 {
@@ -55,7 +55,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --libdir=/usr/lib$(libdirsuffix) \
  --includedir=/usr/include/ksba \
  --localstatedir=/var
-make -j 2
+make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS THANKS
 changelog NEWS

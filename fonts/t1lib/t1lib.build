@@ -1,0 +1,71 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=t1lib
+VERSION=5.1.2
+BUILD=1
+DEPENDS=('xorg_libs >= 7.7-3')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: t1lib (Type 1 font rasterizer library)
+${NAME}:
+${NAME}: t1lib is a library for generating character and string glyphs from
+${NAME}: Adobe Type 1 fonts under UNIX. t1lib uses most of the code of the X11
+${NAME}: rasterizer donated by IBM to the X11 project.
+${NAME}:
+${NAME}: Homepage: http://www.t1lib.org
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=ftp://sunsite.unc.edu/pub/Linux/libs/graphics/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="LGPL2"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var
+#NOTE: kill dependency on Xaw ?
+make ${JOBS} without_doc
+make install prefix="${PKG}/usr" libdir="${PKG}/usr/lib$(libdirsuffix)"
+changelog Changes
+install.dat doinst.sh ${PKG}/install
+install.dir ${PKG}/var/cache/t1lib
+install.dir ${PKG}/etc/{profile.d,fonts}
+install.bin t1lib.{sh,csh} ${PKG}/etc/profile.d
+install.cfg t1lib.conf ${PKG}/etc/fonts
+install.dir ${PKG}/usr/sbin
+install.bin update-type1-database ${PKG}/usr/sbin
+install.dir ${PKG}/usr/share/fonts/{Type1,encodings}
+install.dat Fonts/afm/*.afm ${PKG}/usr/share/fonts/Type1
+install.dat Fonts/type1/*.pfb ${PKG}/usr/share/fonts/Type1
+install.dat Fonts/enc/*.enc ${PKG}/usr/share/fonts/encodings
+chmod 0755 ${PKG}/usr/lib$(libdirsuffix)/*.so*
+}

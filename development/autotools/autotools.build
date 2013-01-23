@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=autotools
 VERSION=2.69
-BUILD=3
+BUILD=4
 DEPENDS=('perl >= 5.12.3-1' 'm4 >= 1.4.16-1')
 
 # Description
@@ -65,7 +65,7 @@ license COPYING.EXCEPTION COPYING.EXCEPTION
 }
 
 SRCNAME[1]=automake
-SRCVERS[1]=1.12.3
+SRCVERS[1]=1.13.1
 SRCPACK[1]=${URL[gnu]}/${SRCNAME[1]}/${SRCNAME[1]}-${SRCVERS[1]}.tar.xz
 SRCCOPY[1]="GPL2"
 

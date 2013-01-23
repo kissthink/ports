@@ -1,0 +1,80 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=snmp
+VERSION=5.7.2
+BUILD=1
+DEPENDS=('tcpip >= 20130122-1' 'openssl >= 1.0.1c-1' 'pci >= 20120628-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: snmp
+${NAME}:
+${NAME}: The Simple Network Management Protocol (SNMP) is a standard protocol
+${NAME}: for managing devices on IP networks. Devices that typically support
+${NAME}: SNMP include routers, switches, servers, workstations, printers,
+${NAME}: modem racks and more. It used mostly in network management systems
+${NAME}: to monitor network-attached devices. It exposes management data in
+${NAME}: the form of variables on the managed systems, which describe the
+${NAME}: system configuration which can be queried (and sometimes set) by
+${NAME}: managing applications.
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=net-snmp
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=${URL[sf]}/net-snmp/${SRCNAME[0]}/${SRCVERS[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-debugging \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc/snmp \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --without-rpm \
+ --with-persistent-directory="/var/lib/snmp" \
+ --with-logfile="/var/log/snmpd.log" \
+ --with-sys-contact="root@localhost" \
+ --with-sys-location="Unknown" \
+ --with-default-snmp-version=3 \
+ --with-libwrap \
+ --disable-embedded-perl \
+ --enable-ipv6
+make ${JOBS} INSTALLDIRS="vendor" NET_SNMP_DONT_CHECK_VERSION=1
+make install INSTALLDIRS="vendor" DESTDIR="${PKG}"
+doc FAQ README README.snmpv3
+changelog NEWS
+license COPYING
+install.dat doinst.sh ${PKG}/install
+install.dir ${PKG}/etc/{rc.d,snmp,tmpfiles.d}
+install.cfg rc.snmpd.new ${PKG}/etc/rc.d
+install.cfg snmpd.conf.tmpfilesd ${PKG}/etc/tmpfiles.d/snmpd.conf
+install.dir ${PKG}${SYS_DIR[systemdsystemunitdir]}
+install.cfg snmpd.service ${PKG}${SYS_DIR[systemdsystemunitdir]}
+install.cfg snmpd.conf ${PKG}/etc/snmp/snmpd.conf.new
+install.dir ${PKG}/var/lib/snmp
+rm -rf \
+ ${PKG}/usr/share/man \
+ ${PKG}/usr/lib$(libdirsuffix)/perl5
+}

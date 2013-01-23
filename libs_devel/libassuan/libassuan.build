@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=libassuan
-VERSION=2.0.2
+VERSION=2.0.3
 BUILD=1
 DEPENDS=('libgpgerror >= 1.10-1')
 
@@ -55,7 +55,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --libdir=/usr/lib$(libdirsuffix) \
  --includedir=/usr/include/assuan \
  --localstatedir=/var
-make -j 2
+make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS THANKS
 changelog NEWS

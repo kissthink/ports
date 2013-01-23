@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=p11kit
 VERSION=0.14
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -54,7 +54,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --sysconfdir=/etc \
  --libdir=/usr/lib$(libdirsuffix) \
  --localstatedir=/var \
- --with-module-path="/usr/share/pkcs11" \
+ --with-module-path="/usr/lib$(libdirsuffix)/plugins/pkcs11" \
  --with-html-dir="${SYS_DIR[html]}"
 #--with-system-config=
 make ${JOBS}

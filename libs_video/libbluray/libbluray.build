@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=libbluray
-VERSION=0.2.1
+VERSION=0.2.3
 BUILD=1
-DEPENDS=('libxml >= 2.7.8-1')
+DEPENDS=('libxml >= 2.9.0-1')
 
 # Description
 
@@ -57,4 +57,5 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --localstatedir=/var
 make ${JOBS}
 make install DESTDIR="${PKG}"
+rm -rf ${PKG}/usr/bin
 }

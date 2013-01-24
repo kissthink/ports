@@ -6,9 +6,9 @@ source /usr/src/ports/Build/build.sh
 
 NAME=libcroco
 MAJOR=0.6
-VERSION=${MAJOR}.5
+VERSION=${MAJOR}.8
 BUILD=1
-DEPENDS=('glib >= 2.32.2-1' 'libxml2 >= 2.7.8-1')
+DEPENDS=('glib >= 2.34.3-1' 'libxml2 >= 2.9.0-1')
 
 # Description
 
@@ -60,4 +60,5 @@ make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
+rm -rf ${PKG}${SYS_DIR[html]}
 }

@@ -5,10 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=librsvg
-MAJOR=2.36
-VERSION=${MAJOR}.1
+MAJOR=2.37
+VERSION=${MAJOR}.0
 BUILD=1
-DEPENDS=('cairo >= 1.12.2-1' 'libcroco >= 0.6.5-1')
+DEPENDS=('gdk_pixbuf >= 2.26.5-1' 'pango >= 1.32.6-1' 'libcroco >= 0.6.8-1')
 OPTIONS="symprepend"
 
 # Description
@@ -69,6 +69,5 @@ make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-#rm -rf \
-# ${PKG}/usr/lib$(libdirsuffix)/mozilla
+rm -rf ${PKG}${SYS_DIR[html]}
 }

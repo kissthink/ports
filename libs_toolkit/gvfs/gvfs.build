@@ -7,7 +7,9 @@ source /usr/src/ports/Build/build.sh
 NAME=gvfs
 MAJOR=1.14
 VERSION=${MAJOR}.2
-BUILD=1
+BUILD=2
+DEPENDS=('disks >= 20130110-1' 'capabilities >= 20130117-1' 'fuse >= 2.9.2-1' 'libsecret >= 0.12-1' 'libbluray >= 0.2.3-1')
+OPTDEPENDS=('gtk+ >= 3.6.4-1' 'libgphoto >= 2.5.0-1' 'obex >= 0.48-1' 'libsoup >= 2.40.2-1' 'libarchive >= 3.0.4-1' 'avahi >= 0.6.31-1' 'libcdio >= 0.83-1')
 
 # Description
 
@@ -65,6 +67,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --libexecdir=/usr/lib$(libdirsuffix)/exec \
  --localstatedir=/var \
  --with-html-dir="${SYS_DIR[html]}"
+#FIXME: systemd
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS MAINTAINERS

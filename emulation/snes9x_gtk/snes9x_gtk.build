@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=snes9x_gtk
-VERSION=1.53.81
+VERSION=20130125
 BUILD=1
-DEPENDS=('gtk+ >= 2.24.6-1' 'sdl >= 1.2.14-1' 'libpng >= 1.4.8-1' 'sound >= 1.0.25-1' 'libxml >= 2.7.8-1')
+DEPENDS=('gtk+ >= 3.6.4-1' 'sdl >= 1.2.15-1' 'libpng >= 1.5.13-1' 'sound >= 1.0.26-1' 'libxml >= 2.9.0-1')
 
 # Description
 
@@ -36,8 +36,8 @@ EOF
 # Sources
 
 SRCNAME[0]=snes9x
-SRCVERS[0]=1.53-src
-SRCPACK[0]=http://snes9x-gtk.googlecode.com/files/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://snes9x-gtk.googlecode.com/files/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
 SRCCOPY[0]="GPL2 LGPL21"
 
 build0()
@@ -54,7 +54,8 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --sysconfdir=/etc \
  --libdir=/usr/lib$(libdirsuffix) \
  --localstatedir=/var \
- --without-oss
+ --without-oss \
+ --with-gtk3
 make ${JOBS}
 make install DESTDIR="${PKG}"
 )

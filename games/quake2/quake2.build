@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=quake2
-VERSION=5.00
+VERSION=5.10
 BUILD=1
 DEPENDS=('sdl >= 1.2.15-1' 'sound >= 1.0.26-1' 'libvorbis >= 1.3.3-1' 'openal >= 1.13-1')
 
@@ -33,27 +33,77 @@ ${NAME}:
 ${NAME}:
 EOF
 
+QLIBDIR=/usr/lib$(libdirsuffix)/plugins/quake2
+
 # Sources
 
 SRCNAME[0]=${NAME}
 SRCVERS[0]=${VERSION}
 SRCPACK[0]=http://deponie.yamagi.org/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
-SRCCOPY[0]="GPL2"
 
 build0()
 {
 make ${JOBS} VERBOSE=1 \
-OPTS="${FLAGS} -DSYSTEMWIDE -DSYSTEMDIR=\\\"/usr/lib$(libdirsuffix)/plugins/quake2\\\""
+OPTS="${FLAGS} -DSYSTEMWIDE -DSYSTEMDIR=\\\"${QLIBDIR}\\\""
 doc README
 changelog CHANGELOG
+license LICENSE
 install.dir ${PKG}/usr/bin
 install.bin release/quake2 ${PKG}/usr/bin
 install.bin release/q2ded ${PKG}/usr/bin
-install.dir ${PKG}/usr/lib$(libdirsuffix)/plugins/quake2/baseq2
-install.bin release/ref_gl.so ${PKG}/usr/lib$(libdirsuffix)/plugins/quake2
-install.bin release/baseq2/game.so ${PKG}/usr/lib$(libdirsuffix)/plugins/quake2/baseq2
+install.dir ${PKG}${QLIBDIR}/baseq2
+install.bin release/ref_gl.so ${PKG}${QLIBDIR}
+install.bin release/baseq2/game.so ${PKG}${QLIBDIR}/baseq2
 install.dir ${PKG}/usr/share/applications
 install.dat quake2.desktop ${PKG}/usr/share/applications
 #install.dir ${PKG}/usr/share/icons/hicolor/48x48/apps
 #install.dat icon/Quake2.png ${PKG}/usr/share/icons/hicolor/48x48/apps/quake2.png
+}
+
+SRCNAME[1]=${NAME}-rogue
+SRCVERS[1]=1.07
+SRCPACK[1]=http://deponie.yamagi.org/${SRCNAME[0]}/${SRCNAME[1]}-${SRCVERS[1]}.tar.xz
+
+build1()
+{
+make ${JOBS} VERBOSE=1 OPTS="${FLAGS}"
+doc README
+changelog CHANGELOG
+license LICENSE
+install.dir ${PKG}${QLIBDIR}/rogue
+install.bin release/game.so ${PKG}${QLIBDIR}/rogue
+install.dir ${PKG}/usr/share/applications
+install.dat quake2-rogue.desktop ${PKG}/usr/share/applications
+}
+
+SRCNAME[2]=${NAME}-xatrix
+SRCVERS[2]=1.09
+SRCPACK[2]=http://deponie.yamagi.org/${SRCNAME[0]}/${SRCNAME[2]}-${SRCVERS[2]}.tar.xz
+
+build2()
+{
+make ${JOBS} VERBOSE=1 OPTS="${FLAGS}"
+doc README
+changelog CHANGELOG
+license LICENSE
+install.dir ${PKG}${QLIBDIR}/xatrix
+install.bin release/game.so ${PKG}${QLIBDIR}/xatrix
+install.dir ${PKG}/usr/share/applications
+install.dat quake2-xatrix.desktop ${PKG}/usr/share/applications
+}
+
+SRCNAME[3]=${NAME}-ctf
+SRCVERS[3]=1.02
+SRCPACK[3]=http://deponie.yamagi.org/${SRCNAME[0]}/${SRCNAME[3]}-${SRCVERS[3]}.tar.xz
+
+build3()
+{
+make ${JOBS} VERBOSE=1 OPTS="${FLAGS}"
+doc README
+changelog CHANGELOG
+license LICENSE
+install.dir ${PKG}${QLIBDIR}/ctf
+install.bin release/game.so ${PKG}${QLIBDIR}/ctf
+install.dir ${PKG}/usr/share/applications
+install.dat quake2-ctf.desktop ${PKG}/usr/share/applications
 }

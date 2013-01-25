@@ -5,8 +5,8 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=fs_btr
-CHECKOUT=20120328
-VERSION=0.19.${CHECKOUT}
+CHECKOUT=20121005
+VERSION=0.20.${CHECKOUT}
 BUILD=1
 
 # Description
@@ -43,5 +43,6 @@ SRCCOPY[0]="GPL2"
 build0()
 {
 make ${JOBS} CFLAGS="${FLAGS}"
-make install prefix="${PKG}/usr"
+make install DESTDIR="${PKG}" prefix="/usr" bindir="/usr/sbin"
+gunzip ${PKG}${SYS_DIR[man]}/man?/*.?.gz
 }

@@ -50,6 +50,7 @@ SYS_DIR[info]="${SYS_DIR[usr]}/info"
 SYS_DIR[html]="${SYS_DIR[share]}/html"
 SYS_DIR[license]="${SYS_DIR[share]}/common-licenses"
 SYS_DIR[systemdsystemunitdir]="${SYS_DIR[share]}/systemd/system"
+SYS_DIR[systemdsystemscriptdir]="${SYS_DIR[share]}/systemd/scripts"
 SYS_DIR[bashcompletiondir]="${SYS_DIR[share]}/bash-completion"
 
 BUILD[dir]="/var/tmp"

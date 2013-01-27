@@ -50,6 +50,6 @@ touch ${PKG}/etc/arptables.conf.new
 install.dir ${PKG}${SYS_DIR[systemdsystemunitdir]}
 install.dat arptables.service ${PKG}${SYS_DIR[systemdsystemunitdir]}
 install.dir ${PKG}${SYS_DIR[systemdsystemscriptdir]}
-install.dat arptables.systemd ${PKG}${SYS_DIR[systemdsystemscriptdir]}/arptables
+install.bin arptables.systemd ${PKG}${SYS_DIR[systemdsystemscriptdir]}/arptables
 rm -rf ${PKG}/etc/rc.d
 }

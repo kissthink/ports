@@ -5,8 +5,8 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=xdg_utils
-VERSION=1.1.0rc1
-BUILD=2
+VERSION=$(date '+%Y%m%d')
+BUILD=1
 
 # Description
 
@@ -35,8 +35,8 @@ EOF
 # Sources
 
 SRCNAME[0]=xdg-utils
-SRCVERS[0]=1.1.0-rc1
-SRCPACK[0]=http://portland.freedesktop.org/download/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCVERS[0]=20121008
+SRCPACK[0]=http://portland.freedesktop.org/download/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
 SRCCOPY[0]="MIT"
 
 build0()
@@ -66,8 +66,6 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --disable-silent-rules \
- --enable-static=no \
- --enable-shared=yes \
  --prefix=/usr \
  --mandir="${SYS_DIR[man]}" \
  --sysconfdir=/etc \
@@ -82,4 +80,34 @@ cd ${PKG}${SYS_DIR[man]}/man1
 rm -f desktop-file-edit.1
 echo ".so man1/desktop-file-install.1" > desktop-file-edit.1
 )
+}
+
+SRCNAME[2]=xdg-user-dirs
+SRCVERS[2]=0.14
+SRCPACK[2]=http://user-dirs.freedesktop.org/releases/${SRCNAME[2]}-${SRCVERS[2]}.tar.gz
+SRCCOPY[2]="GPL2"
+
+build2()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-rpath \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS 
+changelog NEWS
+install.dat doinst.sh ${PKG}/install
+mv \
+ ${PKG}/etc/xdg/user-dirs.conf \
+ ${PKG}/etc/xdg/user-dirs.conf.new
+mv \
+ ${PKG}/etc/xdg/user-dirs.defaults \
+ ${PKG}/etc/xdg/user-dirs.defaults.new
 }

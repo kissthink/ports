@@ -1,0 +1,55 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=font_pcf_terminus
+VERSION=4.38
+BUILD=1
+ARCH=noarch
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: font_pcf_terminus
+${NAME}:
+${NAME}: A clean, fixed width bitmap font designed for long work with
+${NAME}: computers.
+${NAME}:
+${NAME}: Homepage: http://terminus-font.sf.net
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=terminus-font
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=${URL[sf]}/terminus-font/${SRCNAME[0]}-${SRCVERS[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="OFL"
+
+build0()
+{
+chmod 0755 configure
+./configure \
+ --prefix=/usr \
+ --psfdir=/usr/share/kbd/consolefonts \
+ --x11dir=/usr/share/fonts/misc
+make
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog CHANGES
+install.dat doinst.sh ${PKG}/install
+}

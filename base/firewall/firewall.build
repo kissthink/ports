@@ -1,0 +1,265 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=firewall
+VERSION=$(date '+%Y%m%d')
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: firewall
+${NAME}:
+${NAME}: Tools and libraries for network firewalls.
+${NAME}:
+${NAME}: Homepage: http://www.netfilter.org
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=libmnl
+SRCVERS[0]=1.0.3
+SRCPACK[0]=http://ftp.netfilter.org/pub/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCCOPY[0]="LGPL21"
+
+configure()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ ${*}
+}
+
+build0()
+{
+configure
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+}
+
+SRCNAME[1]=libnfnetlink
+SRCVERS[1]=1.0.1
+SRCPACK[1]=http://ftp.netfilter.org/pub/${SRCNAME[1]}/${SRCNAME[1]}-${SRCVERS[1]}.tar.bz2
+SRCCOPY[1]="GPL2"
+
+build1()
+{
+configure
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+}
+
+SRCNAME[2]=libnetfilter_log
+SRCVERS[2]=1.0.1
+SRCPACK[2]=http://ftp.netfilter.org/pub/${SRCNAME[2]}/${SRCNAME[2]}-${SRCVERS[2]}.tar.bz2
+SRCCOPY[2]="GPL2"
+
+build2()
+{
+LIBNFNETLINK_CFLAGS="-I${PKG}/usr/include" \
+LIBNFNETLINK_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lnfnetlink" \
+configure
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+}
+
+SRCNAME[3]=libnetfilter_conntrack
+SRCVERS[3]=1.0.2
+SRCPACK[3]=http://ftp.netfilter.org/pub/${SRCNAME[3]}/${SRCNAME[3]}-${SRCVERS[3]}.tar.bz2
+SRCCOPY[3]="GPL2"
+
+build3()
+{
+LIBMNL_CFLAGS="-I${PKG}/usr/include" \
+LIBMNL_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lmnl" \
+LIBNFNETLINK_CFLAGS="-I${PKG}/usr/include" \
+LIBNFNETLINK_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lnfnetlink" \
+configure
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+}
+
+SRCNAME[4]=libnetfilter_queue
+SRCVERS[4]=1.0.2
+SRCPACK[4]=http://ftp.netfilter.org/pub/${SRCNAME[4]}/${SRCNAME[4]}-${SRCVERS[4]}.tar.bz2
+SRCCOPY[4]="GPL2"
+
+build4()
+{
+LIBMNL_CFLAGS="-I${PKG}/usr/include" \
+LIBMNL_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lmnl" \
+LIBNFNETLINK_CFLAGS="-I${PKG}/usr/include" \
+LIBNFNETLINK_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lnfnetlink" \
+configure
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+}
+
+SRCNAME[5]=libnetfilter_acct
+SRCVERS[5]=1.0.1
+SRCPACK[5]=http://ftp.netfilter.org/pub/${SRCNAME[5]}/${SRCNAME[5]}-${SRCVERS[5]}.tar.bz2
+SRCCOPY[5]="GPL2"
+
+build5()
+{
+LIBMNL_CFLAGS="-I${PKG}/usr/include" \
+LIBMNL_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lmnl" \
+configure
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+}
+
+SRCNAME[6]=libnetfilter_cthelper
+SRCVERS[6]=1.0.0
+SRCPACK[6]=http://ftp.netfilter.org/pub/${SRCNAME[6]}/${SRCNAME[6]}-${SRCVERS[6]}.tar.bz2
+SRCCOPY[6]="GPL2"
+
+build6()
+{
+LIBMNL_CFLAGS="-I${PKG}/usr/include" \
+LIBMNL_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lmnl" \
+configure
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+}
+
+SRCNAME[7]=libnetfilter_cttimeout
+SRCVERS[7]=1.0.0
+SRCPACK[7]=http://ftp.netfilter.org/pub/${SRCNAME[7]}/${SRCNAME[7]}-${SRCVERS[7]}.tar.bz2
+SRCCOPY[7]="GPL2"
+
+build7()
+{
+LIBMNL_CFLAGS="-I${PKG}/usr/include" \
+LIBMNL_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lmnl" \
+configure
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+}
+
+SRCNAME[8]=nfacct
+SRCVERS[8]=1.0.0
+SRCPACK[8]=http://ftp.netfilter.org/pub/${SRCNAME[8]}/${SRCNAME[8]}-${SRCVERS[8]}.tar.bz2
+SRCCOPY[8]="GPL2"
+
+build8()
+{
+LIBMNL_CFLAGS="-I${PKG}/usr/include" \
+LIBMNL_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lmnl" \
+LIBNETFILTER_ACCT_CFLAGS="-I${PKG}/usr/include" \
+LIBNETFILTER_ACCT_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lnetfilter_acct" \
+configure
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+}
+
+SRCNAME[9]=conntrack-tools
+SRCVERS[9]=1.4.0
+SRCPACK[9]=http://ftp.netfilter.org/pub/${SRCNAME[9]}/${SRCNAME[9]}-${SRCVERS[9]}.tar.bz2
+SRCCOPY[9]="GPL2"
+
+build9()
+{
+rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
+LIBMNL_CFLAGS="-I${PKG}/usr/include" \
+LIBMNL_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lmnl" \
+LIBNFNETLINK_CFLAGS="-I${PKG}/usr/include" \
+LIBNFNETLINK_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lnfnetlink" \
+LIBNETFILTER_CONNTRACK_CFLAGS="-I${PKG}/usr/include" \
+LIBNETFILTER_CONNTRACK_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lnetfilter_conntrack" \
+LIBNETFILTER_CTTIMEOUT_CFLAGS="-I${PKG}/usr/include" \
+LIBNETFILTER_CTTIMEOUT_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lnetfilter_cttimeout" \
+LIBNETFILTER_CTHELPER_CFLAGS="-I${PKG}/usr/include" \
+LIBNETFILTER_CTHELPER_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lnetfilter_cthelper" \
+LIBNETFILTER_QUEUE_CFLAGS="-I${PKG}/usr/include" \
+LIBNETFILTER_QUEUE_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lnetfilter_queue" \
+configure
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+install.dir ${PKG}${SYS_DIR[systemdsystemunitdir]}
+install.dat conntrackd.service ${PKG}${SYS_DIR[systemdsystemunitdir]}
+install.dir ${PKG}/etc/conf.d
+install.cfg doc/helper/conntrackd.conf ${PKG}/etc/conf.d/conntrackd.conf.new
+}
+
+SRCNAME[10]=iptables
+SRCVERS[10]=1.4.17
+SRCPACK[10]=http://ftp.netfilter.org/pub/${SRCNAME[10]}/${SRCNAME[10]}-${SRCVERS[10]}.tar.bz2
+SRCCOPY[10]="GPL2"
+
+build10()
+{
+rm include/linux/types.h
+libnfnetlink_CFLAGS="-I${PKG}/usr/include" \
+libnfnetlink_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lnfnetlink" \
+LDFLAGS="-L${PKG}/usr/lib$(libdirsuffix)" \
+configure \
+ --enable-devel \
+ --enable-libipq \
+ --with-xtlibdir=/usr/lib$(libdirsuffix)/plugins/xtables
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+sed -i "s|@SYSTEMDSYSTEMSCRIPTDIR@|${SYS_DIR[systemdsystemscriptdir]}|g" ip{,6}tables.service
+install.dir ${PKG}${SYS_DIR[systemdsystemunitdir]}
+install.dat ip{,6}tables.service ${PKG}${SYS_DIR[systemdsystemunitdir]}
+install.dir ${PKG}${SYS_DIR[systemdsystemscriptdir]}
+install.bin iptables-flush ${PKG}${SYS_DIR[systemdsystemscriptdir]}
+install.dir ${PKG}/etc/iptables
+install.dat rules/{empty,simple_firewall}.rules ${PKG}/etc/iptables
+install.dir ${PKG}/var/lib/ip{,6}tables
+install.dat rules/empty-{filter,mangle,nat,raw,security}.rules ${PKG}/var/lib/iptables
+install.dat rules/empty-{filter,mangle,nat,raw,security}.rules ${PKG}/var/lib/ip6tables
+}
+
+SRCNAME[11]=ipset
+SRCVERS[11]=6.16.1
+SRCPACK[11]=http://ftp.netfilter.org/pub/${SRCNAME[11]}/${SRCNAME[11]}-${SRCVERS[11]}.tar.bz2
+SRCCOPY[11]="GPL2"
+
+build11()
+{
+libmnl_CFLAGS="-I${PKG}/usr/include" \
+libmnl_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lmnl" \
+LDFLAGS="-L${PKG}/usr/lib$(libdirsuffix)" \
+configure \
+ --with-kmod=no
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+changelog ChangeLog
+sed -i "s|@SYSTEMDSYSTEMSCRIPTDIR@|${SYS_DIR[systemdsystemscriptdir]}|g" ipset.service
+install.dir ${PKG}/etc
+touch ${PKG}/etc/ipset.conf
+install.dir ${PKG}/usr/lib$(libdirsuffix)/pkgconfig
+install.dat lib/libipset.pc ${PKG}/usr/lib$(libdirsuffix)/pkgconfig
+install.dir ${PKG}${SYS_DIR[systemdsystemunitdir]}
+install.dat ipset.service ${PKG}${SYS_DIR[systemdsystemunitdir]}
+install.dir ${PKG}${SYS_DIR[systemdsystemscriptdir]}
+install.bin ipset-systemd ${PKG}${SYS_DIR[systemdsystemscriptdir]}/ipset
+}

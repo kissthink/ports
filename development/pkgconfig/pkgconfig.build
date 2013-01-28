@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=pkgconfig
-VERSION=0.27.1
+VERSION=0.28
 BUILD=1
 
 # Description
@@ -37,6 +37,7 @@ EOF
 SRCNAME[0]=pkg-config
 SRCVERS[0]=${VERSION}
 SRCPACK[0]=http://pkgconfig.freedesktop.org/releases/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="GPL2"
 
 build0()
 {
@@ -44,6 +45,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
+ --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
  --prefix=/usr \
@@ -53,9 +55,11 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --libdir=/usr/lib$(libdirsuffix) \
  --localstatedir=/var \
  --with-internal-glib \
- --with-pc-path=/usr/lib$(libdirsuffix)/pkgconfig
-make ${JOBS}
+ --with-pc-path=/usr/lib$(libdirsuffix)/pkgconfig \
+ --disable-host-tool
+make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
+rm -rf ${PKG}${SYS_DIR[html]}
 }

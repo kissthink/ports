@@ -1,0 +1,60 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=dcron
+VERSION=4.5
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: dcron (Dillon's Cron daemon)
+${NAME}:
+${NAME}: The cron daemon runs in the background and executes tasks on behalf
+${NAME}: of users at the appropriate time. Many timed system tasks are
+${NAME}: started with cron, such as the nightly indexing with updatedb.
+${NAME}:
+${NAME}: dcron was written entirely from scratch by Matthew Dillon.
+${NAME}:
+${NAME}: Homepage: http://www.jimpryor.net/linux/dcron.html
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://www.jimpryor.net/linux/releases/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+make ${JOBS} CFLAGS+="${FLAGS}" PREFIX="/usr"
+make install DESTDIR="${PKG}" PREFIX="/usr" MANDIR="/usr/man"
+changelog CHANGELOG
+install.dat doinst.sh ${PKG}/install
+install.dir ${PKG}/etc/cron.{d,hourly,daily,weekly,monthly}
+chmod 0751 ${PKG}/var/spool/cron
+chmod 0750 ${PKG}/var/spool/cron/cron{tabs,stamps}
+chmod 4711 ${PKG}/usr/bin/crontab
+chmod 0755 ${PKG}/usr/sbin/crond
+install -m 0600 crontab.root ${PKG}/var/spool/cron/crontabs/root.new
+install.bin run-parts ${PKG}/usr/sbin
+install.man run-parts.8 ${PKG}${SYS_DIR[man]}/man8
+install.dir ${PKG}/usr/share/vim/ftplugin
+install.dat extra/crontab.vim ${PKG}/usr/share/vim/ftplugin
+#install.dir ${PKG}/etc/conf.d
+#install.cfg extra/crond.conf ${PKG}/etc/conf.d/crond.conf.new
+}

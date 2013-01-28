@@ -1,0 +1,63 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=dhewm3
+VERSION=20130128
+BUILD=1
+DEPENDS=('sdl >= 2.0.15-1' 'openal >= 1.13-1' 'libvorbis >= 1.3.3-1' 'libjpeg >= 1.2.0-1' 'curl >= 7.28.0-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: dhewm3
+${NAME}:
+${NAME}: A Doom 3 source modification.
+${NAME}:
+${NAME}: Homepage: http://github.com/dhewm/dhewm3
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+SRCCOPY[0]="GPL3"
+
+build0()
+{
+(
+cd neo
+cmake \
+-DCMAKE_BUILD_TYPE:STRING="Release" \
+-DCMAKE_CXX_FLAGS:STRING="${FLAGS}" \
+-DCMAKE_C_FLAGS:STRING="${FLAGS}" \
+-DCMAKE_VERBOSE_MAKEFILE:BOOL="on" \
+-DCMAKE_INSTALL_PREFIX:PATH="/usr" \
+-DCMAKE_INSTALL_BINDIR:PATH="/usr/bin" \
+-DCMAKE_INSTALL_LIBDIR:PATH="/usr/lib$(libdirsuffix)/plugins" \
+-DCMAKE_INSTALL_DATAROOTDIR:PATH="/usr/share/application-data" \
+CMakeLists.txt
+make ${JOBS}
+make install DESTDIR="${PKG}"
+)
+doc README.md
+install.dir ${PKG}/usr/share/applications
+install.dat dhewm3.desktop ${PKG}/usr/share/applications
+}

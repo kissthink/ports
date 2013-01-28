@@ -1,0 +1,64 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=iptraf_ng
+VERSION=1.1.3.1
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: iptraf_ng (console-based network monitoring program)
+${NAME}:
+${NAME}: IPTraf is a console-based network monitoring program for Linux that 
+${NAME}: displays information about IP traffic such as:
+${NAME}:
+${NAME}:   Current TCP connections, types of IP packets, packet and byte
+${NAME}:   counts, TCP/UDP counts by ports, packet counts by packet sizes,
+${NAME}:   packet and byte counts by IP address, interface activity, flag
+${NAME}:   statuses on TCP packets, and other LAN station statistics.
+${NAME}:
+${NAME}: iptraf-ng was written by Gerard Paul Java.
+EOF
+
+# Sources
+
+SRCNAME[0]=iptraf-ng
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://fedorahosted.org/releases/i/p/iptraf-ng/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --infodir="${SYS_DIR[info]}" \
+ --sysconfdir=/etc \
+ --libdir=/usr/lib$(libdirsuffix) \
+ --localstatedir=/var \
+ --sbindir=/usr/sbin
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS FAQ
+changelog CHANGES
+install.dir ${PKG}${SYS_DIR[html]}/${SRCNAME[0]}/stylesheet-images
+install.doc Documentation/*.{html,png} ${PKG}${SYS_DIR[html]}/${SRCNAME[0]}
+install.doc Documentation/stylesheet-images/*.gif ${PKG}${SYS_DIR[html]}/${SRCNAME[0]}/stylesheet-images
+install.dir ${PKG}/var/{lib,log}/iptraf-ng
+install.dir ${PKG}/etc/logrotate.d
+install.bin iptraf-ng-logrotate.conf ${PKG}/etc/logrotate.d/iptraf-ng
+}

@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=logrotate
 VERSION=3.8.3
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -46,6 +46,7 @@ make install PREFIX="${PKG}" MANDIR="${SYS_DIR[man]}"
 changelog CHANGES
 install.dat doinst.sh ${PKG}/install
 install.dir ${PKG}/etc/{logrotate.d,cron.daily}
+install.dir ${PKG}/var/lib/logrotate
 install.cfg logrotate.conf ${PKG}/etc/logrotate.conf.new
 install.bin logrotate.cron ${PKG}/etc/cron.daily/logrotate
 }

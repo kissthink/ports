@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=fs_ssh
-VERSION=2.3
+VERSION=2.4
 BUILD=1
-DEPENDS=('fuse >= 2.8.7-1' 'glib >= 2.28.8-1' 'openssl >= 0.9.8r-1')
+DEPENDS=('fuse >= 2.9.2-1' 'glib >= 2.34.3-1')
 
 # Description
 
@@ -46,12 +46,12 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
-make -j 2
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
+make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS FAQ.txt
 changelog ChangeLog

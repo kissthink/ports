@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=man_pages
-VERSION=3.41
+VERSION=3.46
 BUILD=1
 ARCH=noarch
 OPTIONS="nomanz normla nostrip"
@@ -47,5 +47,5 @@ make install MANDIR="${SYS_DIR[man]}" DESTDIR="${PKG}"
 doc Changes.old
 changelog Changes
 install.dat doinst.sh ${PKG}/install
-install.doc whatis.sample ${PKG}/${SYS_DIR[man]}
+install.doc whatis.sample ${PKG}${SYS_DIR[man]}
 }

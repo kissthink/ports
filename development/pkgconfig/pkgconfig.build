@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=pkgconfig
 VERSION=0.28
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -48,14 +48,14 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
  --docdir="${SYS_DIR[html]}/${SRCNAME[0]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-internal-glib \
- --with-pc-path=/usr/lib$(libdirsuffix)/pkgconfig \
+ --with-pc-path=/usr/share/pkgconfig \
  --disable-host-tool
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"

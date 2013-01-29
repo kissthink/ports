@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=man
 VERSION=1.6g
-BUILD=2
+BUILD=3
 
 # Description
 
@@ -49,7 +49,7 @@ make ${JOBS} CFLAGS="${FLAGS}"
 make install DESTDIR="${PKG}"
 changelog HISTORY
 install.dat doinst.sh ${PKG}/install
-install -d -m 0700 ${PKG}/var/cache/man/cat{1,2,3,4,5,6,7,8,n}
+install -d -m 0700 ${PKG}/var/cache/man/cat{1,2,3,4,5,6,7,8,9,n}
 mv \
  ${PKG}/etc/conf.d/man.conf \
  ${PKG}/etc/conf.d/man.conf.new

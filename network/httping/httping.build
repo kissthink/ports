@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=httping
 VERSION=1.5.7
-BUILD=1
-DEPENDS=('openssl >= 0.9.8x-1')
+BUILD=2
+DEPENDS=('openssl >= 1.0.1c-1')
 
 # Description
 

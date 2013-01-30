@@ -1,0 +1,71 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=font_ttf_courierprime
+VERSION=1.203
+BUILD=1
+ARCH=noarch
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: font_ttf_courierprime
+${NAME}:
+${NAME}: Courier Prime is a TrueType monospaced font designed specifically for
+${NAME}: screenplays. It was designed by Alan Dague-Greene for John August and
+${NAME}: released by Quote-Unquote Apps under the SIL Open Font License (OFL).
+${NAME}:
+${NAME}: Homepage: http://quoteunquoteapps.com/courierprime
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+# Update the X font indexes:
+if [ -x /usr/bin/mkfontdir ]; then
+(
+  cd /usr/share/fonts/TTF
+  mkfontscale .
+  mkfontdir .
+)
+fi
+
+if [ -x /usr/bin/fc-cache ]; then
+  /usr/bin/fc-cache -f
+fi
+EOF
+
+# Sources
+
+SRCNAME[0]=courier-prime
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://quoteunquoteapps.com/downloads/${SRCNAME[0]}.zip
+SRCCOPY[0]="OFL"
+SRCOPTS[0]="nosrcroot"
+
+build0()
+{
+install.dir ${PKG}${SYS_DIR[share]}/fonts/TTF
+install.dat "Courier Prime"/*.ttf ${PKG}${SYS_DIR[share]}/fonts/TTF
+install.dir ${PKG}${SYS_DIR[etc]}/fonts/conf.{avail,d}
+install.cfg 30-courier-prime-aliases.conf ${PKG}${SYS_DIR[etc]}/fonts/conf.avail
+(
+  cd ${PKG}${SYS_DIR[etc]}/fonts/conf.d
+  ln -sf ../conf.avail/30-courier-prime-aliases.conf
+)
+}

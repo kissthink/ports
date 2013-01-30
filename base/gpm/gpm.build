@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=gpm
 VERSION=1.20.7
-BUILD=2
+BUILD=3
 
 # Description
 
@@ -32,6 +32,13 @@ ${NAME}: device' error from X, disable /etc/rc.d/rc.gpm.
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+# Install the texinfo files
+if [ -x /usr/bin/install-info ]; then
+  /usr/bin/install-info --info-dir=${SYS_DIR[info]} ${SYS_DIR[info]}/gpm.info.gz 2> /dev/null
+fi
+EOF
+
 # Sources
 
 SRCNAME[0]=${NAME}
@@ -47,28 +54,28 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --build="${ARCH}-slackware-linux" \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
  --infodir="${SYS_DIR[info]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}/gpm" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 ( cd inputattach ; make CFLAGS="${CFLAGS}" DESTDIR="${PKG}" install )
 doc README doc/FAQ doc/README.{etouch,gunze,microtouch,synaptics,twiddler}
 changelog doc/changelog
-install.dir ${PKG}/etc/rc.d
-install.bin mouseconfig ${PKG}/usr/sbin
-install.dir ${PKG}/var/log/setup
-install.bin setup.mouse ${PKG}/var/log/setup
-install.cfg conf/*.conf ${PKG}/etc
-install.dir ${PKG}/usr/share/emacs/site-lisp
-install.dat contrib/emacs/t-mouse.el ${PKG}/usr/share/emacs/site-lisp
+install.bin mouseconfig ${PKG}${SYS_DIR[sbin]}
+install.dir ${PKG}${SYS_DIR[etc]}/{gpm,rc.d}
+install.cfg conf/*.conf ${PKG}${SYS_DIR[etc]}/gpm
+install.dir ${PKG}${SYS_DIR[var]}/log/setup
+install.bin setup.mouse ${PKG}${SYS_DIR[var]}/log/setup
+install.dir ${PKG}${SYS_DIR[share]}/emacs/site-lisp
+install.dat contrib/emacs/t-mouse.el ${PKG}${SYS_DIR[share]}/emacs/site-lisp
 install.dir ${PKG}${SYS_DIR[systemdsystemunitdir]}
 install.dat gpm.service ${PKG}${SYS_DIR[systemdsystemunitdir]}
 (
-  cd ${PKG}/usr/lib$(libdirsuffix)
+  cd ${PKG}${SYS_DIR[lib]}
   chmod 0755 libgpm.so.?.?.?
   ln -sf libgpm.so.?.?.? libgpm.so
 )

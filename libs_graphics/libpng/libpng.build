@@ -5,8 +5,8 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=libpng
-VERSION=1.5.13
-BUILD=2
+VERSION=1.5.14
+BUILD=1
 
 # Description
 
@@ -46,59 +46,45 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-dependency-tracking \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --with-pkgconfigdir="${SYS_DIR[share]}/pkgconfig"
+#FIXME: ZLIBLIB=${SYS_DIR[lib]} when libraries package is rebuilt
 make ${JOBS} \
  prefix=/usr \
- LIBPATH=/usr/lib$(libdirsuffix) \
+ LIBPATH="${SYS_DIR[lib]}" \
  ZLIBLIB="-L/usr/lib$(libdirsuffix) -lm -lz"
 make install DESTDIR="${PKG}" \
  prefix=/usr \
- LIBPATH=/usr/lib$(libdirsuffix) \
+ LIBPATH="${SYS_DIR[lib]}" \
  ZLIBLIB="-L/usr/lib$(libdirsuffix) -lm -lz"
 changelog CHANGES
 license LICENSE
 (
-  cd ${PKG}/usr/include
+  cd ${PKG}${SYS_DIR[include]}
   ln -sf libpng15 libpng
 )
 rm -f \
- ${PKG}/usr/bin/*-config \
- ${PKG}/usr/lib$(libdirsuffix)/*.la
+ ${PKG}${SYS_DIR[bin]}/*-config \
+ ${PKG}${SYS_DIR[lib]}/*.la
 }
 
-#SRCNAME[1]=optipng
-#SRCVERS[1]=0.6.5
-#SRCPACK[1]=${URL[sf]}/${SRCNAME[1]}/files/OptiPNG/${SRCNAME[1]}-${SRCVERS[1]}/${SRCNAME[1]}-${SRCVERS[1]}.tar.gz
-#
-#build1()
-#{
-#CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
-#./configure \
-# -prefix=/usr \
-# -with-system-zlib \
-# -with-system-libpng
-#make ${JOBS}
-#make install DESTDIR="${PKG}"
-#license LICENSE.txt
-#}
-
 SRCNAME[1]=pngcrush
-SRCVERS[1]=1.7.41
+SRCVERS[1]=1.7.44
 SRCPACK[1]=${URL[sf]}/pmt/${SRCNAME[1]}/${SRCVERS[1]}/${SRCNAME[1]}-${SRCVERS[1]}.tar.xz
 
 build1()
 {
 make ${JOBS} \
      OPTS="${FLAGS}" \
-     CPPFLAGS="-I${PKG}/usr/include/libpng-1.5" \
-     LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lpng15 -lm"
+     CPPFLAGS="-I${PKG}${SYS_DIR[include]}/libpng-1.5" \
+     LIBS="-L${PKG}${SYS_DIR[lib]} -lpng15 -lm"
 doc ChangeLog.html
-install.dir ${PKG}/usr/bin
-install.bin pngcrush ${PKG}/usr/bin
+install.dir ${PKG}${SYS_DIR[bin]}
+install.bin pngcrush ${PKG}${SYS_DIR[bin]}
 }
 
 SRCNAME[2]=png2ico
@@ -112,10 +98,10 @@ build2()
 make ${JOBS} \
      DEBUG="" \
      OPTFLAGS="${FLAGS}" \
-     CPPFLAGS="-I${PKG}/usr/include" \
-     LDFLAGS="-L${PKG}/usr/lib$(libdirsuffix) -lpng15 -lz -lm"
-install.dir ${PKG}/usr/bin
-install.bin png2ico ${PKG}/usr/bin
+     CPPFLAGS="-I${PKG}${SYS_DIR[include]}" \
+     LDFLAGS="-L${PKG}${SYS_DIR[lib]} -lpng15 -lz -lm"
+install.dir ${PKG}${SYS_DIR[bin]}
+install.bin png2ico ${PKG}${SYS_DIR[bin]}
 install.dir ${PKG}${SYS_DIR[man]}/man1
 install.dat doc/png2ico.1 ${PKG}${SYS_DIR[man]}/man1
 }

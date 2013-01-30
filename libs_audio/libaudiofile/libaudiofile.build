@@ -4,7 +4,7 @@
 
 source /usr/src/ports/Build/build.sh
 
-NAME=audiofile
+NAME=libaudiofile
 VERSION=0.3.4
 BUILD=1
 
@@ -19,7 +19,7 @@ cat > ${PKG}/install/slack-desc <<EOF
 # customary to leave one space after the ':'.
 
 $(padd)|-----handy-ruler------------------------------------------------------|
-${NAME}: audiofile
+${NAME}: libaudiofile
 ${NAME}:
 ${NAME}: This library allows the processing of audio data to and from audio
 ${NAME}: files of many common formats (currently AIFF, AIFF-C, WAVE, NeXT/Sun
@@ -28,13 +28,13 @@ ${NAME}: also supports compression (currently G.711 mu-law and A-law and IMA
 ${NAME}: and MS ADPCM) as well as PCM formats of all flavors (signed and
 ${NAME}: unsigned integer, single and double precision floating point).
 ${NAME}:
-${NAME}:
+${NAME}: Homepage: http://audiofile.68k.org
 ${NAME}:
 EOF
 
 # Sources
 
-SRCNAME[0]=${NAME}
+SRCNAME[0]=audiofile
 SRCVERS[0]=${VERSION}
 SRCPACK[0]=http://www.68k.org/~michael/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
 SRCCOPY[0]="LGPL2 GPL2"
@@ -47,14 +47,17 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-dependency-tracking \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --includedir=/usr/include/${SRCNAME[0]} \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --includedir="${SYS_DIR[include]}/${SRCNAME[0]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc ACKNOWLEDGEMENTS AUTHORS
 changelog NEWS
+mv \
+ ${PKG}${SYS_DIR[lib]}/pkgconfig \
+ ${PKG}${SYS_DIR[share]}
 }

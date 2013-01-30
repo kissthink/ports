@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=gpm
 VERSION=1.20.7
-BUILD=3
+BUILD=4
 
 # Description
 
@@ -79,4 +79,6 @@ install.dat gpm.service ${PKG}${SYS_DIR[systemdsystemunitdir]}
   chmod 0755 libgpm.so.?.?.?
   ln -sf libgpm.so.?.?.? libgpm.so
 )
+# Unneeded debugging/test cli apps
+rm -f ${PKG}${SYS_DIR[bin]}/{hltest,get-versions,display-{coords,buttons}}
 }

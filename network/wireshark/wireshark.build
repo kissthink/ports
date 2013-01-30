@@ -5,9 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=wireshark
-VERSION=1.8.4
+VERSION=1.8.5
 BUILD=1
-DEPENDS=('glib >= 2.34.2-1' 'tcpip >= 3.2.0-1')
+DEPENDS=('glib >= 2.34.3-1' 'tcpip >= 20130127-1' 'gnutls >= 3.1.6-1' 'geoip >= 1.4.6')
+OPTDEPENDS=('gtk+ >= 3.6.4-1')
 
 # Description
 
@@ -49,13 +50,13 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-dependency-tracking \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --datadir=/usr/share/application-data \
- --with-plugins=/usr/lib$(libdirsuffix)/plugins/wireshark \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --datadir="${SYS_DIR[share]}/application-data" \
+ --with-plugins="${SYS_DIR[lib]}/plugins/wireshark" \
  --enable-setcap-install \
  --with-gtk3=yes \
  --with-dumpcap-group=netdev \
@@ -67,10 +68,10 @@ make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-install.dir ${PKG}/usr/share/applications
-install.dat wireshark.desktop ${PKG}/usr/share/applications
-install.dir ${PKG}/usr/share/icons/hicolor/{16x16,32x32,48x48}/apps
-install.dat image/hi16-app-wireshark.png ${PKG}/usr/share/icons/hicolor/16x16/apps/wireshark.png
-install.dat image/hi32-app-wireshark.png ${PKG}/usr/share/icons/hicolor/32x32/apps/wireshark.png
-install.dat image/hi48-app-wireshark.png ${PKG}/usr/share/icons/hicolor/48x48/apps/wireshark.png
+install.dir ${PKG}${SYS_DIR[share]}/applications
+install.dat wireshark.desktop ${PKG}${SYS_DIR[share]}/applications
+install.dir ${PKG}${SYS_DIR[share]}/icons/hicolor/{16x16,32x32,48x48}/apps
+install.dat image/hi16-app-wireshark.png ${PKG}${SYS_DIR[share]}/icons/hicolor/16x16/apps/wireshark.png
+install.dat image/hi32-app-wireshark.png ${PKG}${SYS_DIR[share]}/icons/hicolor/32x32/apps/wireshark.png
+install.dat image/hi48-app-wireshark.png ${PKG}${SYS_DIR[share]}/icons/hicolor/48x48/apps/wireshark.png
 }

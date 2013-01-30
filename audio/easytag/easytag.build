@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=easytag
-VERSION=2.1.7
+VERSION=20130124
 BUILD=1
-DEPENDS=('gtk+ >= 2.24.10-1' 'id3lib >= 3.8.3-1' 'libvorbis >= 1.3.2-1' 'flac >= 1.2.1-1' 'mp4v2 >= 1.9.1-1')
+DEPENDS=('gtk+ >= 2.24.14-1' 'id3lib >= 3.8.3-1' 'libvorbis >= 1.3.3-1' 'flac >= 1.2.1-1' 'mp4v2 >= 1.9.1-1')
 
 # Description
 
@@ -37,7 +37,7 @@ EOF
 
 SRCNAME[0]=${NAME}
 SRCVERS[0]=${VERSION}
-SRCPACK[0]=${URL[sf]}/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCPACK[0]=${URL[sf]}/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
 SRCCOPY[0]="GPL2"
 
 build0()
@@ -47,36 +47,18 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
- --prefix=/usr \
+ --disable-silent-rules \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
-make ${JOBS}
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --docdir="${SYS_DIR[doc]}/${SRCNAME[0]}-${SRCVERS[0]}" \
+ --htmldir="${SYS_DIR[html]}/${SRCNAME[0]}" \
+ --enable-html-docs
+make ${JOBS} V=1
 make install DESTDIR="${PKG}"
-doc THANKS
+doc THANKS USERS-GUIDE
 changelog ChangeLog
-#FIXME: All this shit will have to be fixed someday
-HTMLDIR=${PKG}${SYS_DIR[html]}/${SRCNAME[0]}
-install.dir ${HTMLDIR}
-install.doc \
- doc/EasyTAG_Documentation.html doc/EasyTAG_Documentation_fr.html \
- ${HTMLDIR}
-mv doc/users_guide_french ${HTMLDIR}
-mv doc/users_guide_german ${HTMLDIR}
-chmod 0644 \
- ${HTMLDIR}/*/* \
- ${HTMLDIR}/*/*/*
-chmod 0755 \
- ${HTMLDIR}/users_guide_french \
- ${HTMLDIR}/users_guide_german \
- ${HTMLDIR}/users_guide_french/images \
- ${HTMLDIR}/users_guide_german/images
-(
- cd ${HTMLDIR}
- chown -R root.root users_guide_french users_guide_german 
-)
-rm -rf \
- ${PKG}/usr/share/gnome \
- ${PKG}/usr/share/easytag
+rm -f ${DOC}/{TODO,HACKING}
 }

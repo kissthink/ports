@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=google_chrome
-VERSION=24.0.1312.56
+VERSION=24.0.1312.57
 BUILD=1
 DEPENDS=('gtk+ >= 2.24.14-1' 'seamonkey_solibs >= 2.15-1' 'gconf >= 3.2.5-1')
 
@@ -46,8 +46,8 @@ build0()
 {
 install.dat doinst.sh ${PKG}/install
 # Symlink the startup script
-install.dir ${PKG}/usr/bin
-( cd ${PKG}/usr/bin ; ln -sf /opt/google/chrome/google-chrome )
+install.dir ${PKG}${SYS_DIR[bin]}
+( cd ${PKG}${SYS_DIR[bin]}; ln -sf /opt/google/chrome/google-chrome )
 # Symlink the required mozilla libraries
 install.dir ${PKG}/opt/google/chrome/lib
 (
@@ -60,19 +60,15 @@ install.dir ${PKG}/opt/google/chrome/lib
   ln -sf /usr/lib$(libdirsuffix)/seamonkey/libsmime3.so libsmime3.so.1d
 )
 # Install properly the desktop file
-install.dir ${PKG}/usr/share/applications
-( cd ${PKG}/usr/share/applications ; ln -sf /opt/google/chrome/google-chrome.desktop )
+install.dir ${PKG}${SYS_DIR[share]}/applications
+( cd ${PKG}${SYS_DIR[share]}/applications ; ln -sf /opt/google/chrome/google-chrome.desktop )
 # Install properly the icon
-install.dir ${PKG}/usr/share/icons/hicolor
+install.dir ${PKG}${SYS_DIR[share]}/icons/hicolor
 for size in 256 128 64 48 32 24 22 16; do
-  dir=${PKG}/usr/share/icons/hicolor/${size}x${size}/apps
+  dir=${PKG}${SYS_DIR[share]}/icons/hicolor/${size}x${size}/apps
   install.dir ${dir}
   ( cd ${dir} ; ln -sf /opt/google/chrome/product_logo_${size}.png google-chrome.png )
 done
-# Relocate man pages
-mv \
- ${PKG}/usr/share/man \
- ${PKG}/usr
 # Delete superfluous stuff
 rm -rf \
  ${PKG}/etc \

@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=gpm
 VERSION=1.20.7
-BUILD=4
+BUILD=5
 
 # Description
 
@@ -49,6 +49,7 @@ SRCCOPY[0]="GPL2"
 build0()
 {
 chmod +x configure
+CPPFLAGS="-DRUN_QUIET" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \

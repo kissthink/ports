@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=gettext
-VERSION=0.18.1.1
+VERSION=0.18.2
 BUILD=1
-DEPENDS=('expat >= 2.0.1-1')
+DEPENDS=('expat >= 2.1.0-1')
 
 # Description
 
@@ -33,6 +33,14 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+# Install the texinfo files
+if [ -x /usr/bin/install-info ]; then
+  /usr/bin/install-info --info-dir=${SYS_DIR[info]} ${SYS_DIR[info]}/gettext.info.gz 2> /dev/null
+  /usr/bin/install-info --info-dir=${SYS_DIR[info]} ${SYS_DIR[info]}/autosprintf.info.gz 2> /dev/null
+fi
+EOF
+
 # Sources
 
 SRCNAME[0]=${NAME}
@@ -47,22 +55,25 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --disable-silent-rules \
+ --disable-rpath \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
  --infodir="${SYS_DIR[info]}" \
  --docdir="${SYS_DIR[html]}/${SRCNAME[0]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --enable-threads=posix \
  --with-included-glib \
  --with-included-libcroco \
  --with-included-libunistring \
  --with-included-libxml
-make -j 2
+make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS THANKS
 changelog NEWS
+rm -rf ${PKG}${SYS_DIR[html]}
+chmod 0755 ${PKG}${SYS_DIR[lib]}/preloadable_libintl.so
 }

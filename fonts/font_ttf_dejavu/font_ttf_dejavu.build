@@ -7,7 +7,7 @@ source /usr/src/ports/Build/build.sh
 NAME=font_ttf_dejavu
 VERSION=2.33
 ARCH=noarch
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -33,6 +33,23 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+# Update the X font indexes:
+if [ -x /usr/bin/mkfontdir ]; then
+(
+  cd ${SYS_DIR[share]}/fonts/TTF
+  mkfontscale .
+  mkfontdir .
+)
+fi
+
+if [ -x /usr/bin/fc-cache ]; then
+  /usr/bin/fc-cache -f
+fi
+EOF
+
 # Sources
 
 SRCNAME[0]=dejavu-fonts-ttf
@@ -44,19 +61,16 @@ build0()
 doc AUTHORS
 changelog NEWS
 license LICENSE
-mkdir -p \
- ${PKG}/usr/share/fonts/TTF \
- ${PKG}/etc/fonts/conf.avail \
- ${PKG}/etc/fonts/conf.d
-install -m 0644 doinst.sh ${PKG}/install
-install -m 0644 ttf/*.ttf ${PKG}/usr/share/fonts/TTF
+install.dir ${PKG}${SYS_DIR[share]}/fonts/{TTF,config}
+install.dir ${PKG}${SYS_DIR[etc]}/fonts.d
+install.dat ttf/*.ttf ${PKG}${SYS_DIR[share]}/fonts/TTF
 (
   cd fontconfig
   for file in *.conf; do
-    install -m 0644 ${file} ${PKG}/etc/fonts/conf.avail
+    install.dat ${file} ${PKG}${SYS_DIR[share]}/fonts/config
     (
-      cd ${PKG}/etc/fonts/conf.d
-      ln -sf ../conf.avail/${file}
+      cd ${PKG}${SYS_DIR[etc]}/fonts.d
+      ln -sf ${SYS_DIR[share]}/fonts/config/${file}
     )
   done
 )

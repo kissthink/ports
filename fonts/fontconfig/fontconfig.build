@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=fontconfig
 VERSION=2.10.91
-BUILD=3
+BUILD=4
 DEPENDS=('libxml >= 2.9.0-2')
 
 # Description
@@ -48,14 +48,16 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --docdir="${SYS_DIR[html]}/fontconfig" \
- --with-xmldir=/etc/fonts \
- --with-templatedir=/etc/fonts/conf.avail \
+ --with-xmldir="${SYS_DIR[share]}/dtds" \
+ --with-templatedir="${SYS_DIR[share]}/fonts/config" \
+ --with-baseconfigdir="${SYS_DIR[etc]}/fonts" \
+ --with-configdir="${SYS_DIR[etc]}/fonts.d" \
  --with-default-fonts=/usr/share/fonts \
  --with-add-fonts=/usr/share/fonts \
  --enable-libxml2 \
@@ -65,16 +67,11 @@ make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog ChangeLog
 license COPYING
-mv \
- ${PKG}${SYS_DIR[html]}/fontconfig/fontconfig-devel/* \
- ${PKG}${SYS_DIR[html]}/fontconfig
-rm -rf \
- ${PKG}${SYS_DIR[html]}/fontconfig/{fontconfig-devel,*.{txt,pdf}}
 install.dat doinst.sh ${PKG}/install
-install.dir ${PKG}/var/log/setup
-install.bin setup.05.fontconfig ${PKG}/var/log/setup
+install.dir ${PKG}${SYS_DIR[var]}/log/setup
+install.bin setup.05.fontconfig ${PKG}${SYS_DIR[var]}/log/setup
 (
-  cd ${PKG}/etc/fonts/conf.d
+  cd ${PKG}${SYS_DIR[etc]}/fonts.d
   for conffile in \
     20-unhint-small-vera.conf \
     30-urw-aliases.conf \
@@ -90,7 +87,15 @@ install.bin setup.05.fontconfig ${PKG}/var/log/setup
     69-unifont.conf \
     80-delicious.conf \
     90-synthetic.conf ; do
-  ln -sf ../conf.avail/${conffile} .
+  ln -sf ${SYS_DIR[share]}/fonts/config/${conffile} .
   done
 )
+rm -rf ${PKG}${SYS_DIR[html]}
+mv \
+ ${PKG}${SYS_DIR[etc]}/fonts/fonts.conf \
+ ${PKG}${SYS_DIR[etc]}/fonts/fonts.conf.new
+#FIXME: patch was sent upstream to add a --with-pkgconfigdir switch
+mv \
+ ${PKG}${SYS_DIR[lib]}/pkgconfig \
+ ${PKG}${SYS_DIR[share]}
 }

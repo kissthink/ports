@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=iftop
 VERSION=1.0pre2
-BUILD=1
-DEPENDS=('tcpip >= 3.2.0-1')
+BUILD=2
+DEPENDS=('tcpip >= 20130127-1')
 
 # Description
 
@@ -46,17 +46,17 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc/conf.d \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[conf]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-resolver=netdb
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog ChangeLog
-# iftop doesn't start as a normal user, capabilities?
+#FIXME: iftop doesn't start as a normal user, capabilities?
 #install.dir ${PKG}/usr/share/applications
 #install.dat iftop.desktop ${PKG}/usr/share/applications
 }

@@ -39,7 +39,7 @@ cat >> ${PKG}/install/doinst.sh <<EOF
 # Update the X font indexes:
 if [ -x /usr/bin/mkfontdir ]; then
 (
-  cd ${SYS_DIR[share]}/fonts/TTF
+  cd ${SYS_DIR[share]}/fonts/OTF
   mkfontscale .
   mkfontdir .
 )

@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=dolphin
-VERSION=20120514
+VERSION=3.5
 BUILD=1
-DEPENDS=('wxgtk >= 2.8.12-1' 'cg_toolkit >= 3.1-1' 'ffmpeg >= 0.10.3-1' 'bluetooth >= 4.98-1' 'sound >= 1.0.25-1' 'openal >= 1.13-1')
+DEPENDS=('wxgtk >= 2.8.12-1' 'cg_toolkit >= 3.1-1' 'ffmpeg >= 0.10.3-1' 'bluetooth >= 4.101-1' 'sound >= 1.0.26-1' 'openal >= 1.13-1')
 
 # Description
 
@@ -35,9 +35,9 @@ EOF
 
 # Sources
 
-SRCNAME[0]=${NAME}-emu
+SRCNAME[0]=${NAME}
 SRCVERS[0]=${VERSION}
-SRCPACK[0]=${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+SRCPACK[0]=${SRCNAME[0]}-${SRCVERS[0]}-src.zip
 SRCCOPY[0]="GPL2"
 
 build0()
@@ -47,12 +47,12 @@ cmake \
  -DCMAKE_CXX_FLAGS:STRING="${FLAGS}" \
  -DCMAKE_VERBOSE_MAKEFILE:BOOL="on" \
  -DCMAKE_INSTALL_PREFIX:PATH="/usr" \
- -Ddatadir:STRING="/usr/share/application-data/dolphin" \
+ -Ddatadir:STRING="${SYS_DIR[share]}/application-data/dolphin" \
 .
 make ${JOBS}
 make install DESTDIR="${PKG}"
-install.dir ${PKG}/usr/share/applications
-install.dat dolphin.desktop ${PKG}/usr/share/applications
-install.dir ${PKG}/usr/share/icons/hicolor/128x128/apps
-install.dat dolphin.png ${PKG}/usr/share/icons/hicolor/128x128/apps
+install.dir ${PKG}${SYS_DIR[share]}/applications
+install.dat dolphin.desktop ${PKG}${SYS_DIR[share]}/applications
+install.dir ${PKG}${SYS_DIR[share]}/icons/hicolor/128x128/apps
+install.dat dolphin.png ${PKG}${SYS_DIR[share]}/icons/hicolor/128x128/apps
 }

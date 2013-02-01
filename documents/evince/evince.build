@@ -8,8 +8,8 @@ NAME=evince
 MAJOR=3.6
 VERSION=${MAJOR}.1
 BUILD=1
-DEPENDS=('gtk+ >= 3.6.1-1' 'gnome_keyring >= 3.0.3-1')
-OPTDEPENDS=('poppler >= 0.20.5-1')
+DEPENDS=('gtk+ >= 3.6.4-1' 'gnome_keyring >= 3.6.2-1')
+OPTDEPENDS=('poppler >= 0.22.0-1' 'djvulibre >= 3.5.23-1' 'libtiff >= 4.0.3-1' 'libspectre >= 0.2.7-1' 'libgxps >= 0.2.2-1')
 
 # Description
 
@@ -42,6 +42,14 @@ cat > ${PKG}/install/doinst.sh <<EOF
 if [ -x /usr/bin/glib-compile-schemas ]; then
   /usr/bin/glib-compile-schemas /usr/share/glib-2.0/schemas
 fi
+
+if [ -x /usr/bin/update-desktop-database ]; then
+  /usr/bin/update-desktop-database -q
+fi
+
+if [ -x /usr/bin/gtk-update-icon-cache ]; then
+  /usr/bin/gtk-update-icon-cache -q -t -f /usr/share/icons/hicolor
+fi
 EOF
 
 # Sources
@@ -61,13 +69,13 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --libexecdir=/usr/lib$(libdirsuffix)/exec \
- --localstatedir=/var \
- --with-html-dir=/usr/share/html \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --libexecdir="${SYS_DIR[lib]}/exec" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --with-html-dir="${SYS_DIR[html]}" \
  --with-platform=gnome \
  --enable-t1lib \
  --enable-xps \
@@ -78,4 +86,5 @@ make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
+rm -rf ${PKG}${SYS_DIR[html]}
 }

@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=font_pcf_terminus
 VERSION=4.38
-BUILD=1
+BUILD=2
 ARCH=noarch
 
 # Description
@@ -33,6 +33,23 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+# Update the X font indexes:
+if [ -x /usr/bin/mkfontdir ]; then
+(
+  cd ${SYS_DIR[share]}/fonts/misc
+  mkfontscale .
+  mkfontdir .
+)
+fi
+
+if [ -x /usr/bin/fc-cache ]; then
+  /usr/bin/fc-cache -f
+fi
+EOF
+
 # Sources
 
 SRCNAME[0]=terminus-font
@@ -44,12 +61,11 @@ build0()
 {
 chmod 0755 configure
 ./configure \
- --prefix=/usr \
- --psfdir=/usr/share/kbd/consolefonts \
- --x11dir=/usr/share/fonts/misc
+ --prefix="${SYS_DIR[usr]}" \
+ --psfdir="${SYS_DIR[share]}/kbd/consolefonts" \
+ --x11dir="${SYS_DIR[share]}/fonts/misc"
 make
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog CHANGES
-install.dat doinst.sh ${PKG}/install
 }

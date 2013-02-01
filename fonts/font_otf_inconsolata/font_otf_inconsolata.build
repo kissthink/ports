@@ -33,6 +33,23 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+# Update the X font indexes:
+if [ -x /usr/bin/mkfontdir ]; then
+(
+  cd ${SYS_DIR[share]}/fonts/TTF
+  mkfontscale .
+  mkfontdir .
+)
+fi
+
+if [ -x /usr/bin/fc-cache ]; then
+  /usr/bin/fc-cache -f
+fi
+EOF
+
 # Sources
 
 SRCNAME[0]=Inconsolata.otf
@@ -42,7 +59,6 @@ SRCOPTS[0]="nosrcroot nounpack"
 
 build0()
 {
-install.dir ${PKG}/usr/share/fonts/OTF 
-install.dat doinst.sh ${PKG}/install
-install.dat ${CWD}/${SRCNAME[0]} ${PKG}/usr/share/fonts/OTF
+install.dir ${PKG}${SYS_DIR[share]}/fonts/OTF
+install.dat ${CWD}/${SRCNAME[0]} ${PKG}${SYS_DIR[share]}/fonts/OTF
 }

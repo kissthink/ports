@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=font_ttf_droid
-VERSION=20110126
+VERSION=20130201
 ARCH=noarch
 BUILD=1
 
@@ -33,6 +33,23 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+# Update the X font indexes:
+if [ -x /usr/bin/mkfontdir ]; then
+(
+  cd ${SYS_DIR[share]}/fonts/TTF
+  mkfontscale .
+  mkfontdir .
+)
+fi
+
+if [ -x /usr/bin/fc-cache ]; then
+  /usr/bin/fc-cache -f
+fi
+EOF
+
 # Sources
 
 SRCNAME[0]=droid
@@ -42,16 +59,15 @@ SRCCOPY[0]="APACHE2"
 
 build0()
 {
-install -m 0644 doinst.sh ${PKG}/install
-mkdir -p ${PKG}/usr/share/fonts/TTF
-install -m 0644 *.ttf ${PKG}/usr/share/fonts/TTF
-mkdir -p ${PKG}/etc/fonts/conf.{d,avail}
+install.dir ${PKG}${SYS_DIR[share]}/fonts/{TTF,config}
+install.dir ${PKG}${SYS_DIR[etc]}/fonts.d
+install.dat *.ttf ${PKG}${SYS_DIR[share]}/fonts/TTF
 (
   for file in *.conf; do
-    install -m 0644 ${file} ${PKG}/etc/fonts/conf.avail
+    install.dat ${file} ${PKG}${SYS_DIR[share]}/fonts/config
     (
-      cd ${PKG}/etc/fonts/conf.d
-      ln -sf ../conf.avail/${file}
+      cd ${PKG}${SYS_DIR[etc]}/fonts.d
+      ln -sf ${SYS_DIR[share]}/fonts/config/${file}
     )
   done
 )

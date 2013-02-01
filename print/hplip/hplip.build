@@ -5,9 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=hplip
-VERSION=3.12.6
+VERSION=3.12.11
 BUILD=1
-DEPENDS=('usb >= 1.0.11-1' 'dbus >= 1.4.20-1' 'snmp >= 5.6.1-1')
+DEPENDS=('ghostscript >= 9.02-1' 'snmp >= 5.7.2-1' 'dbus >= 1.4.24-1')
+OPTDEPENDS=('usb >= 1.0.14-1' 'cups >= 1.6.1-1' 'python >= 2.6.6-1')
 
 # Description
 
@@ -33,6 +34,12 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+if [ -x /usr/bin/update-desktop-database ]; then
+  /usr/bin/update-desktop-database /usr/share/applications >/dev/null 2>&1
+fi
+EOF
+
 # Sources
 
 SRCNAME[0]=${NAME}
@@ -42,7 +49,18 @@ SRCCOPY[0]="GPL2 BSD3 MIT"
 
 build0()
 {
-LIBS="-Wl,--as-needed $(pkg-config libusb --libs)" \
+# https://bugs.archlinux.org/task/30085 - hack found in Gentoo
+# Use system foomatic-rip for hpijs driver instead of foomatic-rip-hplip
+# The hpcups driver does not use foomatic-rip
+(
+  cd ppd/hpijs
+  for file in *.ppd.gz; do
+    rm -f ${file}.temp
+    gunzip -c ${file} | sed 's|foomatic-rip-hplip|foomatic-rip|g' | gzip > ${file}.temp
+    mv ${file}.temp ${file}
+  done
+)
+#LIBS="-Wl,--as-needed $(pkg-config libusb --libs)"
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -52,17 +70,17 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-shared=yes \
  --prefix=/usr \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --docdir="${SYS_DIR[html]}/${SRCNAME[0]}" \
  --with-docdir="${SYS_DIR[html]}/${SRCNAME[0]}" \
- --with-cupsbackenddir=/usr/lib$(libdirsuffix)/cups/backend \
- --with-cupsfilterdir=/usr/lib$(libdirsuffix)/cups/filter \
- --with-hpppddir=/usr/share/cups/model/HP \
- --with-drvdir=/usr/share/cups/drv/hp \
- --disable-foomatic-ppd-install \
- --enable-foomatic-rip-hplip-install \
+ --with-cupsbackenddir="${SYS_DIR[lib]}/exec/cups/backend" \
+ --with-cupsfilterdir="${SYS_DIR[lib]}/exec/cups/filter" \
+ --with-hpppddir="${SYS_DIR[share]}/cups/model/HP" \
+ --with-drvdir="${SYS_DIR[share]}/cups/drv/hp" \
+ --disable-foomatic-rip-hplip-install \
+ --enable-foomatic-ppd-install \
  --enable-foomatic-drv-install \
  --enable-pp-build \
  --enable-hpcups-install \
@@ -81,8 +99,10 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 #FIXME: --enable-scan-build when we have sane
 make ${JOBS}
 make install DESTDIR="${PKG}" rulesdir="$(pkg-config udev --variable=udevdir)/rules.d"
-install.dat doinst.sh ${PKG}/install
+# Log dir should not be world writeable
+chmod 775 \
+  ${PKG}${SYS_DIR[var]}/log/{hp,hp/tmp}
 rm -rf \
- ${PKG}/etc/sane.d \
- ${PKG}/usr/share/hal
+ ${PKG}${SYS_DIR[etc]}/{sane.d,xdg} \
+ ${PKG}${SYS_DIR[share]}/hal
 }

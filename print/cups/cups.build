@@ -8,7 +8,7 @@ NAME=cups
 VERSION=1.6.1
 BUILD=1
 DEPENDS=('gnutls >= 3.1.6-1' 'avahi >= 0.6.31-1' 'libpng >= 1.5.14-1' 'libtiff >= 4.0.3-1')
-OPTDEPENDS=('usb >= 1.0.14-1')
+OPTDEPENDS=('usb >= 1.0.14-1' 'qpdf >= 4.0.1-1'  'poppler >= 0.20.5-1' 'freetype >= 2.4.11-1' 'fontconfig >= 2.10.91-1')
 
 # Description
 
@@ -68,7 +68,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-libusb \
  --enable-raw-printing
 #FIXME: PAM
-make ${JOBS} V=1
+make ${JOBS}
 make install BUILDROOT="${PKG}"
 doc CREDITS.txt
 changelog CHANGES.txt
@@ -85,9 +85,6 @@ install.dat cups.logrotate ${PKG}${SYS_DIR[etc]}/logrotate.d/cups
 echo "ServerName /run/cups/cups.sock" > ${PKG}${SYS_DIR[etc]}/cups/client.conf.new
 touch ${PKG}${SYS_DIR[etc]}/cups/{printers,classes,subscriptions}.conf.new
 chgrp lp ${PKG}${SYS_DIR[etc]}/cups/{printers,classes,subscriptions,client}.conf.new
-# Compress some driver files, adopted from Fedora
-# find ${pkgdir}/usr/share/cups/model -name "*.ppd" | xargs gzip -n9f
-# Use this trick instead of installing cups-samba
 (
   cd ${PKG}${SYS_DIR[lib]}/exec/cups/backend
   if [ ! -e smb ]; then
@@ -111,4 +108,69 @@ rm -rf \
  ${PKG}${SYS_DIR[share]}/cups/{banners,data} \
  ${PKG}${SYS_DIR[share]}/cups/ipptool/*.{ps,pdf.jpg} \
  ${PKG}/run
+}
+
+SRCNAME[1]=cups-filters
+SRCVERS[1]=1.0.29
+SRCPACK[1]=http://www.openprinting.org/download/cups-filters/${SRCNAME[1]}-${SRCVERS[1]}.tar.xz
+
+build1()
+{
+CPPFLAGS="-I${PKG}${SYS_DIR[include]}" \
+LDFLAGS="-L${PKG}${SYS_DIR[lib]}" \
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix="${SYS_DIR[usr]}" \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --with-cups-config="${PKG}${SYS_DIR[bin]}/cups-config" \
+ --with-fontdir="${SYS_DIR[share]}/fonts/config" \
+ --with-rcdir=no \
+ --enable-avahi
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+license COPYING
+changelog NEWS
+install.dir ${PKG}${SYS_DIR[etc]}/fonts.d
+install.dir ${PKG}${SYS_DIR[systemdsystemunitdir]}
+install.dat cups-browsed.service ${PKG}${SYS_DIR[systemdsystemunitdir]}
+# Compress some driver files, adopted from Fedora
+find ${PKG}${SYS_DIR[share]}/ppd -name "*.ppd" | xargs gzip -n9f
+# Use this trick instead of installing cups-samba
+(
+  cd ${PKG}${SYS_DIR[etc]}/fonts.d
+  ln -sf ${SYS_DIR[share]}/fonts/config/99pdftoopvp.conf
+)
+rm -rf \
+ ${PKG}${SYS_DIR[doc]}/cups-filters
+}
+
+SRCNAME[2]=foomatic-filters
+SRCVERS[2]=4.0.12
+SRCPACK[2]=http://www.openprinting.org/download/foomatic/${SRCNAME[2]}-${SRCVERS[2]}.tar.gz
+SRCCOPY[2]="GPL2"
+
+build2()
+{
+export CUPS_SERVERBIN="${SYS_DIR[lib]}/exec/cups"
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --prefix="${SYS_DIR[usr]}" \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
+make ${JOBS}
+make install-main install-cups DESTDIR="${PKG}"
+changelog ChangeLog
 }

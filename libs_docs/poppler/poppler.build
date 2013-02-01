@@ -5,9 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=poppler
-VERSION=0.20.5
+VERSION=0.22.0
 BUILD=1
-DEPENDS=('libjpeg >= 1.2.0-1' 'libpng >= 1.5.13-1' 'libtiff >= 4.0.3-1' 'liblcms >= 2.4-1' 'freetype >= 2.4.10-1' 'fontconfig >= 2.8.0-1' 'expat >= 2.0.1-1')
+DEPENDS=('libjpeg >= 1.2.0-1' 'libpng >= 1.5.14-1' 'libtiff >= 4.0.3-1' 'liblcms >= 2.4-1' 'freetype >= 2.4.11-1' 'fontconfig >= 2.10.91-1' 'expat >= 2.1.0-1')
+OPTDEPENDS=('cairo >= 1.12.10-1')
 
 # Description
 
@@ -43,35 +44,39 @@ SRCCOPY[0]="GPL2"
 build0()
 {
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
-CPPFLAGS="-I/usr/include/lcms-2.0/lcms " \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-html-dir="${SYS_DIR[html]}" \
+ --disable-poppler-qt4 \
+ --enable-cms=lcms2 \
  --enable-xpdf-headers \
  --enable-zlib
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
+rm -rf \
+  ${PKG}${SYS_DIR[bin]}/poppler-glib-demo \
+  ${PKG}${SYS_DIR[html]}
 }
 
 SRCNAME[1]=${NAME}-data
-SRCVERS[1]=0.4.5
+SRCVERS[1]=0.4.6
 SRCPACK[1]=http://poppler.freedesktop.org/${SRCNAME[1]}-${SRCVERS[1]}.tar.gz
 SRCCOPY[1]="GPL2"
 
 build1()
 {
-make install datadir="/usr/share/application-data" DESTDIR="${PKG}"
+make install datadir="${SYS_DIR[share]}/application-data" DESTDIR="${PKG}"
 license COPYING
 license COPYING.adobe COPYING.adobe
 }

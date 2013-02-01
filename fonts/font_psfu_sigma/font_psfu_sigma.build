@@ -7,7 +7,7 @@ source /usr/src/ports/Build/build.sh
 NAME=font_psfu_sigma
 VERSION=0.8
 ARCH=noarch
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -20,14 +20,14 @@ cat > ${PKG}/install/slack-desc <<EOF
 # customary to leave one space after the ':'.
 
 $(padd)|-----handy-ruler------------------------------------------------------|
-${NAME}: font_ttf_dejavu
+${NAME}: font_psfu_sigma
 ${NAME}:
-${NAME}: The DejaVu fonts are a font family based on the Bitstream Vera Fonts
-${NAME}: (http://gnome.org/fonts/). Its purpose is to provide a wider range
-${NAME}: of characters (see http://dejavu.sf.net for more information) while
-${NAME}: maintaining the original look and feel.
+${NAME}: A console font with wide unicode coverage.
 ${NAME}:
-${NAME}: Homepage: http://dejavu-fonts.org
+${NAME}: Homepage:
+${NAME}: http://homepage.ntlworld.com/zarniwhoop/consolefonts/sigma.html
+${NAME}:
+${NAME}:
 ${NAME}:
 ${NAME}:
 ${NAME}:
@@ -41,10 +41,9 @@ SRCPACK[0]=http://homepage.ntlworld.com/zarniwhoop/consolefonts/tarballs/${SRCNA
 
 build0()
 {
-make install PREFIX=/usr FONTDIR=/usr/share/kbd/consolefonts DESTDIR=${PKG}
+make install DESTDIR="${PKG}" PREFIX="${SYS_DIR[usr]}" \
+ FONTDIR="${SYS_DIR[share]}/kbd/consolefonts"
 doc README
 changelog Changelog
 license LICENSES
-rm -rf \
- ${PKG}/usr/share/doc
 }

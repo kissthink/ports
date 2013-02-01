@@ -7,7 +7,7 @@ source /usr/src/ports/Build/build.sh
 NAME=font_ttf_excelsior
 VERSION=3.00
 ARCH=noarch
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -26,11 +26,28 @@ ${NAME}: Fixedsys was one of the first fonts to be included with DOS and
 ${NAME}: Windows. It has lasted a long time, maybe due to being perceived
 ${NAME}: ideal for consoles and IRC clients, and it's often a favorite among
 ${NAME}: programmers. It is monospaced, and contains only the basic western
-${NAME}: Fixedsys Excelsior is a 'pan-unicode' version of Fixedsys.
+${NAME}: glyphs. Fixedsys Excelsior is a 'pan-unicode' version of Fixedsys.
 ${NAME}:
 ${NAME}: Homepage: http://www.fixedsysexcelsior.com
 ${NAME}:
 ${NAME}:
+EOF
+
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+# Update the X font indexes:
+if [ -x /usr/bin/mkfontdir ]; then
+(
+  cd ${SYS_DIR[share]}/fonts/TTF
+  mkfontscale .
+  mkfontdir .
+)
+fi
+
+if [ -x /usr/bin/fc-cache ]; then
+  /usr/bin/fc-cache -f
+fi
 EOF
 
 # Sources
@@ -42,7 +59,6 @@ SRCOPTS[0]="nosrcroot nounpack"
 
 build0()
 {
-install -m 0644 doinst.sh ${PKG}/install
-mkdir -p ${PKG}/usr/share/fonts/TTF
-install -m 0644 ${CWD}/FSEX300.ttf ${PKG}/usr/share/fonts/TTF
+install.dir ${PKG}${SYS_DIR[share]}/fonts/TTF
+install.dat ${CWD}/FSEX300.ttf ${PKG}${SYS_DIR[share]}/fonts/TTF
 }

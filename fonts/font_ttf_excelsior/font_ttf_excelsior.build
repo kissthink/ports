@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=font_ttf_excelsior
-VERSION=3.00
+VERSION=3.01
 ARCH=noarch
-BUILD=2
+BUILD=1
 
 # Description
 
@@ -54,11 +54,11 @@ EOF
 
 SRCNAME[0]=${NAME}
 SRCVERS[0]=${VERSION}
-SRCPACK[0]=http://www.fixedsysexcelsior.com/fonts/FSEX300.ttf
+SRCPACK[0]=http://launchpadlibrarian.net/26228254/FSEX301-L2.ttf
 SRCOPTS[0]="nosrcroot nounpack"
 
 build0()
 {
 install.dir ${PKG}${SYS_DIR[share]}/fonts/TTF
-install.dat ${CWD}/FSEX300.ttf ${PKG}${SYS_DIR[share]}/fonts/TTF
+install.dat ${CWD}/FSEX301-L2.ttf ${PKG}${SYS_DIR[share]}/fonts/TTF
 }

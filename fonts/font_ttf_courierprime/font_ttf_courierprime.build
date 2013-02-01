@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=font_ttf_courierprime
 VERSION=1.203
-BUILD=1
+BUILD=2
 ARCH=noarch
 
 # Description
@@ -39,7 +39,7 @@ cat >> ${PKG}/install/doinst.sh <<EOF
 # Update the X font indexes:
 if [ -x /usr/bin/mkfontdir ]; then
 (
-  cd /usr/share/fonts/TTF
+  cd ${SYS_DIR[share]}/fonts/TTF
   mkfontscale .
   mkfontdir .
 )
@@ -60,12 +60,12 @@ SRCOPTS[0]="nosrcroot"
 
 build0()
 {
-install.dir ${PKG}${SYS_DIR[share]}/fonts/TTF
+install.dir ${PKG}${SYS_DIR[share]}/fonts/{TTF,config}
+install.dir ${PKG}${SYS_DIR[etc]}/fonts.d
 install.dat "Courier Prime"/*.ttf ${PKG}${SYS_DIR[share]}/fonts/TTF
-install.dir ${PKG}${SYS_DIR[etc]}/fonts/conf.{avail,d}
-install.cfg 30-courier-prime-aliases.conf ${PKG}${SYS_DIR[etc]}/fonts/conf.avail
+install.dat 30-courier-prime-aliases.conf ${PKG}${SYS_DIR[share]}/fonts/config
 (
-  cd ${PKG}${SYS_DIR[etc]}/fonts/conf.d
-  ln -sf ../conf.avail/30-courier-prime-aliases.conf
+  cd ${PKG}${SYS_DIR[etc]}/fonts.d
+  ln -sf ${SYS_DIR[share]}/fonts/config/30-courier-prime-aliases.conf
 )
 }

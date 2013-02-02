@@ -1,0 +1,63 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=asciidoc
+VERSION=8.6.8
+BUILD=1
+ARCH=noarch
+DEPENDS=('python >= 2.6.6-1' 'docbook >= 5.0-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: asciidoc (text-based document generation)
+${NAME}:
+${NAME}: AsciiDoc is a text document format for writing notes, documentation,
+${NAME}: articles, books, ebooks, slideshows, web pages, man pages and blogs.
+${NAME}: AsciiDoc files can be translated to many formats including HTML,
+${NAME}: PDF, EPUB, man page. It is highly configurable: both the AsciiDoc
+${NAME}: source file syntax and the backend output markups (which can be
+${NAME}: almost any type of SGML/XML markup) can be customized and extended
+${NAME}: by the user.
+${NAME}:
+${NAME}: Homepage: http://www.methods.co.nz/asciidoc
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=${URL[sf]}/asciidoc/asciidoc/${SRCVERS[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --prefix="${SYS_DIR[usr]}" \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir="${SYS_DIR[share]}/application-data" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc BUGS
+changelog CHANGELOG
+install.dir ${PKG}${SYS_DIR[share]}/vim/{syntax,ftdetect}
+install.dat vim/syntax/asciidoc.vim ${PKG}${SYS_DIR[share]}/vim/syntax
+install.dat vim/ftdetect/asciidoc_filetype.vim \
+ ${PKG}${SYS_DIR[share]}/vim/ftdetect/asciidoc.vim
+install.dir ${PKG}${SYS_DIR[lib]}64/python2.6/site-packages
+install.dat asciidocapi.py ${PKG}${SYS_DIR[lib]}64/python2.6/site-packages
+}

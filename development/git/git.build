@@ -1,0 +1,120 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=git
+MAJOR=1.8
+VERSION=${MAJOR}.1.2
+BUILD=1
+DEPENDS=('openssl >= 1.0.1c-1' 'curl >= 7.28.0-1' 'expat >= 2.1.0-1' 'pcre >= 8.32-1' 'perl >= 5.12.3-1')
+OPTDEPENDS=('python >= 2.6.6-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: git (the stupid content tracker)
+${NAME}:
+${NAME}: Git is a fast, scalable, distributed revision control system with an
+${NAME}: unusually rich command set that provides both high-level operations
+${NAME}: and full access to internals.
+${NAME}:
+${NAME}: "git" can mean anything, depending on your mood.
+${NAME}:
+${NAME}: Git was originally written by Linus Torvalds and is currently
+${NAME}: maintained by Junio C. Hamano.
+${NAME}:
+EOF
+
+# GIT should not be installed while building this package because there might
+# be problems with installing some perl stuff
+
+# According to the Arch Linux build script, git depends also on 'perl-error'.
+# It must be bundled with Slackware's perl? The following perl extensions are
+# optional, but maybe we ought to add them to the perl package if they aren't
+# there already.
+#
+#            'perl-libwww: git svn'
+#            'perl-term-readkey: git svn'
+#            'perl-mime-tools: git send-email'
+#            'perl-net-smtp-ssl: git send-email TLS support'
+#            'perl-authen-sasl: git send-email TLS support'
+#            'cvsps: git cvsimport' 
+
+# We'll re-add gik, git-gui and gitweb when we have subpackages
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://git-core.googlecode.com/files/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="GPL2 LGPL21"
+
+build0()
+{
+CPPFLAGS="-I${SYS_DIR[include]}/pcre" \
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --prefix=/usr \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir="${SYS_DIR[etc]}/git" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --libexecdir="${SYS_DIR[lib]}/exec" \
+ --datadir="${SYS_DIR[share]}/application-data" \
+ --with-perl="/usr/bin/perl" \
+ --with-python="/usr/bin/python" \
+ --with-pager="/usr/bin/less" \
+ --with-editor="/usr/bin/vim" \
+ --with-openssl \
+ --with-libpcre \
+ --with-curl \
+ --with-expat
+#FIXME: use a default editor script instead of vim
+make all html ${JOBS} V=1 \
+ INSTALLDIRS="vendor" ASCIIDOC8="YesPlease" \
+ NO_CROSS_DIRECTORY_HARDLINKS="1" \
+ NO_INSTALL_HARDLINKS="1"
+make install DESTDIR="${PKG}" \
+ INSTALLDIRS="vendor" ASCIIDOC8="YesPlease" \
+ NO_CROSS_DIRECTORY_HARDLINKS="1" \
+ NO_INSTALL_HARDLINKS="1"
+doc Documentation/RelNotes/${MAJOR}.*.txt
+changelog Documentation/RelNotes/${SRCVERS[0]}.txt
+install.dir ${PKG}${SYS_DIR[share]}/html/git/howto
+install.dat Documentation/{user-manual,everyday,howto-index}.html ${PKG}${SYS_DIR[share]}/html/git
+install.dat Documentation/docbook-xsl.css ${PKG}${SYS_DIR[share]}/html/git
+install.dat Documentation/mailmap.txt ${PKG}${SYS_DIR[share]}/html/git
+install.dat Documentation/howto/*.html ${PKG}${SYS_DIR[share]}/html/git/howto
+install.dir ${PKG}${SYS_DIR[share]}/emacs/site-lisp
+install.dat contrib/emacs/*.el ${PKG}${SYS_DIR[share]}/emacs/site-lisp
+install.dir ${PKG}${SYS_DIR[share]}/bash-completion/completions
+install.dat contrib/completion/git-completion.bash ${PKG}${SYS_DIR[share]}/bash-completion/completions/git
+rm -rf \
+ ${PKG}${SYS_DIR[lib]}64/perl5/?.??.? \
+ ${PKG}${SYS_DIR[bin]}/gitk \
+ ${PKG}${SYS_DIR[share]}/{gitweb,gitk,git-gui}
+}
+
+SRCNAME[1]=${NAME}-manpages
+SRCVERS[1]=${VERSION}
+SRCPACK[1]=http://git-core.googlecode.com/files/${SRCNAME[1]}-${SRCVERS[1]}.tar.gz
+SRCOPTS[1]="nosrcroot"
+
+build1()
+{
+install.dir ${PKG}${SYS_DIR[man]}/man{1,5,7}
+install.man man1/*.1 ${PKG}${SYS_DIR[man]}/man1
+install.man man5/*.5 ${PKG}${SYS_DIR[man]}/man5
+install.man man7/*.7 ${PKG}${SYS_DIR[man]}/man7
+rm -rf ${PKG}${SYS_DIR[doc]}/git-manpages*
+}

@@ -1,0 +1,290 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=docbook
+XSLVER=1.78.0
+VERSION=5.0
+BUILD=1
+DEPENDS=('libxml >= 2.9.0-1' 'libxslt >= 1.1.28-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: docbook (a semantic markup language for technical documentation)
+${NAME}:
+${NAME}: It was originally intended for writing technical documents related to
+${NAME}: computer hardware and software but it can be used for any other kind
+${NAME}: of documentation. As a semantic language, DocBook enables it's users
+${NAME}: to create document content in a presentation-neutral form that
+${NAME}: captures the logical structure of the content; that content can then
+${NAME}: be published in many formats, including HTML, XHTML, EPUB, PDF, man
+${NAME}: pages, Web Help and HTML HELP, without requiring users to make any
+${NAME}: changes to the source.
+${NAME}:
+EOF
+
+cat >> ${PKG}/install/doinst.sh <<EOF
+if [ -x /usr/bin/xmlcatalog ]; then
+
+if [ ! -e etc/xml/catalog ]; then
+  /usr/bin/xmlcatalog --noout --create etc/xml/catalog
+else
+  /usr/bin/cp etc/xml/catalog etc/xml/catalog.orig
+  /usr/bin/xmlcatalog --del "file:///etc/xml/docbook" \
+  etc/xml/catalog.orig > etc/xml/catalog
+fi
+
+CATADD="/usr/bin/xmlcatalog --noout --add"
+
+# docbook
+
+\$CATADD "delegatePublic" "-//OASIS//ENTITIES DocBook XML" \
+ "file:///etc/xml/docbook" etc/xml/catalog
+\$CATADD "delegatePublic" "-//OASIS//DTD DocBook XML" \
+ "file:///etc/xml/docbook" etc/xml/catalog
+\$CATADD "delegateSystem" "http://www.oasis-open.org/docbook/" \
+  "file:///etc/xml/docbook" etc/xml/catalog
+\$CATADD "delegateURI" "http://www.oasis-open.org/docbook/" \
+  "file:///etc/xml/docbook" etc/xml/catalog
+ 
+# docbook-xsl
+
+\$CATADD "rewriteSystem" "http://docbook.sourceforge.net/release/xsl/${XSLVER}" \
+ "/usr/share/xml/docbook/stylesheet" etc/xml/catalog
+\$CATADD "rewriteURI" "http://docbook.sourceforge.net/release/xsl/${XSLVER}" \
+ "/usr/share/xml/docbook/stylesheet" etc/xml/catalog
+\$CATADD "rewriteSystem" "http://docbook.sourceforge.net/release/xsl/current" \
+ "/usr/share/xml/docbook/stylesheet" etc/xml/catalog
+\$CATADD "rewriteURI" "http://docbook.sourceforge.net/release/xsl/current" \
+ "/usr/share/xml/docbook/stylesheet" etc/xml/catalog
+fi
+EOF
+
+do_install()
+{
+install.dir ${PKG}${SYS_DIR[share]}/xml/docbook/xml-dtd-${1}/ent
+install.dat docbook.cat *.dtd *.mod ${PKG}${SYS_DIR[share]}/xml/docbook/xml-dtd-${1}
+install.dat ent/*.ent ${PKG}${SYS_DIR[share]}/xml/docbook/xml-dtd-${1}/ent
+}
+
+catadd()
+{
+if [ ! -e ${PKG}${SYS_DIR[etc]}/xml/docbook ]; then
+  install.dir ${PKG}${SYS_DIR[etc]}/xml
+  xmlcatalog --noout --create ${PKG}${SYS_DIR[etc]}/xml/docbook
+fi
+xmlcatalog --noout --add "${1}" "file:///${SYS_DIR[share]}/xml/docbool/xml-dtd-${2}/${3}" "${4}" ${PKG}${SYS_DIR[etc]}/xml/docbook
+}
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://www.docbook.org/xml/${SRCVERS[0]}/${SRCNAME[0]}-${SRCVERS[0]}.zip
+SRCCOPY[0]="MIT"
+
+build0()
+{
+changelog ChangeLog
+install.dir ${PKG}${SYS_DIR[etc]}/xml
+install.dir ${PKG}${SYS_DIR[share]}/xml/docbook/xml-dtd-${SRCVERS[0]}/{dtd,rng,sch,xsd}
+install.dat docbook.nvdl ${PKG}${SYS_DIR[share]}/xml/docbook/xml-dtd-${SRCVERS[0]}
+install.dat dtd/* ${PKG}${SYS_DIR[share]}/xml/docbook/xml-dtd-${SRCVERS[0]}/dtd
+install.dat rng/* ${PKG}${SYS_DIR[share]}/xml/docbook/xml-dtd-${SRCVERS[0]}/rng
+install.dat sch/* ${PKG}${SYS_DIR[share]}/xml/docbook/xml-dtd-${SRCVERS[0]}/sch
+install.dat xsd/* ${PKG}${SYS_DIR[share]}/xml/docbook/xml-dtd-${SRCVERS[0]}/xsd
+install.dir ${PKG}${SYS_DIR[share]}/xml/docbook/stylesheet/docbook5
+install.dat tools/* ${PKG}${SYS_DIR[share]}/xml/docbook/stylesheet/docbook5
+catadd "public" "-//OASIS//DTD DocBook XML 5.0//EN" "5.0" "dtd/docbook.dtd"
+catadd "system" "http://www.oasis-open.org/docbook/xml/5.0/dtd/docbook.dtd" "5.0" "dtd/docbook.dtd"
+catadd "system" "http://docbook.org/xml/5.0/dtd/docbook.dtd" "5.0" "dtd/docbook.dtd"
+catadd "uri" "http://www.oasis-open.org/docbook/xml/5.0/rng/docbook.rng" "5.0" "rng/docbook.rng"
+catadd "uri" "http://docbook.org/xml/5.0/rng/docbook.rng" "5.0" "rng/docbook.rng"
+catadd "uri" "http://www.oasis-open.org/docbook/xml/5.0/rng/docbookxi.rng" "5.0" "rng/docbookxi.rng"
+catadd "uri" "http://docbook.org/xml/5.0/rng/docbookxi.rng" "5.0" "rng/docbookxi.rng"
+catadd "uri" "http://www.oasis-open.org/docbook/xml/5.0/rng/docbook.rnc" "5.0" "rng/docbook.rnc"
+catadd "uri" "http://docbook.org/xml/5.0/rng/docbook.rnc" "5.0" "rng/docbook.rnc"
+catadd "uri" "http://www.oasis-open.org/docbook/xml/5.0/rng/docbookxi.rnc" "5.0" "rng/docbooxi.rnc"
+catadd "uri" "http://docbook.org/xml/5.0/rng/docbookxi.rnc" "5.0" "docbookxi.rnc"
+catadd "uri" "http://www.oasis-open.org/docbook/xml/5.0/xsd/docbook.xsd" "5.0" "xsd/docbook.xsd"
+catadd "uri" "http://docbook.org/xml/5.0/xsd/docbook.xsd" "5.0" "xsd/docbook.xsd"
+catadd "uri" "http://www.oasis-open.org/docbook/xml/5.0/xsd/docbookxi.xsd" "5.0" "xsd/docbookxi.xsd"
+catadd "uri" "http://docbook.org/xml/5.0/xsd/docbookxi.xsd" "5.0" "xsd/docbookxi.xsd"
+catadd "uri" "http://www.oasis-open.org/docbook/xml/5.0/xsd/xi.xsd" "5.0" "xsd/xi.xsd"
+catadd "uri" "http://docbook.org/xml/5.0/xsd/xi.xsd" "5.0" "xsd/xi.xsd"
+catadd "uri" "http://www.oasis-open.org/docbook/xml/5.0/xsd/xlink.xsd" "5.0" "xsd/xlink.xsd"
+catadd "uri" "http://docbook.org/xml/5.0/xsd/xlink.xsd" "5.0" "xsd/xlink.xsd"
+catadd "uri" "http://www.oasis-open.org/docbook/xml/5.0/xsd/xml.xsd" "5.0" "xsd/xml.xsd"
+catadd "uri" "http://docbook.org/xml/5.0/xsd/xml.xsd" "5.0" "xsd/xml.xsd"
+catadd "uri" "http://www.oasis-open.org/docbook/xml/5.0/sch/docbook.sch" "5.0" "sch/docbook.sch"
+catadd "uri" "http://docbook.org/xml/5.0/sch/docbook.sch" "5.0" "sch/docbook.sch"
+catadd "uri" "http://www.oasis-open.org/docbook/xml/5.0/docbook.nvdl" "5.0" "docbook.nvdl"
+catadd "uri" "http://docbook.org/xml/5.0/docbook.nvdl" "5.0" "docbook.nvdl"
+}
+
+SRCNAME[1]=${NAME}-xml
+SRCVERS[1]=4.5
+SRCPACK[1]=http://www.docbook.org/xml/${SRCVERS[1]}/${SRCNAME[1]}-${SRCVERS[1]}.zip
+SRCCOPY[1]="MIT"
+SRCOPTS[1]="nosrcroot"
+
+build1()
+{
+doc ChangeLog
+do_install ${SRCVERS[1]}
+catadd "public" "-//OASIS//DTD DocBook XML V4.5//EN" "4.5" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd"
+catadd "public" "-//OASIS//DTD DocBook XML CALS Table Model V4.5//EN" "4.5" "file:///usr/share/xml/docbook/xml-dtd-4.5/calstblx.dtd"
+catadd "public" "-//OASIS//DTD XML Exchange Table Model 19990315//EN" "4.5" "file:///usr/share/xml/docbook/xml-dtd-4.5/soextblx.dtd"
+catadd "public" "-//OASIS//ELEMENTS DocBook XML Information Pool V4.5//EN" "4.5" "file:///usr/share/xml/docbook/xml-dtd-4.5/dbpoolx.mod"
+catadd "public" "-//OASIS//ELEMENTS DocBook XML Document Hierarchy V4.5//EN" "4.5" "file:///usr/share/xml/docbook/xml-dtd-4.5/dbhierx.mod"
+catadd "public" "-//OASIS//ELEMENTS DocBook XML HTML Tables V4.5//EN" "4.5" "file:///usr/share/xml/docbook/xml-dtd-4.5/htmltblx.mod"
+catadd "public" "-//OASIS//ENTITIES DocBook XML Notations V4.5//EN" "4.5" "file:///usr/share/xml/docbook/xml-dtd-4.5/dbnotnx.mod"
+catadd "public" "-//OASIS//ENTITIES DocBook XML Character Entities V4.5//EN" "4.5" "file:///usr/share/xml/docbook/xml-dtd-4.5/dbcentx.mod"
+catadd "public" "-//OASIS//ENTITIES DocBook XML Additional General Entities V4.5//EN" "4.5" "file:///usr/share/xml/docbook/xml-dtd-4.5/dbgenent.mod"
+catadd "rewriteSystem" "http://www.oasis-open.org/docbook/xml/4.5" "4.5" ""
+catadd "rewriteURI" "http://www.oasis-open.org/docbook/xml/4.5" "4.5" ""
+}
+
+SRCNAME[2]=${NAME}-xml
+SRCVERS[2]=4.4
+SRCPACK[2]=http://www.docbook.org/xml/${SRCVERS[2]}/${SRCNAME[2]}-${SRCVERS[2]}.zip
+SRCCOPY[2]="MIT"
+SRCOPTS[2]="nosrcroot"
+
+build2()
+{
+doc ChangeLog
+do_install ${SRCVERS[2]}
+catadd "public" "-//OASIS//DTD DocBook XML V4.4//EN" "4.4" "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+catadd "public" "-//OASIS//DTD DocBook CALS Table Model V4.4//EN" "4.4" "http://www.oasis-open.org/docbook/xml/4.4/calstblx.dtd"
+catadd "public" "-//OASIS//ELEMENTS DocBook XML HTML Tables V4.4//EN" "4.4" "http://www.oasis-open.org/docbook/xml/4.4/htmltblx.mod"
+catadd "public" "-//OASIS//DTD XML Exchange Table Model 19990315//EN" "4.4" "http://www.oasis-open.org/docbook/xml/4.4/soextblx.dtd"
+catadd "public" "-//OASIS//ELEMENTS DocBook Information Pool V4.4//EN" "4.4" "http://www.oasis-open.org/docbook/xml/4.4/dbpoolx.mod"
+catadd "public" "-//OASIS//ELEMENTS DocBook Document Hierarchy V4.4//EN" "4.4" "http://www.oasis-open.org/docbook/xml/4.4/dbhierx.mod"
+catadd "public" "-//OASIS//ENTITIES DocBook Additional General Entities V4.4//EN" "4.4" "http://www.oasis-open.org/docbook/xml/4.4/dbgenent.mod"
+catadd "public" "-//OASIS//ENTITIES DocBook Notations V4.4//EN" "4.4" "http://www.oasis-open.org/docbook/xml/4.4/dbnotnx.mod"
+catadd "public" "-//OASIS//ENTITIES DocBook Character Entities V4.4//EN" "4.4" "http://www.oasis-open.org/docbook/xml/4.4/dbcentx.mod"
+catadd "rewriteSystem" "http://www.oasis-open.org/docbook/xml/4.4" "4.4" ""
+catadd "rewriteURI" "http://www.oasis-open.org/docbook/xml/4.4" "4.4" ""
+}
+
+SRCNAME[3]=${NAME}-xml
+SRCVERS[3]=4.3
+SRCPACK[3]=http://www.docbook.org/xml/${SRCVERS[3]}/${SRCNAME[3]}-${SRCVERS[3]}.zip
+SRCCOPY[3]="MIT"
+SRCOPTS[3]="nosrcroot"
+
+build3()
+{
+doc ChangeLog
+do_install ${SRCVERS[3]}
+catadd "public" "-//OASIS//DTD DocBook XML V4.3//EN" "4.3" "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"
+catadd "public" "-//OASIS//DTD DocBook CALS Table Model V4.3//EN" "4.3" "http://www.oasis-open.org/docbook/xml/4.3/calstblx.dtd"
+catadd "public" "-//OASIS//DTD XML Exchange Table Model 19990315//EN" "4.3" "http://www.oasis-open.org/docbook/xml/4.3/soextblx.dtd"
+catadd "public" "-//OASIS//ELEMENTS DocBook Information Pool V4.3//EN" "4.3" "http://www.oasis-open.org/docbook/xml/4.3/dbpoolx.mod"
+catadd "public" "-//OASIS//ELEMENTS DocBook Document Hierarchy V4.3//EN" "4.3" "http://www.oasis-open.org/docbook/xml/4.3/dbhierx.mod"
+catadd "public" "-//OASIS//ENTITIES DocBook Additional General Entities V4.3//EN" "4.3" "http://www.oasis-open.org/docbook/xml/4.3/dbgenent.mod"
+catadd "public" "-//OASIS//ENTITIES DocBook Notations V4.3//EN" "4.3" "http://www.oasis-open.org/docbook/xml/4.3/dbnotnx.mod"
+catadd "public" "-//OASIS//ENTITIES DocBook Character Entities V4.3//EN" "4.3" "http://www.oasis-open.org/docbook/xml/4.3/dbcentx.mod"
+catadd "rewriteSystem" "http://www.oasis-open.org/docbook/xml/4.3" "4.3" ""
+catadd "rewriteURI" "http://www.oasis-open.org/docbook/xml/4.3" "4.3" ""
+}
+
+SRCNAME[4]=${NAME}-xml
+SRCVERS[4]=4.2
+SRCPACK[4]=http://www.docbook.org/xml/${SRCVERS[4]}/${SRCNAME[4]}-${SRCVERS[4]}.zip
+SRCCOPY[4]="MIT"
+SRCOPTS[4]="nosrcroot"
+
+build4()
+{
+doc ChangeLog
+do_install ${SRCVERS[4]}
+catadd "public" "-//OASIS//DTD DocBook XML V4.2//EN" "4.2" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"
+catadd "public" "-//OASIS//DTD DocBook CALS Table Model V4.2//EN" "4.2" "http://www.oasis-open.org/docbook/xml/4.2/calstblx.dtd"
+catadd "public" "-//OASIS//DTD XML Exchange Table Model 19990315//EN" "4.2" "http://www.oasis-open.org/docbook/xml/4.2/soextblx.dtd"
+catadd "public" "-//OASIS//ELEMENTS DocBook Information Pool V4.2//EN" "4.2" "http://www.oasis-open.org/docbook/xml/4.2/dbpoolx.mod"
+catadd "public" "-//OASIS//ELEMENTS DocBook Document Hierarchy V4.2//EN" "4.2" "http://www.oasis-open.org/docbook/xml/4.2/dbhierx.mod"
+catadd "public" "-//OASIS//ENTITIES DocBook Additional General Entities V4.2//EN" "4.2" "http://www.oasis-open.org/docbook/xml/4.2/dbgenent.mod"
+catadd "public" "-//OASIS//ENTITIES DocBook Notations V4.2//EN" "4.2" "http://www.oasis-open.org/docbook/xml/4.2/dbnotnx.mod"
+catadd "public" "-//OASIS//ENTITIES DocBook Character Entities V4.2//EN" "4.2" "http://www.oasis-open.org/docbook/xml/4.2/dbcentx.mod"
+catadd "rewriteSystem" "http://www.oasis-open.org/docbook/xml/4.2" "4.2" ""
+catadd "rewriteURI" "http://www.oasis-open.org/docbook/xml/4.2" "4.2" ""
+}
+
+SRCNAME[5]=${NAME}-xml
+SRCVERS[5]=4.1.2
+SRCPACK[5]=http://www.docbook.org/xml/${SRCVERS[4]}/docbkx412.zip
+SRCCOPY[5]="MIT"
+SRCOPTS[5]="nosrcroot"
+
+build5()
+{
+doc ChangeLog
+do_install ${SRCVERS[5]}
+catadd "public" "-//OASIS//DTD DocBook XML V4.1.2//EN" "4.1.2" "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd"
+catadd "public" "-//OASIS//DTD DocBook XML CALS Table Model V4.1.2//EN" "4.1.2" "http://www.oasis-open.org/docbook/xml/4.1.2/calstblx.dtd"
+catadd "public" "-//OASIS//DTD DocBook XML CALS Table Model V4.1.2//EN" "4.1.2" "http://www.oasis-open.org/docbook/xml/4.1.2/calstblx.dtd"
+catadd "public" "-//OASIS//DTD XML Exchange Table Model 19990315//EN" "4.1.2" "http://www.oasis-open.org/docbook/xml/4.1.2/soextblx.dtd"
+catadd "public" "-//OASIS//ELEMENTS DocBook XML Information Pool V4.1.2//EN" "4.1.2" "http://www.oasis-open.org/docbook/xml/4.1.2/dbpoolx.mod"
+catadd "public" "-//OASIS//ELEMENTS DocBook XML Document Hierarchy V4.1.2//EN" "4.1.2" "http://www.oasis-open.org/docbook/xml/4.1.2/dbhierx.mod"
+catadd "public" "-//OASIS//ENTITIES DocBook XML Additional General Entities V4.1.2//EN" "4.1.2" "http://www.oasis-open.org/docbook/xml/4.1.2/dbgenent.mod"
+catadd "public" "-//OASIS//ENTITIES DocBook XML Notations V4.1.2//EN" "4.1.2" "http://www.oasis-open.org/docbook/xml/4.1.2/dbnotnx.mod"
+catadd "public" "-//OASIS//ENTITIES DocBook XML Character Entities V4.1.2//EN" "4.1.2" "http://www.oasis-open.org/docbook/xml/4.1.2/dbcentx.mod"
+catadd "rewriteSystem" "http://www.oasis-open.org/docbook/xml/4.1.2" "4.1.2" ""
+catadd "rewriteURI" "http://www.oasis-open.org/docbook/xml/4.1.2" "4.1.2" ""
+}
+
+SRCNAME[6]=${NAME}-xsl
+SRCVERS[6]=${XSLVER}
+SRCPACK[6]=${URL[sf]}/docbook/docbook-xsl/${SRCVERS[6]}/${SRCNAME[6]}-${SRCVERS[6]}.tar.bz2
+
+build6()
+{
+doc AUTHORS
+license COPYING
+changelog NEWS
+install.dir ${PKG}${SYS_DIR[share]}/xml/docbook/stylesheet
+DIRS="assembly common eclipse epub epub3 fo highlighting html htmlhelp javahelp lib manpages params profiling roundtrip template website xhtml xhtml-1_1 xhtml5"
+for dir in ${DIRS}; do
+  install.dir ${PKG}${SYS_DIR[share]}/xml/docbook/stylesheet/${dir}
+  install.dat ${dir}/*.{xml,xsl,dtd,ent} ${PKG}${SYS_DIR[share]}/xml/docbook/stylesheet/${dir} 2>/dev/null
+done
+install.dat VERSION.xsl ${PKG}${SYS_DIR[share]}/xml/docbook/stylesheet
+}
+
+SRCNAME[7]=xmlto
+SRCVERS[7]=0.0.25
+SRCPACK[7]=http://fedorahosted.org/releases/x/m/xmlto/${SRCNAME[7]}-${SRCVERS[7]}.tar.bz2
+SRCCOPY[7]="GPL2"
+
+build7()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --prefix="${SYS_DIR[usr]}" \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --datadir="${SYS_DIR[share]}/application-data" \
+ --with-webbrowser="links"
+# --with-backend="dblatex"
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS THANKS
+changelog NEWS
+}

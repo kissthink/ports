@@ -71,6 +71,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --localstatedir="${SYS_DIR[var]}" \
  --libexecdir="${SYS_DIR[lib]}/exec" \
  --datadir="${SYS_DIR[share]}/application-data" \
+ --htmldir="${SYS_DIR[html]}/git" \
  --with-perl="/usr/bin/perl" \
  --with-python="/usr/bin/python" \
  --with-pager="/usr/bin/less" \

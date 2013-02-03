@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=cairo
-VERSION=1.12.10
+VERSION=1.12.12
 BUILD=1
-DEPENDS=('freetype >= 2.4.11-1' 'fontconfig >= 2.10.91-1' 'pixman >= 0.28.2' 'xorg_libs >= 7.7-3' 'libpng >= 1.5.13-2')
+DEPENDS=('freetype >= 2.4.11-1' 'fontconfig >= 2.10.91-1' 'pixman >= 0.28.2' 'xorg_libs >= 7.7-3' 'libpng >= 1.5.14-1')
 
 # Description
 
@@ -49,11 +49,11 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-html-dir="${SYS_DIR[html]}" \
  --disable-gtk-doc \
  --enable-qt=no \
@@ -69,4 +69,5 @@ make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
 license COPYING
+rm -rf ${PKG}${SYS_DIR[html]}
 }

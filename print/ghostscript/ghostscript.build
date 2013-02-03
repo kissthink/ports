@@ -1,0 +1,102 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=ghostscript
+VERSION=9.06
+BUILD=1
+DEPENDS=('cups >= 1.6.1-1' 'libjpeg >= 1.2.0-1' 'libpng >= 1.5.14-1' 'libtiff >= 4.0.3-1' 'jasper >= 1.900.1-1' 'liblcms >= 2.4-1' 'fontconfig >= 2.10.91-1' 'freetype >= 2.4.11-1' 'expat >= 2.1.0-1')
+OPTDEPENDS=('gtk+ >= 3.6.4-1' 'xorg_libs >= 7.7-3')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: ghostscript (GPL Ghostscript)
+${NAME}:
+${NAME}: GPL Ghostscript is an interpreter of Adobe Systems' PostScript(tm)
+${NAME}: and Portable Document Format (PDF) languages. Ghostscript is an
+${NAME}: essential part of the printing subsystem, taking PostScript output
+${NAME}: from applications and converting it into an appropriate printer or
+${NAME}: display format. Ghostscript supports many printers directly, and
+${NAME}: more are supported through add-on packages.
+${NAME}:
+${NAME}: Homepage: http://www.ghostscript.com
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://downloads.ghostscript.com/public/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCCOPY[0]="GPL3"
+
+build0()
+{
+# force it to use system libs
+rm -rf jpeg libpng zlib jasper expat tiff lcms freetype
+(
+  cd ijs
+  chmod +x configure
+  CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+  ./configure \
+   --build="${ARCH}-slackware-linux" \
+   --disable-dependency-tracking \
+   --enable-static=no \
+   --enable-shared=yes \
+   --prefix="${SYS_DIR[usr]}" \
+   --mandir="${SYS_DIR[man]}" \
+   --sysconfdir="${SYS_DIR[etc]}" \
+   --libdir="${SYS_DIR[lib]}" \
+   --localstatedir="${SYS_DIR[var]}" \
+   --with-pkgconfigdir="${SYS_DIR[share]}/pkgconfig"
+ make ${JOBS}
+ make install DESTDIR="${PKG}"
+)
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix="${SYS_DIR[usr]}" \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --disable-compile-inits \
+ --enable-dynamic \
+ --enable-fontconfig \
+ --enable-freetype \
+ --without-luratech \
+ --with-ijs \
+ --with-jbig2dec \
+ --with-omni \
+ --with-x \
+ --with-drivers=ALL \
+ --with-fontpath="/usr/share/fonts/Type1:/usr/share/fonts" \
+ --with-install-cups \
+ --with-system-libtiff
+make ${JOBS}
+make install soinstall DESTDIR="${PKG}"
+doc doc/AUTHORS
+license LICENSE
+#FIXME: compat
+(
+  cd ${PKG}${SYS_DIR[lib]}/exec/cups/filter
+  ln -sf gstoraster pstoraster
+)
+rm -rf \
+ ${PKG}${SYS_DIR[bin]}/ijs_*_example \
+ ${PKG}${SYS_DIR[share]}/application-data/ghostscript/${SRCVERS[0]}/{doc,examples}
+}

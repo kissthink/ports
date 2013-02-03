@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=sudo
 VERSION=1.8.6p4
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -32,11 +32,30 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+config etc/sudoers.new
+rm -f etc/sudoers.new
+EOF
+
 # Sources
 
 SRCNAME[0]=${NAME}
 SRCVERS[0]=${VERSION}
 SRCPACK[0]=http://www.sudo.ws/sudo/dist/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="ISC"
 
 build0()
 {
@@ -45,34 +64,44 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --build="${ARCH}-slackware-linux" \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --libexecdir=/usr/lib$(libdirsuffix)/plugins/sudo \
- --localstatedir=/var \
- --sbindir=/usr/sbin \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --libexecdir="${SYS_DIR[lib]}"/plugins/sudo \
+ --localstatedir="${SYS_DIR[var]}" \
+ --sbindir="${SYS_DIR[sbin]}" \
+ --with-docdir="${SYS_DIR[doc]}/sudo" \
+ --with-timedir="${SYS_DIR[run]}/sudo" \
+ --with-passprompt="[sudo] password for %p: " \
+ --with-logging="syslog" \
+ --with-logfac="authpriv" \
+ --with-ignore-dot \
+ --with-tty-tickets \
  --with-env-editor \
  --disable-pam-session \
  --with-pam=no \
- --with-timedir=/var/db/sudo
-#FIXME: pam
+#FIXME: pam (--with-pam-login)
+#FIXME: default editor (--with-editor=/usr/bin/vi|/usr/bin/nano ?)
+#NOTE: --with-linux-audit ? 
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc doc/CONTRIBUTORS doc/UPGRADE doc/sample.{sudo.conf,sudoers}
 changelog NEWS
-license doc/LICENSE
-install.dat doinst.sh ${PKG}/install
+install.dir ${PKG}${SYS_DIR[etc]}/tmpfiles.d
+install.dat sudo.conf.tmpfiles ${PKG}${SYS_DIR[etc]}/tmpfiles.d/sudo.conf
 (
-  cd ${PKG}/usr/bin
+  cd ${PKG}${SYS_DIR[bin]}
   chmod 4711 sudo
   ln -sf sudo sudoedit
 )
 rm -f ${PKG}${SYS_DIR[man]}/man8/sudoedit.8
 echo ".so man8/sudo.8" > ${PKG}${SYS_DIR[man]}/man8/sudoedit.8
-chmod 0755 ${PKG}/usr/lib$(libdirsuffix)/plugins/sudo/*.so
+chmod 0755 ${PKG}${SYS_DIR[lib]}/plugins/sudo/*.so
 mv \
- ${PKG}/etc/sudoers \
- ${PKG}/etc/sudoers.new
-rm -rf ${PKG}/usr/share/doc
+ ${PKG}${SYS_DIR[etc]}/sudoers \
+ ${PKG}${SYS_DIR[etc]}/sudoers.new
+rm -rf \
+ ${PKG}${SYS_DIR[run]} \
+ ${PKG}${SYS_DIR[share]}/doc
 }

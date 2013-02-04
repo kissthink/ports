@@ -7,7 +7,7 @@ source /usr/src/ports/Build/build.sh
 NAME=vi
 MAJOR=7.3
 VERSION=${MAJOR}.773
-BUILD=1
+BUILD=2
 
 # Description
 

@@ -7,7 +7,7 @@ source /usr/src/ports/Build/build.sh
 NAME=vim
 MAJOR=7.3
 VERSION=${MAJOR}.773
-BUILD=4
+BUILD=5
 
 # Description
 
@@ -38,7 +38,7 @@ EOF
 SRCNAME[0]=${NAME}
 SRCVERS[0]=${MAJOR}
 SRCPACK[0]=http://ftp.vim.org/pub/vim/unix/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
-SRCROOT[0]=${NAME}73
+SRCROOT[0]=${SRCNAME[0]}73
 
 # Syntax file updates: ftp://ftp.vim.org/pub/vim/runtime/syntax
 # autoconf: cd src/auto ; autoconf ../configure.in > configure
@@ -48,13 +48,13 @@ configure()
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var/lib/vim \
- --localedir=/usr/share/locale \
- --with-compiledby="<cjsthompson@gmail.com>" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}/lib/vim" \
+ --localedir="${SYS_DIR[share]}/locale" \
+ --with-compiledby="Tightware GNU/Linux" \
  --with-features=huge \
  ${*}
 }
@@ -75,14 +75,13 @@ configure \
  --enable-acl \
  --enable-multibyte \
  --enable-cscope
-make ${JOBS} VIMRCLOC="/etc" VIMRTLOC="/usr/share/vim" VIMRUNTIMEDIR="/usr/share/vim"
-make install VIMRCLOC="/etc" VIMRTLOC="/usr/share/vim" DESTDIR="${PKG}"
+make ${JOBS} VIMRCLOC="${SYS_DIR[etc]}" VIMRTLOC="${SYS_DIR[share]}/vim" VIMRUNTIMEDIR="${SYS_DIR[share]}/vim"
+make install VIMRCLOC="${SYS_DIR[etc]}" VIMRTLOC="${SYS_DIR[share]}/vim" DESTDIR="${PKG}"
 doc README.txt
-( cd ${DOC} ; ln -sf /usr/share/vim/doc/uganda.txt COPYING )
 install.dat doinst.sh ${PKG}/install
 install.dir ${PKG}/etc
-install.cfg runtime/vimrc_example.vim ${PKG}/etc/vimrc.new
-install.dat runtime/rgb.txt ${PKG}/usr/share/vim
+install.dat runtime/rgb.txt ${PKG}${SYS_DIR[share]}/vim
+install.cfg runtime/vimrc_example.vim ${PKG}${SYS_DIR[etc]}/vimrc.new
 (
   cd ${PKG}${SYS_DIR[man]}
   for file in $(find . -name evim.1); do
@@ -96,7 +95,7 @@ install.dat runtime/rgb.txt ${PKG}/usr/share/vim
   done
 )
 (
-  cd ${PKG}/usr/share/vim
+  cd ${PKG}${SYS_DIR[share]}/vim
   rm -rf \
    *vimrc_example.vim \
    */*cmake.vim \
@@ -114,11 +113,11 @@ build1()
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS}
 doc MAINTAINERS FAQ
 changelog NEWS

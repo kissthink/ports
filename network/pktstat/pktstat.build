@@ -6,7 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=pktstat
 VERSION=1.8.5
-BUILD=1
+BUILD=2
+DEPENDS=('tcpip >= 20130127-1' 'usb >= 1.0.14-1')
 
 # Description
 
@@ -44,11 +45,11 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 changelog NEWS

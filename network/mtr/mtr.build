@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=mtr
 VERSION=0.82
-BUILD=1
-DEPENDS=('gtk+ >= 2.24.10-1')
+BUILD=2
+DEPENDS=('gtk+ >= 2.24.14-1')
 
 # Description
 
@@ -42,21 +42,22 @@ SRCCOPY[0]="GPL2"
 
 build0()
 {
+LDFLAGS="-Wl,--as-needed" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --sbindir=/usr/bin
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --sbindir="${SYS_DIR[bin]}"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-install.dir ${PKG}/usr/share/{applications,icons/hicolor/48x48/apps}
-install.dat mtr.desktop ${PKG}/usr/share/applications
-install.dat mtr.png ${PKG}/usr/share/icons/hicolor/48x48/apps
+install.dir ${PKG}${SYS_DIR[share]}/{applications,icons/hicolor/48x48/apps}
+install.dat mtr.desktop ${PKG}${SYS_DIR[share]}/applications
+install.dat mtr.png ${PKG}${SYS_DIR[share]}/icons/hicolor/48x48/apps
 }

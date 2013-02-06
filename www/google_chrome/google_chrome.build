@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=google_chrome
-VERSION=24.0.1312.57
+VERSION=24.0.1312.68
 BUILD=1
 DEPENDS=('gtk+ >= 2.24.14-1' 'seamonkey_solibs >= 2.15-1' 'gconf >= 3.2.5-1')
 
@@ -71,7 +71,7 @@ for size in 256 128 64 48 32 24 22 16; do
 done
 # Delete superfluous stuff
 rm -rf \
- ${PKG}/etc \
- ${PKG}/usr/share/gnome-control-center \
+ ${PKG}${SYS_DIR[etc]} \
+ ${PKG}${SYS_DIR[share]}/gnome-control-center \
  ${PKG}/opt/google/chrome/google-chrome.desktop~
 }

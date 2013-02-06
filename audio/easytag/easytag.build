@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=easytag
-VERSION=20130124
+VERSION=20130207
 BUILD=1
 DEPENDS=('gtk+ >= 2.24.14-1' 'id3lib >= 3.8.3-1' 'libvorbis >= 1.3.3-1' 'flac >= 1.2.1-1' 'mp4v2 >= 1.9.1-1')
 
@@ -28,7 +28,7 @@ ${NAME}: tagging, file renaming from the tags, recursive tagging, playlist
 ${NAME}: generation and many more features. It has an easy to use Gtk+-based
 ${NAME}: interface.
 ${NAME}:
-${NAME}:
+${NAME}: Homepage: http://projects.gnome.org/easytag
 ${NAME}:
 ${NAME}:
 EOF
@@ -54,11 +54,10 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --libdir="${SYS_DIR[lib]}" \
  --localstatedir="${SYS_DIR[var]}" \
  --docdir="${SYS_DIR[doc]}/${SRCNAME[0]}-${SRCVERS[0]}" \
- --htmldir="${SYS_DIR[html]}/${SRCNAME[0]}" \
- --enable-html-docs
+ --htmldir="${SYS_DIR[html]}/${SRCNAME[0]}"
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
-doc THANKS USERS-GUIDE
+doc THANKS
 changelog ChangeLog
 rm -f ${DOC}/{TODO,HACKING}
 }

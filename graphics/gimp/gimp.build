@@ -6,9 +6,9 @@ source /usr/src/ports/Build/build.sh
 
 NAME=gimp
 MAJOR=2.8
-VERSION=${MAJOR}.2
+VERSION=${MAJOR}.4
 BUILD=1
-DEPENDS=('gtk+ >= 2.24.10-1' 'gegl >= 0.2.0-1' 'compat_lcms >= 1.19-1')
+DEPENDS=('gtk+ >= 2.24.14-1' 'gegl >= 0.2.0-1' 'compat_lcms >= 1.19-1')
 
 # Description
 
@@ -51,26 +51,29 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var/lib \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-html-dir="${SYS_DIR[html]}" \
  --with-sendmail=/usr/bin/sendmail \
  --without-print \
- --disable-python
+ --disable-python \
+ --enable-mp \
+ --enable-gimp-console
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-# No idea wtf is wrong with this
-#(
-#  cd ${PKG}/usr/man/man1
-#  echo ".so man/man1/gimptool-2.0.1" > gimptool.1
-#  echo ".so man/man1/gimpremote-2.6.1" > gimp-remote.1
-#  echo ".so man/man1/gimp-2.6.1" > gimp.1
-#  cd ${PKG}/usr/man/man5
-#  echo ".so man/man5/gimprc-2.6.5" > gimprc.5
-#)
+#FIXME: enable printing
+(
+  cd ${PKG}${SYS_DIR[man]}/man1
+  echo ".so man1/gimptool-2.0.1" > gimptool.1
+  echo ".so man1/gimpremote-2.6.1" > gimp-remote.1
+  echo ".so man1/gimp-2.6.1" > gimp.1
+  cd ${PKG}${SYS_DIR[man]}/man5
+  echo ".so man5/gimprc-2.6.5" > gimprc.5
+)
+rm -rf ${PKG}${SYS_DIR[html]}
 }

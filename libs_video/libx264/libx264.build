@@ -4,9 +4,10 @@
 
 source /usr/src/ports/Build/build.sh
 
-NAME=x264
-VERSION=20120127
+NAME=libx264
+VERSION=20130206
 BUILD=1
+DEPENDS=('xorg_libs >= 7.7-3')
 
 # Description
 
@@ -19,7 +20,7 @@ cat > ${PKG}/install/slack-desc <<EOF
 # customary to leave one space after the ':'.
 
 $(padd)|-----handy-ruler------------------------------------------------------|
-${NAME}: x264
+${NAME}: libx264
 ${NAME}:
 ${NAME}: A library for encoding video streams into the H.264/MPEG-4 AVC
 ${NAME}: format. This format is used by many web services such as Youtube,
@@ -34,25 +35,25 @@ EOF
 
 # Sources
 
-SRCNAME[0]=${NAME}
+SRCNAME[0]=x264
 SRCVERS[0]=${VERSION}
-SRCPACK[0]=${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+SRCPACK[0]=ftp://ftp.videolan.org/pub/x264/snapshots/last_${SRCNAME[0]}.tar.bz2
+SRCROOT[0]=${SRCNAME[0]}-snapshot-${SRCVERS[0]}-2245
 SRCCOPY[0]="GPL2"
 
 build0()
 {
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
- --prefix="/usr" \
- --libdir="/usr/lib$(libdirsuffix)" \
- --includedir="/usr/include/x264" \
+ --prefix="${SYS_DIR[usr]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --includedir="${SYS_DIR[include]}/x264" \
  --extra-cflags="${FLAGS}" \
  --enable-shared \
  --enable-pic \
  --enable-visualize
-make -j 2
+make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
-rm -f \
- ${PKG}/usr/lib$(libdirsuffix)/*.a
+#rm -f ${PKG}${SYS_DIR[lib]}/*.a
 }

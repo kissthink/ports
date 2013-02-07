@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=ffmpeg
-VERSION=0.11.1
+VERSION=1.1.2
 BUILD=1
-DEPENDS=('orc >= 0.4.16-1' 'lame >= 3.99.5-1' 'libtheora >= 1.1.1-1' 'speex >= 1.2rc1-1' 'xvidcore >= 1.3.2-1' 'schroedinger >= 1.0.11-1' 'libgsm >= 1.0.13-1' 'x264 >= 20120127-1' 'celt >= 0.11.3-1' 'libvpx >= 1.1.0-1')
+DEPENDS=('orc >= 0.4.16-1' 'lame >= 3.99.5-1' 'libtheora >= 1.1.1-1' 'speex >= 1.2rc1-1' 'xvidcore >= 1.3.2-1' 'schroedinger >= 1.0.11-1' 'libgsm >= 1.0.13-1' 'x264 >= 20130206-1' 'celt >= 0.11.3-1' 'opus >= 0.9.14-1' 'libvpx >= 1.1.0-1' 'libva >= 1.1.0-1' 'libvdpau >= 0.5-1')
 
 # Description
 
@@ -20,7 +20,7 @@ cat > ${PKG}/install/slack-desc <<EOF
 # customary to leave one space after the ':'.
 
 $(padd)|-----handy-ruler------------------------------------------------------|
-${NAME}: FFMPEG
+${NAME}: ffmpeg
 ${NAME}:
 ${NAME}: FFMPEG is a complete solution to record, convert and stream audio and
 ${NAME}: video. It includes libavcodec, the leading audio/video codec library.
@@ -53,14 +53,14 @@ case "$(cpufamily ${ARCH})" in
   ;;
 esac
 ./configure \
- --extra-cflags="-I/usr/include/x264" \
+ --extra-cflags="-I${SYS_DIR[include]}/x264" \
  --disable-static \
  --enable-shared \
  --disable-debug \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --libdir=/usr/lib$(libdirsuffix) \
- --datadir=/usr/share/application-data/${SRCNAME[0]} \
+ --libdir="${SYS_DIR[lib]}" \
+ --datadir="${SYS_DIR[share]}/application-data/${SRCNAME[0]}" \
  --enable-gpl \
  --enable-version3 \
  --enable-nonfree \
@@ -70,14 +70,14 @@ esac
  --disable-outdev=oss \
  --enable-runtime-cpudetect \
  --enable-pthreads \
- --enable-postproc \
- --enable-swscale \
- --enable-avfilter \
+ --enable-vaapi \
+ --enable-vdpau \
  --enable-x11grab \
  --enable-zlib \
  --enable-bzlib \
  --enable-gnutls \
  --enable-openal \
+ --enable-libbluray \
  --enable-libmp3lame \
  --enable-libspeex \
  --enable-libtheora \
@@ -92,7 +92,9 @@ esac
  --enable-libfreetype \
  --enable-libcelt \
  --enable-libv4l2 \
- --enable-libx264
+ --enable-libx264 \
+ --enable-libopus
+# --enable-libsoxr \
 # --enable-avisynth \
 # --enable-libamr-nb \
 # --enable-libamr-wb \
@@ -111,13 +113,8 @@ esac
 # --enable-libxavs \
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
-doc CREDITS RELEASE
+doc CREDITS MAINTAINERS doc/RELEASE_NOTES
 changelog Changelog
 license LICENSE
-if [[ "${ARCH}" == "x86_64" ]]; then
-  mv \
-  ${PKG}/usr/lib/*.so* \
-  ${PKG}/usr/lib$(libdirsuffix)
-  rmdir ${PKG}/usr/lib
-fi
+rm -rf ${PKG}${SYS_DIR[share]}/application-data/${SRCNAME[0]}/examples
 }

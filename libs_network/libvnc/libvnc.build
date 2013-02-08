@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=libvnc
-VERSION=0.9.8.2
+VERSION=0.9.9
 BUILD=1
-DEPENDS=('gnutls >= 3.0.15-1' 'libjpeg >= 1.2.0-1')
+DEPENDS=('gnutls >= 3.1.6-1' 'libjpeg >= 1.2.1-1')
 
 # Description
 
@@ -46,14 +46,22 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
+ --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
-make ${JOBS}
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --without-ssl \
+ --without-crypto \
+ --with-zlib="${SYS_DIR[usr]}" \
+ --with-jpeg="${SYS_DIR[usr]}" \
+ --with-png="${SYS_DIR[usr]}" \
+ --with-avahi="${SYS_DIR[usr]}" \
+ --with-gnutls="${SYS_DIR[usr]}"
+make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS

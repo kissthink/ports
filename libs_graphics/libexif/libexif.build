@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=libexif
 VERSION=0.6.21
-BUILD=1
-DEPENDS=('libjpeg >= 8a-1')
+BUILD=2
+DEPENDS=('libjpeg >= 1.2.0-1')
 
 # Description
 
@@ -49,18 +49,17 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
  --docdir="${SYS_DIR[html]}/${SRCNAME[0]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-rm -rf \
- ${PKG}/usr/share/doc
+rm -rf ${PKG}${SYS_DIR[share]}/doc
 }
 
 SRCNAME[1]=fbida
@@ -70,10 +69,10 @@ SRCPACK[1]=http://dl.bytesex.org/releases/fbida/${SRCNAME[1]}-${SRCVERS[1]}.tar.
 build1()
 {
 make ${JOBS} verbose=yes \
- OPTS="${FLAGS} -I${PKG}/usr/include" \
- EXTRA_LDFLAGS="-L${PKG}/usr/lib$(libdirsuffix)"
-make install DESTDIR="${PKG}" prefix="/usr"
+ OPTS="${FLAGS} -I${PKG}${SYS_DIR[include]}" \
+ EXTRA_LDFLAGS="-L${PKG}${SYS_DIR[lib]}"
+make install DESTDIR="${PKG}" prefix="${SYS_DIR[usr]}"
 rm -f \
- ${PKG}/usr/bin/fb{i,gs} \
+ ${PKG}${SYS_DIR[bin]}/fb{i,gs} \
  ${PKG}${SYS_DIR[man]}/man1/fb{i,gs}.1
 }

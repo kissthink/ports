@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=exiv2
 VERSION=0.23
-BUILD=1
-DEPENDS=('expat >= 2.0.1-1')
+BUILD=2
+DEPENDS=('expat >= 2.1.0-1')
 
 # Description
 
@@ -49,15 +49,14 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-rpath \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS}
 make install DESTDIR="${PKG}"
-doc doc/cmd.txt doc/cmdxmp.txt
 changelog doc/ChangeLog
 chmod 0755 \
- ${PKG}/usr/lib$(libdirsuffix)/*.so*
+ ${PKG}${SYS_DIR[lib]}/*.so*
 }

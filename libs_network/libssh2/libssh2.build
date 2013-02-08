@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=libssh2
 VERSION=1.4.3
-BUILD=1
+BUILD=2
 DEPENDS=('libgcrypt >= 1.5.0-1')
 
 # Description
@@ -42,7 +42,7 @@ SRCCOPY[0]="BSD"
 
 build0()
 {
-CPPFLAGS="-I/usr/include/gpg-error -I/usr/include/gcrypt" \
+CPPFLAGS="-I${SYS_DIR[include]}/gpg-error -I${SYS_DIR[include]}/gcrypt" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -50,12 +50,12 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-rpath \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --includedir=/usr/include/ssh2 \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --includedir="${SYS_DIR[include]}/ssh2" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-libgcrypt \
  --with-libz
 make ${JOBS}

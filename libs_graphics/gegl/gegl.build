@@ -7,9 +7,9 @@ source /usr/src/ports/Build/build.sh
 NAME=gegl
 MAJOR=0.2
 VERSION=${MAJOR}.0
-BUILD=2
-DEPENDS=('glib >= 2.32.2-1')
-OPTDEPENDS=('ffmpeg >= 0.11.1-1')
+BUILD=3
+DEPENDS=('glib >= 2.34.3-1')
+OPTDEPENDS=('ffmpeg >= 1.1.2-1')
 
 # Description
 
@@ -52,18 +52,18 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
 rm -rf \
  ${PKG}/tmp \
- ${PKG}/usr/lib$(libdirsuffix)/*.la
+ ${PKG}${SYS_DIR[lib]}/*.la
 }
 
 SRCNAME[1]=${NAME}
@@ -73,8 +73,8 @@ SRCCOPY[1]="GPL3 LGPL3"
 
 build1()
 {
-BABL_CFLAGS="-I${PKG}/usr/include/babl-0.1" \
-BABL_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lbabl-0.1 -lm" \
+BABL_CFLAGS="-I${PKG}${SYS_DIR[include]}/babl-0.1" \
+BABL_LIBS="-L${PKG}${SYS_DIR[lib]} -lbabl-0.1 -lm" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -82,11 +82,11 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-html-dir="${SYS_DIR[html]}" \
  --disable-docs
 make ${JOBS} V=1

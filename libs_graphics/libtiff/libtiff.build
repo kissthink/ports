@@ -7,8 +7,8 @@ source /usr/src/ports/Build/build.sh
 NAME=libtiff
 MAJOR=4.0
 VERSION=${MAJOR}.3
-BUILD=1
-DEPENDS=('libjpeg >= 1.2.0-1')
+BUILD=2
+DEPENDS=('libjpeg >= 1.2.1-1')
 
 # Description
 
@@ -50,31 +50,30 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-rpath \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --includedir=/usr/include/tiff-${MAJOR} \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --includedir="${SYS_DIR[include]}/tiff-${MAJOR}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-docdir="${SYS_DIR[html]}"
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 changelog ChangeLog
 license COPYRIGHT
 (
-  cd ${PKG}/usr/man/man3
+  cd ${PKG}${SYS_DIR[man]}/man3
   for manpage in *.3tiff; do
     mv ${manpage} $(basename ${manpage} .3tiff).3
   done
 )
 #FIXME: compat, this should dissapear one of these days
 (
-  cd ${PKG}/usr/include
-  for header in ${PKG}/usr/include/tiff-${MAJOR}/*.h; do
-    ln -sf /usr/include/tiff-${MAJOR}/${header##*/}
+  cd ${PKG}${SYS_DIR[include]}
+  for header in ${PKG}${SYS_DIR[include]}/tiff-${MAJOR}/*.h; do
+    ln -sf ${SYS_DIR[include]}/tiff-${MAJOR}/${header##*/}
   done
 )
 # Let's get rid of the html stuff as it doesn't add much
-rm -rf \
- ${PKG}/usr/share
+rm -rf ${PKG}${SYS_DIR[html]}
 }

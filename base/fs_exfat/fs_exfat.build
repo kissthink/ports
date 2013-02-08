@@ -1,0 +1,65 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=fs_exfat
+VERSION=1.0.1
+BUILD=1
+DEPENDS=('fuse >= 2.9.2-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: fs_exfat
+${NAME}:
+${NAME}: A free exFAT file system implementation which uses FUSE.
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=fuse-exfat
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://exfat.googlecode.com/files/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="GPL3"
+
+build0()
+{
+scons CFLAGS="${FLAGS}" ${JOBS} install DESTDIR="${PKG}${SYS_DIR[sbin]}"
+changelog ChangeLog
+install.dir ${PKG}${SYS_DIR[man]}/man8
+install.man fuse/mount.exfat-fuse.8 ${PKG}${SYS_DIR[man]}/man8
+echo ".so man8/mount.exfat-fuse.8" > ${PKG}${SYS_DIR[man]}/man8/mount.exfat.8
+}
+
+SRCNAME[1]=exfat-utils
+SRCVERS[1]=${VERSION}
+SRCPACK[1]=http://exfat.googlecode.com/files/${SRCNAME[1]}-${SRCVERS[1]}.tar.gz
+SRCCOPY[1]="GPL3"
+
+build1()
+{
+scons CFLAGS="${FLAGS}" ${JOBS} install DESTDIR="${PKG}${SYS_DIR[sbin]}"
+changelog ChangeLog
+install.dir ${PKG}${SYS_DIR[man]}/man8
+install.man */*.8 ${PKG}${SYS_DIR[man]}/man8
+echo ".so man8/exfatfsck.8" > ${PKG}${SYS_DIR[man]}/man8/fsck.exfat.8
+echo ".so man8/mkexfatfs.8" > ${PKG}${SYS_DIR[man]}/man8/mkfs.exfat.8
+}

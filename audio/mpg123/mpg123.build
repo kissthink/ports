@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=mpg123
 VERSION=1.14.4
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -57,13 +57,12 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-shared=yes \
  --enable-debug=no \
  --enable-modules=yes \
- --enable-aligncheck=no \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --includedir=/usr/include/${NAME} \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --includedir="${SYS_DIR[include]}/${NAME}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --enable-gapless=yes \
  --enable-fifo=yes \
  --enable-ipv6=yes \
@@ -91,12 +90,12 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --includedir=/usr/include/${NAME} \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --includedir="${SYS_DIR[include]}/${NAME}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS} CFLAGS+="${FLAGS}"
 make install DESTDIR=${PKG}
 doc AUTHORS
@@ -114,12 +113,12 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --includedir=/usr/include/${NAME} \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --includedir="${SYS_DIR[include]}/${NAME}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS} CFLAGS+="${FLAGS}"
 make install DESTDIR=${PKG}
 changelog Changelog

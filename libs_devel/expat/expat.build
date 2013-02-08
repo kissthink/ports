@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=expat
 VERSION=2.1.0
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -45,9 +45,10 @@ cmake \
 -DCMAKE_CXX_FLAGS:STRING="${FLAGS}" \
 -DCMAKE_C_FLAGS:STRING="${FLAGS}" \
 -DCMAKE_VERBOSE_MAKEFILE:BOOL="on" \
--DCMAKE_INSTALL_PREFIX:PATH="/usr" \
--DMAN_INSTALL_DIR:PATH="/usr/man" \
--DLIB_INSTALL_DIR:PATH="/usr/lib$(libdirsuffix)" \
+-DCMAKE_INSTALL_PREFIX:PATH="${SYS_DIR[usr]}" \
+-DMAN_INSTALL_DIR:PATH="${SYS_DIR[man]}" \
+-DLIB_INSTALL_DIR:PATH="${SYS_DIR[lib]}" \
+-DPKC_INSTALL_DIR:PATH="${SYS_DIR[share]}/pkgconfig" \
 -DBUILD_examples:BOOL="off" \
 -DBUILD_tests:BOOL="off" \
 CMakeLists.txt

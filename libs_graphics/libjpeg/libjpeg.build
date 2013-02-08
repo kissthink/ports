@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=libjpeg
-VERSION=1.2.0
+VERSION=1.2.1
 BUILD=1
 
 # Description
@@ -34,7 +34,7 @@ EOF
 
 # Sources
 
-JPGLIBS="${PKG}/usr/lib$(libdirsuffix)"
+JPGLIBS="${PKG}${SYS_DIR[lib]}"
 
 SRCNAME[0]=${NAME}-turbo
 SRCVERS[0]=${VERSION}
@@ -49,17 +49,17 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-dependency-tracking \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-jpeg8
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc README
 changelog ChangeLog.txt
-rm -rf ${PKG}/usr/share
+rm -rf ${PKG}${SYS_DIR[share]}
 }
 
 SRCNAME[1]=jpegoptim
@@ -69,17 +69,17 @@ SRCCOPY[1]="GPL2"
 
 build1()
 {
-LD_LIBRARY_PATH="${PKG}/usr/lib$(libdirsuffix)" \
+LD_LIBRARY_PATH="${PKG}${SYS_DIR[lib]}" \
 LDFLAGS="-L${JPGLIBS}" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --with-libjpeg="${PKG}/usr/include"
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --with-libjpeg="${PKG}${SYS_DIR[include]}"
 make ${JOBS}
 make install INSTALL_ROOT="${PKG}"
 doc README
@@ -92,17 +92,17 @@ SRCCOPY[2]="GPL2"
 
 build2()
 {
-LD_LIBRARY_PATH="${PKG}/usr/lib$(libdirsuffix)" \
+LD_LIBRARY_PATH="${PKG}${SYS_DIR[lib]}" \
 LDFLAGS="-L${JPGLIBS}" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --with-libjpeg="${PKG}/usr/include"
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --with-libjpeg="${PKG}${SYS_DIR[include]}"
 make ${JOBS}
 make install INSTALL_ROOT="${PKG}"
 doc README

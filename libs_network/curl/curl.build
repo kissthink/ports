@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=curl
-VERSION=7.28.0
+VERSION=7.29.0
 BUILD=1
-DEPENDS=('gnutls >= 3.1.1-1' 'ca_certificates >= 20111211-1')
+DEPENDS=('gnutls >= 3.1.6-1' 'ca_certificates >= 20130119-1')
 
 # Description
 
@@ -49,14 +49,14 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-debug \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --without-librtmp \
  --without-ssl \
- --with-gnutls=/usr \
+ --with-gnutls="${SYS_DIR[usr]}" \
  --disable-ldap \
  --disable-ldaps \
  --enable-ipv6 \
@@ -68,6 +68,6 @@ make ${JOBS}
 make install DESTDIR="${PKG}"
 doc docs/THANKS
 changelog CHANGES
-install.dir ${PKG}/usr/share/aclocal
-install.dat docs/libcurl/libcurl.m4 ${PKG}/usr/share/aclocal
+install.dir ${PKG}${SYS_DIR[share]}/aclocal
+install.dat docs/libcurl/libcurl.m4 ${PKG}${SYS_DIR[share]}/aclocal
 }

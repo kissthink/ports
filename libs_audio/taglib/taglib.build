@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=taglib
 VERSION=1.8
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -28,7 +28,7 @@ ${NAME}: popular audio formats. Currently it supports both ID3v1 and ID3v2 for
 ${NAME}: MP3 files, Ogg Vorbis comments and ID3 tags and Vorbis comments in
 ${NAME}: FLAC files.
 ${NAME}:
-${NAME}: Homepage: http://developer.kde.org/~wheeler/taglib.html
+${NAME}: Homepage: http://taglib.github.com
 ${NAME}:
 EOF
 
@@ -45,16 +45,16 @@ cmake \
 -DCMAKE_CXX_FLAGS:STRING="${FLAGS}" \
 -DCMAKE_C_FLAGS:STRING="${FLAGS}" \
 -DCMAKE_VERBOSE_MAKEFILE:BOOL="on" \
--DCMAKE_INSTALL_PREFIX:PATH="/usr" \
--DEXEC_INSTALL_PREFIX:PATH="/usr" \
--DBIN_INSTALL_DIR:PATH="/usr/bin" \
--DINCLUDE_INSTALL_DIR:PATH="/usr/include" \
--DLIB_INSTALL_DIR:PATH="/usr/lib" \
--DLIB_SUFFIX:STRING="$(libdirsuffix)" \
+-DCMAKE_INSTALL_PREFIX:PATH="${SYS_DIR[usr]}" \
+-DEXEC_INSTALL_PREFIX:PATH="${SYS_DIR[usr]}" \
+-DBIN_INSTALL_DIR:PATH="${SYS_DIR[bin]}" \
+-DINCLUDE_INSTALL_DIR:PATH="${SYS_DIR[include]}" \
+-DLIB_INSTALL_DIR:PATH="${SYS_DIR[lib]}" \
+-DPKGCONFIG_INSTALL_DIR:PATH="${SYS_DIR[share]}/pkgconfig" \
 CMakeLists.txt
 make
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-rm -rf ${PKG}/usr/bin
+rm -rf ${PKG}${SYS_DIR[bin]}
 }

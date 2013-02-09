@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=cgroup
 VERSION=0.38
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -32,6 +32,52 @@ ${NAME}: Homepage: http://libcg.sourceforge.net
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+# Leave any new rc files with the same permissions as the old ones:
+if [ -e etc/rc.d/rc.cgconfig ]; then
+  if [ -x etc/rc.d/rc.cgconfig ]; then
+    chmod 755 etc/rc.d/rc.cgconfig.new
+  else
+    chmod 644 etc/rc.d/rc.cgconfig.new
+  fi
+fi
+if [ -e etc/rc.d/rc.cgred ]; then
+  if [ -x etc/rc.d/rc.cgred ]; then
+    chmod 755 etc/rc.d/rc.cgred.new
+  else
+    chmod 644 etc/rc.d/rc.cgred.new
+  fi
+fi
+
+# Then config() them:
+config etc/rc.d/rc.cgconfig.new
+config etc/rc.d/rc.cgred.new
+
+# config() the other configuration files:
+config etc/cgroup/cgconfig.conf.new
+config etc/cgroup/cgred.conf.new
+config etc/cgroup/cgrules.conf.new
+config etc/cgroup/cgsnapshot_blacklist.conf.new
+
+# If there are already installed config files, get rid of the .new ones.
+# There will still be fresh samples in the docs.
+rm -f etc/cgroup/cgconfig.conf.new etc/cgroup/cgred.conf.new etc/cgroup/cgrules.conf.new etc/cgroup/cgsnapshot_blacklist.conf.new
+EOF
+
 # Sources
 
 SRCNAME[0]=libcgroup
@@ -41,6 +87,7 @@ SRCCOPY[0]="LGPL21"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -48,23 +95,27 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --enable-cgred-socket="/run/cgred/cgred.socket" \
  --enable-pam=no
+#FIXME: systemd --enable-opaque-hierarchy="name:systemd"
 make ${JOBS}
 make install DESTDIR="${PKG}"
-doc README README_daemon
-rmdir \
- ${PKG}/usr/lib$(libdirsuffix)/security
-install.dir ${PKG}/etc/{rc.d,cgroup}
-install.dat doinst.sh ${PKG}/install
+doc README{,_{daemon,systemd}}
+install.dir ${PKG}/etc/{rc.d,cgroup,tmpfiles.d}
+install.dat cgroup.conf.tmpfiles ${PKG}/etc/tmpfiles.d/cgroup.conf
 install.dat scripts/init.d/cgconfig ${PKG}/etc/rc.d/rc.cgconfig.new
 install.dat scripts/init.d/cgred ${PKG}/etc/rc.d/rc.cgred.new
-install.dat samples/cgconfig.conf ${PKG}/etc/cgroup/cgconfig.conf.new
 install.dat samples/cgred.conf ${PKG}/etc/cgroup/cgred.conf.new
+install.dat samples/cgconfig.conf ${PKG}/etc/cgroup/cgconfig.conf.new
 install.dat samples/cgrules.conf ${PKG}/etc/cgroup/cgrules.conf.new
 install.dat samples/cgsnapshot_blacklist.conf ${PKG}/etc/cgroup/cgsnapshot_blacklist.conf.new
+install.dir ${PKG}${SYS_DIR[systemdsystemunitdir]}
+install.dat dist/cgconfig.service ${PKG}${SYS_DIR[systemdsystemunitdir]}
+#FIXME: PAM
+rm -rf ${PKG}${SYS_DIR[lib]}/security
 }

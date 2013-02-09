@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=ladspa
 VERSION=1.13
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -45,10 +45,10 @@ build0()
 (
 cd src
 make targets OPTS="${CFLAGS}" \
- INSTALL_PLUGINS_DIR="/usr/lib$(libdirsuffix)/ladspa/"
+ INSTALL_PLUGINS_DIR="${SYS_DIR[lib]}/plugins/ladspa/"
 make install \
- INSTALL_PLUGINS_DIR="${PKG}/usr/lib$(libdirsuffix)/ladspa/" \
- INSTALL_INCLUDE_DIR="${PKG}/usr/include/" \
- INSTALL_BINARY_DIR="${PKG}/usr/bin/"
+ INSTALL_PLUGINS_DIR="${PKG}${SYS_DIR[lib]}/plugins/ladspa/" \
+ INSTALL_INCLUDE_DIR="${PKG}${SYS_DIR[include]}" \
+ INSTALL_BINARY_DIR="${PKG}${SYS_DIR[bin]}"
 )
 }

@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=google_talkplugin
 VERSION=3.10.2.0
-BUILD=1
+BUILD=2
 DEPENDS=('gtk+ >= 2.24.14-1')
 
 # Description
@@ -45,14 +45,14 @@ SRCOPTS[0]="pkgunpack"
 build0()
 {
 # Install cron script properly
-install.dir ${PKG}/etc/cron.daily
-install.bin opt/google/talkplugin/cron/google-talkplugin ${PKG}/etc/cron.daily
+install.dir ${PKG}${SYS_DIR[etc]}/cron.daily
+install.bin opt/google/talkplugin/cron/google-talkplugin ${PKG}${SYS_DIR[etc]}/cron.daily
 rm -rf ${PKG}/opt/google/talkplugin/cron
 # Install plugin properly
-rm -rf ${PKG}/usr/lib64
-install.dir ${PKG}/usr/lib$(libdirsuffix)/plugins/mozilla
+rm -rf ${PKG}${SYS_DIR[lib]}64
+install.dir ${PKG}${SYS_DIR[lib]}/plugins/mozilla
 (
-  cd ${PKG}/usr/lib$(libdirsuffix)/plugins/mozilla
+  cd ${PKG}${SYS_DIR[lib]}/plugins/mozilla
   ln -sf /opt/google/talkplugin/libnpgoogletalk.so
   ln -sf /opt/google/talkplugin/libnpgtpo3dautoplugin.so
 )

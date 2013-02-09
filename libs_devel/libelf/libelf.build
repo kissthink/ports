@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=libelf
 VERSION=0.8.13
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -44,16 +44,15 @@ build0()
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
  --infodir="${SYS_DIR[info]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --disable-compat
-make -j 2
-make install instroot="${PKG}"
+make ${JOBS}
+make install instroot="${PKG}" pkgdir="${SYS_DIR[share]}/pkgconfig"
 changelog ChangeLog
-rm -f \
- ${PKG}/usr/lib$(libdirsuffix)/libelf.a
+rm -f ${PKG}${SYS_DIR[lib]}/libelf.a
 }

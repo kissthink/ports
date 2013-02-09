@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=lftp
-VERSION=4.4.0
+VERSION=4.4.3
 BUILD=1
-DEPENDS=('gnutls >= 3.1.1-1')
+DEPENDS=('gnutls >= 3.1.6-1')
 
 # Description
 
@@ -33,6 +33,24 @@ ${NAME}: Homepage: http://lftp.yar.ru
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+config etc/conf.d/lftp.conf.new
+EOF
+
 # Sources
 
 SRCNAME[0]=${NAME}
@@ -42,35 +60,27 @@ SRCCOPY[0]="GPL3"
 
 build0()
 {
+sed -i 's|pkglibdir = $(libdir)/@PACKAGE@|pkglibdir = $(libdir)/plugins/@PACKAGE@|g' */Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc/conf.d \
- --libdir=/usr/lib$(libdirsuffix)/plugins \
+ --sysconfdir="${SYS_DIR[conf]}" \
+ --libdir="${SYS_DIR[lib]}" \
  --localstatedir=/var \
  --with-gnutls \
  --with-modules \
- --with-pager=/usr/bin/less
+ --with-pager="/usr/bin/less"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS FAQ THANKS
 changelog NEWS
-install.dat doinst.sh ${PKG}/install
-mv \
- ${PKG}/usr/share/${NAME} \
- ${PKG}/${SYS_DIR[doc]}/${NAME}-${VERSION}/scripts
 mv \
  ${PKG}/etc/conf.d/lftp.conf \
  ${PKG}/etc/conf.d/lftp.conf.new
-mv \
- ${PKG}/usr/lib$(libdirsuffix)/lftp \
- ${PKG}/usr/lib$(libdirsuffix)/plugins
-mv \
- ${PKG}/usr/lib$(libdirsuffix)/plugins/*.so* \
- ${PKG}/usr/lib$(libdirsuffix)
+rm -rf ${PKG}${SYS_DIR[share]}/${SRCNAME[0]}
 }

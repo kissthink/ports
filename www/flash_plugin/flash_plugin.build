@@ -6,9 +6,9 @@ source /usr/src/ports/Build/build.sh
 
 NAME=flash_plugin
 MAJOR=11
-VERSION=${MAJOR}.2.202.243
+VERSION=${MAJOR}.2.202.262
 BUILD=1
-DEPENDS=('gtk+ >= 2.24.10-1')
+DEPENDS=('gtk+ >= 2.24.14-1')
 
 # Description
 
@@ -42,21 +42,21 @@ SRCOPTS[0]="nosrcroot"
 
 URL=http://download.macromedia.com/pub/labs/flashplatformruntimes/flashplayer11
 if [ "$(uname -m)" == "x86_64" ]; then
-SRCPACK[0]=${URL}/install_flash_player_11_linux_x86_64.tar.gz
+SRCPACK[0]=${URL}/install_flash_player_11_linux.x86_64.tar.gz
 else
-SRCPACK[0]=${URL}/install_flash_player_11_linux_i386.tar.gz
+SRCPACK[0]=${URL}/install_flash_player_11_linux.i386.tar.gz
 fi
 
 build0()
 {
-install.dir ${PKG}/usr/lib$(libdirsuffix)/plugins/mozilla
-install.bin libflashplayer.so ${PKG}/usr/lib$(libdirsuffix)/plugins/mozilla
-install.dir ${PKG}/usr/bin
-install.bin usr/bin/flash-player-properties ${PKG}/usr/bin
-install.dir ${PKG}/usr/share/applications
+install.dir ${PKG}${SYS_DIR[lib]}/plugins/mozilla
+install.bin libflashplayer.so ${PKG}${SYS_DIR[lib]}/plugins/mozilla
+install.dir ${PKG}${SYS_DIR[bin]}
+install.bin usr/bin/flash-player-properties ${PKG}${SYS_DIR[bin]}
+install.dir ${PKG}${SYS_DIR[share]}/applications
 install.dat \
  usr/share/applications/flash-player-properties.desktop \
- ${PKG}/usr/share/applications
-install.dir ${PKG}/usr/share/icons/hicolor
-cp -r usr/share/icons/hicolor/* ${PKG}/usr/share/icons/hicolor
+ ${PKG}${SYS_DIR[share]}/applications
+install.dir ${PKG}${SYS_DIR[share]}/icons/hicolor
+cp -r usr/share/icons/hicolor/* ${PKG}${SYS_DIR[share]}/icons/hicolor
 }

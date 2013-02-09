@@ -32,6 +32,13 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+# Install the texinfo files
+if [ -x /usr/bin/install-info ]; then
+  /usr/bin/install-info --info-dir=${SYS_DIR[info]} ${SYS_DIR[info]}/inetutils.info.gz 2> /dev/null
+fi
+EOF
+
 # Sources
 
 SRCNAME[0]=libnl
@@ -41,6 +48,8 @@ SRCCOPY[0]="LGPL21"
 
 build0()
 {
+sed -i 's|pkglibdir = $(libdir)/@PACKAGE@|pkglibdir = $(libdir)/plugins/@PACKAGE@|g' \
+ Makefile.in */Makefile.in */*/Makefile.in */*/*/Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -48,11 +57,12 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/usr/share/net \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[share]}/net" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --with-pkgconfigdir="${SYS_DIR[share]}/pkgconfig"
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 changelog ChangeLog
@@ -65,17 +75,17 @@ SRCCOPY[1]="BSD3"
 
 build1()
 {
-CPPFLAGS="-I${PKG}/usr/include/libnl3" \
-LDFLAGS="-L${PKG}/usr/lib$(libdirsuffix)" \
+CPPFLAGS="-I${PKG}${SYS_DIR[include]}/libnl3" \
+LDFLAGS="-L${PKG}${SYS_DIR[lib]}" \
 CFLAGS="${FLAGS} ${CPPFLAGS}" CXXFLAGS="${FLAGS} ${CPPFLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --enable-ipv6 \
  --enable-bluetooth
 make ${JOBS}
@@ -83,13 +93,12 @@ make install DESTDIR="${PKG}"
 doc CREDITS
 changelog CHANGES
 (
-  cd ${PKG}/usr/man/man3
+  cd ${PKG}${SYS_DIR[man]}/man3
   for manpage in *.3pcap; do
     mv ${manpage} $(basename ${manpage} .3pcap).3
   done
 )
-rm -rf \
- ${PKG}/usr/lib$(libdirsuffix)/*.a
+rm -f ${PKG}${SYS_DIR[lib]}/*.a
 }
 
 SRCNAME[2]=tcp_wrappers
@@ -99,11 +108,11 @@ SRCROOT[2]=${SRCNAME[2]}_${SRCVERS[2]}
 
 build2()
 {
-make OPTS="${FLAGS}" REAL_DAEMON_DIR="/usr/sbin" linux
-make install DESTDIR="${PKG}" MANDIR="${SYS_DIR[man]}" LIBDIR="/usr/lib$(libdirsuffix)"
+make OPTS="${FLAGS}" REAL_DAEMON_DIR="${SYS_DIR[sbin]}" linux
+make install DESTDIR="${PKG}" MANDIR="${SYS_DIR[man]}" LIBDIR="${SYS_DIR[lib]}"
 doc README
 changelog CHANGES
-rm -f ${PKG}/usr/lib$(libdirsuffix)/libwrap.a
+rm -f ${PKG}${SYS_DIR[lib]}/libwrap.a
 }
 
 SRCNAME[3]=host
@@ -112,8 +121,13 @@ SRCPACK[3]=ftp://ftp.weird.com/pub/local/${SRCNAME[3]}-${SRCVERS[3]}.tar.gz
 
 build3()
 {
-make ${JOBS} COPTIM="${FLAGS}"
-make install DESTDIR="${PKG}"
+make ${JOBS} COPTIM="${FLAGS}" CONFDIR="${SYS_DIR[etc]}" \
+ PREFIX="${SYS_DIR[usr]}" MANDIR="${SYS_DIR[man]}/man1"
+make install DESTDIR="${PKG}" CONFDIR="${SYS_DIR[etc]}" \
+ PREFIX="${SYS_DIR[usr]}" MANDIR="${SYS_DIR[man]}/man1"
+for file in mxlookup nscheck nslookup rblookup; do
+  echo ".so man1/host.1" > ${PKG}${SYS_DIR[man]}/man1/${file}.1
+done
 }
 
 SRCNAME[4]=traceroute
@@ -125,12 +139,12 @@ build4()
 {
 make ${JOBS} CFLAGS+="${FLAGS}"
 make install DESTDIR="${PKG}" \
- prefix=/usr \
+ prefix="${SYS_DIR[usr]}" \
  mandir="${SYS_DIR[man]}"
 doc CREDITS
 changelog ChangeLog
 (
-  cd ${PKG}/usr/bin
+  cd ${PKG}${SYS_DIR[bin]}
   ln -sf traceroute traceroute6
   cd ${PKG}${SYS_DIR[man]}/man1
   echo ".so man1/traceroute.1" > traceroute6.1
@@ -144,7 +158,7 @@ SRCCOPY[5]="GPL2"
 
 build5()
 {
-make ${JOBS} CFLAGS="${FLAGS} -I/usr/include/idn" HAVE_LIBIDN=y
+make ${JOBS} CFLAGS="${FLAGS} -I${SYS_DIR[include]}/idn" HAVE_LIBIDN=y
 make install mandir="${SYS_DIR[man]}" BASEDIR="${PKG}"
 }
 
@@ -164,12 +178,12 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-rpath \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
  --infodir="${SYS_DIR[info]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --disable-servers \
  --disable-hostname \
  --disable-logger \
@@ -181,7 +195,7 @@ make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS THANKS
 changelog NEWS
-chmod 0755 ${PKG}/usr/bin/{ping,ping6,rcp,rsh,rlogin}
+chmod 0755 ${PKG}${SYS_DIR[bin]}/{ping,ping6,rcp,rsh,rlogin}
 rmdir ${PKG}/usr/libexec
 }
 
@@ -194,9 +208,9 @@ build7()
 {
 make ${JOBS} \
  CCOPTOPT="${FLAGS}" \
- VPATH="/usr/lib$(libdirsuffix)"
+ VPATH="${SYS_DIR[lib]}"
 make install \
- SBINDIR="/usr/sbin" \
+ SBINDIR="${SYS_DIR[sbin]}" \
  DESTDIR="${PKG}"
 changelog RELNOTES
 # These utilities are provided by other packages but leave this just in case
@@ -218,8 +232,8 @@ make ${JOBS} CFLAGS="${FLAGS}"
 make install-slattach install-plipconfig installdata \
  DESTDIR="${PKG}" \
  MANDIR="${SYS_DIR[man]}" \
- BINDIR="/usr/bin" \
- SBINDIR="/usr/sbin"
+ BINDIR="${SYS_DIR[bin]}" \
+ SBINDIR="${SYS_DIR[sbin]}"
 rm -rf ${PKG}${SYS_DIR[man]}/pt_BR
 }
 
@@ -233,17 +247,17 @@ build9()
 ./configure
 make ${JOBS} \
  CCOPTS="${FLAGS}" \
- CONFDIR="/usr/share/net" \
- DATADIR="/usr/share/net" \
- LIBDIR="/usr/lib$(libdirsuffix)/plugins"
+ CONFDIR="${SYS_DIR[share]}/net" \
+ DATADIR="${SYS_DIR[share]}/net" \
+ LIBDIR="${SYS_DIR[lib]}/plugins"
 make install \
  DESTDIR="${PKG}" \
- CONFDIR="/usr/share/net" \
- DATADIR="/usr/share/net" \
- SBINDIR="/usr/sbin" \
- LIBDIR="/usr/lib$(libdirsuffix)/plugins" \
- MANDIR="/usr/man" \
- DOCDIR="/usr/doc/${SRCNAME[9]}-${SRCVERS[9]}/extra"
+ CONFDIR="${SYS_DIR[share]}/net" \
+ DATADIR="${SYS_DIR[share]}/net" \
+ SBINDIR="${SYS_DIR[sbin]}" \
+ LIBDIR="${SYS_DIR[lib]}/plugins" \
+ MANDIR="${SYS_DIR[man]}" \
+ DOCDIR="${SYS_DIR[doc]}/${SRCNAME[9]}-${SRCVERS[9]}/extra"
 rm -rf \
- ${PKG}/usr/doc/${SRCNAME[9]}-${SRCVERS[9]}/extra
+ ${PKG}${SYS_DIR[doc]}/${SRCNAME[9]}-${SRCVERS[9]}/extra
 }

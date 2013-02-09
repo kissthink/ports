@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=pth
 VERSION=2.0.7
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -47,11 +47,11 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-dependency-tracking \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-pic
 make ${JOBS}
 make install DESTDIR="${PKG}"

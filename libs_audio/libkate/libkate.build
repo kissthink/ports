@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=libkate
 VERSION=0.4.1
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -40,6 +40,7 @@ SRCPACK[0]=http://libkate.googlecode.com/files/${SRCNAME[0]}-${SRCVERS[0]}.tar.g
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -47,18 +48,19 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
-make -j 2 V=1
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
+make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS README THANKS
 changelog ChangeLog
 license COPYING
 rm -rf \
- ${PKG}/usr/lib$(libdirsuffix)/python*/ \
- ${PKG}/usr/bin/KateDJ \
- ${PKG}/usr/share
+ ${PKG}${SYS_DIR[doc]}/${SRCNAME[0]} \
+ ${PKG}${SYS_DIR[lib]}64 \
+ ${PKG}${SYS_DIR[bin]}/KateDJ \
+ ${PKG}${SYS_DIR[man]}/man1/KateDJ.1
 }

@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=libconfig
-VERSION=1.4.8
+VERSION=1.4.9
 BUILD=1
 
 # Description
@@ -47,13 +47,13 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-dependency-tracking \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
  --infodir="${SYS_DIR[info]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --includedir=/usr/include/config \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --includedir="${SYS_DIR[include]}/config" \
+ --localstatedir="${SYS_DIR[var]}" \
  --disable-examples
 make ${JOBS}
 make install DESTDIR="${PKG}"

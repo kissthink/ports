@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=talloc
 VERSION=2.0.8
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -44,20 +44,20 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-rpath \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --includedir=/usr/include/${SRCNAME[0]} \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --includedir="${SYS_DIR[include]}/${SRCNAME[0]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --disable-python
 make ${JOBS}
 make install DESTDIR="${PKG}"
-rm -f \
- ${PKG}/usr/lib$(libdirsuffix)/*.a
 (
-  cd ${PKG}/usr/lib$(libdirsuffix)
+  cd ${PKG}${SYS_DIR[lib]}
   chmod 0755 libtalloc.so.${SRCVERS[0]}
   ln -s libtalloc.so.${SRCVERS[0]} libtalloc.so
 )
+rm -f \
+ ${PKG}${SYS_DIR[lib]}/*.a
 }

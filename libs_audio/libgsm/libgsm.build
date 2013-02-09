@@ -8,7 +8,7 @@ NAME=libgsm
 MAJOR=1.0
 MINOR=13
 VERSION=${MAJOR}.${MINOR}
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -43,19 +43,14 @@ SRCROOT[0]=${SRCNAME[0]}-${MAJOR}-pl${MINOR}
 
 build0()
 {
-make OPTS="${FLAGS}" -j 2
-make install DESTDIR="${PKG}" \
- mandir="${SYS_DIR[man]}" libdir="/usr/lib$(libdirsuffix)"
-
-changelog ChangeLog 
+make ${JOBS} OPTS="${FLAGS}"
+make install DESTDIR="${PKG}" mandir="${SYS_DIR[man]}" libdir="${SYS_DIR[lib]}"
+changelog ChangeLog
 license COPYRIGHT
-
 (
-  cd $PKG/usr/bin
+  cd ${PKG}${SYS_DIR[bin]}
   ln -sf toast untoast
   ln -sf toast tcat
 )
-
-rm -f \
- ${PKG}/usr/lib*/*.a
+rm -f ${PKG}${SYS_DIR[lib]}/*.a
 }

@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=libcdaudio
 VERSION=0.99.12p2
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -40,23 +40,22 @@ SRCPACK[0]=${URL[sf]}/${SRCNAME[0]}/${SRCNAME[0]}/${SRCVERS[0]}/${SRCNAME[0]}-${
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datadir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --includedir=/usr/include/cdaudio \
- --localstatedir=/var
-make -j 2
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --includedir="${SYS_DIR[include]}/cdaudio" \
+ --localstatedir="${SYS_DIR[var]}"
+make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
 license COPYING
-rm -rf \
- ${PKG}/usr/share
 }

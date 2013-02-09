@@ -58,5 +58,4 @@ make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog ChangeLog 
-#rm -rf ${PKG}${SYS_DIR[man]}
 }

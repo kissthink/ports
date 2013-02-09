@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=libid3tag
 VERSION=0.15.1b
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -47,19 +47,17 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-dependency-tracking \
  --disable-static \
  --disable-debugging \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --includedir=/usr/include/id3tag \
- --localstatedir=/var
-make -j 2
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --includedir="${SYS_DIR[include]}/id3tag" \
+ --localstatedir="${SYS_DIR[var]}"
+make ${JOBS}
 make install DESTDIR="${PKG}"
 doc CREDITS
 changelog CHANGES
-sed -i "s|@LIBDIR@|/usr/lib$(libdirsuffix)|g" id3tag.pc
-install.dir \
- ${PKG}/usr/lib$(libdirsuffix)/pkgconfig
-install -m 0644 id3tag.pc \
- ${PKG}/usr/lib$(libdirsuffix)/pkgconfig
+sed -i "s|@LIBDIR@|${SYS_DIR[lib]}|g" id3tag.pc
+install.dir ${PKG}${SYS_DIR[share]}/pkgconfig
+install.dat id3tag.pc ${PKG}${SYS_DIR[share]}/pkgconfig
 }

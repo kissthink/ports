@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=fftw
 VERSION=3.3.3
-BUILD=2
+BUILD=3
 
 # Description
 
@@ -32,6 +32,13 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+# Install the texinfo files
+if [ -x /usr/bin/install-info ]; then
+  /usr/bin/install-info --info-dir=${SYS_DIR[info]} ${SYS_DIR[info]}/fftw3.info.gz 2> /dev/null
+fi
+EOF
+
 # Sources
 
 SRCNAME[0]=${NAME}
@@ -46,13 +53,13 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-dependency-tracking \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
  --infodir="${SYS_DIR[info]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --includedir=/usr/include/fftw3 \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --includedir="${SYS_DIR[include]}/fftw3" \
+ --localstatedir="${SYS_DIR[var]}" \
  ${*}
 }
 
@@ -69,6 +76,6 @@ make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-install.dir ${PKG}/usr/share/html
-cp -r doc/html ${PKG}/usr/share/html/${NAME}
+#install.dir ${PKG}${SYS_DIR[share]}/html
+#cp -r doc/html ${PKG}${SYS_DIR[share]}/html/${NAME}
 }

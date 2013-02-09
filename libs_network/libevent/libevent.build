@@ -5,8 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=libevent
-VERSION=2.0.20
+VERSION=2.0.21
 BUILD=1
+OPTDEPENDS=('openssl >= 1.0.1c-1')
 
 # Description
 
@@ -47,12 +48,12 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-dependency-tracking \
  --enable-shared=yes \
  --enable-static=no \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --includedir=/usr/include/event \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --includedir="${SYS_DIR[include]}/event" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc README

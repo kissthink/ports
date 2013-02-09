@@ -6,9 +6,9 @@ source /usr/src/ports/Build/build.sh
 
 NAME=libsoup
 MAJOR=2.40
-VERSION=${MAJOR}.2
+VERSION=${MAJOR}.3
 BUILD=1
-DEPENDS=('glib >= 2.34.2-1' 'libxml >= 2.9.0-1')
+DEPENDS=('glib >= 2.34.3-1' 'libxml >= 2.9.0-1')
 
 # Description
 
@@ -52,15 +52,17 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-shared=yes \
  --enable-introspection=no \
  --enable-debug=minimum \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-html-dir="${SYS_DIR[html]}"
-# --without-gnome
+# --without-gnome ?
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
+# No development docs
+rm -rf ${PKG}${SYS_DIR[html]}
 }

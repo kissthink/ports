@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=libgupnp
-VERSION=0.18.3
+VERSION=0.18.4
 BUILD=1
-DEPENDS=('glib >= 2.32.2-1' 'libsoup >= 2.38.0-1')
+DEPENDS=('glib >= 2.34.3-1' 'libsoup >= 2.40.3-1')
 
 # Description
 
@@ -37,8 +37,8 @@ EOF
 
 GUPNPREPO=http://gupnp.org/sites/all/files/sources
 
-GTKINCS="-I/usr/include/glib-2.0 -I/usr/lib$(libdirsuffix)/glib-2.0/include"
-GSSDPINCS="-I/usr/include/libsoup-2.4 -I/usr/include/libxml2"
+GTKINCS="-I${SYS_DIR[include]}/glib-2.0 -I/usr/lib$(libdirsuffix)/glib-2.0/include"
+GSSDPINCS="-I${SYS_DIR[include]}/libsoup-2.4 -I${SYS_DIR[include]}/libxml2"
 
 configure()
 {
@@ -50,29 +50,31 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
   --enable-static=no \
   --enable-shared=yes \
   --enable-introspection=no \
-  --prefix=/usr \
+  --enable-gtk-doc-html=no \
+  --prefix="${SYS_DIR[usr]}" \
   --mandir="${SYS_DIR[man]}" \
-  --sysconfdir=/etc \
-  --libdir=/usr/lib$(libdirsuffix) \
-  --localstatedir=/var \
+  --sysconfdir="${SYS_DIR[etc]}" \
+  --libdir="${SYS_DIR[lib]}" \
+  --localstatedir="${SYS_DIR[var]}" \
   --with-html-dir="${SYS_DIR[html]}" \
   ${*}
 }
 
 SRCNAME[0]=gssdp
-SRCVERS[0]=0.12.1
+SRCVERS[0]=0.12.2
 SRCPACK[0]=${GUPNPREPO}/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
 SRCCOPY[0]="LGPL2"
 
 build0()
 {
-CPPFLAGS="-I/usr/include/libsoup-2.4 ${GTKINCS}" \
+CPPFLAGS="-I${SYS_DIR[include]}/libsoup-2.4 ${GTKINCS}" \
 configure \
- --datadir=/usr/share/application-data
+ --datadir=${SYS_DIR[share]}/application-data
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
+rm -rf ${PKG}${SYS_DIR[html]}
 }
 
 SRCNAME[1]=gupnp
@@ -82,33 +84,33 @@ SRCCOPY[1]="LGPL2"
 
 build1()
 {
-PKG_CONFIG_PATH="${PKG}/usr/lib$(libdirsuffix)/pkgconfig" \
-CPPFLAGS="-I${PKG}/usr/include/gssdp-1.0 ${GTKINCS} ${GSSDPINCS}" \
-LDFLAGS="-L${PKG}/usr/lib$(libdirsuffix)" \
+LIBGUPNP_LIBS="-luuid -L${PKG}${SYS_DIR[lib]} -lgssdp-1.0 -lgobject-2.0 -lgio-2.0" \
+LIBGUPNP_CFLAGS="-I${PKG}${SYS_DIR[include]}/gssdp-1.0 ${GTKINCS} ${GSSDPINCS}" \
 configure \
- --with-context-manager=linux
+ --with-context-manager=network-manager
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-rm -f \
- ${PKG}/usr/lib$(libdirsuffix)/*.la
+rm -rf \
+ ${PKG}${SYS_DIR[lib]}/*.la \
+ ${PKG}${SYS_DIR[html]}
 }
 
 SRCNAME[2]=gupnp-igd
-SRCVERS[2]=0.2.1
-SRCPACK[2]=${GUPNPREPO}/${SRCNAME[2]}-${SRCVERS[2]}.tar.gz
+SRCVERS[2]=0.2.2
+SRCPACK[2]=${GUPNPREPO}/${SRCNAME[2]}-${SRCVERS[2]}.tar.xz
 SRCCOPY[2]="LGPL21"
 
 build2()
 {
-PKG_CONFIG_PATH="${PKG}/usr/lib$(libdirsuffix)/pkgconfig" \
-CPPFLAGS="-I${PKG}/usr/include/gssdp-1.0 -I${PKG}/usr/include/gupnp-1.0 ${GTKINCS} ${GSSDPINCS}" \
-LDFLAGS="-L${PKG}/usr/lib$(libdirsuffix)" \
+LIBGUPNP_LIBS="-luuid -L${PKG}${SYS_DIR[lib]} -lgupnp-1.0 -lgssdp-1.0 -lglib-2.0 -lgthread-2.0 -lgobject-2.0 -lgio-2.0" \
+LIBGUPNP_CFLAGS="-I${PKG}${SYS_DIR[include]}/gssdp-1.0 -I${PKG}${SYS_DIR[include]}/gupnp-1.0 ${GTKINCS} ${GSSDPINCS}" \
 configure \
  --disable-python
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
+rm -rf ${PKG}${SYS_DIR[html]}
 }

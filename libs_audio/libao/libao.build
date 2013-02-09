@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=libao
 VERSION=1.1.0
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -41,28 +41,26 @@ SRCCOPY[0]="GPL2"
 
 build0()
 {
+sed -i 's|docdir = $(datadir)/doc/$(PACKAGE)-$(VERSION)|docdir = $(datarootdir)/html/$(PACKAGE)|g' doc/Makefile.in
+sed -i 's|plugindir=$libdir/ao/plugins-$PLUGIN_VERSION|plugindir=$libdir/plugins/ao|g' configure
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --enable-alsa \
  --enable-alsa-mmap
-make -j 2
+make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog CHANGES
-install.dir ${PKG}/usr/share/html
-mv \
-  ${PKG}/usr/share/doc/${NAME}-${VERSION} \
-  ${PKG}/usr/share/html/${NAME}
-rm -rf \
- ${PKG}/usr/lib*/*/*/liboss.so \
- ${PKG}/usr/share/doc
+rm -rf ${PKG}${SYS_DIR[html]}
+( cd ${PKG}${SYS_DIR[lib]} ; find . -name liboss.so -exec rm -f '{}' \; )
 }

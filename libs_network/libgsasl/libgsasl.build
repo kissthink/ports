@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=libgsasl
 VERSION=1.8.0
-BUILD=1
-DEPENDS=('libidn >= 2.4-1' 'libgcrypt >= 1.5.0-1' 'libntlm >= 1.3-1')
+BUILD=2
+DEPENDS=('libgcrypt >= 1.5.0-1' 'libntlm >= 1.3-1')
 
 # Description
 
@@ -42,7 +42,7 @@ SRCCOPY[0]="GPL3 LGPL21"
 
 build0()
 {
-CPPFLAGS="-I/usr/include/idn -I/usr/include/ntlm -I/usr/include/gcrypt -I/usr/include/gpg-error" \
+CPPFLAGS="-I${SYS_DIR[include]}/idn -I${SYS_DIR[include]}/ntlm -I${SYS_DIR[include]}/gcrypt -I${SYS_DIR[include]}/gpg-error" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -50,12 +50,12 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-rpath \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --includedir=/usr/include/gsasl \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --includedir="${SYS_DIR[include]}/gsasl" \
  --with-libgcrypt
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"

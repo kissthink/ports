@@ -8,10 +8,7 @@ NAME=sqlite
 MAJOR=3
 MINOR=7.15.2
 VERSION=${MAJOR}.${MINOR}
-BUILD=1
-
-# sqlite refuses to compile with -ffast-math
-FLAGS="${CPU_FLAGS[${HOST_ARCH}]} -O2 -fno-strength-reduce -fomit-frame-pointer"
+BUILD=2
 
 # Description
 
@@ -45,18 +42,19 @@ SRCPACK[0]=http://www.sqlite.org/${SRCNAME[0]}-${SRCVERS[0]}.zip
 
 build0()
 {
+# sqlite refuses to compile with -ffast-math
 CPPFLAGS="-DSQLITE_ENABLE_COLUMN_METADATA=1 -DSQLITE_DISABLE_DIRSYNC=1 -DSQLITE_ENABLE_FTS3=3 -DSQLITE_ENABLE_RTREE=1 -DSQLITE_SECURE_DELETE=1 -DSQLITE_ENABLE_UNLOCK_NOTIFY=1" \
-CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+CFLAGS="${FLAGS%-ffast-math}" CXXFLAGS="${FLAGS%-ffast-math}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --includedir="/usr/include/${NAME}-${MAJOR}" \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --includedir="${SYS_DIR[include]}/${NAME}-${MAJOR}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --disable-tcl \
  --enable-threadsafe \
  --enable-cross-thread-connections \

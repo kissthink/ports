@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=raptor
 VERSION=2.0.8
-BUILD=1
-DEPENDS=('libxslt >= 1.1.26-1' 'curl >= 7.28.0-1')
+BUILD=2
+DEPENDS=('libxslt >= 1.1.28-1' 'curl >= 7.29.0-1')
 
 # Description
 
@@ -49,14 +49,16 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-html-dir="${SYS_DIR[html]}"
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
+# No development docs
+rm -rf ${PKG}${SYS_DIR[html]}
 }

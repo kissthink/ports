@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=lame
 VERSION=3.99.5
-BUILD=1
+BUILD=2
 DEPENDS=('libsndfile >= 1.0.25-1')
 
 # Description
@@ -42,6 +42,7 @@ SRCCOPY[0]="LGPL2"
 
 build0()
 {
+sed -i 's|pkghtmldir = $(pkgdocdir)/html|pkghtmldir = $(datarootdir)/html/$(PACKAGE)|g' doc/html/Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -50,21 +51,15 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-debug=no \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --enable-nasm \
  --enable-dynamic-frontends \
  --with-fileio=sndfile
 make ${JOBS}
 make install DESTDIR="${PKG}"
-changelog ChangeLog 
-install.dir ${PKG}/usr/share/html
-mv \
- ${PKG}/usr/share/doc/${NAME}/html \
- ${PKG}/usr/share/html/${NAME}
-rm -rf \
- ${PKG}/usr/share/doc
+changelog ChangeLog
 }

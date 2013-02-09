@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=libproxy
-VERSION=0.4.7
+VERSION=0.4.11
 BUILD=1
 
 # Description
@@ -46,12 +46,12 @@ cmake \
  -DCMAKE_CXX_FLAGS:STRING="${FLAGS}" \
  -DCMAKE_C_FLAGS:STRING="${FLAGS}" \
  -DCMAKE_VERBOSE_MAKEFILE:BOOL="on" \
- -DCMAKE_INSTALL_PREFIX:PATH="/usr" \
- -DEXEC_INSTALL_PREFIX:PATH="/usr" \
- -DLIB_INSTALL_DIR:PATH="/usr/lib$(libdirsuffix)" \
- -DLIBEXEC_INSTALL_DIR:PATH="/usr/lib$(libdirsuffix)/exec" \
- -DMODULE_INSTALL_DIR:PATH="/usr/lib$(libdirsuffix)/plugins/${SRCNAME[0]}" \
- -DINCLUDE_INSTALL_DIR:PATH="/usr/include/proxy" \
+ -DCMAKE_INSTALL_PREFIX:PATH="${SYS_DIR[usr]}" \
+ -DEXEC_INSTALL_PREFIX:PATH="${SYS_DIR[usr]}" \
+ -DLIB_INSTALL_DIR:PATH="${SYS_DIR[lib]}" \
+ -DLIBEXEC_INSTALL_DIR:PATH="${SYS_DIR[lib]}/exec" \
+ -DMODULE_INSTALL_DIR:PATH="${SYS_DIR[lib]}/plugins/${SRCNAME[0]}" \
+ -DINCLUDE_INSTALL_DIR:PATH="${SYS_DIR[include]}/proxy" \
  -DWITH_GNOME3:BOOL="on" \
  -DWITH_WEBKIT3:BOOL="off" \
  -DWITH_PYTHON:BOOL="off" \
@@ -59,7 +59,7 @@ cmake \
  -DWITH_PERL:BOOL="off" \
  -DWITH_VALA:BOOL="off" \
 CMakeLists.txt
-make -j 2
+make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS

@@ -32,6 +32,24 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+config etc/conf.d/conntrackd.conf.new
+EOF
+
 # Sources
 
 SRCNAME[0]=libmnl
@@ -41,6 +59,7 @@ SRCCOPY[0]="LGPL21"
 
 configure()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -48,11 +67,11 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  ${*}
 }
 
@@ -82,8 +101,8 @@ SRCCOPY[2]="GPL2"
 
 build2()
 {
-LIBNFNETLINK_CFLAGS="-I${PKG}/usr/include" \
-LIBNFNETLINK_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lnfnetlink" \
+LIBNFNETLINK_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+LIBNFNETLINK_LIBS="-L${PKG}${SYS_DIR[lib]} -lnfnetlink" \
 configure
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
@@ -96,10 +115,10 @@ SRCCOPY[3]="GPL2"
 
 build3()
 {
-LIBMNL_CFLAGS="-I${PKG}/usr/include" \
-LIBMNL_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lmnl" \
-LIBNFNETLINK_CFLAGS="-I${PKG}/usr/include" \
-LIBNFNETLINK_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lnfnetlink" \
+LIBMNL_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+LIBMNL_LIBS="-L${PKG}${SYS_DIR[lib]} -lmnl" \
+LIBNFNETLINK_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+LIBNFNETLINK_LIBS="-L${PKG}${SYS_DIR[lib]} -lnfnetlink" \
 configure
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
@@ -112,10 +131,10 @@ SRCCOPY[4]="GPL2"
 
 build4()
 {
-LIBMNL_CFLAGS="-I${PKG}/usr/include" \
-LIBMNL_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lmnl" \
-LIBNFNETLINK_CFLAGS="-I${PKG}/usr/include" \
-LIBNFNETLINK_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lnfnetlink" \
+LIBMNL_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+LIBMNL_LIBS="-L${PKG}${SYS_DIR[lib]} -lmnl" \
+LIBNFNETLINK_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+LIBNFNETLINK_LIBS="-L${PKG}${SYS_DIR[lib]} -lnfnetlink" \
 configure
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
@@ -128,8 +147,8 @@ SRCCOPY[5]="GPL2"
 
 build5()
 {
-LIBMNL_CFLAGS="-I${PKG}/usr/include" \
-LIBMNL_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lmnl" \
+LIBMNL_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+LIBMNL_LIBS="-L${PKG}${SYS_DIR[lib]} -lmnl" \
 configure
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
@@ -142,8 +161,8 @@ SRCCOPY[6]="GPL2"
 
 build6()
 {
-LIBMNL_CFLAGS="-I${PKG}/usr/include" \
-LIBMNL_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lmnl" \
+LIBMNL_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+LIBMNL_LIBS="-L${PKG}${SYS_DIR[lib]} -lmnl" \
 configure
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
@@ -156,8 +175,8 @@ SRCCOPY[7]="GPL2"
 
 build7()
 {
-LIBMNL_CFLAGS="-I${PKG}/usr/include" \
-LIBMNL_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lmnl" \
+LIBMNL_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+LIBMNL_LIBS="-L${PKG}${SYS_DIR[lib]} -lmnl" \
 configure
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
@@ -170,10 +189,10 @@ SRCCOPY[8]="GPL2"
 
 build8()
 {
-LIBMNL_CFLAGS="-I${PKG}/usr/include" \
-LIBMNL_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lmnl" \
-LIBNETFILTER_ACCT_CFLAGS="-I${PKG}/usr/include" \
-LIBNETFILTER_ACCT_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lnetfilter_acct" \
+LIBMNL_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+LIBMNL_LIBS="-L${PKG}${SYS_DIR[lib]} -lmnl" \
+LIBNETFILTER_ACCT_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+LIBNETFILTER_ACCT_LIBS="-L${PKG}${SYS_DIR[lib]} -lnetfilter_acct" \
 configure
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
@@ -186,27 +205,27 @@ SRCCOPY[9]="GPL2"
 
 build9()
 {
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
-LIBMNL_CFLAGS="-I${PKG}/usr/include" \
-LIBMNL_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lmnl" \
-LIBNFNETLINK_CFLAGS="-I${PKG}/usr/include" \
-LIBNFNETLINK_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lnfnetlink" \
-LIBNETFILTER_CONNTRACK_CFLAGS="-I${PKG}/usr/include" \
-LIBNETFILTER_CONNTRACK_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lnetfilter_conntrack" \
-LIBNETFILTER_CTTIMEOUT_CFLAGS="-I${PKG}/usr/include" \
-LIBNETFILTER_CTTIMEOUT_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lnetfilter_cttimeout" \
-LIBNETFILTER_CTHELPER_CFLAGS="-I${PKG}/usr/include" \
-LIBNETFILTER_CTHELPER_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lnetfilter_cthelper" \
-LIBNETFILTER_QUEUE_CFLAGS="-I${PKG}/usr/include" \
-LIBNETFILTER_QUEUE_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lnetfilter_queue" \
+rm -f ${PKG}${SYS_DIR[lib]}/*.la
+LIBMNL_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+LIBMNL_LIBS="-L${PKG}${SYS_DIR[lib]} -lmnl" \
+LIBNFNETLINK_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+LIBNFNETLINK_LIBS="-L${PKG}${SYS_DIR[lib]} -lnfnetlink" \
+LIBNETFILTER_CONNTRACK_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+LIBNETFILTER_CONNTRACK_LIBS="-L${PKG}${SYS_DIR[lib]} -lnetfilter_conntrack" \
+LIBNETFILTER_CTTIMEOUT_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+LIBNETFILTER_CTTIMEOUT_LIBS="-L${PKG}${SYS_DIR[lib]} -lnetfilter_cttimeout" \
+LIBNETFILTER_CTHELPER_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+LIBNETFILTER_CTHELPER_LIBS="-L${PKG}${SYS_DIR[lib]} -lnetfilter_cthelper" \
+LIBNETFILTER_QUEUE_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+LIBNETFILTER_QUEUE_LIBS="-L${PKG}${SYS_DIR[lib]} -lnetfilter_queue" \
 configure
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 install.dir ${PKG}${SYS_DIR[systemdsystemunitdir]}
 install.dat conntrackd.service ${PKG}${SYS_DIR[systemdsystemunitdir]}
-install.dir ${PKG}/etc/conf.d
-install.cfg doc/helper/conntrackd.conf ${PKG}/etc/conf.d/conntrackd.conf.new
+install.dir ${PKG}${SYS_DIR[conf]}
+install.cfg doc/helper/conntrackd.conf ${PKG}${SYS_DIR[conf]}/conntrackd.conf.new
 }
 
 SRCNAME[10]=iptables
@@ -216,14 +235,16 @@ SRCCOPY[10]="GPL2"
 
 build10()
 {
+sed -i 's|${libdir}/pkgconfig|${datarootdir}/pkgconfig|g' configure
+sed -i 's|${datadir}/xtables|${datadir}/net|g' configure
 rm include/linux/types.h
-libnfnetlink_CFLAGS="-I${PKG}/usr/include" \
-libnfnetlink_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lnfnetlink" \
-LDFLAGS="-L${PKG}/usr/lib$(libdirsuffix)" \
+libnfnetlink_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+libnfnetlink_LIBS="-L${PKG}${SYS_DIR[lib]} -lnfnetlink" \
+LDFLAGS="-L${PKG}${SYS_DIR[lib]}" \
 configure \
  --enable-devel \
  --enable-libipq \
- --with-xtlibdir=/usr/lib$(libdirsuffix)/plugins/xtables
+ --with-xtlibdir=${SYS_DIR[lib]}/plugins/xtables
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 sed -i "s|@SYSTEMDSYSTEMSCRIPTDIR@|${SYS_DIR[systemdsystemscriptdir]}|g" ip{,6}tables.service
@@ -231,11 +252,11 @@ install.dir ${PKG}${SYS_DIR[systemdsystemunitdir]}
 install.dat ip{,6}tables.service ${PKG}${SYS_DIR[systemdsystemunitdir]}
 install.dir ${PKG}${SYS_DIR[systemdsystemscriptdir]}
 install.bin iptables-flush ${PKG}${SYS_DIR[systemdsystemscriptdir]}
-install.dir ${PKG}/etc/iptables
-install.dat rules/{empty,simple_firewall}.rules ${PKG}/etc/iptables
-install.dir ${PKG}/var/lib/ip{,6}tables
-install.dat rules/empty-{filter,mangle,nat,raw,security}.rules ${PKG}/var/lib/iptables
-install.dat rules/empty-{filter,mangle,nat,raw,security}.rules ${PKG}/var/lib/ip6tables
+install.dir ${PKG}${SYS_DIR[etc]}/iptables
+install.dat rules/{empty,simple_firewall}.rules ${PKG}${SYS_DIR[etc]}/iptables
+install.dir ${PKG}${SYS_DIR[var]}/lib/ip{,6}tables
+install.dat rules/empty-{filter,mangle,nat,raw,security}.rules ${PKG}${SYS_DIR[var]}/lib/iptables
+install.dat rules/empty-{filter,mangle,nat,raw,security}.rules ${PKG}${SYS_DIR[var]}/lib/ip6tables
 }
 
 SRCNAME[11]=ipset
@@ -245,19 +266,19 @@ SRCCOPY[11]="GPL2"
 
 build11()
 {
-libmnl_CFLAGS="-I${PKG}/usr/include" \
-libmnl_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lmnl" \
-LDFLAGS="-L${PKG}/usr/lib$(libdirsuffix)" \
+libmnl_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+libmnl_LIBS="-L${PKG}${SYS_DIR[lib]} -lmnl" \
+LDFLAGS="-L${PKG}${SYS_DIR[lib]}" \
 configure \
  --with-kmod=no
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 changelog ChangeLog
 sed -i "s|@SYSTEMDSYSTEMSCRIPTDIR@|${SYS_DIR[systemdsystemscriptdir]}|g" ipset.service
-install.dir ${PKG}/etc
-touch ${PKG}/etc/ipset.conf
-install.dir ${PKG}/usr/lib$(libdirsuffix)/pkgconfig
-install.dat lib/libipset.pc ${PKG}/usr/lib$(libdirsuffix)/pkgconfig
+install.dir ${PKG}${SYS_DIR[etc]}
+touch ${PKG}${SYS_DIR[etc]}/ipset.conf
+install.dir ${PKG}${SYS_DIR[share]}/pkgconfig
+install.dat lib/libipset.pc ${PKG}${SYS_DIR[share]}/pkgconfig
 install.dir ${PKG}${SYS_DIR[systemdsystemunitdir]}
 install.dat ipset.service ${PKG}${SYS_DIR[systemdsystemunitdir]}
 install.dir ${PKG}${SYS_DIR[systemdsystemscriptdir]}

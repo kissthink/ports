@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=orc
 VERSION=0.4.16
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -46,14 +46,16 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-dependency-tracking \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --with-html-dir=/usr/share/html \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --with-html-dir="${SYS_DIR[html]}" \
  --enable-backend=all
-make -j 2
+make ${JOBS}
 make install DESTDIR="${PKG}"
 license COPYING
+# No development docs
+rm -rf ${PKG}${SYS_DIR[html]}
 }

@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=sdl
 VERSION=1.2.15
-BUILD=1
-DEPENDS=('sound >= 1.0.25-1')
+BUILD=2
+DEPENDS=('sound >= 1.0.26-1')
 
 # Description
 
@@ -39,20 +39,28 @@ SRCNAME[0]=SDL
 SRCVERS[0]=${VERSION}
 SRCPACK[0]=http://www.libsdl.org/release/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
 
-build0()
+configure()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
+ --enable-dependency-tracking=no \
  --enable-shared=yes \
  --enable-static=no \
  --disable-rpath \
- --disable-nasm \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ ${*}
+}
+
+build0()
+{
+configure \
+ --disable-nasm \
  --with-x \
  --disable-x11-shared \
  --disable-video-svga \
@@ -70,9 +78,9 @@ make ${JOBS} CFLAGS="${FLAGS}"
 make install DESTDIR="${PKG}"
 doc CREDITS
 changelog WhatsNew
-mkdir -p ${PKG}/${SYS_DIR[html]}/${SRCNAME[0]}
-install.doc docs.html docs/html/*.html \
- ${PKG}/${SYS_DIR[html]}/${SRCNAME[0]}
+#install.dir ${PKG}/${SYS_DIR[html]}/${SRCNAME[0]}
+#install.doc docs.html docs/html/*.html \
+# ${PKG}/${SYS_DIR[html]}/${SRCNAME[0]}
 }
 
 SRCNAME[1]=SDL_mixer
@@ -82,19 +90,10 @@ SRCCOPY[1]="ZLIB"
 
 build1()
 {
-SDL_CFLAGS="-D_GNU_SOURCE=1 -D_REENTRANT -I${PKG}/usr/include/SDL" \
-SDL_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lSDL -lpthread" \
-CFLAGS="${FLAGS} -I/usr/include/mad" CXXFLAGS="${FLAGS} -I/usr/include/mad" \
-./configure \
- --build="${ARCH}-slackware-linux" \
- --enable-dependency-tracking=no \
- --enable-static=no \
- --enable-shared=yes \
- --prefix=/usr \
- --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+SDL_CFLAGS="-D_GNU_SOURCE=1 -D_REENTRANT -I${PKG}${SYS_DIR[include]}/SDL" \
+SDL_LIBS="-L${PKG}${SYS_DIR[lib]} -lSDL -lpthread" \
+CPPFLAGS="-I${SYS_DIR[include]}/mad" \
+configure \
  --enable-music-mp3-mad-gpl \
  --enable-music-mod-modplug
 make ${JOBS}
@@ -109,19 +108,9 @@ SRCCOPY[2]="ZLIB"
 
 build2()
 {
-SDL_CFLAGS="-D_GNU_SOURCE=1 -D_REENTRANT -I${PKG}/usr/include/SDL" \
-SDL_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lSDL -lpthread" \
-CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
-./configure \
- --build="${ARCH}-slackware-linux" \
- --disable-dependency-tracking \
- --enable-static=no \
- --enable-shared=yes \
- --prefix=/usr \
- --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+SDL_CFLAGS="-D_GNU_SOURCE=1 -D_REENTRANT -I${PKG}${SYS_DIR[include]}/SDL" \
+SDL_LIBS="-L${PKG}${SYS_DIR[lib]} -lSDL -lpthread" \
+configure \
  --disable-jpg-shared \
  --disable-png-shared \
  --disable-tif-shared \
@@ -139,21 +128,11 @@ SRCCOPY[3]="ZLIB"
 
 build3()
 {
-CPPFLAGS="-I${PKG}/usr/include/SDL" \
-LDFLAGS="-L${PKG}/usr/lib$(libdirsuffix)" \
-CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
-./configure \
- --build="${ARCH}-slackare-linux" \
- --disable-dependency-tracking \
- --enable-static=no \
- --enable-shared=yes \
- --prefix=/usr \
- --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --with-sdl-prefix="${PKG}/usr" \
- --with-sdl-exec-prefix="${PKG}/usr" \
+CPPFLAGS="-I${PKG}${SYS_DIR[include]}/SDL" \
+LDFLAGS="-L${PKG}${SYS_DIR[lib]}" \
+configure \
+ --with-sdl-prefix="${PKG}${SYS_DIR[usr]}" \
+ --with-sdl-exec-prefix="${PKG}${SYS_DIR[usr]}" \
  --disable-sdltest \
  --disable-gui
 make ${JOBS}
@@ -168,19 +147,9 @@ SRCCOPY[4]="ZLIB"
 
 build4()
 {
-SDL_CFLAGS="-D_GNU_SOURCE=1 -D_REENTRANT -I${PKG}/usr/include/SDL" \
-SDL_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lSDL -lpthread" \
-CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
-./configure \
- --build="${ARCH}-slackware-linux" \
- --disable-dependency-tracking \
- --enable-static=no \
- --enable-shared=yes \
- --prefix=/usr \
- --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+SDL_CFLAGS="-D_GNU_SOURCE=1 -D_REENTRANT -I${PKG}${SYS_DIR[include]}/SDL" \
+SDL_LIBS="-L${PKG}${SYS_DIR[lib]} -lSDL -lpthread" \
+configure
 make ${JOBS}
 make install DESTDIR="${PKG}"
 changelog CHANGES
@@ -193,26 +162,15 @@ SRCCOPY[5]="LGPL21"
 
 build5()
 {
-CPPFLAGS="-I${PKG}/usr/include/SDL" \
-LDFLAGS="-L${PKG}/usr/lib$(libdirsuffix)" \
-CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
-./configure \
- --build="${ARCH}-slackare-linux" \
- --disable-dependency-tracking \
- --enable-static=no \
- --enable-shared=yes \
- --prefix=/usr \
- --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --with-sdl-prefix="${PKG}/usr" \
- --with-sdl-exec-prefix="${PKG}/usr" \
+CPPFLAGS="-I${PKG}${SYS_DIR[include]}/SDL" \
+LDFLAGS="-L${PKG}${SYS_DIR[lib]}" \
+configure \
+ --with-sdl-prefix="${PKG}${SYS_DIR[usr]}" \
+ --with-sdl-exec-prefix="${PKG}${SYS_DIR[usr]}" \
  --disable-sdltest
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc CREDITS
 changelog CHANGELOG
-rm -f \
- ${PKG}/usr/bin/playsound*
+rm -f ${PKG}${SYS_DIR[bin]}/playsound*
 }

@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=geoip
 VERSION=1.4.8
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -32,6 +32,24 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+config etc/conf.d/GeoIP.conf.new
+EOF
+
 # Sources
 
 SRCNAME[0]=GeoIP
@@ -47,20 +65,19 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-dependency-tracking \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc/conf.d \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --datadir=/usr/share/application-data
-make -j 2
+ --sysconfdir="${SYS_DIR[etc]}/conf.d" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --datadir="${SYS_DIR[share]}/net"
+make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS README
 changelog ChangeLog
-install -m 0644 doinst.sh ${PKG}/install
 mv \
  ${PKG}/etc/conf.d/GeoIP.conf.default \
- ${DOC}
+ ${PKG}/etc/conf.d/GeoIP.conf.sample
 mv \
  ${PKG}/etc/conf.d/GeoIP.conf \
  ${PKG}/etc/conf.d/GeoIP.conf.new

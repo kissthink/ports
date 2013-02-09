@@ -7,9 +7,9 @@ source /usr/src/ports/Build/build.sh
 NAME=gegl
 MAJOR=0.2
 VERSION=${MAJOR}.0
-BUILD=3
+BUILD=4
 DEPENDS=('glib >= 2.34.3-1')
-OPTDEPENDS=('ffmpeg >= 1.1.2-1')
+OPTDEPENDS=('ffmpeg >= 1.1.2-1' 'openexr >= 1.7.1-1')
 
 # Description
 

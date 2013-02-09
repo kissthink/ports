@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=pcre
 VERSION=8.32
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -48,13 +48,13 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=yes \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
  --docdir="${SYS_DIR[html]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --includedir=/usr/include/pcre \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --includedir="${SYS_DIR[include]}/pcre" \
+ --localstatedir="${SYS_DIR[var]}" \
  --enable-jit \
  --enable-pcre16 \
  --enable-pcre32 \
@@ -66,9 +66,6 @@ make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-mv \
- ${PKG}/${SYS_DIR[html]}/html \
- ${PKG}/${SYS_DIR[html]}/pcre
-rm \
- ${PKG}/${SYS_DIR[html]}/*
+# No development docs
+rm -rf ${PKG}${SYS_DIR[html]}
 }

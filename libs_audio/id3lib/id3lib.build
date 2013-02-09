@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=id3lib
 VERSION=3.8.3
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -48,15 +48,15 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-static=no \
  --enable-shared=yes \
  --enable-debug=minimum \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
-make -j 2
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
+make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS THANKS
 changelog NEWS
-mkdir -p ${PKG}/usr/man/man1
-install -m 0644 doc/man/*.1 ${PKG}/usr/man/man1
+install.dir ${PKG}${SYS_DIR[man]}/man1
+install.man doc/man/*.1 ${PKG}${SYS_DIR[man]}/man1
 }

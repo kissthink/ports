@@ -7,8 +7,8 @@ source /usr/src/ports/Build/build.sh
 NAME=libvisual
 MAJOR=0.4
 VERSION=${MAJOR}.0
-BUILD=1
-DEPENDS=('glib >= 2.26.1-1')
+BUILD=2
+DEPENDS=('glib >= 2.34.3-1')
 
 # Description
 
@@ -30,7 +30,7 @@ ${NAME}: make use of all the plugins that are written for libvisual.
 ${NAME}: Libvisual also contains a whole set of facilities to ease the
 ${NAME}: development of plugins.
 ${NAME}:
-${NAME}: Libvisual was written by Dennis Smit.
+${NAME}: Homepage: http://www.libvisual.org
 ${NAME}:
 EOF
 
@@ -43,18 +43,19 @@ SRCCOPY[0]="LGPL21"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datadir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
-make -j 2
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
+make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
@@ -66,8 +67,8 @@ SRCPACK[1]=${URL[sf]}/${NAME}/${SRCNAME[1]}-${SRCVERS[1]}.tar.bz2
 
 build1()
 {
-LIBVISUAL_CFLAGS="-I${PKG}/usr/include/libvisual-${MAJOR}" \
-LIBVISUAL_LIBS="-L${PKG}/usr/lib$(libdirsuffix)" \
+LIBVISUAL_CFLAGS="-I${PKG}${SYS_DIR[include]}/libvisual-${MAJOR}" \
+LIBVISUAL_LIBS="-L${PKG}${SYS_DIR[lib]}" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
   --build="${ARCH}-slackware-linux" \
@@ -75,18 +76,18 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
   --disable-rpath \
   --enable-static=no \
   --enable-shared=yes \
-  --prefix=/usr \
+  --prefix="${SYS_DIR[usr]}" \
   --mandir="${SYS_DIR[man]}" \
-  --sysconfdir=/etc \
-  --libdir=/usr/lib$(libdirsuffix) \
-  --localstatedir=/var \
-  --datadir=/usr/share/application-data \
-  --with-plugins-base-dir=/usr/lib$(libdirsuffix)/plugins/libvisual-${MAJOR} \
+  --sysconfdir="${SYS_DIR[etc]}" \
+  --libdir="${SYS_DIR[lib]}" \
+  --localstatedir="${SYS_DIR[var]}" \
+  --datadir="${SYS_DIR[share]}/application-data" \
+  --with-plugins-base-dir=${SYS_DIR[lib]}/plugins/libvisual-${MAJOR} \
   --disable-gdkpixbuf-plugin \
   --disable-gstreamer-plugin \
   --disable-mplayer \
   --disable-inputdebug
-make -j 2
+make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog ChangeLog

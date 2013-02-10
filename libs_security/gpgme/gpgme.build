@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=gpgme
 VERSION=1.3.2
-BUILD=1
+BUILD=2
 DEPENDS=('gnupg >= 2.0.19-1')
 
 # Description
@@ -48,24 +48,26 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-dependency-tracking \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
  --infodir="${SYS_DIR[info]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --includedir=/usr/include/gpgme \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --includedir="${SYS_DIR[include]}/gpgme" \
+ --with-g13=${SYS_DIR[bin]}/g13 \
  --disable-gpg-test \
  --disable-gpgsm-test \
- --disable-gpgconf-test \
- --with-g13=/usr/bin/g13
+ --disable-gpgconf-test
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS THANKS
 changelog NEWS
-#shit: scripting language
+# FIXME: We'll consider using the lisp stuff when we can build several
+# packages at once
 rm -rf \
- $PKG/usr/libexec \
- $PKG/usr/share/common-lisp
+ ${PKG}${SYS_DIR[usr]}/libexec \
+ ${PKG}${SYS_DIR[share]}/common-lisp \
+ ${PKG}${SYS_DIR[info]}
 }
 

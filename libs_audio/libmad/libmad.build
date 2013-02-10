@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=libmad
 VERSION=0.15.1b
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -49,29 +49,24 @@ case "$(cpufamily ${ARCH})" in
     EXTRA="--enable-fpm=intel"
   ;; 
 esac
-
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --disable-static \
  --disable-debugging \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --includedir=/usr/include/mad \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --includedir="${SYS_DIR[include]}/mad" \
+ --localstatedir="${SYS_DIR[var]}" \
  --enable-accuracy \
  "${EXTRA}"
-make -j 2
+make ${JOBS}
 make install DESTDIR="${PKG}"
-
-changelog CHANGES
 doc CREDITS
-
-install.dir \
- ${PKG}/usr/lib$(libdirsuffix)/pkgconfig
-install -m 0644 mad.pc \
- ${PKG}/usr/lib$(libdirsuffix)/pkgconfig
+changelog CHANGES
+install.dir ${PKG}${SYS_DIR[share]}/pkgconfig
+install.dat mad.pc ${PKG}${SYS_DIR[share]}/pkgconfig
 }

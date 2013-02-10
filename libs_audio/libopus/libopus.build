@@ -4,8 +4,8 @@
 
 source /usr/src/ports/Build/build.sh
 
-NAME=opus
-VERSION=0.9.14
+NAME=libopus
+VERSION=1.0.2
 BUILD=1
 
 # Description
@@ -34,13 +34,14 @@ EOF
 
 # Sources
 
-SRCNAME[0]=${NAME}
+SRCNAME[0]=opus
 SRCVERS[0]=${VERSION}
 SRCPACK[0]=http://downloads.xiph.org/releases/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
 SRCCOPY[0]="BSD3"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -48,13 +49,13 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
-rm -rf ${PKG}/usr/share/doc
+rm -rf ${PKG}${SYS_DIR[doc]}/${SRCMAME[0]}
 }

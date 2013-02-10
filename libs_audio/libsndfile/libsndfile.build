@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=libsndfile
 VERSION=1.0.25
-BUILD=2
+BUILD=3
 DEPENDS=('sound >= 1.0.26-1' 'libvorbis >= 1.3.3-1' 'flac >= 1.2.1-1')
 
 # Description
@@ -42,7 +42,7 @@ SRCCOPY[0]="LGPL21"
 
 build0()
 {
-sed -i 's|$(libdir)/pkgconfig|$(datadir)/pkgconfig|g' Makefile.in
+sed -i 's|$(libdir)/pkgconfig|/usr/share/pkgconfig|g' Makefile.in
 sed -i 's|htmldir = $(htmldocdir)|htmldir = @htmldir@/libsndfile|g' doc/Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \

@@ -5,10 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=audacious
-VERSION=3.3.3
+VERSION=3.3.4
 BUILD=1
-DEPENDS=('gtk+ >= 3.6.2-1' 'dbus_glib >= 0.100-1')
-OPTDEPENDS=('mpg123 >= 1.14.2-1' 'ffmpeg >= 0.11.1-1' 'curl >= 7.28.0-1')
+DEPENDS=('gtk+ >= 3.6.4-1' 'dbus_glib >= 0.100-1')
+OPTDEPENDS=('mpg123 >= 1.14.4-1' 'ffmpeg >= 1.1.2-1' 'curl >= 7.29.0-1')
 
 # Description
 
@@ -43,14 +43,15 @@ SRCCOPY[0]="MIT"
 
 build0()
 {
+sed -i 's|${libdir}/pkgconfig|${datarootdir}/pkgconfig|g' Makefile
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
@@ -63,17 +64,20 @@ SRCCOPY[1]="BSD3"
 
 build1()
 {
-PKG_CONFIG_PATH="${PKG}/usr/lib$(libdirsuffix)/pkgconfig" \
-MOWGLI_CFLAGS="-I${PKG}/usr/include/libmowgli" \
-MOWGLI_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lmowgli" \
+sed -i 's|plugindir ?= ${libdir}/${PACKAGE}|plugindir ?= ${libdir}/plugins/${PACKAGE}|g' buildsys.mk.in
+sed -i 's|plugindir = ${libdir}/mcs|plugindir = ${libdir}/plugins/mcs|g' extra.mk.in
+sed -i 's|${libdir}/pkgconfig|${datarootdir}/pkgconfig|g' Makefile
+PKG_CONFIG_PATH="${PKG}${SYS_DIR[share]}/pkgconfig" \
+MOWGLI_CFLAGS="-I${PKG}${SYS_DIR[include]}/libmowgli" \
+MOWGLI_LIBS="-L${PKG}${SYS_DIR[lib]} -lmowgli" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --disable-gconf \
  --disable-kconfig
 make ${JOBS} V=1
@@ -88,52 +92,60 @@ SRCCOPY[2]="GPL3"
 
 build2()
 {
-PKG_CONFIG_PATH="${PKG}/usr/lib$(libdirsuffix)/pkgconfig" \
-CPPFLAGS="-I${PKG}/usr/include/libmowgli" \
-LIBMCS_CFLAGS="-I${PKG}/usr/include -I${PKG}/include/libmowgli" \
-LIBMCS_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lmcs -lmowgli" \
+sed -i 's|${datadir}/icons|${datarootdir}/icons|g' pixmaps/Makefile
+sed -i 's|${datadir}/pixmaps|${datarootdir}/pixmaps|g' configure
+sed -i 's|${datadir}/applications|${datarootdir}/applications|g' configure Makefile src/audacious/Makefile
+sed -i 's|$datadir/locale|$datarootdir/locale|g' configure
+sed -i 's|plugindir="$libdir/audacious"|plugindir="$libdir/plugins/audacious"|g' configure
+sed -i 's|${libdir}/pkgconfig|${datarootdir}/pkgconfig|g' Makefile
+PKG_CONFIG_PATH="${PKG}${SYS_DIR[share]}/pkgconfig" \
+LIBMCS_CFLAGS="-I${PKG}${SYS_DIR[include]} -I${PKG}${SYS_DIR[include]}/libmowgli" \
+LIBMCS_LIBS="-L${PKG}${SYS_DIR[lib]} -lmcs -lmowgli" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --disable-rpath \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --datadir="${SYS_DIR[share]}/application-data" \
  --with-regexlib=gnu
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
-install.dir ${PKG}/usr/share/Thunar/sendto
+install.dir ${PKG}${SYS_DIR[share]}/Thunar/sendto
 install.dat thunar-sendto-audacious-playlist.desktop \
- ${PKG}/usr/share/Thunar/sendto
+ ${PKG}${SYS_DIR[share]}/Thunar/sendto
 }
 
 SRCNAME[3]=${NAME}-plugins
 SRCVERS[3]=${VERSION}
 SRCPACK[3]=http://distfiles.atheme.org/${SRCNAME[3]}-${SRCVERS[3]}.tar.bz2
 
-EXTINC="-I/usr/include/sndfile -I/usr/include/samplerate"
+EXTINC="-I${SYS_DIR[include]}/sndfile -I${SYS_DIR[include]}/samplerate"
 
 build3()
 {
-PKG_CONFIG_PATH="${PKG}/usr/lib$(libdirsuffix)/pkgconfig" \
-CPPFLAGS="-I${PKG}/usr/include -I${PKG}/usr/include/libmowgli ${EXTINC}" \
-LDFLAGS="-L${PKG}/usr/lib$(libdirsuffix)" \
-MOWGLI_CFLAGS="-I${PKG}/usr/include/libmowgli" \
-MOWGLI_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lmowgli" \
+sed -i 's|$datadir/locale|$datarootdir/locale|g' configure
+PKG_CONFIG_PATH="${PKG}${SYS_DIR[share]}/pkgconfig" \
+CPPFLAGS="-I${PKG}${SYS_DIR[include]} -I${PKG}${SYS_DIR[include]}/libmowgli ${EXTINC}" \
+LDFLAGS="-L${PKG}${SYS_DIR[lib]}" \
+MOWGLI_CFLAGS="-I${PKG}${SYS_DIR[include]}/libmowgli" \
+MOWGLI_LIBS="-L${PKG}${SYS_DIR[lib]} -lmowgli" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --disable-rpath \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --datadir="${SYS_DIR[share]}/application-data" \
  --disable-oss \
  --enable-ipv6
 make ${JOBS} V=1

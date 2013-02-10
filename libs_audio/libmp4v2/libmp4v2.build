@@ -4,8 +4,8 @@
 
 source /usr/src/ports/Build/build.sh
 
-NAME=mp4v2
-VERSION=1.9.1
+NAME=libmp4v2
+VERSION=2.0.0
 BUILD=1
 
 # Description
@@ -19,7 +19,7 @@ cat > ${PKG}/install/slack-desc <<EOF
 # customary to leave one space after the ':'.
 
 $(padd)|-----handy-ruler------------------------------------------------------|
-${NAME}: mp4v2 (MP4/AAC library)
+${NAME}: libmp4v2 (MP4/AAC library)
 ${NAME}:
 ${NAME}: The mpeg4ip package, available from http://mpeg4ip.net contains a
 ${NAME}: piece of software, the libmp4v2 package. Unfortunately the mpeg4ip
@@ -27,14 +27,14 @@ ${NAME}: package also contains software that are covered by patents in some
 ${NAME}: juridistictions and therefore the policy of several different free
 ${NAME}: software distributions stops it's inclusion.
 ${NAME}:
-${NAME}: Homepage: http://resare.com/libmp4v2
+${NAME}: Homepage: http://code.google.com/p/mp4v2
 ${NAME}:
 ${NAME}:
 EOF
 
 # Sources
 
-SRCNAME[0]=${NAME}
+SRCNAME[0]=mp4v2
 SRCVERS[0]=${VERSION}
 SRCPACK[0]=http://mp4v2.googlecode.com/files/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
 SRCCOPY[0]="LGPL2"
@@ -48,18 +48,13 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-shared=yes \
  --enable-static=no \
  --disable-debug \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
-make -j 2
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
+make ${JOBS}
 make install DESTDIR="${PKG}"
-
-doc doc/Authors.txt doc/ToolGuide.txt
+doc doc/Authors.txt
 changelog doc/ReleaseNotes.txt
-
-rm -rf \
- ${PKG}/usr/man/manm
-
 }

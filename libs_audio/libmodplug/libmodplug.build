@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=libmodplug
 VERSION=0.8.8.4
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -40,6 +40,7 @@ SRCPACK[0]=${URL[sf]}/modplug-xmms/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
 
 build0()
 {
+sed -i 's|${libdir}/pkgconfig|${datarootdir}/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -47,15 +48,13 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
-make -j 2 V=1
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
+make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog ChangeLog
-rm -rf \
- ${PKG}/usr/share
 }

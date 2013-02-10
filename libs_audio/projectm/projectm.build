@@ -1,0 +1,60 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=projectm
+VERSION=2.1.0
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: projectm
+${NAME}:
+${NAME}: A music visualizer which is a reimplementation of Milkdrop under
+${NAME}: OpenGL. 3D acceleration is recommended.
+${NAME}:
+${NAME}: Homepage: http://projectm.sourceforge.net
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=projectM-complete
+SRCVERS[0]=${VERSION}-Source
+SRCPACK[0]=${URL[sf]}/${NAME}/${SRCVERS[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="LGPL21"
+
+build0()
+{
+sed -i 's|share/projectM|share/application-data/projectm|g' src/libprojectM/CMakeLists.txt
+sed -i 's|/share/projectM/presets|/share/application-data/projectm/presets|g' src/libprojectM/projectM.cpp
+sed -i 's|${CMAKE_INSTALL_PREFIX}/lib/pkgconfig|${CMAKE_INSTALL_PREFIX}/share/pkgconfig|g' src/libprojectM/CMakeLists.txt
+cmake \
+ -DCMAKE_BUILD_TYPE=Release \
+ -DCMAKE_CXX_FLAGS:STRING="${FLAGS}" \
+ -DCMAKE_C_FLAGS:STRING="${FLAGS}" \
+ -DCMAKE_VERBOSE_MAKEFILE:BOOL="on" \
+ -DCMAKE_INSTALL_PREFIX:PATH="${SYS_DIR[usr]}" \
+ -DINCLUDE-PROJECTM-QT:BOOL="off" \
+ -DINCLUDE-PROJECTM-PULSEAUDIO:BOOL="off" \
+ -DINCLUDE-PROJECTM-TEST:BOOL="off" \
+CMakeLists.txt
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS.txt FAQ.txt
+}

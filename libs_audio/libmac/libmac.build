@@ -4,7 +4,7 @@
 
 source /usr/src/ports/Build/build.sh
 
-NAME=mac
+NAME=libmac
 VERSION=3.99u4b5
 BUILD=1
 
@@ -34,35 +34,30 @@ EOF
 
 # Sources
 
-SRCNAME[0]=${NAME}
+SRCNAME[0]=mac
 SRCVERS[0]=3.99-u4-b5
 SRCPACK[0]=${URL[sf]}/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
 
 build0()
 {
-CFLAGS="${FLAGS} -DSHNTOOL" CXXFLAGS="${FLAGS} -DSHNTOOL" \
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+CPPFLAGS="-DSHNTOOL" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --enable-assembly=yes
-make -j 2
+make ${JOBS}
 make install DESTDIR="${PKG}"
-
 doc AUTHORS src/Credits.txt
 changelog NEWS
-
-mkdir -p ${PKG}/usr/share/html/${NAME}
-install.doc src/License.htm src/Readme.htm ${PKG}/usr/share/html/${NAME}
-
-(
-  cd ${DOC}
-  ln -sf /usr/share/html/${NAME}/License.htm
-)
+install.dir ${PKG}${SYS_DIR[html]}/${NAME}
+install.doc src/License.htm src/Readme.htm ${PKG}${SYS_DIR[html]}/${NAME}
+( cd ${DOC} ; ln -sf ${SYS_DIR[html]}/${NAME}/License.htm )
 }

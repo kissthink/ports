@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=libmusicbrainz
 VERSION=2.1.5
-BUILD=1
-DEPENDS=('expat >= 2.0.1-1')
+BUILD=2
+DEPENDS=('expat >= 2.1.0-1')
 
 # Description
 
@@ -42,31 +42,20 @@ SRCCOPY[0]="LGPL21"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
-make -j 2
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
+make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog ChangeLog
 }
-
-# 3.0.3
-#cmake \
-# -DCMAKE_CXX_FLAGS:STRING="${FLAGS}" \
-# -DCMAKE_CXX_FLAGS:STRING="${FLAGS}" \
-# -DCMAKE_VERBOSE_MAKEFILE:BOOL="on" \
-# -DCMAKE_INSTALL_PREFIX:PATH="/usr" \
-# -DEXEC_INSTALL_PREFIX:PATH="/usr" \
-# -DBIN_INSTALL_DIR:PATH="/usr/bin" \
-# -DINCLUDE_INSTALL_DIR:PATH="/usr/include" \
-# -DLIB_INSTALL_DIR:PATH="/usr/lib" \
-# CMakeLists.txt

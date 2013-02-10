@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=libvpx
 VERSION=1.1.0
-BUILD=1
-DEPENDS=('glib >= 2.32.3-1')
+BUILD=2
+DEPENDS=('glib >= 2.34.3-1')
 
 # Description
 
@@ -42,10 +42,11 @@ SRCCOPY[0]="BSD3"
 
 build0()
 {
+sed -i 's|$(LIBSUBDIR)/pkgconfig|/share/pkgconfig|g' libs.mk
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
- --prefix=/usr \
- --libdir=/usr/lib$(libdirsuffix) \
+ --prefix="${SYS_DIR[usr]}" \
+ --libdir="${SYS_DIR[lib]}" \
  --disable-install-docs \
  --disable-install-srcs \
  --enable-shared \
@@ -56,9 +57,8 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-vp8-encoder \
  --enable-vp8-decoder
 make ${JOBS} verbose=1
-make install DIST_DIR="${PKG}/usr"
+make install DIST_DIR="${PKG}${SYS_DIR[usr]}"
 doc AUTHORS
 changelog CHANGELOG
-rm -f \
- ${PKG}/usr/lib$(libdirsuffix)/*.a
+rm -f ${PKG}${SYS_DIR[lib]}/*.a
 }

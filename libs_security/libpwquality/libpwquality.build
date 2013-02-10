@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=libpwquality
 VERSION=1.2.1
-BUILD=1
+BUILD=2
 DEPENDS=('cracklib >= 2.8.22-1')
 
 # Description
@@ -33,6 +33,24 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+config etc/security/pwquality.conf.new
+EOF
+
 # Sources
 
 SRCNAME[0]=${NAME}
@@ -42,6 +60,7 @@ SRCCOPY[0]="BSD3 GPL2"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' src/Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -51,10 +70,10 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-shared=yes \
  --prefix=/usr \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --includedir=/usr/include/pwquality \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --includedir="${SYS_DIR[include]}/pwquality" \
  --enable-python-bindings=no \
  --enable-pam=no
 #FIXME: PAM
@@ -62,8 +81,7 @@ make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-install.dat doinst.sh ${PKG}/install
 mv \
- ${PKG}/etc/security/pwquality.conf \
- ${PKG}/etc/security/pwquality.conf.new
+ ${PKG}${SYS_DIR[etc]}/security/pwquality.conf \
+ ${PKG}${SYS_DIR[etc]}/security/pwquality.conf.new
 }

@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=cracklib
 VERSION=2.8.22
-BUILD=2
+BUILD=3
 
 # Description
 
@@ -32,6 +32,28 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+config etc/security/cracklib.conf.new
+
+if [ -x /usr/sbin/update-cracklib ]; then
+  /usr/sbin/update-cracklib
+fi
+EOF
+
 # Sources
 
 SRCNAME[0]=${NAME}
@@ -48,28 +70,27 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-rpath \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --datadir=/usr/share/dict \
- --with-default-dict=/var/cache/cracklib/pw_dict \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --datadir="${SYS_DIR[share]}/dict" \
+ --with-default-dict="${SYS_DIR[var]}/cache/cracklib/pw_dict" \
  --without-python
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-install.dat doinst.sh ${PKG}/install
 install.dir ${PKG}${SYS_DIR[man]}/man{3,8}
 install.man man/*.3 ${PKG}${SYS_DIR[man]}/man3
 install.man man/*.8 ${PKG}${SYS_DIR[man]}/man8
-install.dir ${PKG}/etc/{cron.daily,security}
-install.bin util/cracklib-runtime.cron.daily ${PKG}/etc/cron.daily/cracklib
-install.dat util/cracklib.conf ${PKG}/etc/security/cracklib.conf.new
-install.bin util/update-cracklib ${PKG}/usr/sbin
+install.dir ${PKG}${SYS_DIR[etc]}/{cron.daily,security}
+install.bin util/cracklib-runtime.cron.daily ${PKG}${SYS_DIR[etc]}/cron.daily/cracklib
+install.dat util/cracklib.conf ${PKG}${SYS_DIR[etc]}/security/cracklib.conf.new
+install.bin util/update-cracklib ${PKG}${SYS_DIR[sbin]}
 install.man util/update-cracklib.8 ${PKG}${SYS_DIR[man]}/man8
-install.dat extra-dicts/* ${PKG}/usr/share/dict/cracklib
-rm -f ${PKG}/usr/share/dict/cracklib/*.magic
-install.dir ${PKG}/var/cache/cracklib
+install.dat extra-dicts/* ${PKG}${SYS_DIR[share]}/dict/cracklib
+rm -f ${PKG}${SYS_DIR[share]}/dict/cracklib/*.magic
+install.dir ${PKG}${SYS_DIR[var]}/cache/cracklib
 }

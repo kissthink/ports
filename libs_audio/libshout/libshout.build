@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=libshout
-VERSION=2.2.2
+VERSION=2.3.1
 BUILD=1
-DEPENDS=('libtheora >= 1.1.1-1')
+DEPENDS=('libtheora >= 1.1.1-1' 'libspeex >= 1.2rc1-1')
 
 # Description
 
@@ -42,23 +42,22 @@ SRCCOPY[0]="GPL2"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --enable-shared=yes \
  --enable-static=no \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
-make -j 2
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
+make ${JOBS}
 make install DESTDIR="${PKG}"
-
 changelog NEWS
-
 rm -rf \
- ${PKG}/usr/share/doc \
- ${PKG}/usr/bin
+ ${PKG}${SYS_DIR[doc]}/${SRCNAME[0]}
+# ${PKG}${SYS_DIR[bin]}
 }

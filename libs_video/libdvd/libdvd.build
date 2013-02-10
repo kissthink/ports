@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=libdvd
 VERSION=4.2.0
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -40,17 +40,18 @@ SRCPACK[0]=http://download.videolan.org/pub/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVER
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' src/Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
@@ -64,15 +65,16 @@ SRCCOPY[1]="GPL2"
 
 build1()
 {
+sed -i 's|$(libdir)/pkgconfig|/usr/share/pkgconfig|g' Makefile
 ./configure2 \
  --extra-cflags="${FLAGS}" \
  --disable-debug \
  --disable-opts \
  --disable-static \
  --enable-shared \
- --prefix="/usr" \
- --libdir="/usr/lib$(libdirsuffix)" \
- --shlibdir="/usr/lib$(libdirsuffix)"
+ --prefix="${SYS_DIR[usr]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --shlibdir="${SYS_DIR[lib]}"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS README
@@ -85,19 +87,20 @@ SRCPACK[2]=http://www.mplayerhq.hu/MPlayer/releases/dvdnav/${SRCNAME[2]}-${SRCVE
 
 build2()
 {
+sed -i 's|$(libdir)/pkgconfig|/usr/share/pkgconfig|g' Makefile
 ./configure2 \
  --extra-cflags="${FLAGS}" \
  --disable-debug \
  --disable-opts \
  --disable-static \
  --enable-shared \
- --prefix=/usr \
- --libdir="/usr/lib$(libdirsuffix)" \
- --shlibdir="/usr/lib$(libdirsuffix)" \
- --with-dvdread-config="${PKG}/usr/bin/dvdread-config"
+ --prefix="${SYS_DIR[usr]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --shlibdir="${SYS_DIR[lib]}" \
+ --with-dvdread-config="${PKG}${SYS_DIR[bin]}/dvdread-config"
 make ${JOBS} \
- DVDREAD_CFLAGS="-I${PKG}/usr/include" \
- DVDREAD_LIBS="-L${PKG}/usr/lib$(libdirsuffix)"
+ DVDREAD_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+ DVDREAD_LIBS="-L${PKG}${SYS_DIR[lib]}"
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog ChangeLog

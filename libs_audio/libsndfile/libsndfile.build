@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=libsndfile
 VERSION=1.0.25
-BUILD=1
-DEPENDS=('sound >= 1.0.24-1' 'libvorbis >= 1.3.2-1' 'flac >= 1.2.1-1')
+BUILD=2
+DEPENDS=('sound >= 1.0.26-1' 'libvorbis >= 1.3.3-1' 'flac >= 1.2.1-1')
 
 # Description
 
@@ -42,6 +42,8 @@ SRCCOPY[0]="LGPL21"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datadir)/pkgconfig|g' Makefile.in
+sed -i 's|htmldir = $(htmldocdir)|htmldir = @htmldir@/libsndfile|g' doc/Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -49,17 +51,16 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[html]}" \
  --mandir="${SYS_DIR[man]}" \
  --htmldir="${SYS_DIR[html]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --includedir=/usr/include/sndfile \
- --localstatedir=/var
-make -j 2 V=1
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --includedir="${SYS_DIR[include]}/sndfile" \
+ --localstatedir="${SYS_DIR[var]}"
+make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-rm -f \
- ${PKG}/usr/share/html/*/win32*
+rm -rf ${PKG}${SYS_DIR[html]}
 }

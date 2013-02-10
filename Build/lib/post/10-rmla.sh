@@ -27,6 +27,10 @@ if [[ ! "${OPTIONS}" == *normla* ]]; then
 
   info "Removing any libtool library (.la) files"
 
+  # Allow the for loop to work on files with spaces
+  saveifs="${IFS}"
+  IFS="$(echo -en "\n\b")"
+
   for file in $(find ${PKG}); do
 
     filetype="$(file ${file})"
@@ -38,5 +42,7 @@ if [[ ! "${OPTIONS}" == *normla* ]]; then
     esac
 
   done
+
+  IFS="${saveifs}"
 
 fi

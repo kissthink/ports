@@ -27,6 +27,10 @@ if [[ ! "${OPTIONS}" == *nostrip* ]]; then
 
   info "Stripping debugging symbols from binaries"
 
+  # Allow the for loop to work on files with spaces
+  saveifs="${IFS}"
+  IFS=$(echo -en "\n\b")
+
   for file in $(find ${PKG}); do
 
     filetype="$(file -bi ${file})"
@@ -41,5 +45,7 @@ if [[ ! "${OPTIONS}" == *nostrip* ]]; then
     esac
 
   done
+
+  IFS="${saveifs}"
 
 fi

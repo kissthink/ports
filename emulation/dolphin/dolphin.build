@@ -7,7 +7,7 @@ source /usr/src/ports/Build/build.sh
 NAME=dolphin
 VERSION=3.5
 BUILD=1
-DEPENDS=('wxgtk >= 2.8.12-1' 'cg_toolkit >= 3.1-1' 'ffmpeg >= 0.10.3-1' 'bluetooth >= 4.101-1' 'sound >= 1.0.26-1' 'openal >= 1.13-1')
+DEPENDS=('wxgtk >= 2.8.12-1' 'cg_toolkit >= 3.1-1' 'ffmpeg >= 0.10.3-1' 'bluetooth >= 4.101-1' 'sound >= 1.0.26-1' 'libopenal >= 1.13-1')
 
 # Description
 

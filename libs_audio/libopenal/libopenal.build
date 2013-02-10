@@ -4,10 +4,11 @@
 
 source /usr/src/ports/Build/build.sh
 
-NAME=openal
-VERSION=1.13
+NAME=libopenal
+VERSION=1.15.1
 BUILD=1
-DEPENDS=('sound >= 1.0.24-1')
+DEPENDS=('sound >= 1.0.26-1')
+OPTDEPENDS=('ffmpeg >= 1.1.2-1')
 
 # Description
 
@@ -35,27 +36,27 @@ EOF
 
 # Sources
 
-SRCNAME[0]=${NAME}-soft
+SRCNAME[0]=openal-soft
 SRCVERS[0]=${VERSION}
 SRCPACK[0]=http://kcat.strangesoft.net/openal-releases/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
 SRCCOPY[0]="LGPL2"
 
 build0()
 {
+sed -i 's|lib${LIB_SUFFIX}/pkgconfig|share/pkgconfig|g' CMakeLists.txt
 cmake \
 -DCMAKE_BUILD_TYPE:STRING="Release" \
 -DCMAKE_CXX_FLAGS:STRING="${FLAGS}" \
 -DCMAKE_C_FLAGS:STRING="${FLAGS}" \
 -DCMAKE_VERBOSE_MAKEFILE:BOOL="on" \
--DCMAKE_INSTALL_PREFIX:PATH="/usr" \
--DLIB_SUFFIX:STRING="$(libdirsuffix)" \
+-DCMAKE_INSTALL_PREFIX:PATH="${SYS_DIR[usr]}" \
 -DEXAMPLES:BOOL="on" \
 -DALSOFT_CONFIG:BOOL="off" \
 -DPULSEAUDIO:BOOL="off" \
 -DOSS:BOOL="off" \
 -DALSA:BOOL="on" \
 CMakeLists.txt
-make -j 2
+make ${JOBS}
 make install DESTDIR="${PKG}"
 doc alsoftrc.sample
 }

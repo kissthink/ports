@@ -317,7 +317,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --libdir="${SYS_DIR[lib]}" \
  --localstatedir="${SYS_DIR[var]}" \
  --with-html-dir="${SYS_DIR[html]}" \
- --with-module-path="${SYS_DIR[share]}/pkcs11/modules"
+ --with-module-path="${SYS_DIR[lib]}/plugins/pkcs11"
 # --with-system-anchors="${SYS_DIR[share]}/ca-certificates"
 #--with-system-config= --with-system-certificates=
 make ${JOBS}

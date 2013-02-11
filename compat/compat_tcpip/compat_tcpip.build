@@ -21,7 +21,7 @@ cat > ${PKG}/install/slack-desc <<EOF
 $(padd)|-----handy-ruler------------------------------------------------------|
 ${NAME}: compat_tcpip
 ${NAME}:
-${NAME}: Deprecated TCP/IP utilites and libraries.
+${NAME}: Deprecated TCP/IP utilities.
 ${NAME}:
 ${NAME}:
 ${NAME}:
@@ -34,82 +34,28 @@ EOF
 
 # Sources
 
-SRCNAME[0]=libnl
-SRCVERS[0]=1.1
-SRCPACK[0]=http://www.infradead.org/~tgr/${SRCNAME[0]}/files/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
-SRCCOPY[0]="LGPL21"
+SRCNAME[0]=net-tools
+SRCVERS[0]=20130121
+SRCPACK[0]=http://www.tazenda.demon.co.uk/phil/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
 
 build0()
-{
-CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
-./configure \
- --build="${ARCH}-slackware-linux" \
- --prefix=/usr \
- --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --includedir=/usr/include/libnl1 \
- --localstatedir=/var
-make ${JOBS}
-make install DESTDIR="${PKG}"
-changelog ChangeLog
-rm -rf \
- ${PKG}/etc
-#${PKG}/usr/{include,lib$(libdirsuffix)/pkgconfig}
-chmod 0755 ${PKG}/usr/lib$(libdirsuffix)/*.so.?.?
-}
-
-SRCNAME[1]=libnl
-SRCVERS[1]=2.0
-SRCPACK[1]=http://www.infradead.org/~tgr/${SRCNAME[1]}/files/${SRCNAME[1]}-${SRCVERS[1]}.tar.gz
-SRCCOPY[1]="LGPL21"
-
-build1()
-{
-CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
-./configure \
- --build="${ARCH}-slackware-linux" \
- --disable-dependency-tracking \
- --enable-static=no \
- --enable-shared=yes \
- --prefix=/usr \
- --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --includedir=/usr/include/libnl2 \
- --localstatedir=/var \
- --disable-cli
-make ${JOBS}
-make install DESTDIR="${PKG}"
-changelog ChangeLog
-rm -rf \
- ${PKG}/etc
-}
-
-SRCNAME[2]=net-tools
-SRCVERS[2]=20120724
-SRCPACK[2]=http://www.tazenda.demon.co.uk/phil/${SRCNAME[2]}/${SRCNAME[2]}-${SRCVERS[2]}.tar.xz
-
-build2()
 {
 make version.h
 make ${JOBS} CFLAGS="${FLAGS}"
 make install-base \
  DESTDIR="${PKG}" \
  MANDIR="${SYS_DIR[man]}" \
- BINDIR="/usr/bin" \
- SBINDIR="/usr/sbin"
+ BINDIR="${SYS_DIR[bin]}" \
+ SBINDIR="${SYS_DIR[sbin]}"
 #FIXME: compatibility symlinks
-install.dir ${PKG}/{bin,sbin}
+install.dir ${PKG}/sbin
 (
   cd ${PKG}/sbin
-  ln -sf /usr/sbin/arp
-  ln -sf /usr/sbin/rarp
-  ln -sf /usr/sbin/ifconfig
-  ln -sf /usr/sbin/route
-  ln -sf /usr/sbin/ipmaddr
-  ln -sf /usr/sbin/iptunnel
-  cd ${PKG}/bin
-  ln -sf /usr/bin/netstat
+  ln -sf ${SYS_DIR[sbin]}/arp
+  ln -sf ${SYS_DIR[sbin]}/rarp
+  ln -sf ${SYS_DIR[sbin]}/ifconfig
+  ln -sf ${SYS_DIR[sbin]}/route
+  ln -sf ${SYS_DIR[sbin]}/ipmaddr
+  ln -sf ${SYS_DIR[sbin]}/iptunnel
 )
 }

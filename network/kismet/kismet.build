@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=kismet
 VERSION=20130211
-BUILD=1
+BUILD=2
 DEPENDS=('tcpip >= 20130209-1' 'pcre >= 8.32-1' 'openssl >= 1.0.1c-1')
 
 # Description
@@ -96,4 +96,5 @@ mv \
 mv \
  ${PKG}${SYS_DIR[etc]}/kismet/kismet_drone.conf \
  ${PKG}${SYS_DIR[etc]}/kismet/kismet_drone.conf.new
+chmod 0755 ${PKG}${SYS_DIR[lib]}/plugins/kismet*/*.so
 }

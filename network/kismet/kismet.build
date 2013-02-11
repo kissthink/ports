@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=kismet
-VERSION=201103R2
+VERSION=20130211
 BUILD=1
-DEPENDS=('tcpip >= 3.2.0-1' 'pcre >= 8.30-1' 'openssl >= 0.9.8t-1' 'compat_tcpip >= 20120202-1')
+DEPENDS=('tcpip >= 20130209-1' 'pcre >= 8.32-1' 'openssl >= 1.0.1c-1')
 
 # Description
 
@@ -33,25 +33,49 @@ ${NAME}: decloaking) hidden networks, and infering the presence of
 ${NAME}: nonbeaconing networks via data traffic.
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+config etc/kismet/kismet.conf.new
+config etc/kismet/kismet_drone.conf.new
+
+chown root.netdev usr/bin/kismet_capture
+chmod 4750 usr/bin/kismet_capture
+EOF
+
 # Sources
 
 SRCNAME[0]=${NAME}
-SRCVERS[0]=2011-03-R2
-SRCPACK[0]=http://www.kismetwireless.net/code/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://www.kismetwireless.net/code/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
 SRCCOPY[0]="GPL2"
 
 build0()
 {
-CPPFLAGS="-fpermissive -I/usr/include/libnl2" \
+sed -i 's|@datadir@/kismet/wav|@datadir@/sounds/kismet|g' Makefile.inc.in
+LIBS="-lnl-3 -lnl-genl-3" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc/kismet \
- --libdir=/usr/lib$(libdirsuffix)/plugins \
- --localstatedir=/var \
- --with-pcreheaders=/usr/include/pcre \
+ --sysconfdir="${SYS_DIR[etc]}/kismet" \
+ --libdir="${SYS_DIR[lib]}/plugins" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --with-pcreheaders="${SYS_DIR[include]}/pcre" \
  --with-suidgroup="netdev"
 make ${JOBS} dep
 make ${JOBS}
@@ -60,17 +84,16 @@ make install suidinstall DESTDIR="${PKG}"
 make plugins-install DESTDIR="${PKG}"
 doc README
 changelog RELEASENOTES.txt
-install.dat doinst.sh ${PKG}/install
-install.dir ${PKG}/usr/share/icons/hicolor/48x48/apps
-install.dat kismet.png ${PKG}/usr/share/icons/hicolor/48x48/apps
-install.dir ${PKG}/usr/share/applications
-install.dat kismet.desktop ${PKG}/usr/share/applications
-install.dir ${PKG}/usr/share/dtds
-install.dat extra/*.{dtd,xsd} ${PKG}/usr/share/dtds
+install.dir ${PKG}${SYS_DIR[share]}/icons/hicolor/48x48/apps
+install.dat kismet.png ${PKG}${SYS_DIR[share]}/icons/hicolor/48x48/apps
+install.dir ${PKG}${SYS_DIR[share]}/applications
+install.dat kismet.desktop ${PKG}${SYS_DIR[share]}/applications
+install.dir ${PKG}${SYS_DIR[share]}/dtds
+install.dat extra/*.{dtd,xsd} ${PKG}${SYS_DIR[share]}/dtds
 mv \
- ${PKG}/etc/kismet/kismet.conf \
- ${PKG}/etc/kismet/kismet.conf.new
+ ${PKG}${SYS_DIR[etc]}/kismet/kismet.conf \
+ ${PKG}${SYS_DIR[etc]}/kismet/kismet.conf.new
 mv \
- ${PKG}/etc/kismet/kismet_drone.conf \
- ${PKG}/etc/kismet/kismet_drone.conf.new
+ ${PKG}${SYS_DIR[etc]}/kismet/kismet_drone.conf \
+ ${PKG}${SYS_DIR[etc]}/kismet/kismet_drone.conf.new
 }

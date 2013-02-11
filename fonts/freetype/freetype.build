@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=freetype
 VERSION=2.4.11
-BUILD=1
+BUILD=2
 DEPENDS=('bzip2 >= 1.0.6-1')
 
 # Description
@@ -42,25 +42,26 @@ SRCCOPY[0]="GPL2"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datadir)/pkgconfig|g' builds/unix/install.mk
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --enable-shared=yes \
  --enable-static=no \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 changelog docs/CHANGES
 license docs/LICENSE.TXT
 license docs/FTL.TXT COPYING-FTL.TXT
 # From Slackware:
-install.dir ${PKG}/usr/include
+install.dir ${PKG}${SYS_DIR[include]}
 (
-  cd ${PKG}/usr/include
+  cd ${PKG}${SYS_DIR[include]}
   rm -rf freetype
   ln -sf freetype2/freetype .
 )

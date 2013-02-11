@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=neon
 VERSION=0.29.6
-BUILD=1
-DEPENDS=('gnutls >= 3.0.2-1' 'libxml >= 2.7.8-1' 'zlib >= 1.2.3-1' 'libproxy >= 0.4.7-1')
+BUILD=2
+DEPENDS=('gnutls >= 3.1.6-1' 'libxml >= 2.9.0-1' 'libproxy >= 0.4.11-1')
 
 # Description
 
@@ -42,22 +42,26 @@ SRCCOPY[0]="LGPL2"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(prefix)/share/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
  --docdir="${SYS_DIR[html]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --enable-threadsafe-ssl=posix \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-ssl=gnutls \
- --with-libxml2
-make -j 2
+ --with-libxml2 \
+ --with-ca-bundle="${SYS_DIR[etc]}/ssl/certs/ca-certificates.crt" \
+ --enable-threadsafe-ssl=posix
+make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS THANKS
 changelog NEWS
+# No development docs
+rm -rf ${PKG}${SYS_DIR[html]}
 }

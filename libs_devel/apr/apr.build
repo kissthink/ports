@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=apr
 VERSION=1.4.6
-BUILD=2
+BUILD=3
 
 # Description
 
@@ -41,6 +41,7 @@ SRCCOPY[0]="APACHE2"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(prefix)/share/pkgconfig|g' Makefile.in
 export apr_cv_epoll_create1=no
 export apr_cv_dup3=no
 export apr_cv_accept4=no
@@ -50,19 +51,20 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --build="${ARCH}-slackware-linux" \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --includedir=/usr/include/apr-1 \
- --localstatedir=/var \
- --with-installbuilddir=/usr/share/application-data/apr-1 \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --includedir="${SYS_DIR[include]}/apr-1" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --with-installbuilddir="${SYS_DIR[share]}/application-data/apr-1" \
  --with-devrandom=/dev/urandom \
  --enable-nonportable-atomics \
  --enable-threads
 make ${JOBS}
 make install DESTDIR="${PKG}"
 changelog CHANGES
+rm -f ${PKG}${SYS_DIR[lib]}/*.exp
 }
 
 SRCNAME[1]=${NAME}-util
@@ -72,29 +74,33 @@ SRCCOPY[1]="APACHE2"
 
 build1()
 {
-export APR_BUILD_DIR="${PKG}/usr/share/application-data/apr-1"
-CPPFLAGS="-I${PKG}/usr/include/apr-1" \
-LDFLAGS="-L${PKG}/usr/lib$(libdirsuffix)" \
+sed -i 's|$(libdir)/pkgconfig|$(prefix)/share/pkgconfig|g' Makefile.in
+sed -i 's|${libdir}/apr-util-${APRUTIL_MAJOR_VERSION}|${libdir}/plugins/apr-util-${APRUTIL_MAJOR_VERSION}|g' configure
+export APR_BUILD_DIR="${PKG}${SYS_DIR[share]}/application-data/apr-1"
+CPPFLAGS="-I${PKG}${SYS_DIR[include]}/apr-1" \
+LDFLAGS="-L${PKG}${SYS_DIR[lib]}" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --includedir=/usr/include/apr-1 \
- --localstatedir=/var \
- --with-apr="${PKG}/usr" \
- --with-expat=/usr \
- --with-berkeley-db=/usr \
- --with-gdbm=/usr \
- --with-sqlite3=/usr \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --includedir="${SYS_DIR[include]}/apr-1" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --with-apr="${PKG}${SYS_DIR[usr]}" \
+ --with-expat="${SYS_DIR[usr]}" \
+ --with-berkeley-db="${SYS_DIR[usr]}" \
+ --with-gdbm="${SYS_DIR[usr]}" \
+ --with-sqlite3="${SYS_DIR[usr]}" \
  --without-pgsql \
  --without-sqlite2
 sed -i "s|/usr/share/application-data/apr-1|${PKG}/usr/share/application-data/apr-1|g" build/rules.mk
 make ${JOBS}
 make install DESTDIR="${PKG}"
 changelog CHANGES
+# http://mail-archives.apache.org/mod_mbox/apr-dev/200501.mbox/%3Ccc67648e0501170537470f8135@mail.gmail.com%3E
+rm -f ${PKG}${SYS_DIR[lib]}/*.exp
 }

@@ -23,13 +23,32 @@ ${NAME}: libraries (shared libraries needed by many programs)
 ${NAME}:
 ${NAME}: This is a collection of shared libraries needed to run most programs.
 ${NAME}:
-${NAME}: 
+${NAME}: It includes: zlib, gmp, libidn, libtasn1, libaio, libffi and nettle. 
 ${NAME}:
 ${NAME}:
 ${NAME}:
 ${NAME}:
 ${NAME}:
 ${NAME}:
+EOF
+
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+config etc/pkcs11/pkcs11.conf.new
 EOF
 
 # Sources
@@ -45,10 +64,10 @@ cmake \
  -DCMAKE_C_FLAGS:STRING="${FLAGS}" \
  -DCMAKE_CXX_FLAGS:STRING="${FLAGS}" \
  -DCMAKE_VERBOSE_MAKEFILE:BOOL="on" \
- -DCMAKE_INSTALL_PREFIX:PATH="/usr" \
- -DINSTALL_LIB_DIR:STRING="/usr/lib$(libdirsuffix)" \
- -DINSTALL_MAN_DIR:STRING="/usr/man" \
- -DINSTALL_PKGCONFIG_DIR:STRING="/usr/lib$(libdirsuffix)/pkgconfig" \
+ -DCMAKE_INSTALL_PREFIX:PATH="${SYS_DIR[usr]}" \
+ -DINSTALL_LIB_DIR:STRING="${SYS_DIR[lib]}" \
+ -DINSTALL_MAN_DIR:STRING="${SYS_DIR[man]}" \
+ -DINSTALL_PKGCONFIG_DIR:STRING="${SYS_DIR[share]}/pkgconfig" \
 .
 make ${JOBS}
 make install DESTDIR="${PKG}"
@@ -57,8 +76,8 @@ changelog ChangeLog
 }
 
 SRCNAME[1]=gmp
-SRCVERS[1]=5.0.5
-SRCPACK[1]=ftp://ftp.gmplib.org/pub/${SRCNAME[1]}-${SRCVERS[1]}/${SRCNAME[1]}-${SRCVERS[1]}.tar.xz
+SRCVERS[1]=5.1.0
+SRCPACK[1]=ftp://ftp.gmplib.org/pub/gmp-${SRCVERS[1]}/${SRCNAME[1]}-${SRCVERS[1]}.tar.xz
 SRCCOPY[1]="GPL3 LGPL3"
 
 build1()
@@ -69,132 +88,244 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-dependency-tracking \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
  --infodir="${SYS_DIR[info]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --enable-cxx \
- --enable-mpbsd \
- --enable-mpfr
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --enable-assembly \
+ --enable-cxx
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
+# No development docs
+rm -rf ${PKG}${SYS_DIR[info]}
 }
 
-SRCNAME[2]=libidn
-SRCVERS[2]=1.25
-SRCPACK[2]=http://ftp.gnu.org/gnu/${SRCNAME[2]}/${SRCNAME[2]}-${SRCVERS[2]}.tar.gz
-SRCCOPY[2]="GPL2 LGPL3"
+SRCNAME[2]=mpfr
+SRCVERS[2]=3.1.1
+SRCPACK[2]=http://www.mpfr.org/mpfr-current/${SRCNAME[2]}-${SRCVERS[2]}.tar.xz
+SRCCOPY[2]="GPL3 LGPL3"
 
 build2()
 {
-CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+# Can't use -ffast-math with this library
+CFLAGS="${FLAGS%-ffast-math}" CXXFLAGS="${FLAGS%-ffast-math}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
- --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --enable-static=no \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
  --infodir="${SYS_DIR[info]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --includedir=/usr/include/idn \
- --localstatedir=/var \
- --with-html-dir="${SYS_DIR[html]}"
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --with-gmp-include="${PKG}${SYS_DIR[include]}" \
+ --with-gmp-lib="${PKG}${SYS_DIR[lib]}"
 make ${JOBS}
 make install DESTDIR="${PKG}"
-doc AUTHORS THANKS
+doc AUTHORS
 changelog NEWS
+# No development docs
+rm -rf \
+ ${PKG}${SYS_DIR[doc]}/mpfr \
+ ${PKG}${SYS_DIR[info]}
 }
 
-SRCNAME[3]=libtasn1
-SRCVERS[3]=3.2
-SRCPACK[3]=http://ftp.gnupg.org/pub/gnutls/${SRCNAME[3]}/${SRCNAME[3]}-${SRCVERS[3]}.tar.gz
-SRCCOPY[3]="LGPL21 GPL3"
+SRCNAME[3]=libidn
+SRCVERS[3]=1.26
+SRCPACK[3]=http://ftp.gnu.org/gnu/libidn/${SRCNAME[3]}-${SRCVERS[3]}.tar.gz
+SRCCOPY[3]="GPL2 LGPL3"
 
 build3()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
+ --disable-silent-rules \
+ --disable-rpath \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
  --infodir="${SYS_DIR[info]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --includedir=/usr/include/tasn1 \
- --with-html-dir="${SYS_DIR[html]}"
-make ${JOBS}
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --includedir="${SYS_DIR[include]}/idn" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --with-html-dir="${SYS_DIR[html]}" \
+ --enable-threads=posix
+make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS THANKS
 changelog NEWS
+# No development docs
+rm -rf ${PKG}${SYS_DIR[info]}
 }
 
-SRCNAME[4]=libaio
-SRCVERS[4]=0.3.109
-SRCPACK[4]=http://www.kernel.org/pub/linux/kernel/people/bcrl/aio/${SRCNAME[4]}-${SRCVERS[4]}.tar.bz2
-SRCCOPY[4]="LGPL21"
+SRCNAME[4]=libtasn1
+SRCVERS[4]=3.2
+SRCPACK[4]=http://ftp.gnupg.org/pub/gnutls/${SRCNAME[4]}/${SRCNAME[4]}-${SRCVERS[4]}.tar.gz
+SRCCOPY[4]="LGPL21 GPL3"
 
 build4()
 {
-make ${JOBS} OPTFLAGS="${FLAGS}"
-make install prefix="${PKG}/usr" libdir="${PKG}/usr/lib$(libdirsuffix)"
-changelog ChangeLog
-rm -f ${PKG}/usr/lib$(libdirsuffix)/libaio.a
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' lib/Makefile.in
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix="${SYS_DIR[usr]}" \
+ --mandir="${SYS_DIR[man]}" \
+ --infodir="${SYS_DIR[info]}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --includedir="${SYS_DIR[include]}/tasn1" \
+ --with-html-dir="${SYS_DIR[html]}"
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS THANKS
+changelog NEWS
+# No development docs
+rm -rf ${PKG}${SYS_DIR[info]}
 }
 
-SRCNAME[5]=nettle
-SRCVERS[5]=2.5
-SRCPACK[5]=http://www.lysator.liu.se/~nisse/archive/${SRCNAME[5]}-${SRCVERS[5]}.tar.gz
+SRCNAME[5]=libaio
+SRCVERS[5]=0.3.109
+SRCPACK[5]=http://www.kernel.org/pub/linux/kernel/people/bcrl/aio/${SRCNAME[5]}-${SRCVERS[5]}.tar.bz2
 SRCCOPY[5]="LGPL21"
 
 build5()
 {
+make ${JOBS} OPTFLAGS="${FLAGS}"
+make install prefix="${PKG}${SYS_DIR[usr]}" libdir="${PKG}${SYS_DIR[lib]}"
+changelog ChangeLog
+rm -f ${PKG}${SYS_DIR[lib]}/libaio.a
+}
+
+SRCNAME[6]=nettle
+SRCVERS[6]=2.6
+SRCPACK[6]=http://www.lysator.liu.se/~nisse/archive/${SRCNAME[6]}-${SRCVERS[6]}.tar.gz
+SRCCOPY[6]="LGPL21"
+
+build6()
+{
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --enable-shared \
- --prefix=/usr \
+ --disable-static \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
  --infodir="${SYS_DIR[info]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 changelog NEWS
-rm -f ${PKG}/usr/lib$(libdirsuffix)/lib{nettle,hogweed}.a
-chmod 0755 ${PKG}/usr/lib$(libdirsuffix)/*.so*
+chmod 0755 ${PKG}${SYS_DIR[lib]}/*.so*
+# No development docs
+rm -rf ${PKG}${SYS_DIR[info]}
 }
 
-SRCNAME[6]=libffi
-SRCVERS[6]=3.0.11
-SRCPACK[6]=ftp://sourceware.org/pub/${SRCNAME[6]}/${SRCNAME[6]}-${SRCVERS[6]}.tar.gz
-SRCCOPY[6]="MIT"
+SRCNAME[7]=libffi
+SRCVERS[7]=3.0.11
+SRCPACK[7]=ftp://sourceware.org/pub/${SRCNAME[7]}/${SRCNAME[7]}-${SRCVERS[7]}.tar.gz
+SRCCOPY[7]="MIT"
 
-build6()
+build7()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
  --infodir="${SYS_DIR[info]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 changelog ChangeLog
+# No development docs
+rm -rf ${PKG}${SYS_DIR[info]}
+}
+
+SRCNAME[8]=popt
+SRCVERS[8]=1.16
+SRCPACK[8]=http://rpm5.org/files/popt/${SRCNAME[8]}-${SRCVERS[8]}.tar.gz
+SRCCOPY[8]="MIT"
+
+build8()
+{
+sed -i 's|$(prefix)/lib/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-rpath \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix="${SYS_DIR[usr]}" \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog CHANGES
+}
+
+SRCNAME[9]=p11-kit
+SRCVERS[9]=0.14
+SRCPACK[9]=http://p11-glue.freedesktop.org/releases/${SRCNAME[9]}-${SRCVERS[9]}.tar.gz
+SRCCOPY[9]="BSD3"
+
+build9()
+{
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' p11-kit/Makefile.in
+LIBTASN1_CFLAGS="-I${PKG}${SYS_DIR[include]}/tasn1" \
+LIBTASN1_LIBS="-L${PKG}${SYS_DIR[lib]} -ltasn1" \
+CPPFLAGS="-I${PKG}${SYS_DIR[include]}/tasn1" \
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --disable-rpath \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix="${SYS_DIR[usr]}" \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --with-html-dir="${SYS_DIR[html]}" \
+ --with-module-path="${SYS_DIR[share]}/pkcs11/modules"
+# --with-system-anchors="${SYS_DIR[share]}/ca-certificates"
+#--with-system-config= --with-system-certificates=
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+mv \
+ ${PKG}${SYS_DIR[etc]}/pkcs11/pkcs11.conf.example \
+ ${PKG}${SYS_DIR[etc]}/pkcs11/pkcs11.conf.new
+rm -rf ${PKG}${SYS_DIR[html]}
 }

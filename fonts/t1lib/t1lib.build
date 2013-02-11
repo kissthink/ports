@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=t1lib
 VERSION=5.1.2
-BUILD=1
+BUILD=2
 DEPENDS=('xorg_libs >= 7.7-3')
 
 # Description
@@ -33,6 +33,14 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+if [ -x /usr/sbin/update-type1-database ]; then
+  /usr/sbin/update-type1-database
+fi
+EOF
+
 # Sources
 
 SRCNAME[0]=${NAME}
@@ -47,25 +55,24 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --build="${ARCH}-slackware-linux" \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 #NOTE: kill dependency on Xaw ?
 make ${JOBS} without_doc
-make install prefix="${PKG}/usr" libdir="${PKG}/usr/lib$(libdirsuffix)"
+make install prefix="${PKG}${SYS_DIR[usr]}" libdir="${PKG}${SYS_DIR[lib]}"
 changelog Changes
-install.dat doinst.sh ${PKG}/install
-install.dir ${PKG}/var/cache/t1lib
-install.dir ${PKG}/etc/{profile.d,fonts}
-install.bin t1lib.{sh,csh} ${PKG}/etc/profile.d
-install.cfg t1lib.conf ${PKG}/etc/fonts
-install.dir ${PKG}/usr/sbin
-install.bin update-type1-database ${PKG}/usr/sbin
-install.dir ${PKG}/usr/share/fonts/{Type1,encodings}
-install.dat Fonts/afm/*.afm ${PKG}/usr/share/fonts/Type1
-install.dat Fonts/type1/*.pfb ${PKG}/usr/share/fonts/Type1
-install.dat Fonts/enc/*.enc ${PKG}/usr/share/fonts/encodings
-chmod 0755 ${PKG}/usr/lib$(libdirsuffix)/*.so*
+install.dir ${PKG}${SYS_DIR[var]}/cache/t1lib
+install.dir ${PKG}${SYS_DIR[etc]}/{profile.d,fonts}
+install.bin t1lib.{sh,csh} ${PKG}${SYS_DIR[etc]}/profile.d
+install.cfg t1lib.conf ${PKG}${SYS_DIR[etc]}/fonts
+install.dir ${PKG}${SYS_DIR[sbin]}
+install.bin update-type1-database ${PKG}${SYS_DIR[sbin]}
+install.dir ${PKG}${SYS_DIR[share]}/fonts/{Type1,encodings}
+install.dat Fonts/afm/*.afm ${PKG}${SYS_DIR[share]}/fonts/Type1
+install.dat Fonts/type1/*.pfb ${PKG}${SYS_DIR[share]}/fonts/Type1
+install.dat Fonts/enc/*.enc ${PKG}${SYS_DIR[share]}/fonts/encodings
+chmod 0755 ${PKG}${SYS_DIR[lib]}/*.so*
 }

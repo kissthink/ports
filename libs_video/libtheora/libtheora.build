@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=libtheora
 VERSION=1.1.1
-BUILD=2
+BUILD=3
 DEPENDS=('libvorbis >= 1.3.3-1')
 
 # Description
@@ -42,7 +42,7 @@ SRCPACK[0]=http://downloads.xiph.org/releases/${NAME}/${SRCNAME[0]}-${SRCVERS[0]
 build0()
 {
 sed -i 's|$(datadir)/doc/$(PACKAGE)-$(VERSION)|$(datadir)/doc/$(PACKAGE)|g' doc/Makefile.in
-sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
+sed -i 's|$(libdir)/pkgconfig|$(datadir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \

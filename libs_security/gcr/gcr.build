@@ -7,7 +7,7 @@ source /usr/src/ports/Build/build.sh
 NAME=gcr
 MAJOR=3.6
 VERSION=${MAJOR}.2
-BUILD=2
+BUILD=3
 DEPENDS=('libgcrypt >= 1.5.0-1' 'gtk+ >= 3.6.4-1')
 
 # Description
@@ -66,6 +66,7 @@ build0()
 {
 sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' gc{r,k}/Makefile.in
 sed -i 's|uidir = $(datadir)/gcr-@GCR_MAJOR@/ui|uidir = $(datadir)/application-data/gcr-@GCR_MAJOR@/ui|g' gcr/Makefile.in
+sed -i 's|pkcs11standalonedir="${libdir}/gnome-keyring/devel"|pkcs11standalonedir="${libdir}/plugins/gnome-keyring/devel"|g' configure
 CPPFLAGS="-I${SYS_DIR[include]}/gpg-error -I${SYS_DIR[include]}/gcrypt" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \

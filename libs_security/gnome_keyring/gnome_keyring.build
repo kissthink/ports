@@ -7,7 +7,7 @@ source /usr/src/ports/Build/build.sh
 NAME=gnome_keyring
 MAJOR=3.6
 VERSION=${MAJOR}.2
-BUILD=1
+BUILD=2
 DEPENDS=('gcr >= 3.6.2-1' 'capabilities >= 20130117-1')
 
 # Description
@@ -43,7 +43,8 @@ SRCCOPY[0]="GPL2 LGPL2"
 
 build0()
 {
-CPPFLAGS="-I/usr/include/gcrypt -I/usr/include/gpg-error -I/usr/include/tasn1" \
+sed -i 's|pkcs11standalonedir="${libdir}/gnome-keyring/devel"|pkcs11standalonedir="${libdir}/plugins/gnome-keyring/devel"|g' configure
+CPPFLAGS="-I${SYS_DIR[include]}/gcrypt -I${SYS_DIR[include]}/gpg-error -I${SYS_DIR[include]}/tasn1" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -52,26 +53,26 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-static=no \
  --enable-shared=yes \
  --enable-debug=no \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --libexecdir=/usr/lib$(libdirsuffix)/exec \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --libexecdir="${SYS_DIR[lib]}/exec" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-html-dir="${SYS_DIR[html]}" \
- --with-root-certs=/etc/ssl/certs \
- --with-pkcs11-modules=/usr/lib$(libdirsuffix)/plugins/pkcs11 \
+ --with-root-certs="${SYS_DIR[etc]}/ssl/certs" \
+ --with-pkcs11-modules="${SYS_DIR[lib]}/plugins/pkcs11" \
  --disable-schemas-compile \
  --disable-pam
 #FIXME: PAM
-# --with-pam-dir=/usr/lib$(libdirsuffix)/security
+# --with-pam-dir=${SYS_DIR[lib]}/plugins/security
 #FIXME: Change run dir to /run ?
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-rm -rf \
- ${PKG}/usr/share/gnome-keyring/introspect
+# No development docs
+rm -rf ${PKG}${SYS_DIR[html]}
 }
 
 SRCNAME[1]=libgnome-keyring
@@ -81,7 +82,8 @@ SRCCOPY[1]="GPL2 LGPL2"
 
 build1()
 {
-CPPFLAGS="-I/usr/include/gcrypt -I/usr/include/gpg-error" \
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' library/Makefile.in
+CPPFLAGS="-I${SYS_DIR[include]}/gcrypt -I${SYS_DIR[include]}/gpg-error" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -90,15 +92,17 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-static=no \
  --enable-shared=yes \
  --enable-debug=no \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --libexecdir=/usr/lib$(libdirsuffix)/exec \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --libexecdir="${SYS_DIR[lib]}/exec" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-html-dir="${SYS_DIR[html]}"
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
+# No development docs
+rm -rf ${PKG}${SYS_DIR[html]}
 }

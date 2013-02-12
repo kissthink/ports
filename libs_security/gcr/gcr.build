@@ -7,8 +7,8 @@ source /usr/src/ports/Build/build.sh
 NAME=gcr
 MAJOR=3.6
 VERSION=${MAJOR}.2
-BUILD=1
-DEPENDS=('libgcrypt >= 1.5.0-1' 'p11kit >= 0.14-1' 'gtk+ >= 3.6.4-1')
+BUILD=2
+DEPENDS=('libgcrypt >= 1.5.0-1' 'gtk+ >= 3.6.4-1')
 
 # Description
 
@@ -39,15 +39,15 @@ cat >> ${PKG}/install/doinst.sh <<EOF
 
 # Compile settings data schemas
 if [ -x /usr/bin/glib-compile-schemas ]; then
-  /usr/bin/glib-compile-schemas /usr/share/glib-2.0/schemas
+  /usr/bin/glib-compile-schemas ${SYS_DIR[share]}/glib-2.0/schemas
 fi
 
 if [ -x /usr/bin/gtk-update-icon-cache ]; then
-  /usr/bin/gtk-update-icon-cache -q -t -f /usr/share/icons/hicolor
+  /usr/bin/gtk-update-icon-cache -q -t -f ${SYS_DIR[share]}/icons/hicolor
 fi
 
 if [ -x /usr/bin/update-mime-database ]; then
-  /usr/bin/update-mime-database /usr/share/mime &> /dev/null
+  /usr/bin/update-mime-database ${SYS_DIR[share]}/mime &> /dev/null
 fi
 
 if [ -x /usr/bin/update-desktop-database ]; then
@@ -64,7 +64,9 @@ SRCCOPY[0]="LGPL2"
 
 build0()
 {
-CPPFLAGS="-I/usr/include/gpg-error -I/usr/include/gcrypt" \
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' gc{r,k}/Makefile.in
+sed -i 's|uidir = $(datadir)/gcr-@GCR_MAJOR@/ui|uidir = $(datadir)/application-data/gcr-@GCR_MAJOR@/ui|g' gcr/Makefile.in
+CPPFLAGS="-I${SYS_DIR[include]}/gpg-error -I${SYS_DIR[include]}/gcrypt" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -72,16 +74,18 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --libexecdir=/usr/lib$(libdirsuffix)/exec \
- --localstatedir=/var \
- --with-pkcs11-modules=/usr/lib$(libdirsuffix)/plugins/pkcs11 \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --libexecdir="${SYS_DIR[lib]}/exec" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --with-pkcs11-modules="${SYS_DIR[lib]}/plugins/pkcs11" \
  --with-html-dir="${SYS_DIR[html]}"
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
+# No development docs
+rm -rf ${PKG}${SYS_DIR[html]}
 }

@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=lftp
 VERSION=4.4.3
-BUILD=1
+BUILD=2
 DEPENDS=('gnutls >= 3.1.6-1')
 
 # Description
@@ -65,6 +65,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
+ --disable-rpath \
  --enable-static=no \
  --enable-shared=yes \
  --prefix="${SYS_DIR[usr]}" \
@@ -72,15 +73,16 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --sysconfdir="${SYS_DIR[conf]}" \
  --libdir="${SYS_DIR[lib]}" \
  --localstatedir=/var \
+ --with-pager="${SYS_DIR[bin]}/less" \
  --with-gnutls \
  --with-modules \
- --with-pager="/usr/bin/less"
+ --enable-packager-mode
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS FAQ THANKS
 changelog NEWS
 mv \
- ${PKG}/etc/conf.d/lftp.conf \
- ${PKG}/etc/conf.d/lftp.conf.new
+ ${PKG}${SYS_DIR[conf]}/lftp.conf \
+ ${PKG}${SYS_DIR[conf]}/lftp.conf.new
 rm -rf ${PKG}${SYS_DIR[share]}/${SRCNAME[0]}
 }

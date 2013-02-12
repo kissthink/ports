@@ -5,9 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=gst_plugins_ugly
-VERSION=0.10.19
+VERSION=1.0.5
 BUILD=1
-DEPENDS=('gstreamer >= 0.10.36-1')
+DEPENDS=('gstreamer >= 1.0.5-1')
+OPTDEPENDS=('liba52 >= 0.7.5cvs-1' 'libcdio >= 0.83-1' 'libdvd >= 4.2.0-1' 'lame >= 3.99.5-1' 'libmad >= 0.15.1b-1' 'libx264 >= 20130206-1')
 
 # Description
 
@@ -39,6 +40,8 @@ GSTREAMERREPO="http://gstreamer.freedesktop.org/src"
 
 configure()
 {
+sed -i 's|$(libdir)/gstreamer-$GST_API_VERSION|$(libdir)/plugins/gstreamer-$GST_API_VERSION|g' configure
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' pkgconfig/Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -49,12 +52,12 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-introspection=no \
  --disable-debug \
  --disable-rpath \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --localstatedir=/var \
- --libdir=/usr/lib$(libdirsuffix) \
- --libexecdir=/usr/lib$(libdirsuffix)/exec \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --libexecdir="${SYS_DIR[lib]}/exec" \
  --with-html-dir="${SYS_DIR[html]}" \
  --enable-docbook=no \
  --enable-gtk-doc=no \
@@ -71,11 +74,13 @@ build0()
 {
 configure \
  --enable-orc
+# missing plugins: amrnb, amrwb, mpeg2dec, sidplay
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS RELEASE
 changelog NEWS 
-rm -f \
+rm -rf \
+ ${PKG}${SYS_DIR[html]} \
  ${PKG}/usr/lib$(libdirsuffix)/*.a \
  ${PKG}/usr/lib$(libdirsuffix)/*/*.a
 }

@@ -5,7 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=djvulibre
-VERSION=3.5.23
+VER=3.5.25
+PATCHLVL=3
+VERSION=${VER}.${PATCHLVL}
 BUILD=1
 
 # Description
@@ -19,13 +21,13 @@ cat > ${PKG}/install/slack-desc <<EOF
 # customary to leave one space after the ':'.
 
 $(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: djvulibre (DjVu document library)
 ${NAME}:
+${NAME}: A library for the DjVu ("déjà vu") digital document format that can
+${NAME}: advantageously replace PDF, PS, TIFF, JPEG and GIF for distributing
+${NAME}: scanned documents or high-resolution pictures.
 ${NAME}:
-${NAME}:
-${NAME}:
-${NAME}:
-${NAME}:
-${NAME}:
+${NAME}: Homepage: http://djvu.sf.net
 ${NAME}:
 ${NAME}:
 ${NAME}:
@@ -37,24 +39,28 @@ EOF
 SRCNAME[0]=${NAME}
 SRCVERS[0]=${VERSION}
 SRCPACK[0]=${URL[sf]}/djvu/DjVuLibre/${SRCVERS[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCROOT[0]=${SRCNAME[0]}-${VER}
 SRCCOPY[0]="GPL2"
 
 build0()
 {
+sed -i 's|${libdir}/pkgconfig|${datadir}/pkgconfig|g' libdjvu/Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
- --disable-dependency-tracking \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --docdir="${DOC}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
-make -j 2
+ --docdir="${SYS_DIR[doc]}/${SRCNAME[0]}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --disable-xmltools \
+ --disable-desktopfiles
+make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
+chmod 0755 ${PKG}${SYS_DIR[lib]}/libdjvulibre.so.??.?.?
 }

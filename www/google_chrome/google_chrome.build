@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=google_chrome
-VERSION=24.0.1312.68
+VERSION=24.0.1312.70
 BUILD=1
 DEPENDS=('gtk+ >= 2.24.14-1' 'seamonkey_solibs >= 2.15-1' 'gconf >= 3.2.5-1')
 
@@ -33,6 +33,10 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+( cd opt/google/chrome ; chmod 4755 chrome-sandbox )
+EOF
+
 # Sources
 
 #FIXME: architecture kludge
@@ -44,7 +48,6 @@ SRCOPTS[0]="pkgunpack"
 
 build0()
 {
-install.dat doinst.sh ${PKG}/install
 # Symlink the startup script
 install.dir ${PKG}${SYS_DIR[bin]}
 ( cd ${PKG}${SYS_DIR[bin]}; ln -sf /opt/google/chrome/google-chrome )
@@ -73,5 +76,5 @@ done
 rm -rf \
  ${PKG}${SYS_DIR[etc]} \
  ${PKG}${SYS_DIR[share]}/gnome-control-center \
- ${PKG}/opt/google/chrome/google-chrome.desktop~
+ ${PKG}/opt/google/chrome/google-chrome.desktop{~,.orig}
 }

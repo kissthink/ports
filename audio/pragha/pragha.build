@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=pragha
 VERSION=1.1.1
-BUILD=1
-DEPENDS=('xfce >= 4.10-1' 'gstreamer >= 0.10.36-1' 'sqlite >= 3.7.10-1' 'liblastfm >= 0.5-1' 'taglib >= 1.7.1-1' 'libcdio >= 0.83-1')
+BUILD=2
+DEPENDS=('xfce >= 4.10-1' 'gstreamer >= 1.0.5-1' 'sqlite >= 3.7.15.2-1' 'liblastfm >= 20121125-1' 'taglib >= 1.8-1' 'libcdio >= 0.83-1')
 
 # Description
 
@@ -49,15 +49,16 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --docdir="${SYS_DIR[doc]}/${SRCNAME[0]}-${SRCVERS[0]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --docdir="${SYS_DIR[doc]}/${SRCNAME[0]}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --with-gstreamer=1.0
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
+doc FAQ
 changelog NEWS
-rm -rf \
- ${PKG}/usr/share/doc
+rm -rf ${PKG}${SYS_DIR[doc]}/${SRCNAME[0]}
 }

@@ -5,9 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=libcanberra
-VERSION=0.29
+VERSION=0.30
 BUILD=1
-DEPENDS=('gtk+ >= 2.24.10-1' 'sound >= 1.0.25-1' 'libvorbis >= 1.3.2-1')
+DEPENDS=('gtk+ >= 3.6.4-1' 'sound >= 1.0.26-1' 'libvorbis >= 1.3.3-1')
+OPTDEPENDS=('gstreamer >= 1.0.5-1' 'gtk+ >= 2.24.14-1' 'udev >= 173-1')
 
 # Description
 
@@ -42,6 +43,10 @@ SRCCOPY[0]="LGPL21"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
+sed -i 's|$(libdir)/libcanberra-@PACKAGE_VERSION@|$(libdir)/plugins/libcanberra-@PACKAGE_VERSION@|g' src/Makefile.in
+sed -i 's|${libdir}/gtk-2.0/modules|${libdir}/plugins/gtk-2.0/modules|g' configure
+sed -i 's|${libdir}/gtk-3.0/modules|${libdir}/plugins/gtk-3.0/modules|g' configure
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -49,12 +54,12 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --includedir=/usr/include/canberra \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --includedir="${SYS_DIR[include]}/canberra" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-html-dir="${SYS_DIR[html]}" \
  --with-systemdsystemunitdir="${SYS_DIR[systemdsystemunitdir]}" \
  --disable-oss
@@ -62,13 +67,14 @@ make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc README
 rm -rf \
- ${PKG}/usr/share/{doc,gdm,gnome} \
- ${PKG}/usr/lib$(libdirsuffix)/gnome* \
- ${PKG}/etc
+ ${PKG}${SYS_DIR[html]} \
+ ${PKG}${SYS_DIR[share]}/{gdm,gnome,doc/${SRCNAME[0]}} \
+ ${PKG}${SYS_DIR[lib]}/gnome* \
+ ${PKG}${SYS_DIR[etc]}
 }
 
 SRCNAME[1]=sound-theme-freedesktop
-SRCVERS[1]=0.7
+SRCVERS[1]=0.8
 SRCPACK[1]=http://people.freedesktop.org/~mccann/dist/${SRCNAME[1]}-${SRCVERS[1]}.tar.bz2
 
 build1()
@@ -76,11 +82,11 @@ build1()
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --disable-dependency-tracking \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make
 make install DESTDIR="${PKG}"
 changelog NEWS

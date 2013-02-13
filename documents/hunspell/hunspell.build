@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=hunspell
 VERSION=1.3.2
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -41,6 +41,7 @@ SRCCOPY[0]="GPL2 LGPL21 MPL11"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -48,12 +49,12 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-dependency-tracking \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
  --infodir="${SYS_DIR[info]}" \
- --sysconfdir=/etc/conf.d \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[conf]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-readline \
  --with-ui
 make ${JOBS}

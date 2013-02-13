@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=harfbuzz
-VERSION=0.9.10
+VERSION=0.9.12
 BUILD=1
 DEPENDS=('glib >= 2.34.3-1')
 
@@ -41,6 +41,7 @@ SRCPACK[0]=http://www.freedesktop.org/software/harfbuzz/release/${SRCNAME[0]}-${
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -48,11 +49,11 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS THANKS

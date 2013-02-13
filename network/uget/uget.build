@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=uget
-VERSION=1.10.2
+VERSION=1.10.3
 BUILD=1
-DEPENDS=('gtk+ >= 3.6.1-1' 'curl >= 7.28.0-1' 'gstreamer >= 0.10.36-1' 'libnotify >= 0.7.5-1')
+DEPENDS=('gtk+ >= 3.6.4-1' 'curl >= 7.29.0-1' 'libnotify >= 0.7.5-1' 'gstreamer >= 1.0.5-1')
 
 # Description
 
@@ -46,11 +46,11 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS

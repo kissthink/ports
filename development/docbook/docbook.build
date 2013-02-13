@@ -7,7 +7,7 @@ source /usr/src/ports/Build/build.sh
 NAME=docbook
 XSLVER=1.78.0
 VERSION=5.0
-BUILD=1
+BUILD=2
 DEPENDS=('libxml >= 2.9.0-1' 'libxslt >= 1.1.28-1')
 
 # Description
@@ -78,13 +78,23 @@ install.dat docbook.cat *.dtd *.mod ${PKG}${SYS_DIR[share]}/xml/docbook/xml-dtd-
 install.dat ent/*.ent ${PKG}${SYS_DIR[share]}/xml/docbook/xml-dtd-${1}/ent
 }
 
+loc()
+{
+  if [ ! -z "${2}" ]; then
+    echo "file:///${SYS_DIR[share]}/xml/docbook/xml-dtd-${1}/${2}"
+  else
+    echo "file:///${SYS_DIR[share]}/xml/docbook/xml-dtd-${1}"
+  fi
+}
+
 catadd()
 {
 if [ ! -e ${PKG}${SYS_DIR[etc]}/xml/docbook ]; then
   install.dir ${PKG}${SYS_DIR[etc]}/xml
   xmlcatalog --noout --create ${PKG}${SYS_DIR[etc]}/xml/docbook
 fi
-xmlcatalog --noout --add "${1}" "file:///${SYS_DIR[share]}/xml/docbool/xml-dtd-${2}/${3}" "${4}" ${PKG}${SYS_DIR[etc]}/xml/docbook
+echo "xmlcatalog --noout --add ${1} ${2} ${3} ${PKG}${SYS_DIR[etc]}/xml/docbook"
+xmlcatalog --noout --add "${1}" "${2}" "${3}" "${PKG}${SYS_DIR[etc]}/xml/docbook"
 }
 
 # Sources
@@ -106,31 +116,31 @@ install.dat sch/* ${PKG}${SYS_DIR[share]}/xml/docbook/xml-dtd-${SRCVERS[0]}/sch
 install.dat xsd/* ${PKG}${SYS_DIR[share]}/xml/docbook/xml-dtd-${SRCVERS[0]}/xsd
 install.dir ${PKG}${SYS_DIR[share]}/xml/docbook/stylesheet/docbook5
 install.dat tools/* ${PKG}${SYS_DIR[share]}/xml/docbook/stylesheet/docbook5
-catadd "public" "-//OASIS//DTD DocBook XML 5.0//EN" "5.0" "dtd/docbook.dtd"
-catadd "system" "http://www.oasis-open.org/docbook/xml/5.0/dtd/docbook.dtd" "5.0" "dtd/docbook.dtd"
-catadd "system" "http://docbook.org/xml/5.0/dtd/docbook.dtd" "5.0" "dtd/docbook.dtd"
-catadd "uri" "http://www.oasis-open.org/docbook/xml/5.0/rng/docbook.rng" "5.0" "rng/docbook.rng"
-catadd "uri" "http://docbook.org/xml/5.0/rng/docbook.rng" "5.0" "rng/docbook.rng"
-catadd "uri" "http://www.oasis-open.org/docbook/xml/5.0/rng/docbookxi.rng" "5.0" "rng/docbookxi.rng"
+catadd "public" "-//OASIS//DTD DocBook XML 5.0//EN" "$(loc '5.0' 'dtd/docbook.dtd')"
+catadd "system" "http://www.oasis-open.org/docbook/xml/5.0/dtd/docbook.dtd" "$(loc '5.0' 'dtd/docbook.dtd')"
+catadd "system" "http://docbook.org/xml/5.0/dtd/docbook.dtd" "$(loc '5.0' 'dtd/docbook.dtd')"
+catadd "uri" "http://www.oasis-open.org/docbook/xml/5.0/rng/docbook.rng" "$(loc '5.0' 'rng/docbook.rng')"
+catadd "uri" "http://docbook.org/xml/5.0/rng/docbook.rng" "$(loc '5.0' 'rng/docbook.rng')"
+catadd "uri" "http://www.oasis-open.org/docbook/xml/5.0/rng/docbookxi.rng" "$(loc '5.0' 'rng/docbookxi.rng')"
 catadd "uri" "http://docbook.org/xml/5.0/rng/docbookxi.rng" "5.0" "rng/docbookxi.rng"
-catadd "uri" "http://www.oasis-open.org/docbook/xml/5.0/rng/docbook.rnc" "5.0" "rng/docbook.rnc"
-catadd "uri" "http://docbook.org/xml/5.0/rng/docbook.rnc" "5.0" "rng/docbook.rnc"
-catadd "uri" "http://www.oasis-open.org/docbook/xml/5.0/rng/docbookxi.rnc" "5.0" "rng/docbooxi.rnc"
-catadd "uri" "http://docbook.org/xml/5.0/rng/docbookxi.rnc" "5.0" "docbookxi.rnc"
-catadd "uri" "http://www.oasis-open.org/docbook/xml/5.0/xsd/docbook.xsd" "5.0" "xsd/docbook.xsd"
-catadd "uri" "http://docbook.org/xml/5.0/xsd/docbook.xsd" "5.0" "xsd/docbook.xsd"
-catadd "uri" "http://www.oasis-open.org/docbook/xml/5.0/xsd/docbookxi.xsd" "5.0" "xsd/docbookxi.xsd"
-catadd "uri" "http://docbook.org/xml/5.0/xsd/docbookxi.xsd" "5.0" "xsd/docbookxi.xsd"
-catadd "uri" "http://www.oasis-open.org/docbook/xml/5.0/xsd/xi.xsd" "5.0" "xsd/xi.xsd"
-catadd "uri" "http://docbook.org/xml/5.0/xsd/xi.xsd" "5.0" "xsd/xi.xsd"
-catadd "uri" "http://www.oasis-open.org/docbook/xml/5.0/xsd/xlink.xsd" "5.0" "xsd/xlink.xsd"
-catadd "uri" "http://docbook.org/xml/5.0/xsd/xlink.xsd" "5.0" "xsd/xlink.xsd"
-catadd "uri" "http://www.oasis-open.org/docbook/xml/5.0/xsd/xml.xsd" "5.0" "xsd/xml.xsd"
-catadd "uri" "http://docbook.org/xml/5.0/xsd/xml.xsd" "5.0" "xsd/xml.xsd"
-catadd "uri" "http://www.oasis-open.org/docbook/xml/5.0/sch/docbook.sch" "5.0" "sch/docbook.sch"
-catadd "uri" "http://docbook.org/xml/5.0/sch/docbook.sch" "5.0" "sch/docbook.sch"
-catadd "uri" "http://www.oasis-open.org/docbook/xml/5.0/docbook.nvdl" "5.0" "docbook.nvdl"
-catadd "uri" "http://docbook.org/xml/5.0/docbook.nvdl" "5.0" "docbook.nvdl"
+catadd "uri" "http://www.oasis-open.org/docbook/xml/5.0/rng/docbook.rnc" "$(loc '5.0' 'rng/docbook.rnc')"
+catadd "uri" "http://docbook.org/xml/5.0/rng/docbook.rnc" "$(loc '5.0' 'rng/docbook.rnc')"
+catadd "uri" "http://www.oasis-open.org/docbook/xml/5.0/rng/docbookxi.rnc" "$(loc '5.0' 'rng/docbooxi.rnc')"
+catadd "uri" "http://docbook.org/xml/5.0/rng/docbookxi.rnc" "$(loc '5.0' 'docbookxi.rnc')"
+catadd "uri" "http://www.oasis-open.org/docbook/xml/5.0/xsd/docbook.xsd" "$(loc '5.0' 'xsd/docbook.xsd')"
+catadd "uri" "http://docbook.org/xml/5.0/xsd/docbook.xsd" "$(loc '5.0' 'xsd/docbook.xsd')"
+catadd "uri" "http://www.oasis-open.org/docbook/xml/5.0/xsd/docbookxi.xsd" "$(loc '5.0' 'xsd/docbookxi.xsd')"
+catadd "uri" "http://docbook.org/xml/5.0/xsd/docbookxi.xsd" "$(loc '5.0' 'xsd/docbookxi.xsd')"
+catadd "uri" "http://www.oasis-open.org/docbook/xml/5.0/xsd/xi.xsd" "$(loc '5.0' 'xsd/xi.xsd')"
+catadd "uri" "http://docbook.org/xml/5.0/xsd/xi.xsd" "$(loc '5.0' 'xsd/xi.xsd')"
+catadd "uri" "http://www.oasis-open.org/docbook/xml/5.0/xsd/xlink.xsd" "$(loc '5.0' 'xsd/xlink.xsd')"
+catadd "uri" "http://docbook.org/xml/5.0/xsd/xlink.xsd" "$(loc '5.0' 'xsd/xlink.xsd')"
+catadd "uri" "http://www.oasis-open.org/docbook/xml/5.0/xsd/xml.xsd" "$(loc '5.0' 'xsd/xml.xsd')"
+catadd "uri" "http://docbook.org/xml/5.0/xsd/xml.xsd" "$(loc '5.0' 'xsd/xml.xsd')"
+catadd "uri" "http://www.oasis-open.org/docbook/xml/5.0/sch/docbook.sch" "$(loc '5.0' 'sch/docbook.sch')"
+catadd "uri" "http://docbook.org/xml/5.0/sch/docbook.sch" "$(loc '5.0' 'sch/docbook.sch')"
+catadd "uri" "http://www.oasis-open.org/docbook/xml/5.0/docbook.nvdl" "$(loc '5.0' 'docbook.nvdl')"
+catadd "uri" "http://docbook.org/xml/5.0/docbook.nvdl" "$(loc '5.0' 'docbook.nvdl')"
 }
 
 SRCNAME[1]=${NAME}-xml
@@ -143,17 +153,17 @@ build1()
 {
 doc ChangeLog
 do_install ${SRCVERS[1]}
-catadd "public" "-//OASIS//DTD DocBook XML V4.5//EN" "4.5" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd"
-catadd "public" "-//OASIS//DTD DocBook XML CALS Table Model V4.5//EN" "4.5" "file:///usr/share/xml/docbook/xml-dtd-4.5/calstblx.dtd"
-catadd "public" "-//OASIS//DTD XML Exchange Table Model 19990315//EN" "4.5" "file:///usr/share/xml/docbook/xml-dtd-4.5/soextblx.dtd"
-catadd "public" "-//OASIS//ELEMENTS DocBook XML Information Pool V4.5//EN" "4.5" "file:///usr/share/xml/docbook/xml-dtd-4.5/dbpoolx.mod"
-catadd "public" "-//OASIS//ELEMENTS DocBook XML Document Hierarchy V4.5//EN" "4.5" "file:///usr/share/xml/docbook/xml-dtd-4.5/dbhierx.mod"
-catadd "public" "-//OASIS//ELEMENTS DocBook XML HTML Tables V4.5//EN" "4.5" "file:///usr/share/xml/docbook/xml-dtd-4.5/htmltblx.mod"
-catadd "public" "-//OASIS//ENTITIES DocBook XML Notations V4.5//EN" "4.5" "file:///usr/share/xml/docbook/xml-dtd-4.5/dbnotnx.mod"
-catadd "public" "-//OASIS//ENTITIES DocBook XML Character Entities V4.5//EN" "4.5" "file:///usr/share/xml/docbook/xml-dtd-4.5/dbcentx.mod"
-catadd "public" "-//OASIS//ENTITIES DocBook XML Additional General Entities V4.5//EN" "4.5" "file:///usr/share/xml/docbook/xml-dtd-4.5/dbgenent.mod"
-catadd "rewriteSystem" "http://www.oasis-open.org/docbook/xml/4.5" "4.5" ""
-catadd "rewriteURI" "http://www.oasis-open.org/docbook/xml/4.5" "4.5" ""
+catadd "public" "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd"
+catadd "public" "-//OASIS//DTD DocBook XML CALS Table Model V4.5//EN" "$(loc '4.5' 'calstblx.dtd')"
+catadd "public" "-//OASIS//DTD XML Exchange Table Model 19990315//EN" "$(loc '4.5' 'soextblx.dtd')"
+catadd "public" "-//OASIS//ELEMENTS DocBook XML Information Pool V4.5//EN" "$(loc '4.5' 'dbpoolx.mod')"
+catadd "public" "-//OASIS//ELEMENTS DocBook XML Document Hierarchy V4.5//EN" "$(loc '4.5' 'dbhierx.mod')"
+catadd "public" "-//OASIS//ELEMENTS DocBook XML HTML Tables V4.5//EN" "$(loc '4.5' 'htmltblx.mod')"
+catadd "public" "-//OASIS//ENTITIES DocBook XML Notations V4.5//EN" "$(loc '4.5' 'dbnotnx.mod')"
+catadd "public" "-//OASIS//ENTITIES DocBook XML Character Entities V4.5//EN" "$(loc '4.5' 'dbcentx.mod')"
+catadd "public" "-//OASIS//ENTITIES DocBook XML Additional General Entities V4.5//EN" "$(loc '4.5' 'dbgenent.mod')"
+catadd "rewriteSystem" "http://www.oasis-open.org/docbook/xml/4.5" "$(loc '4.5')"
+catadd "rewriteURI" "http://www.oasis-open.org/docbook/xml/4.5" "$(loc '4.5')"
 }
 
 SRCNAME[2]=${NAME}-xml
@@ -166,17 +176,17 @@ build2()
 {
 doc ChangeLog
 do_install ${SRCVERS[2]}
-catadd "public" "-//OASIS//DTD DocBook XML V4.4//EN" "4.4" "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
-catadd "public" "-//OASIS//DTD DocBook CALS Table Model V4.4//EN" "4.4" "http://www.oasis-open.org/docbook/xml/4.4/calstblx.dtd"
-catadd "public" "-//OASIS//ELEMENTS DocBook XML HTML Tables V4.4//EN" "4.4" "http://www.oasis-open.org/docbook/xml/4.4/htmltblx.mod"
-catadd "public" "-//OASIS//DTD XML Exchange Table Model 19990315//EN" "4.4" "http://www.oasis-open.org/docbook/xml/4.4/soextblx.dtd"
-catadd "public" "-//OASIS//ELEMENTS DocBook Information Pool V4.4//EN" "4.4" "http://www.oasis-open.org/docbook/xml/4.4/dbpoolx.mod"
-catadd "public" "-//OASIS//ELEMENTS DocBook Document Hierarchy V4.4//EN" "4.4" "http://www.oasis-open.org/docbook/xml/4.4/dbhierx.mod"
-catadd "public" "-//OASIS//ENTITIES DocBook Additional General Entities V4.4//EN" "4.4" "http://www.oasis-open.org/docbook/xml/4.4/dbgenent.mod"
-catadd "public" "-//OASIS//ENTITIES DocBook Notations V4.4//EN" "4.4" "http://www.oasis-open.org/docbook/xml/4.4/dbnotnx.mod"
-catadd "public" "-//OASIS//ENTITIES DocBook Character Entities V4.4//EN" "4.4" "http://www.oasis-open.org/docbook/xml/4.4/dbcentx.mod"
-catadd "rewriteSystem" "http://www.oasis-open.org/docbook/xml/4.4" "4.4" ""
-catadd "rewriteURI" "http://www.oasis-open.org/docbook/xml/4.4" "4.4" ""
+catadd "public" "-//OASIS//DTD DocBook XML V4.4//EN" "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+catadd "public" "-//OASIS//DTD DocBook CALS Table Model V4.4//EN" "http://www.oasis-open.org/docbook/xml/4.4/calstblx.dtd"
+catadd "public" "-//OASIS//ELEMENTS DocBook XML HTML Tables V4.4//EN" "http://www.oasis-open.org/docbook/xml/4.4/htmltblx.mod"
+catadd "public" "-//OASIS//DTD XML Exchange Table Model 19990315//EN" "http://www.oasis-open.org/docbook/xml/4.4/soextblx.dtd"
+catadd "public" "-//OASIS//ELEMENTS DocBook Information Pool V4.4//EN" "http://www.oasis-open.org/docbook/xml/4.4/dbpoolx.mod"
+catadd "public" "-//OASIS//ELEMENTS DocBook Document Hierarchy V4.4//EN" "http://www.oasis-open.org/docbook/xml/4.4/dbhierx.mod"
+catadd "public" "-//OASIS//ENTITIES DocBook Additional General Entities V4.4//EN" "http://www.oasis-open.org/docbook/xml/4.4/dbgenent.mod"
+catadd "public" "-//OASIS//ENTITIES DocBook Notations V4.4//EN" "http://www.oasis-open.org/docbook/xml/4.4/dbnotnx.mod"
+catadd "public" "-//OASIS//ENTITIES DocBook Character Entities V4.4//EN" "http://www.oasis-open.org/docbook/xml/4.4/dbcentx.mod"
+catadd "rewriteSystem" "http://www.oasis-open.org/docbook/xml/4.4" "$(loc '4.4')"
+catadd "rewriteURI" "http://www.oasis-open.org/docbook/xml/4.4" "$(loc '4.4')"
 }
 
 SRCNAME[3]=${NAME}-xml
@@ -189,16 +199,16 @@ build3()
 {
 doc ChangeLog
 do_install ${SRCVERS[3]}
-catadd "public" "-//OASIS//DTD DocBook XML V4.3//EN" "4.3" "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"
-catadd "public" "-//OASIS//DTD DocBook CALS Table Model V4.3//EN" "4.3" "http://www.oasis-open.org/docbook/xml/4.3/calstblx.dtd"
-catadd "public" "-//OASIS//DTD XML Exchange Table Model 19990315//EN" "4.3" "http://www.oasis-open.org/docbook/xml/4.3/soextblx.dtd"
-catadd "public" "-//OASIS//ELEMENTS DocBook Information Pool V4.3//EN" "4.3" "http://www.oasis-open.org/docbook/xml/4.3/dbpoolx.mod"
-catadd "public" "-//OASIS//ELEMENTS DocBook Document Hierarchy V4.3//EN" "4.3" "http://www.oasis-open.org/docbook/xml/4.3/dbhierx.mod"
-catadd "public" "-//OASIS//ENTITIES DocBook Additional General Entities V4.3//EN" "4.3" "http://www.oasis-open.org/docbook/xml/4.3/dbgenent.mod"
-catadd "public" "-//OASIS//ENTITIES DocBook Notations V4.3//EN" "4.3" "http://www.oasis-open.org/docbook/xml/4.3/dbnotnx.mod"
-catadd "public" "-//OASIS//ENTITIES DocBook Character Entities V4.3//EN" "4.3" "http://www.oasis-open.org/docbook/xml/4.3/dbcentx.mod"
-catadd "rewriteSystem" "http://www.oasis-open.org/docbook/xml/4.3" "4.3" ""
-catadd "rewriteURI" "http://www.oasis-open.org/docbook/xml/4.3" "4.3" ""
+catadd "public" "-//OASIS//DTD DocBook XML V4.3//EN" "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"
+catadd "public" "-//OASIS//DTD DocBook CALS Table Model V4.3//EN" "http://www.oasis-open.org/docbook/xml/4.3/calstblx.dtd"
+catadd "public" "-//OASIS//DTD XML Exchange Table Model 19990315//EN" "http://www.oasis-open.org/docbook/xml/4.3/soextblx.dtd"
+catadd "public" "-//OASIS//ELEMENTS DocBook Information Pool V4.3//EN" "http://www.oasis-open.org/docbook/xml/4.3/dbpoolx.mod"
+catadd "public" "-//OASIS//ELEMENTS DocBook Document Hierarchy V4.3//EN" "http://www.oasis-open.org/docbook/xml/4.3/dbhierx.mod"
+catadd "public" "-//OASIS//ENTITIES DocBook Additional General Entities V4.3//EN" "http://www.oasis-open.org/docbook/xml/4.3/dbgenent.mod"
+catadd "public" "-//OASIS//ENTITIES DocBook Notations V4.3//EN" "http://www.oasis-open.org/docbook/xml/4.3/dbnotnx.mod"
+catadd "public" "-//OASIS//ENTITIES DocBook Character Entities V4.3//EN" "http://www.oasis-open.org/docbook/xml/4.3/dbcentx.mod"
+catadd "rewriteSystem" "http://www.oasis-open.org/docbook/xml/4.3" "$(loc '4.3')"
+catadd "rewriteURI" "http://www.oasis-open.org/docbook/xml/4.3" "$(loc '4.3')"
 }
 
 SRCNAME[4]=${NAME}-xml
@@ -211,16 +221,16 @@ build4()
 {
 doc ChangeLog
 do_install ${SRCVERS[4]}
-catadd "public" "-//OASIS//DTD DocBook XML V4.2//EN" "4.2" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"
-catadd "public" "-//OASIS//DTD DocBook CALS Table Model V4.2//EN" "4.2" "http://www.oasis-open.org/docbook/xml/4.2/calstblx.dtd"
-catadd "public" "-//OASIS//DTD XML Exchange Table Model 19990315//EN" "4.2" "http://www.oasis-open.org/docbook/xml/4.2/soextblx.dtd"
-catadd "public" "-//OASIS//ELEMENTS DocBook Information Pool V4.2//EN" "4.2" "http://www.oasis-open.org/docbook/xml/4.2/dbpoolx.mod"
-catadd "public" "-//OASIS//ELEMENTS DocBook Document Hierarchy V4.2//EN" "4.2" "http://www.oasis-open.org/docbook/xml/4.2/dbhierx.mod"
-catadd "public" "-//OASIS//ENTITIES DocBook Additional General Entities V4.2//EN" "4.2" "http://www.oasis-open.org/docbook/xml/4.2/dbgenent.mod"
-catadd "public" "-//OASIS//ENTITIES DocBook Notations V4.2//EN" "4.2" "http://www.oasis-open.org/docbook/xml/4.2/dbnotnx.mod"
-catadd "public" "-//OASIS//ENTITIES DocBook Character Entities V4.2//EN" "4.2" "http://www.oasis-open.org/docbook/xml/4.2/dbcentx.mod"
-catadd "rewriteSystem" "http://www.oasis-open.org/docbook/xml/4.2" "4.2" ""
-catadd "rewriteURI" "http://www.oasis-open.org/docbook/xml/4.2" "4.2" ""
+catadd "public" "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"
+catadd "public" "-//OASIS//DTD DocBook CALS Table Model V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/calstblx.dtd"
+catadd "public" "-//OASIS//DTD XML Exchange Table Model 19990315//EN" "http://www.oasis-open.org/docbook/xml/4.2/soextblx.dtd"
+catadd "public" "-//OASIS//ELEMENTS DocBook Information Pool V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/dbpoolx.mod"
+catadd "public" "-//OASIS//ELEMENTS DocBook Document Hierarchy V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/dbhierx.mod"
+catadd "public" "-//OASIS//ENTITIES DocBook Additional General Entities V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/dbgenent.mod"
+catadd "public" "-//OASIS//ENTITIES DocBook Notations V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/dbnotnx.mod"
+catadd "public" "-//OASIS//ENTITIES DocBook Character Entities V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/dbcentx.mod"
+catadd "rewriteSystem" "http://www.oasis-open.org/docbook/xml/4.2" "$(loc '4.2')"
+catadd "rewriteURI" "http://www.oasis-open.org/docbook/xml/4.2" "$(loc '4.2')"
 }
 
 SRCNAME[5]=${NAME}-xml
@@ -233,17 +243,17 @@ build5()
 {
 doc ChangeLog
 do_install ${SRCVERS[5]}
-catadd "public" "-//OASIS//DTD DocBook XML V4.1.2//EN" "4.1.2" "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd"
-catadd "public" "-//OASIS//DTD DocBook XML CALS Table Model V4.1.2//EN" "4.1.2" "http://www.oasis-open.org/docbook/xml/4.1.2/calstblx.dtd"
-catadd "public" "-//OASIS//DTD DocBook XML CALS Table Model V4.1.2//EN" "4.1.2" "http://www.oasis-open.org/docbook/xml/4.1.2/calstblx.dtd"
-catadd "public" "-//OASIS//DTD XML Exchange Table Model 19990315//EN" "4.1.2" "http://www.oasis-open.org/docbook/xml/4.1.2/soextblx.dtd"
-catadd "public" "-//OASIS//ELEMENTS DocBook XML Information Pool V4.1.2//EN" "4.1.2" "http://www.oasis-open.org/docbook/xml/4.1.2/dbpoolx.mod"
-catadd "public" "-//OASIS//ELEMENTS DocBook XML Document Hierarchy V4.1.2//EN" "4.1.2" "http://www.oasis-open.org/docbook/xml/4.1.2/dbhierx.mod"
-catadd "public" "-//OASIS//ENTITIES DocBook XML Additional General Entities V4.1.2//EN" "4.1.2" "http://www.oasis-open.org/docbook/xml/4.1.2/dbgenent.mod"
-catadd "public" "-//OASIS//ENTITIES DocBook XML Notations V4.1.2//EN" "4.1.2" "http://www.oasis-open.org/docbook/xml/4.1.2/dbnotnx.mod"
-catadd "public" "-//OASIS//ENTITIES DocBook XML Character Entities V4.1.2//EN" "4.1.2" "http://www.oasis-open.org/docbook/xml/4.1.2/dbcentx.mod"
-catadd "rewriteSystem" "http://www.oasis-open.org/docbook/xml/4.1.2" "4.1.2" ""
-catadd "rewriteURI" "http://www.oasis-open.org/docbook/xml/4.1.2" "4.1.2" ""
+catadd "public" "-//OASIS//DTD DocBook XML V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd"
+catadd "public" "-//OASIS//DTD DocBook XML CALS Table Model V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/calstblx.dtd"
+catadd "public" "-//OASIS//DTD DocBook XML CALS Table Model V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/calstblx.dtd"
+catadd "public" "-//OASIS//DTD XML Exchange Table Model 19990315//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/soextblx.dtd"
+catadd "public" "-//OASIS//ELEMENTS DocBook XML Information Pool V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/dbpoolx.mod"
+catadd "public" "-//OASIS//ELEMENTS DocBook XML Document Hierarchy V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/dbhierx.mod"
+catadd "public" "-//OASIS//ENTITIES DocBook XML Additional General Entities V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/dbgenent.mod"
+catadd "public" "-//OASIS//ENTITIES DocBook XML Notations V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/dbnotnx.mod"
+catadd "public" "-//OASIS//ENTITIES DocBook XML Character Entities V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/dbcentx.mod"
+catadd "rewriteSystem" "http://www.oasis-open.org/docbook/xml/4.1.2" "$(loc '4.1.2')"
+catadd "rewriteURI" "http://www.oasis-open.org/docbook/xml/4.1.2" "$(loc '4.1.2')"
 }
 
 SRCNAME[6]=${NAME}-xsl

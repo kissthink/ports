@@ -1,0 +1,60 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=wv
+VERSION=0.4.2
+BUILD=1
+DEPENDS=('glib >= 2.34.3-1' 'libgsf >= 1.14.25-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: wv (MS Word document import library)
+${NAME}:
+${NAME}: wv is a portable MS Word .doc import filter that supports Word 6, 95,
+${NAME}: 97, 2000 and 2002 (XP) formats.
+${NAME}:
+${NAME}: Homepage: http://wvware.sourceforge.net
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}2
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=${URL[sf]}/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCCOPY[0]="LGPL2"
+
+build0()
+{
+cmake \
+-DCMAKE_BUILD_TYPE:STRING="Release" \
+-DCMAKE_CXX_FLAGS:STRING="${FLAGS}" \
+-DCMAKE_C_FLAGS:STRING="${FLAGS}" \
+-DCMAKE_SKIP_RPATH:BOOL="on" \
+-DCMAKE_VERBOSE_MAKEFILE:BOOL="on" \
+-DCMAKE_INSTALL_PREFIX:PATH="${SYS_DIR[usr]}" \
+CMakeLists.txt
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS THANKS
+changelog ChangeLog
+# The .la doesn't get recognized as a genuine one by file when getting
+# rid of them
+rm -rf ${PKG}${SYS_DIR[lib]}/{wvWare,*.la}
+}

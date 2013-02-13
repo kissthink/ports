@@ -5,8 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=fribidi
-VERSION=0.10.9
+VERSION=0.19.5
 BUILD=1
+DEPENDS=('glib >= 2.34.3-1')
 
 # Description
 
@@ -36,25 +37,27 @@ EOF
 
 SRCNAME[0]=${NAME}
 SRCVERS[0]=${VERSION}
-SRCPACK[0]=http://fribidi.org/download/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCPACK[0]=http://fribidi.org/download/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
 SRCCOPY[0]="LGPL21"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
+ --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
  --enable-debug=no \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --without-charsets
-make ${JOBS}
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --with-glib=no
+make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS THANKS
 changelog NEWS

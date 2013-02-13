@@ -6,9 +6,9 @@ source /usr/src/ports/Build/build.sh
 
 NAME=libwpd
 MAJOR=0.9
-VERSION=${MAJOR}.0
+VERSION=${MAJOR}.6
 BUILD=1
-DEPENDS=('glib >= 2.28.6-1')
+DEPENDS=('glib >= 2.34.3-1')
 
 # Description
 
@@ -38,54 +38,55 @@ EOF
 
 SRCNAME[0]=${NAME}
 SRCVERS[0]=${VERSION}
-SRCPACK[0]=${URL[sf]}/libwpd/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCPACK[0]=${URL[sf]}/libwpd/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
 SRCCOPY[0]="LGPL21"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
+ --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
-make -j 2
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
+make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc CREDITS
 changelog NEWS
 }
 
 SRCNAME[1]=libwpg
-SRCVERS[1]=0.2.0
-SRCPACK[1]=${URL[sf]}/${SRCNAME[1]}/${SRCNAME[1]}/${SRCNAME[1]}-${SRCVERS[1]}/${SRCNAME[1]}-${SRCVERS[1]}.tar.bz2
+SRCVERS[1]=0.2.1
+SRCPACK[1]=${URL[sf]}/${SRCNAME[1]}/${SRCNAME[1]}/${SRCNAME[1]}-${SRCVERS[1]}/${SRCNAME[1]}-${SRCVERS[1]}.tar.xz
 SRCCOPY[1]="LGPL2"
 
 build1()
 {
-LIBWPG_CFLAGS="-I${PKG}/usr/include/libwpd-${MAJOR}" \
-LIBWPG_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lwpd-${MAJOR}" \
-LIBWPDSTREAM_CFLAGS="-I${PKG}/usr/include/libwpd-${MAJOR}" \
-LIBWPDSTREAM_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lwpd-stream-${MAJOR}" \
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
+LIBWPG_CFLAGS="-I${PKG}${SYS_DIR[include]}/libwpd-${MAJOR}" \
+LIBWPG_LIBS="-L${PKG}${SYS_DIR[lib]} -lwpd-${MAJOR} -lwpd-stream-${MAJOR}" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
-make -j 2
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
+make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
 rm -f \
- ${PKG}/usr/bin/wpg2svgbatch*
+ ${PKG}${SYS_DIR[bin]}/wpg2svgbatch*
 }

@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=xz
 VERSION=5.0.4
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -41,6 +41,7 @@ SRCCOPY[0]="GPL2 GPL3 LGPL21"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' src/liblzma/Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -48,24 +49,16 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-rpath \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS THANKS
 changelog NEWS
-#FIXME: compatibilily symlinks
-install.dir ${PKG}/bin
-(
-  cd ${PKG}/bin
-  ln -sf /usr/bin/xz
-)
-rm -rf \
- ${PKG}/usr/share/doc
-# Fix man page symlink shit
+# No manual page symlinks
 (
   cd ${PKG}${SYS_DIR[man]}/man1
   rm -f {lzmore,lzmadec,lzless,lzma,lzegrep,unlzma,lzdiff}.1
@@ -77,4 +70,5 @@ rm -rf \
   echo ".so man1/xz.1" > unlzma.1
   echo ".so man1/xzdiff.1" > lzdiff.1
 )
+rm -rf ${PKG}${SYS_DIR[doc]}/${SRCNAME[0]}
 }

@@ -7,7 +7,7 @@ source /usr/src/ports/Build/build.sh
 NAME=libcroco
 MAJOR=0.6
 VERSION=${MAJOR}.8
-BUILD=1
+BUILD=2
 DEPENDS=('glib >= 2.34.3-1' 'libxml2 >= 2.9.0-1')
 
 # Description
@@ -43,6 +43,7 @@ SRCCOPY[0]="GPL2 LGPL2"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datadir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -50,11 +51,11 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-html-dir="${SYS_DIR[html]}"
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"

@@ -43,25 +43,23 @@ build0()
 {
 make ${JOBS} \
  OPT="${FLAGS}" \
- PREFIX="/usr" \
- SBINDIR="/usr/sbin" \
- LIBDIR="/usr/lib$(libdirsuffix)" \
- SHAREDIR="/usr/share/hwdata" \
- MANDIR="/usr/man"
-make install \
+ PREFIX="${SYS_DIR[usr]}" \
+ SBINDIR="${SYS_DIR[sbin]}" \
+ LIBDIR="${SYS_DIR[lib]}" \
+ SHAREDIR="${SYS_DIR[share]}/hwdata" \
+ MANDIR="${SYS_DIR[man]}"
+make install install-lib \
  DESTDIR="${PKG}" \
- PREFIX="/usr" \
- SBINDIR="/usr/sbin" \
- LIBDIR="/usr/lib$(libdirsuffix)" \
- SHAREDIR="/usr/share/hwdata" \
- MANDIR="/usr/man"
+ PREFIX="${SYS_DIR[usr]}" \
+ SBINDIR="${SYS_DIR[sbin]}" \
+ LIBDIR="${SYS_DIR[lib]}" \
+ SHAREDIR="${SYS_DIR[share]}/hwdata" \
+ MANDIR="${SYS_DIR[man]}" \
+ PKGCFDIR="${SYS_DIR[share]}/pkgconfig"
 changelog ChangeLog
-install.dir ${PKG}/usr/bin
-mv \
- ${PKG}/usr/sbin/lspci \
- ${PKG}/usr/bin
+install.dir ${PKG}${SYS_DIR[bin]}
 rm -f \
- ${PKG}/usr/share/hwdata/pci.ids.gz
+ ${PKG}${SYS_DIR[share]}/hwdata/pci.ids.gz
 }
 
 SRCNAME[1]=pciids
@@ -71,15 +69,9 @@ SRCOPTS[1]="nosrcroot nounpack"
 
 build1()
 {
-install.dir ${PKG}/usr/share/hwdata
-rm -f ${PKG}/usr/share/hwdata/pci.ids
-install.dat ${CWD}/pci.ids ${PKG}/usr/share/hwdata
-cat ${CWD}/pci.ids | gzip -9nf > ${PKG}/usr/share/hwdata/pci.ids.gz
-#FIXME: compat workaround for The Slackware Mess(tm)
-(
-  cd ${PKG}/usr/share
-  ln -sf hwdata/pci.ids pci.ids
-)
+install.dir ${PKG}${SYS_DIR[share]}/hwdata
+rm -f ${PKG}${SYS_DIR[share]}/hwdata/pci.ids
+cat ${CWD}/pci.ids | gzip -9nf > ${PKG}${SYS_DIR[share]}/hwdata/pci.ids.gz
 }
 
 SRCNAME[2]=libpciaccess
@@ -88,6 +80,7 @@ SRCPACK[2]=http://xorg.freedesktop.org/archive/individual/lib/${SRCNAME[2]}-${SR
 
 build2()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -95,13 +88,13 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --with-zlib \
- --with-pciids-path=/usr/share/hwdata
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --with-pciids-path="${SYS_DIR[share]}/hwdata" \
+ --with-zlib
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS

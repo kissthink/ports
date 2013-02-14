@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=cryptsetup
 VERSION=1.6.0
-BUILD=1
+BUILD=2
 DEPENDS=('lvm >= 2.02.98-1' 'libpwquality >= 1.2.1-1')
 
 # Description
@@ -42,6 +42,8 @@ SRCCOPY[0]="GPL2 LGPL21"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' lib/Makefile.in
+CPPFLAGS="-I${SYS_DIR[include]}/pwquality" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -49,15 +51,15 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-rpath \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-crypto_backend=nettle \
  --enable-cryptsetup-reencrypt \
- --disable-selinux
-#FIXME: --enable-pwquality ?
+ --disable-selinux \
+ --enable-pwquality
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS FAQ docs/*-ReleaseNotes

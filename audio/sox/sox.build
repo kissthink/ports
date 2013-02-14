@@ -58,7 +58,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --localstatedir="${SYS_DIR[var]}" \
  --with-pkgconfigdir="${SYS_DIR[share]}/pkgconfig" \
  --with-ladspa-path="${SYS_DIR[lib]}/plugins/ladspa" \
- --with-distro="Tightware GNU/Linux" \
+ --with-distro="${DISTRONAME}" \
  --with-dyn-default \
  --with-oss=no \
  --with-oggvorbis=dyn \

@@ -54,7 +54,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --libdir="${SYS_DIR[lib]}" \
  --localstatedir="${SYS_DIR[var]}/lib/vim" \
  --localedir="${SYS_DIR[share]}/locale" \
- --with-compiledby="Tightware GNU/Linux" \
+ --with-compiledby="${DISTRONAME}" \
  --with-features=huge \
  ${*}
 }

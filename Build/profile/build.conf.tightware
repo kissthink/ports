@@ -1,3 +1,7 @@
+# What is the name of this distro
+
+DISTRONAME="Tightware GNU/Linux"
+
 # Where to store built packages
 
 PKGREPO=/usr/src/packages

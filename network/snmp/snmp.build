@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=snmp
 VERSION=5.7.2
-BUILD=1
-DEPENDS=('tcpip >= 20130122-1' 'openssl >= 1.0.1c-1' 'pci >= 20120628-1')
+BUILD=2
+DEPENDS=('tcpip >= 20130209-1' 'openssl >= 1.0.1d-1' 'pci >= 20130214-1')
 
 # Description
 
@@ -33,6 +33,33 @@ ${NAME}: managing applications.
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+# Keep same perms on rc.snmpd.new:
+if [ -e etc/rc.d/rc.snmpd ]; then
+  cp -a etc/rc.d/rc.snmpd etc/rc.d/rc.snmpd.new.incoming
+  cat etc/rc.d/rc.snmpd.new > etc/rc.d/rc.snmpd.new.incoming
+  mv etc/rc.d/rc.snmpd.new.incoming etc/rc.d/rc.snmpd.new
+fi
+
+config etc/snmp/snmpd.conf.new
+config etc/rc.d/rc.snmpd.new
+EOF
+
 # Sources
 
 SRCNAME[0]=net-snmp
@@ -47,14 +74,14 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-debugging \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc/snmp \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}/snmp" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --without-rpm \
- --with-persistent-directory="/var/lib/snmp" \
- --with-logfile="/var/log/snmpd.log" \
+ --with-persistent-directory="${SYS_DIR[var]}/lib/snmp" \
+ --with-logfile="${SYS_DIR[var]}/log/snmpd.log" \
  --with-sys-contact="root@localhost" \
  --with-sys-location="Unknown" \
  --with-default-snmp-version=3 \
@@ -66,15 +93,14 @@ make install INSTALLDIRS="vendor" DESTDIR="${PKG}"
 doc FAQ README README.snmpv3
 changelog NEWS
 license COPYING
-install.dat doinst.sh ${PKG}/install
-install.dir ${PKG}/etc/{rc.d,snmp,tmpfiles.d}
-install.cfg rc.snmpd.new ${PKG}/etc/rc.d
-install.cfg snmpd.conf.tmpfilesd ${PKG}/etc/tmpfiles.d/snmpd.conf
+install.dir ${PKG}${SYS_DIR[etc]}/{rc.d,snmp,tmpfiles.d}
+install.cfg rc.snmpd ${PKG}${SYS_DIR[etc]}/rc.d/rc.snmpd.new
+install.cfg snmpd.conf.tmpfilesd ${PKG}${SYS_DIR[etc]}/tmpfiles.d/snmpd.conf
 install.dir ${PKG}${SYS_DIR[systemdsystemunitdir]}
 install.cfg snmpd.service ${PKG}${SYS_DIR[systemdsystemunitdir]}
-install.cfg snmpd.conf ${PKG}/etc/snmp/snmpd.conf.new
-install.dir ${PKG}/var/lib/snmp
+install.cfg snmpd.conf ${PKG}${SYS_DIR[etc]}/snmp/snmpd.conf.new
+install.dir ${PKG}${SYS_DIR[var]}/lib/snmp
 rm -rf \
- ${PKG}/usr/share/man \
- ${PKG}/usr/lib$(libdirsuffix)/perl5
+ ${PKG}${SYS_DIR[lib]}{,64}/perl5 \
+ ${PKG}${SYS_DIR[man]}/man3/*SNMP*.3
 }

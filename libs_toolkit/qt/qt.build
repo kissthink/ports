@@ -5,9 +5,11 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=qt
-VERSION=4.7.4
+MAJOR=5.0
+VERSION=${MAJOR}.1
 BUILD=1
-DEPENDS=('xorg_libs >= 7.6-4' 'glib >= 2.28.8-1')
+DEPENDS=('xorg_libs >= 7.7-3' 'glib >= 2.34.3-1' 'dbus >= 1.4.24-1' 'sqlite >= 3.7.15.2-1' 'libjpeg >= 1.2.1-1' 'libtiff >= 4.0.3-1' 'libpng >= 1.5.14-1' 'libmng >= 1.0.10-1' 'mesa >= 9.0.1-1' 'fontconfig >= 2.10.91-1' 'sound >= 1.0.26-1' 'pcre >= 8.32-1')
+OPTDEPENDS=('openssl >= 1.0.1d-1')
 
 # Description
 
@@ -38,7 +40,7 @@ EOF
 SRCNAME[0]=${NAME}-everywhere-opensource-src
 SRCVERS[0]=${VERSION}
 SRCPACK[0]=ftp://ftp.qt.nokia.com/qt/source/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
-SRCCOPY[0]="GPL3 LGPL2 FDL"
+SRCCOPY[0]="GPL3 LGPL21 FDL13"
 
 build0()
 {
@@ -49,54 +51,68 @@ export OPENSOURCE_CXXFLAGS="$FLAGS"
  -confirm-license \
  -opensource \
  -release \
- -prefix /usr \
- -libdir /usr/lib$(libdirsuffix) \
- -plugindir /usr/lib$(libdirsuffix)/plugins/qt \
- -importdir /usr/lib$(libdirsuffix)/plugins/qt/imports \
- -datadir /usr/share/application-data/qt \
- -translationdir /usr/share/application-data/qt/translations \
- -docdir /usr/share/html/qt \
- -headerdir /usr/include/qt \
- -sysconfdir /etc/qt \
+ -shared \
+ -prefix "${SYS_DIR[usr]}" \
+ -libdir "${SYS_DIR[lib]}" \
+ -archdatadir "${SYS_DIR[share]}/application-data/qt-${MAJOR}" \
+ -plugindir "${SYS_DIR[lib]}/plugins/qt-${MAJOR}" \
+ -importdir "${SYS_DIR[lib]}/plugins/qt-${MAJOR}/imports" \
+ -qmldir "${SYS_DIR[lib]}/plugins/qt-${MAJOR}/qml" \
+ -datadir "${SYS_DIR[share]}/application-data/qt-${MAJOR}" \
+ -translationdir "${SYS_DIR[share]}/application-data/qt-${MAJOR}/translations" \
+ -libexecdir "${SYS_DIR[lib]}/exec" \
+ -docdir "${SYS_DIR[share]}/html/qt-${MAJOR}" \
+ -headerdir "${SYS_DIR[include]}/qt-${MAJOR}" \
+ -sysconfdir "${SYS_DIR[etc]}/qt-${MAJOR}" \
  -nomake examples \
  -nomake demos \
  -no-separate-debug-info \
- -no-phonon \
  -no-rpath \
  -no-pch \
- -fast \
- -webkit \
+ -no-icu \
+ -no-nis \
+ -optimized-qmake \
+ -xcb \
+ -iconv \
+ -glib \
+ -opengl \
+ -javascript-jit \
  -dbus \
- -qt-gif \
+ -cups \
+ -dbus-linked \
  -openssl-linked \
  -system-libpng \
  -system-libjpeg \
- -system-libmng \
- -system-libtiff \
  -system-zlib \
  -system-sqlite \
+ -system-xcb \
  -plugin-sql-sqlite
-sed -i "s|-O2|${FLAGS}|g" mkspecs/common/g++.conf
-make -j 2
+sed -i "s|-O2|${FLAGS}|g" qtbase/mkspecs/common/g++.conf
+make ${JOBS}
 make install INSTALL_ROOT="${PKG}"
-doc LGPL_EXCEPTION.txt
-changelog changes-${VERSION}
-install.dat doinst.sh ${PKG}/install
-install.dir ${PKG}/etc/profile.d
-install.bin qt.sh ${PKG}/etc/profile.d
-install.bin qt.csh ${PKG}/etc/profile.d
-install.dir ${PKG}/usr/share/applications
-#FIXME: add desktop file for qtconfig -> settings
-install.dat desktop/*.desktop ${PKG}/usr/share/applications
-install.dir ${PKG}/usr/share/icons/hicolor/{16x16,32x32,48x48,64x46,128x128}/apps
-install.dat src/gui/dialogs/images/qtlogo-64.png \
- ${PKG}/usr/share/icons/hicolor/64x64/apps/qtlogo.png
-install.dat tools/assistant/tools/assistant/images/assistant.png \
- ${PKG}/usr/share/icons/hicolor/32x32/apps
-install.dat tools/designer/src/designer/images/designer.png \
- ${PKG}/usr/share/icons/hicolor/128x128/apps
-for icon in tools/linguist/linguist/images/icons/linguist-*-32.png ; do
+doc qtbase/LGPL_EXCEPTION.txt
+changelog qtbase/dist/changes-${VERSION}
+# Desktop files and icons
+install.dir ${PKG}${SYS_DIR[share]}/applications
+install.dat desktop/*.desktop ${PKG}${SYS_DIR[share]}/applications
+install.dir ${PKG}${SYS_DIR[share]}/icons/hicolor/{16x16,32x32,48x48,64x46,128x128}/apps
+install.dat qtbase/src/widgets/dialogs/images/qtlogo-64.png \
+ ${PKG}${SYS_DIR[share]}/icons/hicolor/64x64/apps/qtlogo.png
+install.dat qttools/src/assistant/assistant/images/assistant.png \
+ ${PKG}${SYS_DIR[share]}/icons/hicolor/32x32/apps
+install.dat qttools/src/designer/src/designer/images/designer.png \
+ ${PKG}${SYS_DIR[share]}/icons/hicolor/128x128/apps
+for icon in qttools/src/linguist/linguist/images/icons/linguist-*-32.png ; do
   size=$(echo $(basename ${icon}) | cut -d- -f2)
-  install.dat ${icon} ${PKG}/usr/share/icons/hicolor/${size}x${size}/apps/linguist.png
+  install.dat ${icon} ${PKG}${SYS_DIR[share]}/icons/hicolor/${size}x${size}/apps/linguist.png
 done
+# Put pkgconfig files in the right place
+mv \
+ ${PKG}${SYS_DIR[lib]}/pkgconfig \
+ ${PKG}${SYS_DIR[share]}
+# No development docs
+# No idea why those cmake, prl and mkspecs stuff are needed...
+rm -rf \
+ ${PKG}${SYS_DIR[html]} \
+ ${PKG}${SYS_DIR[lib]}/{*.prl,cmake}
 }

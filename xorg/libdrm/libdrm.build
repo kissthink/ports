@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=libdrm
-VERSION=2.4.41
+VERSION=2.4.42
 BUILD=1
-DEPENDS=('udev >= 173-1' 'pci >= 20120628-1')
+DEPENDS=('udev >= 173-1' 'pci >= 20130214-1')
 
 # Description
 
@@ -39,10 +39,11 @@ SRCNAME[0]=${NAME}
 SRCVERS[0]=${VERSION}
 SRCPACK[0]=http://dri.freedesktop.org/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
 
-#NOTE: cairo is just used for tests, it can therefore safely be ignored
+#NOTE: cairo is just used for tests, it can therefore be safely ignored
 
 build0()
 {
+sed -i 's|${libdir}/pkgconfig|${datarootdir}/pkgconfig|g' configure
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -50,11 +51,11 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-shared=yes \
  --enable-static=no \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-kernel-source=/usr/src/linux \
  --enable-cairo-tests=no \
  --enable-udev

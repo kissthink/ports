@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=audit
 VERSION=2.2.2
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -32,6 +32,31 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+config etc/libaudit.conf.new
+config etc/audit/auditd.conf.new
+config etc/audit/audit.rules.new
+config etc/audisp/audisp-remote.conf.new
+config etc/audisp/audispd.conf.new
+config etc/audisp/zos-remote.conf.new
+config etc/rc.d/rc.auditd.new
+EOF
+
 # Sources
 
 SRCNAME[0]=${NAME}
@@ -41,47 +66,47 @@ SRCCOPY[0]="GPL2"
 
 build0()
 {
+sed -i 's|/usr/lib/systemd/system|/usr/share/systemd/system|g' init.d/Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --without-python \
  --with-libcap-ng=auto \
-#FIXME: enable tcp_wrappers?
-#FIXME: systemd
+ --with-libwrap="${SYS_DIR[usr]}" \
+ --enable-systemd
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS THANKS
 changelog ChangeLog
-install.dat doinst.sh ${PKG}/install
-install.cfg rc.auditd ${PKG}/etc/rc.d/rc.auditd.new
+install.cfg rc.auditd ${PKG}${SYS_DIR[etc]}/rc.d/rc.auditd.new
+mv \
+ ${PKG}${SYS_DIR[etc]}/libaudit.conf \
+ ${PKG}${SYS_DIR[etc]}/libaudit.conf.new
+mv \
+ ${PKG}${SYS_DIR[etc]}/audit/auditd.conf \
+ ${PKG}${SYS_DIR[etc]}/audit/auditd.conf.new
+mv \
+ ${PKG}${SYS_DIR[etc]}/audit/audit.rules \
+ ${PKG}${SYS_DIR[etc]}/audit/audit.rules.new
+mv \
+ ${PKG}${SYS_DIR[etc]}/audisp/audisp-remote.conf \
+ ${PKG}${SYS_DIR[etc]}/audisp/audisp-remote.conf.new
+mv \
+ ${PKG}${SYS_DIR[etc]}/audisp/audispd.conf \
+ ${PKG}${SYS_DIR[etc]}/audisp/audispd.conf.new
+mv \
+ ${PKG}${SYS_DIR[etc]}/audisp/zos-remote.conf \
+ ${PKG}${SYS_DIR[etc]}/audisp/zos-remote.conf.new
 rm -rf \
- ${PKG}/etc/rc.d/init.d \
- ${PKG}/etc/sysconfig \
- ${PKG}/usr/lib$(libdirsuffix)/python*/site-packages/audit.py?
-mv \
- ${PKG}/etc/libaudit.conf \
- ${PKG}/etc/libaudit.conf.new
-mv \
- ${PKG}/etc/audit/auditd.conf \
- ${PKG}/etc/audit/auditd.conf.new
-mv \
- ${PKG}/etc/audit/audit.rules \
- ${PKG}/etc/audit/audit.rules.new
-mv \
- ${PKG}/etc/audisp/audisp-remote.conf \
- ${PKG}/etc/audisp/audisp-remote.conf.new
-mv \
- ${PKG}/etc/audisp/audispd.conf \
- ${PKG}/etc/audisp/audispd.conf.new
-mv \
- ${PKG}/etc/audisp/zos-remote.conf \
- ${PKG}/etc/audisp/zos-remote.conf.new
+ ${PKG}${SYS_DIR[etc]}/rc.d/init.d \
+ ${PKG}${SYS_DIR[etc]}/sysconfig \
+ ${PKG}${SYS_DIR[lib]}/python*/site-packages/audit.py?
 }

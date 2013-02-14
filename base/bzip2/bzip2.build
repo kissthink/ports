@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=bzip2
 VERSION=1.0.6
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -44,28 +44,18 @@ build0()
 make ${JOBS} OPTFLAGS="${FLAGS}" -f Makefile-libbz2_so
 make ${JOBS} OPTFLAGS="${FLAGS}"
 make install install-so DESTDIR="${PKG}" \
- PREFIX="/usr" \
- MANDIR="/usr/man" \
- LIBDIR="/usr/lib$(libdirsuffix)"
+ PREFIX="${SYS_DIR[usr]}" \
+ MANDIR="${SYS_DIR[man]}" \
+ LIBDIR="${SYS_DIR[lib]}"
 changelog CHANGES
 rm -f \
- ${PKG}/usr/bin/bzip2
+ ${PKG}${SYS_DIR[bin]}/bzip2
 mv \
- ${PKG}/usr/bin/bzip2-shared \
- ${PKG}/usr/bin/sbzip2
+ ${PKG}${SYS_DIR[bin]}/bzip2-shared \
+ ${PKG}${SYS_DIR[bin]}/sbzip2
 (
   cd ${PKG}${SYS_DIR[man]}/man1
   mv bzip2.1 sbzip2.1
-  echo ".so man1/sbzip2.1" > sbzcat.1
-  echo ".so man1/sbzip2.1" > sbunzip2.1
-)
-#FIXME: compat
-install.dir ${PKG}/bin
-(
-  cd ${PKG}/bin
-  ln -sf /usr/bin/bzip2
-  ln -sf /usr/bin/bzip2 bzcat
-  ln -sf /usr/bin/bzip2 bunzip2
 )
 }
 
@@ -80,17 +70,16 @@ build1()
 make ${JOBS} OPTFLAGS="${FLAGS}"
 doc AUTHORS
 changelog ChangeLog
-install.dir ${PKG}/usr/bin
-install.bin pbzip2 ${PKG}/usr/bin/bzip2
+install.dir ${PKG}${SYS_DIR[bin]}
+install.bin pbzip2 ${PKG}${SYS_DIR[bin]}/bzip2
 install.dir ${PKG}${SYS_DIR[man]}/man1
 install.man pbzip2.1 ${PKG}${SYS_DIR[man]}/man1
 (
-  cd ${PKG}/usr/bin
+  cd ${PKG}${SYS_DIR[bin]}
   ln -sf bzip2 pbzip2
   ln -sf bzip2 pbzcat
   ln -sf bzip2 pbunzip2
   cd ${PKG}${SYS_DIR[man]}/man1
   echo ".so man1/pbzip2.1" > bzip2.1
 )
-
 }

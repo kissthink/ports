@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=file
 VERSION=5.12
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -48,19 +48,19 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --datadir=/usr/share \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --datadir="${SYS_DIR[share]}" \
  --enable-fsect-man5
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 changelog ChangeLog
-install.dir ${PKG}/usr/share/magic
-install.dat magic/Magdir/* ${PKG}/usr/share/magic
+install.dir ${PKG}${SYS_DIR[share]}/magic
+install.dat magic/Magdir/* ${PKG}${SYS_DIR[share]}/magic
 rm -rf \
  ${PKG}${SYS_DIR[man]}/man4 \
- ${PKG}/usr/share/magic.mgc
+ ${PKG}${SYS_DIR[share]}/magic.mgc
 }

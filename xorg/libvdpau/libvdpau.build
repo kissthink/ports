@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=libvdpau
-VERSION=0.5
+VERSION=0.6
 BUILD=1
 
 # Description
@@ -40,21 +40,22 @@ SRCPACK[0]=http://people.freedesktop.org/~aplattner/vdpau/${SRCNAME[0]}-${SRCVER
 
 build0()
 {
-chmod 0755 configure
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --with-module-dir=/usr/lib$(libdirsuffix)/plugins/vdpau
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --with-module-dir="${SYS_DIR[lib]}/plugins/vdpau"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
+changelog ChangeLog
 license COPYING
 }

@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=parted
 VERSION=3.1
-BUILD=1
+BUILD=2
 DEPENDS=('udev >= 173-1' 'lvm >= 2.02.98-1')
 
 # Description
@@ -33,6 +33,13 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+# Install the texinfo files
+if [ -x /usr/bin/install-info ]; then
+  /usr/bin/install-info --info-dir=${SYS_DIR[info]} ${SYS_DIR[info]}/parted.info.gz 2> /dev/null
+fi
+EOF
+
 # Sources
 
 SRCNAME[0]=${NAME}
@@ -42,6 +49,7 @@ SRCCOPY[0]="GPL3"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 #FIXME: workaround for failing test for ext2_fs.h
 ac_cv_header_linux_ext2_fs_h="yes" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
@@ -53,12 +61,12 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-static=no \
  --enable-shared=yes \
  --enable-debug=no \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
  --infodir="${SYS_DIR[info]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS THANKS

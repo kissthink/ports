@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=scsi
 VERSION=1.35
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -49,18 +49,18 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-dependency-tracking \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --bindir=/usr/sbin
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --bindir="${SYS_DIR[sbin]}"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS CREDITS
 changelog ChangeLog
 install.bin rescan-scsi-bus.sh \
- ${PKG}/usr/sbin/rescan-scsi-bus
+ ${PKG}${SYS_DIR[sbin]}/rescan-scsi-bus
 }
 
 SRCNAME[1]=lsscsi
@@ -73,19 +73,19 @@ build1()
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS} CFLAGS+="${FLAGS}"
 make install DESTDIR="${PKG}"
 doc AUTHORS CREDITS
 changelog ChangeLog
-install.dir ${PKG}/usr/man/man1
+install.dir ${PKG}${SYS_DIR[man]}/man1
 mv \
- ${PKG}/usr/man/man8/lsscsi.8 \
- ${PKG}/usr/man/man1/lsscsi.1
+ ${PKG}${SYS_DIR[man]}/man8/lsscsi.8 \
+ ${PKG}${SYS_DIR[man]}/man1/lsscsi.1
 }
 
 SRCNAME[2]=sdparm
@@ -99,12 +99,12 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/lib$(libdirsuffix) \
- --localstatedir=/var \
- --bindir=/usr/sbin
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --bindir="${SYS_DIR[sbin]}"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS CREDITS

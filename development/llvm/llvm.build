@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=llvm
-VERSION=3.1
-BUILD=2
-DEPENDS=('libraries >= 20120902-1')
+VERSION=3.2
+BUILD=1
+DEPENDS=('libraries >= 20130211-1')
 
 # Description
 
@@ -47,52 +47,76 @@ build0()
   mv clang-${VERSION}.src tools/clang
 }
 
-SRCNAME[1]=${NAME}
+SRCNAME[1]=compiler-rt
 SRCVERS[1]=${VERSION}
 SRCPACK[1]=http://llvm.org/releases/${SRCNAME[1]}-${SRCVERS[1]}.src.tar.gz
 SRCROOT[1]=${NAME}-${VERSION}.src
+SRCOPTS[1]="nosrcroot"
 
 build1()
 {
+  install.dir projects
+  mv compiler-rt-${VERSION}.src projects/compiler-rt
+}
+
+SRCNAME[2]=${NAME}
+SRCVERS[2]=${VERSION}
+SRCPACK[2]=http://llvm.org/releases/${SRCNAME[2]}-${SRCVERS[2]}.src.tar.gz
+SRCROOT[2]=${NAME}-${VERSION}.src
+
+build2()
+{
+# Fix insecure rpath
+sed -i 's|$(RPATH) -Wl,$(\(ToolDir\|LibDir\|ExmplDir\))||g' Makefile.rules
+# Drop "svn" suffix from version string
+sed -i 's|3\.2svn|3.2|g' configure
 #FIXME: convert to CMake one of these days
-sed -i "s|(PROJ_prefix)/lib|(PROJ_prefix)/lib$(libdirsuffix)|g" Makefile.config.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-expensive-checks \
  --disable-debug-runtime \
  --disable-assertions \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --with-c-include-dirs="${SYS_DIR[lib]}64/gcc/x86_64-slackware-linux/4.7.2/include:${SYS_DIR[usr]}/local/include:${SYS_DIR[include]}"
+ --with-binutils-include="${SYS_DIR[usr]}/include" \
+ --with-udis86="${SYS_DIR[usr]}" \
+ --disable-docs \
+ --disable-expensive-checks \
+ --disable-debug-runtime \
+ --disable-assertions \
  --enable-shared \
  --enable-optimized \
  --enable-libffi \
  --enable-bindings=none \
  --enable-targets=all \
- --with-binutils-include=/usr/include \
- --with-udis86=/usr
+ --enable-cxx11
 make ${JOBS} VERBOSE=1 REQUIRES_RTTI=1
 make install DESTDIR="${PKG}"
 doc CREDITS.TXT
 license LICENSE.TXT
 # Install also the clang-analyzer
-install.dir ${PKG}/usr/lib$(libdirsuffix)/clang-analyzer
+install.dir ${PKG}${SYS_DIR[share]}/application-data/clang-analyzer
 for f in scan-{build,view}; do
-  mv tools/clang/tools/${f} ${PKG}/usr/lib$(libdirsuffix)/clang-analyzer
-  ln -s /usr/lib$(libdirsuffix)/clang-analyzer/${f}/${f} ${PKG}/usr/bin/${f}
+  mv tools/clang/tools/${f} ${PKG}${SYS_DIR[share]}/application-data/clang-analyzer
+  ln -s ${SYS_DIR[share]}/application-data/clang-analyzer/${f}/${f} ${PKG}${SYS_DIR[bin]}/${f}
 done
+install.man tools/clang/tools/scan-build/scan-build.1 ${PKG}${SYS_DIR[man]}/man1
+rm -f ${PKG}${SYS_DIR[share]}/application-data/clang-analyzer/scan-build/scan-build.1
 # LTO
-install.dir ${PKG}/usr/lib$(libdirsuffix)/bfd-plugins
+#FIXME: lib64
+install.dir ${PKG}${SYS_DIR[lib]}64/bfd-plugins
 (
-  cd ${PKG}/usr/lib$(libdirsuffix)/bfd-plugins
-  ln -sf /usr/lib$(libdirsuffix)/LLVMgold.so
+  cd ${PKG}${SYS_DIR[lib]}64/bfd-plugins
+  ln -sf ${SYS_DIR[lib]}/LLVMgold.so
 )
 # Clean up cruft
 rm -f \
- ${PKG}/usr/lib$(libdirsuffix)/*LLVMHello.*
-chmod 0644 \
- ${PKG}/usr/lib$(libdirsuffix)/*.a
+ ${PKG}${SYS_DIR[lib]}/*LLVMHello.* \
+ ${PKG}${SYS_DIR[html]}
+chmod -x ${PKG}${SYS_DIR[lib]}/*.a
 }

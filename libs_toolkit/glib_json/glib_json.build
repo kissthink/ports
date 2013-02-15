@@ -5,9 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=glib_json
-VERSION=0.14.2
-BUILD=1
-DEPENDS=('glib >= 2.32.2-1')
+MAJOR=0.14
+VERSION=${MAJOR}.2
+BUILD=2
+DEPENDS=('glib >= 2.34.3-1')
 
 # Description
 
@@ -37,11 +38,12 @@ EOF
 
 SRCNAME[0]=json-glib
 SRCVERS[0]=${VERSION}
-SRCPACK[0]=${URL[gnome]}/${SRCNAME[0]}/${SRCVERS[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+SRCPACK[0]=${URL[gnome]}/${SRCNAME[0]}/${MAJOR}/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
 SRCCOPY[0]="LGPL21"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -52,13 +54,15 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-debug=minimum \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-html-dir="${SYS_DIR[html]}"
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 changelog NEWS
+# No development docs
+rm -rf ${PKG}${SYS_DIR[html]}
 }

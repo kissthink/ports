@@ -6,8 +6,9 @@ source /usr/src/ports/Build/build.sh
 
 NAME=util_linux
 VERSION=2.22.2
-BUILD=2
+BUILD=4
 DEPENDS=('udev >= 173-1')
+OPTDEPENDS=('libxml >= 2.9.0-2' 'xz >= 5.0.4-1' 'bzip2 >= 1.0.6-1')
 
 # Description
 
@@ -33,6 +34,38 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+# Keep same perms on rc.serial.new:
+if [ -e etc/rc.d/rc.serial ]; then
+  cp -a etc/rc.d/rc.serial etc/rc.d/rc.serial.new.incoming
+  cat etc/rc.d/rc.serial.new > etc/rc.d/rc.serial.new.incoming
+  mv etc/rc.d/rc.serial.new.incoming etc/rc.d/rc.serial.new
+fi
+
+config etc/rc.d/rc.serial.new
+config etc/serial.conf.new
+
+# Install the texinfo files
+if [ -x /usr/bin/install-info ]; then
+  /usr/bin/install-info --info-dir=${SYS_DIR[info]} ${SYS_DIR[info]}/which.info.gz 2> /dev/null
+fi
+EOF
+
 # Sources
 
 SRCNAME[0]=util-linux
@@ -42,8 +75,11 @@ SRCCOPY[0]="GPL3 GPL2 LGPL2 LGPL21 BSD4"
 
 build0()
 {
+sed -i 's|$(usrlib_execdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 #FIXME: PAM: undisable su, sulogin, login when switching
+#FIXME: when switching to PAM -> --enable-login-utils and fix up 'shadow'
 #FIXME: sysvinit: remove mountpoint from there
+#FIXME: --enable-socket-activation --> when switching to systemd
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -52,13 +88,13 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-rpath \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --bindir=/usr/bin \
- --sbindir=/usr/sbin \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --bindir="${SYS_DIR[bin]}" \
+ --sbindir="${SYS_DIR[sbin]}" \
  --with-systemdsystemunitdir="${SYS_DIR[systemdsystemunitdir]}" \
  --disable-login \
  --disable-su \
@@ -79,59 +115,57 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-wall \
  --enable-write \
  --enable-use-tty-group
-#FIXME: --enable-socket-activation --> when switching to systemd
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
 rm -rf ${PKG}${SYS_DIR[man]}/ru
-#TODO: when switching to PAM -> --enable-login-utils and fix up 'shadow'
 #FIXME: compat
 (
-  cd ${PKG}/usr/bin
-  ln -sf /usr/sbin/fdformat
-  ln -sf /usr/sbin/readprofile
-  ln -sf /usr/sbin/tunelp
-  ln -sf /usr/sbin/raw
+  cd ${PKG}${SYS_DIR[bin]}
+  ln -sf ${SYS_DIR[sbin]}/fdformat
+  ln -sf ${SYS_DIR[sbin]}/readprofile
+  ln -sf ${SYS_DIR[sbin]}/tunelp
+  ln -sf ${SYS_DIR[sbin]}/raw
   cd ${PKG}/usr/sbin
   ln -sf hwclock clock
-  ln -sf /usr/bin/mount
-  ln -sf /usr/bin/umount
-  cd ${PKG}/usr/man/man8
+  ln -sf ${SYS_DIR[bin]}/mount
+  ln -sf ${SYS_DIR[bin]}/umount
+  cd ${PKG}${SYS_DIR[man]}/man8
   echo ".so man1/hwclock.8" > clock.8
 
   install.dir ${PKG}/sbin
   cd ${PKG}/sbin
-  ln -sf /usr/bin/mount
-  ln -sf /usr/bin/umount
-  ln -sf /usr/sbin/ctrlaltdel
-  ln -sf /usr/sbin/blkid
-  ln -sf /usr/sbin/fdisk
-  ln -sf /usr/sbin/fsck.minix
-  ln -sf /usr/sbin/switch_root
-  ln -sf /usr/sbin/mkfs.bfs
-  ln -sf /usr/sbin/mkfs
-  ln -sf /usr/sbin/cfdisk
-  ln -sf /usr/sbin/hwclock
-  ln -sf /usr/sbin/hwclock clock
-  ln -sf /usr/sbin/raw
-  ln -sf /usr/sbin/mkswap
-  ln -sf /usr/sbin/agetty
-  ln -sf /usr/sbin/fsck.cramfs
-  ln -sf /usr/sbin/losetup
-  ln -sf /usr/sbin/findfs
-  ln -sf /usr/sbin/mkfs.cramfs
-  ln -sf /usr/sbin/fsfreeze
-  ln -sf /usr/sbin/sfdisk
-  ln -sf /usr/sbin/fstrim
-  ln -sf /usr/sbin/swapon
-  ln -sf /usr/sbin/swapon swapoff
-  ln -sf /usr/sbin/fsck
-  ln -sf /usr/sbin/mkfs.minix
-  ln -sf /usr/sbin/swaplabel
-  ln -sf /usr/sbin/wipefs
-  ln -sf /usr/sbin/pivot_root
-  ln -sf /usr/sbin/blockdev
+  ln -sf ${SYS_DIR[bin]}/mount
+  ln -sf ${SYS_DIR[bin]}/umount
+  ln -sf ${SYS_DIR[sbin]}/ctrlaltdel
+  ln -sf ${SYS_DIR[sbin]}/blkid
+  ln -sf ${SYS_DIR[sbin]}/fdisk
+  ln -sf ${SYS_DIR[sbin]}/fsck.minix
+  ln -sf ${SYS_DIR[sbin]}/switch_root
+  ln -sf ${SYS_DIR[sbin]}/mkfs.bfs
+  ln -sf ${SYS_DIR[sbin]}/mkfs
+  ln -sf ${SYS_DIR[sbin]}/cfdisk
+  ln -sf ${SYS_DIR[sbin]}/hwclock
+  ln -sf ${SYS_DIR[sbin]}/hwclock clock
+  ln -sf ${SYS_DIR[sbin]}/raw
+  ln -sf ${SYS_DIR[sbin]}/mkswap
+  ln -sf ${SYS_DIR[sbin]}/agetty
+  ln -sf ${SYS_DIR[sbin]}/fsck.cramfs
+  ln -sf ${SYS_DIR[sbin]}/losetup
+  ln -sf ${SYS_DIR[sbin]}/findfs
+  ln -sf ${SYS_DIR[sbin]}/mkfs.cramfs
+  ln -sf ${SYS_DIR[sbin]}/fsfreeze
+  ln -sf ${SYS_DIR[sbin]}/sfdisk
+  ln -sf ${SYS_DIR[sbin]}/fstrim
+  ln -sf ${SYS_DIR[sbin]}/swapon
+  ln -sf ${SYS_DIR[sbin]}/swapon swapoff
+  ln -sf ${SYS_DIR[sbin]}/fsck
+  ln -sf ${SYS_DIR[sbin]}/mkfs.minix
+  ln -sf ${SYS_DIR[sbin]}/swaplabel
+  ln -sf ${SYS_DIR[sbin]}/wipefs
+  ln -sf ${SYS_DIR[sbin]}/pivot_root
+  ln -sf ${SYS_DIR[sbin]}/blockdev
 )
 }
 
@@ -145,12 +179,12 @@ build1()
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --sbindir=/usr/sbin
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --sbindir="${SYS_DIR[sbin]}"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 changelog ChangeLog
@@ -158,7 +192,7 @@ changelog ChangeLog
 (
 install.dir ${PKG}/sbin
 cd ${PKG}/sbin
-ln -sf /usr/sbin/adjtimex
+ln -sf ${SYS_DIR[sbin]}/adjtimex
 )
 }
 
@@ -172,18 +206,17 @@ build2()
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --bindir=/usr/sbin
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --bindir="${SYS_DIR[sbin]}"
 make ${JOBS}
 make install DESTDIR="${PKG}"
-cat doinst.sh >> ${PKG}/install/doinst.sh
-install.dir ${PKG}/etc/rc.d
-install.dat rc.serial ${PKG}/etc/rc.d/rc.serial.new
-install.dat serial.conf ${PKG}/etc/serial.conf.new
+install.dir ${PKG}${SYS_DIR[etc]}/rc.d
+install.dat rc.serial ${PKG}${SYS_DIR[etc]}/rc.d/rc.serial.new
+install.dat serial.conf ${PKG}${SYS_DIR[etc]}/serial.conf.new
 }
 
 SRCNAME[3]=net-tools
@@ -197,8 +230,8 @@ make ${JOBS} CFLAGS="${FLAGS}"
 make install-hostname \
  DESTDIR="${PKG}" \
  MANDIR="${SYS_DIR[man]}" \
- BINDIR="/usr/bin" \
- SBINDIR="/usr/sbin"
+ BINDIR="${SYS_DIR[bin]}" \
+ SBINDIR="${SYS_DIR[sbin]}"
 }
 
 SRCNAME[4]=sysfsutils
@@ -214,11 +247,11 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-dependency-tracking \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS CREDITS docs/libsysfs.txt
@@ -226,18 +259,13 @@ changelog ChangeLog
 }
 
 SRCNAME[5]=slackwareutils
-SRCVERS[5]=1.0.1
+SRCVERS[5]=1.0.2
 SRCPACK[5]=http://github.com/downloads/cjsthompson/${SRCNAME[5]}/${SRCNAME[5]}-${SRCVERS[5]}.tar.xz
 
 build5()
 {
 make ${JOBS} CFLAGS="${FLAGS}"
 make install DESTDIR="${PKG}" MANDIR="${SYS_DIR[man]}/man1"
-#FIXME: compat
-mv \
-  ${PKG}/usr/bin/mktemp \
-  ${PKG}/usr/bin/mktemp-bsd
-( cd ${PKG}/usr/bin ; ln -sf mktemp-bsd mktemp )
 }
 
 SRCNAME[6]=tree
@@ -248,7 +276,7 @@ SRCCOPY[6]="GPL2"
 build6()
 {
 make ${JOBS} OPTS="${FLAGS}"
-make install prefix="${PKG}/usr" MANDIR="${PKG}${SYS_DIR[man]}/man1"
+make install prefix="${PKG}${SYS_DIR[usr]}" MANDIR="${PKG}${SYS_DIR[man]}/man1"
 doc README
 changelog CHANGES
 }
@@ -263,16 +291,16 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 rm -f \
- ${PKG}/usr/bin/{which,run-parts} \
- ${PKG}/usr/sbin/installkernel \
+ ${PKG}${SYS_DIR[bin]}/{which,run-parts} \
+ ${PKG}${SYS_DIR[sbin]}/installkernel \
  ${PKG}${SYS_DIR[man]}/man{1,8}/{which,run-parts,installkernel}.? \
  ${PKG}${SYS_DIR[man]}/??/man{1,8}/{which,run-parts,installkernel}.?
 }
@@ -288,14 +316,138 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
  --infodir="${SYS_DIR[info]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
+changelog NEWS
+}
+
+SRCNAME[9]=procps-ng
+SRCVERS[9]=3.3.6
+SRCPACK[9]=${URL[sf]}/${SRCNAME[9]}/Production/${SRCNAME[9]}-${SRCVERS[9]}.tar.xz
+SRCCOPY[9]="GPL2 LGPL2"
+
+build9()
+{
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' proc/Makefile.in
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-rpath \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix="${SYS_DIR[usr]}" \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --docdir="${SYS_DIR[doc]}/${SRCNAME[0]}-${SRCVERS[0]}" \
+ --disable-kill \
+ --disable-skill \
+ --enable-w-from \
+ --enable-watch8bit
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+#FIXME: everything should end up in /usr not /usr/usr
+mv ${PKG}${SYS_DIR[usr]}/usr/bin/* ${PKG}${SYS_DIR[bin]}
+rm -rf ${PKG}${SYS_DIR[usr]}/usr
+(
+  cd ${PKG}${SYS_DIR[bin]}
+  ln -sf pkill pgrep
+)
+}
+
+SRCNAME[10]=procinfo-ng
+SRCVERS[10]=2.0.304
+SRCPACK[10]=${URL[sf]}/procinfo-ng/${SRCNAME[10]}/${SRCVERS[10]}/${SRCNAME[10]}-${SRCVERS[10]}.tar.bz2
+SRCCOPY[10]="GPL2 LGPL21"
+
+build10()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --prefix="${SYS_DIR[usr]}" \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
+make ${JOBS}
+make install DESTDIR="${PKG}"
+}
+
+SRCNAME[11]=psmisc
+SRCVERS[11]=22.20
+SRCPACK[11]=${URL[sf]}/psmisc/${SRCNAME[11]}/${SRCNAME[11]}-${SRCVERS[11]}.tar.gz
+SRCCOPY[11]="GPL2"
+
+build11()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-rpath \
+ --prefix="${SYS_DIR[usr]}" \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog ChangeLog
+echo ".so man1/pstree.1" > ${PKG}${SYS_DIR[man]}/man1/pstree.x11.1
+}
+
+SRCNAME[12]=libarchive
+SRCVERS[12]=3.1.2
+SRCPACK[12]=http://libarchive.googlecode.com/files/${SRCNAME[12]}-${SRCVERS[12]}.tar.gz
+SRCCOPY[12]="BSD2"
+
+build12()
+{
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix="${SYS_DIR[usr]}" \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --includedir="${SYS_DIR[include]}/archive" \
+ --enable-posix-regex-lib=libc \
+ --enable-bsdtar=shared \
+ --enable-bsdcpio=shared \
+ --without-expat \
+ --without-openssl
+#NOTE: can it replace uu{en,de}code ?
+#FIXME: Use CMake
+#cmake \
+# -DENABLE_NETTLE:BOOL="on" \
+# -DENABLE_OPENSSL:BOOL="off" \
+# -DENABLE_TAR_SHARED:BOOL="on" \
+# -DENABLE_CPIO_SHARED:BOOL="on" \
+# -DENABLE_XATTR:BOOL="on" \
+# -DENABLE_ACL:BOOL="on" \
+# -DENABLE_ICONV:BOOL="on" \
+#CMakeLists.txt
+make ${JOBS} V=1
+make check
+make install DESTDIR="${PKG}"
 changelog NEWS
 }

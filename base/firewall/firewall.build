@@ -260,7 +260,7 @@ install.dat rules/empty-{filter,mangle,nat,raw,security}.rules ${PKG}${SYS_DIR[v
 }
 
 SRCNAME[11]=ipset
-SRCVERS[11]=6.16.1
+SRCVERS[11]=6.17
 SRCPACK[11]=http://ftp.netfilter.org/pub/${SRCNAME[11]}/${SRCNAME[11]}-${SRCVERS[11]}.tar.bz2
 SRCCOPY[11]="GPL2"
 

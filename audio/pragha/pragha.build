@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=pragha
-VERSION=1.1.1
-BUILD=2
-DEPENDS=('xfce >= 4.10-1' 'gstreamer >= 1.0.5-1' 'sqlite >= 3.7.15.2-1' 'liblastfm >= 20121125-1' 'taglib >= 1.8-1' 'libcdio >= 0.83-1')
+VERSION=1.1.2
+BUILD=1
+DEPENDS=('gtk+ >= 3.6.4-1' 'gstreamer >= 1.0.5-1' 'sqlite >= 3.7.15.2-1' 'liblastfm >= 20121125-1' 'taglib >= 1.8-1' 'libcdio >= 0.83-1')
 
 # Description
 
@@ -55,7 +55,8 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --sysconfdir="${SYS_DIR[etc]}" \
  --libdir="${SYS_DIR[lib]}" \
  --localstatedir="${SYS_DIR[var]}" \
- --with-gstreamer=1.0
+ --with-gstreamer=1.0 \
+ --with-gtk3
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc FAQ

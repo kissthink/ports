@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=keyutils
 VERSION=1.5.5
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -43,12 +43,13 @@ build0()
 {
 make ${JOBS} OPTS="${CFLAGS}"
 make install DESTDIR="${PKG}" \
- BINDIR="/usr/bin" \
- SBINDIR="/usr/sbin" \
- LIBDIR="/usr/lib$(libdirsuffix)" \
+ BINDIR="${SYS_DIR[bin]}" \
+ SBINDIR="${SYS_DIR[sbin]}" \
+ LIBDIR="${SYS_DIR[lib]}" \
+ USRLIBDIR="${SYS_DIR[lib]}" \
  MAN1="${SYS_DIR[man]}/man1" \
  MAN3="${SYS_DIR[man]}/man3" \
  MAN5="${SYS_DIR[man]}/man5" \
  MAN8="${SYS_DIR[man]}/man8"
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.a
+rm -f ${PKG}${SYS_DIR[lib]}/*.a
 }

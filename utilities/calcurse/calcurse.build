@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=calcurse
-VERSION=3.1.3
+VERSION=3.1.4
 BUILD=1
 
 # Description
@@ -55,5 +55,5 @@ make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-rm -f ${PKG}${SYS_DIR[html]}/calcurse/submitting-patches.html
+rm -f ${PKG}${SYS_DIR[html]}/${SRCNAME[0]}/submitting-patches.html
 }

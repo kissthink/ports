@@ -43,7 +43,7 @@ EOF
 
 SRCNAME[0]=google-chrome
 SRCVERS[0]=stable_current_$(uname -m)
-SRCPACK[0]=${SRCNAME[0]}-${SRCVERS[0]}.rpm
+SRCPACK[0]=https://dl.google.com/linux/direct/${SRCNAME[0]}-${SRCVERS[0]}.rpm
 SRCOPTS[0]="pkgunpack"
 
 build0()

@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=gamin
 VERSION=0.1.10
-BUILD=1
-DEPENDS=('glib >= 2.30.2-1')
+BUILD=2
+DEPENDS=('glib >= 2.34.3-1')
 
 # Description
 
@@ -33,6 +33,25 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+config etc/gamin/gaminrc.new
+EOF
+
 # Sources
 
 SRCNAME[0]=${NAME}
@@ -42,18 +61,19 @@ SRCCOPY[0]="LGPL2"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --libexecdir=/usr/lib$(libdirsuffix)/exec \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --libexecdir="${SYS_DIR[lib]}/exec" \
  --with-python=/go/to/hell \
  --disable-dnotify \
  --enable-inotifyq
@@ -61,9 +81,7 @@ make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-install.dat doinst.sh ${PKG}/install
-install.dir ${PKG}/etc/gamin
-install.cfg gaminrc ${PKG}/etc/gamin/gaminrc.new
-rm -rf \
- ${PKG}/usr/lib$(libdirsuffix)/python*
+install.dir ${PKG}${SYS_DIR[etc]}/gamin
+install.cfg gaminrc ${PKG}${SYS_DIR[etc]}/gamin/gaminrc.new
+rm -rf ${PKG}${SYS_DIR[lib]}64
 }

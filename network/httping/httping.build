@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=httping
-VERSION=1.5.7
-BUILD=2
-DEPENDS=('openssl >= 1.0.1c-1')
+VERSION=1.5.8
+BUILD=1
+DEPENDS=('openssl >= 1.0.1d-1')
 
 # Description
 
@@ -44,7 +44,7 @@ build0()
 make ${JOBS} OFLAGS="${FLAGS}" DEBUG="no" TFO="yes"
 make install DESTDIR="${PKG}" \
  MANDIR="${SYS_DIR[man]}" \
- DOCDIR="bla"
+ DOCDIR="${SYS_DIR[doc]}/${SRCVERS[0]}"
 license license.txt
-rm -rf ${PKG}/bla
+rm -rf ${PKG}${SYS_DIR[doc]}/${SRCVERS[0]}
 }

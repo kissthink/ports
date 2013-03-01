@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=bin
 VERSION=$(date +%Y%m%d)
-BUILD=1
+BUILD=2
 DEPENDS=('udev >= 173-1')
 OPTDEPENDS=('libxml >= 2.9.0-2' 'xz >= 5.0.4-1' 'bzip2 >= 1.0.6-1')
 
@@ -539,10 +539,10 @@ make ${JOBS}
 make install DESTDIR="${PKG}"
 #FIXME: replace the slackware run-parts hack with this one
 rm -f \
- ${PKG}${SYS_DIR[bin]}/{which,run-parts} \
+ ${PKG}${SYS_DIR[bin]}/run-parts \
  ${PKG}${SYS_DIR[sbin]}/installkernel \
- ${PKG}${SYS_DIR[man]}/man{1,8}/{which,run-parts,installkernel}.? \
- ${PKG}${SYS_DIR[man]}/??/man{1,8}/{which,run-parts,installkernel}.?
+ ${PKG}${SYS_DIR[man]}/man{1,8}/{run-parts,installkernel}.? \
+ ${PKG}${SYS_DIR[man]}/??/man{1,8}/{run-parts,installkernel}.?
 }
 
 SRCNAME[15]=coreutils

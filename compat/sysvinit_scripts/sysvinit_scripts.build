@@ -7,7 +7,7 @@ source /usr/src/ports/Build/build.sh
 NAME=sysvinit_scripts
 MAJOR=2.0
 VERSION=${MAJOR}
-BUILD=2
+BUILD=3
 ARCH=noarch
 
 # Description
@@ -32,6 +32,33 @@ ${NAME}:
 ${NAME}:
 ${NAME}:
 ${NAME}:
+EOF
+
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+config etc/inittab.new
+config etc/rc.d/rc.4.new
+config etc/rc.d/rc.6.new
+config etc/rc.d/rc.K.new
+config etc/rc.d/rc.M.new
+config etc/rc.d/rc.S.new
+config etc/rc.d/rc.local.new
+config etc/rc.d/rc.loop.new
+config etc/rc.d/rc.sysvinit.new
 EOF
 
 # Sources

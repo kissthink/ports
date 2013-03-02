@@ -5,7 +5,8 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=gnutls
-VERSION=3.1.8
+MAJOR=3.1
+VERSION=${MAJOR}.9
 BUILD=1
 DEPENDS=('libraries >= 20130211-1')
 
@@ -37,7 +38,7 @@ EOF
 
 SRCNAME[0]=${NAME}
 SRCVERS[0]=${VERSION}
-SRCPACK[0]=ftp://ftp.gnutls.org/pub/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+SRCPACK[0]=ftp://ftp.gnutls.org/gcrypt/gnutls/v${MAJOR}/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
 SRCCOPY[0]="GPL3"
 
 build0()

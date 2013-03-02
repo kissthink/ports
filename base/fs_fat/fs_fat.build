@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=fs_fat
-VERSION=3.0.15
+VERSION=3.0.16
 BUILD=1
 
 # Description
@@ -36,7 +36,7 @@ EOF
 
 SRCNAME[0]=dosfstools
 SRCVERS[0]=${VERSION}
-SRCPACK[0]=http://www.daniel-baumann.ch/software/dosfstools/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+SRCPACK[0]=http://www.daniel-baumann.ch/software/dosfstools/${SRCNAME[0]}-${SRCVERS[0]}.orig.tar.xz
 SRCCOPY[0]="GPL3"
 
 build0()

@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=libwmf
 VERSION=0.2.8.4
-BUILD=2
-DEPENDS=('freetype >= 2.4.11-1' 'libjpeg >= 1.2.0-1' 'libpng >= 1.5.13-1' 'expat >= 2.0.1-1' 'xorg_libs >= 7.7-3' 'fonts_type1_ghostscript >= 8.11-1')
+BUILD=3
+DEPENDS=('freetype >= 2.4.11-1' 'libjpeg >= 1.2.0-1' 'libpng >= 1.5.14-1' 'libxml >= 2.9.0-1' 'xorg_libs >= 7.7-3' 'font_type1_ghostscript >= 8.11-1')
 
 # Description
 
@@ -49,26 +49,27 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-static=no \
  --enable-shared=yes \
  --enable-debug=no \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-docdir="${SYS_DIR[html]}/${SRCNAME[0]}" \
- --with-gsfontdir=/usr/share/fonts/Type1 \
- --with-fontdir=/usr/share/fonts/Type1 \
- --with-xtrafontmap=/usr/share/application-data/wmf/fontmap
+ --with-gsfontdir="${SYS_DIR[share]}/fonts/Type1" \
+ --with-fontdir="${SYS_DIR[share]}/fonts/Type1" \
+ --with-xtrafontmap="${SYS_DIR[share]}/application-data/wmf/fontmap" \
+ --with-libxml2="${SYS_DIR[usr]}"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS CREDITS
 changelog NEWS
-install.dir ${PKG}/usr/share/application-data/wmf
+install.dir ${PKG}${SYS_DIR[share]}/application-data/wmf
 mv \
-  ${PKG}/usr/share/fonts/Type1/fontmap \
-  ${PKG}/usr/share/application-data/wmf
+  ${PKG}${SYS_DIR[share]}/fonts/Type1/fontmap \
+  ${PKG}${SYS_DIR[share]}/application-data/wmf
 # Drop the development docs, the fonts and the gdk_pixbuf loader
 rm -rf \
   ${PKG}${SYS_DIR[html]} \
-  ${PKG}/usr/share/fonts \
-  ${PKG}/usr/lib$(libdirsuffix)/gdk-pixbuf-2.0
+  ${PKG}${SYS_DIR[share]}/fonts \
+  ${PKG}${SYS_DIR[lib]}/gdk-pixbuf-2.0
 }

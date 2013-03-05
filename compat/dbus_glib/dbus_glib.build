@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=dbus_glib
-VERSION=0.100
+VERSION=0.100.2
 BUILD=1
-DEPENDS=('dbus >= 1.4.20-1' 'glib >= 2.32.3-1')
+DEPENDS=('dbus >= 1.4.24-1' 'glib >= 2.34.3-1')
 
 # Description
 
@@ -22,9 +22,9 @@ cat > ${PKG}/install/slack-desc <<EOF
 $(padd)|-----handy-ruler------------------------------------------------------|
 ${NAME}: D-BUS Glib
 ${NAME}:
-${NAME}: D-BUS bindings for Glib.
+${NAME}: D-BUS bindings for Glib. These are deprecated and replaced by gdbus
+${NAME}: which is part of Glib.
 ${NAME}:
-${NAME}: Homepage: http://dbus.freedesktop.org
 ${NAME}:
 ${NAME}:
 ${NAME}:
@@ -42,6 +42,7 @@ SRCCOPY[0]="GPL2 AFL21"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -49,15 +50,18 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --libexecdir=/usr/lib$(libdirsuffix)/exec \
- --localstatedir=/var \
- --with-html-dir="${SYS_DIR[html]}"
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --libexecdir="${SYS_DIR[lib]}/exec" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --with-html-dir="${SYS_DIR[html]}" \
+ --enable-bash-completion=no
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog ChangeLog
+# No development docs
+rm -rf ${PKG}${SYS_DIR[html]}
 }

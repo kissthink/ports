@@ -7,8 +7,8 @@ source /usr/src/ports/Build/build.sh
 NAME=libwnck
 MAJOR=2.31
 VERSION=${MAJOR}.0
-BUILD=1
-DEPENDS=('gtk+ >= 2.24.10-1')
+BUILD=2
+DEPENDS=('gtk+ >= 2.24.14-1')
 
 # Description
 
@@ -43,6 +43,7 @@ SRCCOPY[0]="LGPL2"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -51,14 +52,16 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-static=no \
  --enable-shared=yes \
  --enable-introspection=no \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-html-dir="${SYS_DIR[html]}"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS MAINTAINERS
 changelog NEWS
+# No development docs
+rm -rf ${PKG}${SYS_DIR[html]}
 }

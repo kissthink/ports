@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=libxklavier
-VERSION=5.2.1
+VERSION=5.3
 BUILD=1
-DEPENDS=('xorg_libs >= 7.6-5' 'xkeyboard_config >= 2.5.1-1' 'glib >= 2.32.0-1' 'libxml >= 2.7.8-1')
+DEPENDS=('xorg_libs >= 7.7-3' 'xkeyboard_config >= 2.8-1' 'glib >= 2.34.3-1' 'libxml >= 2.9.0-1')
 
 # Description
 
@@ -42,21 +42,25 @@ SRCCOPY[0]="LGPL2"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
+ --disable-silent-rules \
  --disable-rpath \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-html-dir="${SYS_DIR[html]}"
-make ${JOBS}
+make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS CREDITS
 changelog NEWS
+# No development docs
+rm -rf ${PKG}${SYS_DIR[html]}
 }

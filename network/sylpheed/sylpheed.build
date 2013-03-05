@@ -7,10 +7,9 @@ source /usr/src/ports/Build/build.sh
 NAME=sylpheed
 MAJOR=3.3
 VERSION=${MAJOR}.0
-BUILD=1
-DEPENDS=('gtk+ >= 2.24.14-1' 'openssl >= 0.9.8x-1' 'gpgme >= 1.3.1-1')
-
-#gnutls?
+BUILD=2
+DEPENDS=('gtk+ >= 2.24.14-1' 'openssl >= 1.0.1d-1' 'gpgme >= 1.3.2-1')
+OPTDEPENDS=('sqlite >= 3.7.15.2-1')
 
 # Description
 
@@ -54,19 +53,45 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-rpath \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc/conf.d \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --with-manualdir=/usr/share/html/sylpheed_manual \
- --with-faqdir=/usr/share/html/sylpheed_faq \
- --with-plugindir=/usr/lib$(libdirsuffix)/exec/sylpheed
-make ${JOBS}
+ --sysconfdir="${SYS_DIR[conf]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --with-plugindir="${SYS_DIR[lib]}/exec/sylpheed" \
+ --with-manualdir="${SYS_DIR[html]}/sylpheed_manual" \
+ --with-faqdir="${SYS_DIR[html]}/sylpheed_faq" 
+make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-install.dir ${PKG}/usr/share/icons/hicolor/{64x64,128x128}/apps
-install.dat sylpheed-128x128.png ${PKG}/usr/share/icons/hicolor/128x128/apps/sylpheed.png
-install.dat sylpheed-64x64.png ${PKG}/usr/share/icons/hicolor/64x64/apps/sylpheed.png
+install.dir ${PKG}${SYS_DIR[share]}/icons/hicolor/{64x64,128x128}/apps
+install.dat sylpheed-128x128.png ${PKG}${SYS_DIR[share]}/icons/hicolor/128x128/apps/sylpheed.png
+install.dat sylpheed-64x64.png ${PKG}${SYS_DIR[share]}/icons/hicolor/64x64/apps/sylpheed.png
+}
+
+SRCNAME[1]=sylfilter
+SRCVERS[1]=0.7
+SRCPACK[1]=http://sylpheed.sraoss.jp/${SRCNAME[1]}/src/${SRCNAME[1]}-${SRCVERS[1]}.tar.gz
+SRCCOPY[1]="BSD3"
+
+build1()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-rpath \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix="${SYS_DIR[usr]}" \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --with-libsylph="sylpheed" \
+ --with-libsylph-dir="${PKG}${SYS_DIR[usr]}"
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog NEWS
 }

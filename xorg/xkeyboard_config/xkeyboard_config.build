@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=xkeyboard_config
-VERSION=2.6
+VERSION=2.8
 ARCH=noarch
 BUILD=1
 
@@ -46,19 +46,15 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-dependency-tracking \
  --disable-silent-rules \
  --disable-static \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --with-xkb-base=/usr/share/X11/xkb
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --with-xkb-base="${SYS_DIR[share]}/X11/xkb"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS CREDITS
 changelog NEWS
 license COPYING
-install.dir ${PKG}/usr/lib$(libdirsuffix)
-mv \
- ${PKG}/usr/share/pkgconfig \
- ${PKG}/usr/lib$(libdirsuffix)
 }

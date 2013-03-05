@@ -9,6 +9,7 @@ MAJOR=2.8
 VERSION=${MAJOR}.4
 BUILD=1
 DEPENDS=('gtk+ >= 2.24.14-1' 'gegl >= 0.2.0-1' 'compat_lcms >= 1.19-1')
+OPTDEPENDS=('libwmf >= 0.2.8.4-1')
 
 # Description
 

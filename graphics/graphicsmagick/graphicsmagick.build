@@ -8,6 +8,7 @@ NAME=graphicsmagick
 VERSION=1.3.17
 BUILD=2
 DEPENDS=('freetype >= 2.4.11-1' 'liblcms >= 2.4-1' 'xorg_libs >= 7.7-3' 'bzip2 >= 1.0.6-1')
+OPTDEPENDS=('libwmf >= 0.2.8.4-1')
 OPTIONS="normla"
 
 # Description

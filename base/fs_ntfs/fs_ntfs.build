@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=fs_ntfs
 VERSION=2013.1.13
-BUILD=1
+BUILD=2
 DEPENDS=('fuse >= 2.9.2-1')
 
 # Description
@@ -42,34 +42,35 @@ SRCCOPY[0]="GPL2 LGPL2"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datadir)/pkgconfig|g' configure
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
- --exec-prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
+ --exec-prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-fuse=external \
  --enable-extras \
  --enable-crypto \
  --disable-ldconfig
 make ${JOBS}
-make install DESTDIR="${PKG}" LIBTOOL="/usr/bin/libtool"
+make install DESTDIR="${PKG}" LIBTOOL="${SYS_DIR[bin]}/libtool"
 doc AUTHORS CREDITS
 mv \
  ${PKG}/sbin/* \
- ${PKG}/usr/sbin
+ ${PKG}${SYS_DIR[sbin]}
 (
-  cd ${PKG}/usr/bin
+  cd ${PKG}${SYS_DIR[bin]}
   ln -s ntfs-3g ntfsmount
-  cd ${PKG}/usr/sbin
-  ln -s /usr/bin/ntfs-3g mount.ntfs-fuse
-  ln -s /usr/bin/ntfs-3g mount.ntfs
+  cd ${PKG}${SYS_DIR[sbin]}
+  ln -s ${SYS_DIR[bin]}/ntfs-3g mount.ntfs-fuse
+  ln -s ${SYS_DIR[bin]}/ntfs-3g mount.ntfs
 )
 (
   cd ${PKG}${SYS_DIR[man]}/man8
@@ -83,5 +84,5 @@ mv \
 )
 rm -rf \
  ${PKG}/sbin \
- ${PKG}/usr/share
+ ${PKG}${SYS_DIR[doc]}/ntfs-3g
 }

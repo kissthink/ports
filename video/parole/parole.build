@@ -5,8 +5,8 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=parole
-MAJOR=0.4
-VERSION=20130210
+MAJOR=0.5
+VERSION=${MAJOR}.0
 BUILD=1
 DEPENDS=('xfce >= 4.10-4' 'gstreamer >= 1.0.5-1' 'dbus_glib >= 0.100-1')
 
@@ -38,7 +38,7 @@ EOF
 
 SRCNAME[0]=${NAME}
 SRCVERS[0]=${VERSION}
-SRCPACK[0]=http://archive.xfce.org/src/apps/${SRCNAME[0]}/${MAJOR}/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+SRCPACK[0]=http://archive.xfce.org/src/apps/${SRCNAME[0]}/${MAJOR}/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
 SRCCOPY[0]="GPL2"
 
 build0()
@@ -46,6 +46,8 @@ build0()
 sed -i 's|${prefix}/${DATADIRNAME}/${PACKAGE}/pixmaps|${datarootdir}/pixmaps/${PACKAGE}|g' configure
 sed -i 's|$(libdir)/parole-$(PAROLE_VERSION_API)|$(libdir)/plugins/parole-$(PAROLE_VERSION_API)|g' src/Makefile.in src/plugins/*/Makefile.in
 sed -i 's|$(datadir)/parole/parole-plugins-$(PAROLE_VERSION_API)|$(datarootdir)/application-data/parole/parole-plugins-$(PAROLE_VERSION_API)|g' src/Makefile.in src/plugins/*/Makefile.in
+sed -i 's|$(datadir)/parole/gtk-2.0|$(datarootdir)/application-data/parole/gtk-2.0|g' data/gtk-2.0/Makefile.in
+sed -i 's|${DATADIRNAME}/${PACKAGE}/gtk-2.0|${DATADIRNAME}/application-data/${PACKAGE}/gtk-2.0|g' configure
 BROWSER_PLUGIN_DIR="${SYS_DIR[lib]}/plugins/mozilla" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \

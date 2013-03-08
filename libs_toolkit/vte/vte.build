@@ -7,7 +7,7 @@ source /usr/src/ports/Build/build.sh
 NAME=vte
 MAJOR=0.28
 VERSION=${MAJOR}.2
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -42,6 +42,7 @@ SRCCOPY[0]="LGPL2"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -49,13 +50,13 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --libexecdir=/usr/lib$(libdirsuffix)/exec \
- --datadir=/usr/share/application-data \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --libexecdir="${SYS_DIR[lib]}/exec" \
+ --datadir="${SYS_DIR[share]}/application-data" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-html-dir="${SYS_DIR[html]}" \
  --enable-gnome-pty-helper=no \
  --enable-python=no
@@ -64,7 +65,8 @@ make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
 rm -rf \
- ${PKG}/usr/bin \
- ${PKG}/usr/share/application-data/pygtk \
- ${PKG}/usr/lib/pkgconfig/pyvte.pc
+ ${PKG}${SYS_DIR[bin]} \
+ ${PKG}${SYS_DIR[html]} \
+ ${PKG}${SYS_DIR[share]}/application-data/pygtk \
+ ${PKG}${SYS_DIR[share]}/pkgconfig/pyvte.pc
 }

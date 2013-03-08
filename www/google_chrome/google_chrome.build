@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=google_chrome
 VERSION=25.0.1364.160
-BUILD=1
+BUILD=2
 DEPENDS=('gtk+ >= 2.24.14-1' 'seamonkey_solibs >= 2.15-1' 'gconf >= 3.2.5-1')
 
 # Description
@@ -51,17 +51,6 @@ build0()
 # Symlink the startup script
 install.dir ${PKG}${SYS_DIR[bin]}
 ( cd ${PKG}${SYS_DIR[bin]}; ln -sf /opt/google/chrome/google-chrome )
-# Symlink the required mozilla libraries
-install.dir ${PKG}/opt/google/chrome/lib
-(
-  cd ${PKG}/opt/google/chrome/lib
-  ln -sf /usr/lib$(libdirsuffix)/seamonkey/libnspr4.so libnspr4.so.0d
-  ln -sf /usr/lib$(libdirsuffix)/seamonkey/libnss3.so libnss3.so.1d
-  ln -sf /usr/lib$(libdirsuffix)/seamonkey/libnssutil3.so libnssutil3.so.1d
-  ln -sf /usr/lib$(libdirsuffix)/seamonkey/libplc4.so libplc4.so.0d
-  ln -sf /usr/lib$(libdirsuffix)/seamonkey/libplds4.so libplds4.so.0d
-  ln -sf /usr/lib$(libdirsuffix)/seamonkey/libsmime3.so libsmime3.so.1d
-)
 # Install properly the desktop file
 install.dir ${PKG}${SYS_DIR[share]}/applications
 ( cd ${PKG}${SYS_DIR[share]}/applications ; ln -sf /opt/google/chrome/google-chrome.desktop )

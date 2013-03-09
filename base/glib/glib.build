@@ -7,8 +7,8 @@ source /usr/src/ports/Build/build.sh
 NAME=glib
 MAJOR=2.34
 VERSION=${MAJOR}.3
-BUILD=1
-DEPENDS=('libraries >= 20120902-1')
+BUILD=2
+DEPENDS=('libraries >= 20130211-1')
 OPTIONS="symprepend"
 
 # Description
@@ -35,17 +35,41 @@ ${NAME}:
 ${NAME}:
 EOF
 
-LIBDIR=/usr/lib$(libdirsuffix)
+export GIO_MODULE_DIR="${SYS_DIR[lib]}/plugins/gio-2.0"
+
 cat >> ${PKG}/install/doinst.sh <<EOF
 # Add the gtk+ modules to the cache
+
 if [ -x /usr/bin/gio-querymodules ]; then
-  /usr/bin/gio-querymodules ${LIBDIR}/plugins/gio-2.0
+  /usr/bin/gio-querymodules ${GIO_MODULE_DIR}
 fi
 EOF
 
-# Sources
+configure()
+{
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
+export PKG_CONFIG_PATH="${PKG}${SYS_DIR[share]}/pkgconfig"
+export LD_LIBRARY_PATH="${PKG}${SYS_DIR[lib]}"
+export LDFLAGS="-L${PKG}${SYS_DIR[lib]}"
+export CPPFLAGS="-I${SYS_DIR[include]}/libelf -I${PKG}${SYS_DIR[include]}/gio-unix-2.0 -I${PKG}${SYS_DIR[include]}/glib-2.0"
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-shared=yes \
+ --enable-static=no \
+ --prefix="${SYS_DIR[usr]}" \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --libexecdir="${SYS_DIR[lib]}/exec" \
+ --with-html-dir="${SYS_DIR[html]}" \
+ ${*}
+}
 
-export GIO_MODULE_DIR="${LIBDIR}/plugins/gio-2.0"
+# Sources
 
 SRCNAME[0]=${NAME}
 SRCVERS[0]=${VERSION}
@@ -54,34 +78,23 @@ SRCCOPY[0]="LGPL2"
 
 build0()
 {
-CPPFLAGS="-I/usr/include/libelf" \
-CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
-./configure \
- --build="${ARCH}-slackware-linux" \
- --disable-dependency-tracking \
- --disable-silent-rules \
- --enable-shared=yes \
- --enable-static=no \
- --enable-debug=minimum \
- --prefix=/usr \
- --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --with-gio-module-dir="${GIO_MODULE_DIR}" \
- --with-html-dir=/usr/share/html
+sed -i 's|configexecincludedir = $(libdir)/glib-2.0/include|configexecincludedir = $(includedir)/glib-2.0|g' glib/Makefile.in
+sed -i 's|-I${libdir}/glib-2.0/include||g' glib-2.0.pc.in
+sed -i 's|codegendir = $(libdir)/gdbus-2.0/codegen|codegendir = $(libdir)/exec/gdbus-2.0/codegen|g' gio/gdbus-2.0/codegen/Makefile.in
+sed -i 's|@libdir@|@libdir@/exec|g' gio/gdbus-2.0/codegen/gdbus-codegen.in
+configure \
+ --with-gio-module-dir="${GIO_MODULE_DIR}"
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-touch ${PKG}/${GIO_MODULE_DIR}/giomodule.cache
-#SHIT: scripting language
+touch ${PKG}${GIO_MODULE_DIR}/giomodule.cache
 rm -rf \
- ${PKG}/usr/share/gdb \
- ${PKG}/usr/share/glib-2.0/gdb \
- ${PKG}/usr/bin/gtester-report \
- ${PKG}/usr/man/man1/gtester-report.1 \
- ${PKG}/usr/lib$(libdirsuffix)/*.la
+ ${PKG}${SYS_DIR[html]} \
+ ${PKG}${SYS_DIR[share]}/{gdb,glib-2.0/gdb} \
+ ${PKG}${SYS_DIR[bin]}/gtester-report \
+ ${PKG}${SYS_DIR[man]}/man1/gtester-report.1 \
+ ${PKG}${SYS_DIR[lib]}/*.la
 }
 
 SRCNAME[1]=${NAME}-networking
@@ -91,25 +104,9 @@ SRCCOPY[1]="LGPL2"
 
 build1()
 {
-LD_LIBRARY_PATH="${PKG}/usr/lib$(libdirsuffix)" \
-PKG_CONFIG_PATH="${PKG}/usr/lib$(libdirsuffix)/pkgconfig" \
-CPPFLAGS="-I${PKG}/usr/lib$(libdirsuffix)/glib-2.0/include -I${PKG}/usr/include/glib-2.0" \
-LDFLAGS="-L${PKG}/usr/lib$(libdirsuffix)" \
-LIBS="-lgmodule-2.0" \
 MODULE_DIR="${GIO_MODULE_DIR}" \
-CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
-./configure \
- --build="${ARCH}-slackware-linux" \
- --disable-dependency-tracking \
- --disable-silent-rules \
- --enable-shared=yes \
- --enable-static=no \
- --prefix=/usr \
- --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --libexecdir=/usr/lib$(libdirsuffix)/exec
+LIBS="-lgmodule-2.0" \
+configure
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 changelog NEWS
@@ -123,27 +120,40 @@ SRCCOPY[2]="LGPL21"
 
 build2()
 {
-LD_LIBRARY_PATH="${PKG}/usr/lib$(libdirsuffix)" \
-LDFLAGS="-L${PKG}/usr/lib$(libdirsuffix)" \
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' {client,dbus-1}/Makefile.in
 LIBS="-lglib-2.0 -lgmodule-2.0" \
-CPPFLAGS="-I${PKG}/usr/lib$(libdirsuffix)/glib-2.0/include -I${PKG}/usr/include/glib-2.0" \
-PKG_CONFIG_PATH="${PKG}/usr/lib$(libdirsuffix)/pkgconfig" \
-CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
-./configure \
- --build="${ARCH}-slackware-linux" \
- --disable-dependency-tracking \
- --disable-silent-rules \
- --enable-introspection=no \
- --prefix=/usr \
- --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --libexecdir=/usr/lib$(libdirsuffix)/exec \
- --with-html-dir="${SYS_DIR[html]}" \
+configure \
  --with-gio-modules-dir="${GIO_MODULE_DIR}" \
  --disable-editor
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 changelog NEWS
+# No development docs
+rm -rf \
+ ${PKG}${SYS_DIR[html]} \
+ ${PKG}${SYS_DIR[man]}/man1/dconf-editor.1 \
+ ${PKG}${SYS_DIR[share]}/vala
 }
+
+#INTROM=1.34
+#SRCNAME[3]=gobject-introspection
+#SRCVERS[3]=${INTROM}.2
+#SRCPACK[3]=${URL[gnome]}/${SRCNAME[3]}/${INTROM}/${SRCNAME[3]}-${SRCVERS[3]}.tar.xz
+#SRCCOPY[3]="LGPL2 GPL2"
+#
+#build3()
+#{
+#sed -i "s|\$(shell pkg-config --variable=|${PKG}/\$(shell pkg-config --variable=|g" Makefile.in
+#sed -i 's|$(GLIB_LIBDIR)/glib-2.0/include/glibconfig.h|$(GLIB_INCLUDEDIR)/glibconfig.h|g' Makefile.in
+#sed -i 's|pkglibdir = $(libdir)/@PACKAGE@|pkglibdir = $(libdir)/exec/@PACKAGE@|g' Makefile.in
+#sed -i 's|@libdir@|@libdir@/exec|g' tools/g-ir-scanner.in
+#configure \
+# --with-glib-src="${BUILD[dir]}/${NAME}-${VERSION}"
+#make ${JOBS} V=1
+#make install DESTDIR="${PKG}"
+#doc AUTHORS CONTRIBUTORS
+#changelog NEWS
+#rm -rf \
+# ${PKG}${SYS_DIR[html]} \
+# ${PKG}${SYS_DIR[lib]}/*.la
+#}

@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=gconf
-VERSION=3.2.5
+VERSION=3.2.6
 BUILD=1
-DEPENDS=('glib >= 2.32.0-1')
+DEPENDS=('glib >= 2.34.3-1' 'dbus_glib >= 0.100.2-1' 'libxml >= 2.9.0-1' 'policykit >= 0.105-1')
 
 # Description
 
@@ -33,6 +33,16 @@ ${NAME}:
 ${NAME}:
 EOF
 
+export GIO_MODULE_DIR="${SYS_DIR[lib]}/plugins/gio-2.0"
+
+cat >> ${PKG}/install/doinst.sh <<EOF
+# Add the gtk+ modules to the cache
+
+if [ -x ${SYS_DIR[bin]}/gio-querymodules ]; then
+  ${SYS_DIR[bin]}/gio-querymodules ${GIO_MODULE_DIR}
+fi
+EOF
+
 # Sources
 
 SRCNAME[0]=GConf
@@ -42,6 +52,9 @@ SRCCOPY[0]="LGPL2"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
+sed -i 's|pkglibdir = $(libdir)/@PACKAGE@|pkglibdir = $(libdir)/plugins/@PACKAGE@|g' Makefile.in */Makefile.in */*/Makefile.in
+sed -i 's|GIO_MODULE_DIR=$libdir/gio/modules|GIO_MODULE_DIR=$libdir/plugins/gio-2.0|g' configure
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -51,17 +64,20 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-shared=yes \
  --enable-debug=minimum \
  --enable-introspection=no \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --libexecdir=/usr/lib$(libdirsuffix)/exec \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --libexecdir="${SYS_DIR[lib]}/exec" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-html-dir="${SYS_DIR[html]}" \
+ --with-openldap=no \
  --with-gtk=2.0 \
  --disable-orbit
-make ${JOBS}
+make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
+# No development docs
+rm -rf ${PKG}${SYS_DIR[html]}
 }

@@ -7,9 +7,9 @@ source /usr/src/ports/Build/build.sh
 NAME=gvfs
 MAJOR=1.14
 VERSION=${MAJOR}.2
-BUILD=2
-DEPENDS=('disks >= 20130110-1' 'capabilities >= 20130117-1' 'fuse >= 2.9.2-1' 'libsecret >= 0.12-1' 'libbluray >= 0.2.3-1')
-OPTDEPENDS=('gtk+ >= 3.6.4-1' 'libgphoto >= 2.5.0-1' 'obex >= 0.48-1' 'libsoup >= 2.40.2-1' 'libarchive >= 3.0.4-1' 'avahi >= 0.6.31-1' 'libcdio >= 0.83-1')
+BUILD=3
+DEPENDS=('disks >= 20130110-1' 'fuse >= 2.9.2-1' 'libsecret >= 0.12-1' 'libbluray >= 0.2.3-1')
+OPTDEPENDS=('gtk+ >= 3.6.4-1' 'libgphoto >= 2.5.0-1' 'obex >= 0.48-1' 'libsoup >= 2.40.2-1' 'avahi >= 0.6.31-1' 'libcdio >= 0.83-1')
 
 # Description
 
@@ -35,11 +35,17 @@ ${NAME}:
 ${NAME}:
 EOF
 
-LIBDIR=/usr/lib$(libdirsuffix)
 cat >> ${PKG}/install/doinst.sh <<EOF
 # Add the gtk+ module to the cache
-if [ -x /usr/bin/gio-querymodules ]; then
-  /usr/bin/gio-querymodules ${LIBDIR}/plugins/gio-2.0
+
+if [ -x ${SYS_DIR[bin]}/gio-querymodules ]; then
+  ${SYS_DIR[bin]}/gio-querymodules ${SYS_DIR[lib]}/plugins/gio-2.0
+fi
+
+# Compile settings data schemas
+
+if [ -x ${SYS_DIR[bin]}/glib-compile-schemas ]; then
+  ${SYS_DIR[bin]}/glib-compile-schemas ${SYS_DIR[share]}/glib-2.0/schemas
 fi
 EOF
 
@@ -52,7 +58,8 @@ SRCCOPY[0]="GPL2"
 
 build0()
 {
-CPPFLAGS="-I/usr/include/archive -I/usr/include/gpg-error -I/usr/include/gcrypt" \
+sed -i 's|giomodulesdir=$libdir/gio/modules|giomodulesdir=$libdir/plugins/gio-2.0|g' configure
+CPPFLAGS="-I${SYS_DIR[include]}/archive -I${SYS_DIR[include]}/gpg-error -I${SYS_DIR[include]}/gcrypt" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -60,12 +67,12 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --libexecdir=/usr/lib$(libdirsuffix)/exec \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --libexecdir="${SYS_DIR[lib]}/exec" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-html-dir="${SYS_DIR[html]}"
 #FIXME: systemd
 make ${JOBS} V=1
@@ -73,14 +80,9 @@ make install DESTDIR="${PKG}"
 doc AUTHORS MAINTAINERS
 changelog NEWS
 mv \
- ${PKG}/usr/share/dbus-1/services/gvfs-daemon.service \
- ${PKG}/usr/share/dbus-1/services/org.gtk.vfs.Daemon.service
+ ${PKG}${SYS_DIR[share]}/dbus-1/services/gvfs-daemon.service \
+ ${PKG}${SYS_DIR[share]}/dbus-1/services/org.gtk.vfs.Daemon.service
 mv \
- ${PKG}/usr/share/dbus-1/services/gvfs-metadata.service \
- ${PKG}/usr/share/dbus-1/services/org.gtk.vfs.Metadata.service
-install.dir ${PKG}/usr/lib$(libdirsuffix)/plugins
-mv \
- ${PKG}/usr/lib$(libdirsuffix)/gio/modules \
- ${PKG}/usr/lib$(libdirsuffix)/plugins/gio-2.0
-rmdir ${PKG}/usr/lib$(libdirsuffix)/gio
+ ${PKG}${SYS_DIR[share]}/dbus-1/services/gvfs-metadata.service \
+ ${PKG}${SYS_DIR[share]}/dbus-1/services/org.gtk.vfs.Metadata.service
 }

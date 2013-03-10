@@ -5,8 +5,8 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=mtr
-VERSION=0.82
-BUILD=2
+VERSION=0.84
+BUILD=1
 DEPENDS=('gtk+ >= 2.24.14-1')
 
 # Description

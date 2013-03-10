@@ -7,8 +7,8 @@ source /usr/src/ports/Build/build.sh
 NAME=pango
 MAJOR=1.32
 VERSION=${MAJOR}.6
-BUILD=1
-DEPENDS=('glib >= 2.34.3-1' 'cairo >= 1.12.8-1' 'harfbuzz >= 0.9.10-1')
+BUILD=2
+DEPENDS=('glib >= 2.34.3-1' 'cairo >= 1.12.12-1' 'harfbuzz >= 0.9.12-1')
 OPTIONS="symprepend"
 
 # Description
@@ -35,6 +35,16 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+# Do the module querying after installation
+
+if [ -x ${SYS_DIR[bin]}/pango-querymodules ]; then
+  ${SYS_DIR[bin]}/pango-querymodules > ${SYS_DIR[var]}/cache/pango-1.0/pango.modules
+fi
+EOF
+
 # Sources
 
 SRCNAME[0]=${NAME}
@@ -44,6 +54,8 @@ SRCCOPY[0]="LGPL2"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
+sed -i 's|$(libdir)/pango/$(PANGO_MODULE_VERSION)/modules|$(libdir)/plugins/pango/$(PANGO_MODULE_VERSION)|g' modules/Module.mk modules/*/Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -52,19 +64,19 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-shared=yes \
  --enable-static=no \
  --enable-debug=minimum \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc/pango-1.0 \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var/cache/pango-1.0 \
- --with-html-dir=/usr/share/html
+ --sysconfdir="${SYS_DIR[etc]}/pango-1.0" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}/cache/pango-1.0" \
+ --with-html-dir="${SYS_DIR[html]}"
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS THANKS
 changelog NEWS
-install.dir ${PKG}/var/cache/pango-1.0
-install.dat doinst.sh ${PKG}/install
-touch ${PKG}/var/cache/pango-1.0/pango.modules
+install.dir ${PKG}${SYS_DIR[var]}/cache/pango-1.0
+touch ${PKG}${SYS_DIR[var]}/cache/pango-1.0/pango.modules
 rm -rf \
- ${PKG}/usr/lib$(libdirsuffix)/*/*/*.a
+ ${PKG}${SYS_DIR[html]} \
+ ${PKG}${SYS_DIR[lib]}/*/*/*.a
 }

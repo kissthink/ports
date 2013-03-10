@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=rtmpdump
-VERSION=20111210
+VERSION=20121230
 BUILD=1
-DEPENDS=('gnutls >= 3.0.8-1')
+DEPENDS=('gnutls >= 3.1.9-1')
 
 # Description
 
@@ -42,8 +42,9 @@ SRCCOPY[0]="GPL2"
 
 build0()
 {
-make -j 2 OPT="${FLAGS}" prefix="/usr" libdir="/usr/lib$(libdirsuffix)"
-make install DESTDIR="${PKG}" prefix="/usr" libdir="/usr/lib$(libdirsuffix)"
+sed -i 's|$(LIBDIR)/pkgconfig|$(DESTDIR)/usr/share/pkgconfig|g' librtmp/Makefile
+make ${JOBS} OPT="${FLAGS}" prefix="${SYS_DIR[usr]}" libdir="${SYS_DIR[lib]}" mandir="${SYS_DIR[man]}"
+make install DESTDIR="${PKG}" prefix="${SYS_DIR[usr]}" libdir="${SYS_DIR[lib]}" mandir="${SYS_DIR[man]}"
 changelog ChangeLog
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.a
+rm -f ${PKG}${SYS_DIR[lib]}/*.a
 }

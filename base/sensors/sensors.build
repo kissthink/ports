@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=sensors
 VERSION=3.3.3
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -32,6 +32,25 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+config etc/conf.d/sensors.conf.new
+EOF
+
 # Sources
 
 SRCNAME[0]=lm_sensors
@@ -41,15 +60,14 @@ SRCCOPY[0]="GPL LGPL21"
 
 build0()
 {
-make ${JOBS} CFLAGS="${FLAGS}" PREFIX="/usr" LIBDIR="/usr/lib$(libdirsuffix)"
-make install DESTDIR="${PKG}" PREFIX="/usr" LIBDIR="/usr/lib$(libdirsuffix)"
+make ${JOBS} CFLAGS="${FLAGS}" PREFIX="${SYS_DIR[usr]}" LIBDIR="${SYS_DIR[lib]}"
+make install DESTDIR="${PKG}" PREFIX="${SYS_DIR[usr]}" LIBDIR="${SYS_DIR[lib]}"
 doc CONTRIBUTORS
 changelog CHANGES
-install.dat doinst.sh ${PKG}/install
 mv \
- ${PKG}/etc/conf.d/sensors.conf \
- ${PKG}/etc/conf.d/sensors.conf.new
+ ${PKG}${SYS_DIR[conf]}/sensors.conf \
+ ${PKG}${SYS_DIR[conf]}/sensors.conf.new
 rm -f \
- ${PKG}/usr/bin/sensors-conf-convert \
- ${PKG}/usr/lib$(libdirsuffix)/*.a
+ ${PKG}${SYS_DIR[bin]}/sensors-conf-convert \
+ ${PKG}${SYS_DIR[lib]}/*.a
 }

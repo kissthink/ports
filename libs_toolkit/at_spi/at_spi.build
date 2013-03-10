@@ -6,9 +6,9 @@ source /usr/src/ports/Build/build.sh
 
 NAME=at_spi
 MAJOR=2.6
-VERSION=${MAJOR}.1
+VERSION=${MAJOR}.3
 BUILD=1
-DEPENDS=('atk >= 2.6.0-1' 'dbus >= 1.4.20-1')
+DEPENDS=('atk >= 2.6.0-1' 'dbus >= 1.4.24-1')
 
 # Description
 
@@ -34,6 +34,16 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+# Compile settings data schemas
+
+if [ -x ${SYS_DIR[bin]}/glib-compile-schemas ]; then
+  ${SYS_DIR[bin]}/glib-compile-schemas ${SYS_DIR[share]}/glib-2.0/schemas
+fi
+EOF
+
 # Sources
 
 SRCNAME[0]=at-spi2-core
@@ -43,6 +53,7 @@ SRCCOPY[0]="LGPL2"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -50,28 +61,32 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --libexecdir=/usr/lib$(libdirsuffix)/exec \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --libexecdir="${SYS_DIR[lib]}/exec" \
  --with-html-dir="${SYS_DIR[html]}"
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
+# No development docs
+rm -rf ${PKG}${SYS_DIR[html]}
 }
 
 SRCNAME[1]=at-spi2-atk
-SRCVERS[1]=${VERSION}
+SRCVERS[1]=${MAJOR}.2
 SRCPACK[1]=${URL[gnome]}/{SRCNAME[1]}/${MAJOR}/${SRCNAME[1]}-${SRCVERS[1]}.tar.xz
 SRCCOPY[1]="LGPL2"
 
 build1()
 {
-ATSPI_CFLAGS="-I${PKG}/usr/include/at-spi-2.0" \
-ATSPI_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -latspi" \
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
+sed -i 's|$(libdir)/gtk-2.0/modules|$(libdir)/plugins/gtk-2.0/modules|g' atk-adaptor/gtk-?.?/Makefile.in
+ATSPI_CFLAGS="-I${PKG}${SYS_DIR[include]}/at-spi-2.0" \
+ATSPI_LIBS="-L${PKG}${SYS_DIR[lib]} -latspi" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -79,13 +94,15 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
+#FIXME: This should go into a GNOME specific subpackage
+rm -rf ${PKG}${SYS_DIR[lib]}/gnome-settings-daemon-?.?
 }

@@ -7,7 +7,7 @@ source /usr/src/ports/Build/build.sh
 NAME=sysvinit_scripts
 MAJOR=2.0
 VERSION=${MAJOR}
-BUILD=3
+BUILD=4
 ARCH=noarch
 
 # Description

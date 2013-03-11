@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=sound
 VERSION=1.0.26
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -32,6 +32,26 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+config etc/modprobe.d/snd-pcsp.conf.new
+config etc/rc.d/rc.alsa.new
+EOF
+
 # Sources
 
 ALSAREPO="ftp://ftp.alsa-project.org/pub/lib"
@@ -47,21 +67,22 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
+ --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}/alsa" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --disable-python \
- --with-configdir=/usr/share/alsa \
- --with-plugindir=/usr/lib$(libdirsuffix)/plugins/alsa-1 \
- --with-pkgconfdir=/usr/lib$(libdirsuffix)/pkgconfig
-make ${JOBS}
+ --with-configdir="${SYS_DIR[share]}/alsa" \
+ --with-plugindir="${SYS_DIR[lib]}/plugins/alsa-1" \
+ --with-pkgconfdir="${SYS_DIR[share]}/pkgconfig"
+make ${JOBS} V=1
 make install DESTDIR="${PKG}"
-mv doc/asoundrc.txt doc/asoundrc.sample
-doc doc/asoundrc.sample
+install.dir ${PKG}${SYS_DIR[etc]}/alsa
+install.dat doc/asoundrc.txt ${PKG}${SYS_DIR[etc]}/alsa/asoundrc.sample
 }
 
 SRCNAME[1]=alsa-utils
@@ -75,28 +96,31 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
+ --disable-silent-rules \
  --disable-rpath \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}/alsa" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --disable-xmlto \
  --disable-alsaconf \
- --with-alsa-prefix="${PKG}/usr/lib$(libdirsuffix)" \
- --with-alsa-inc-prefix="${PKG}/usr/include" \
- --with-udev-rules-dir="$(pkg-config udev --variable=udevdir)/rules.d" \
+ --with-alsa-prefix="${PKG}${SYS_DIR[lib]}" \
+ --with-alsa-inc-prefix="${PKG}${SYS_DIR[include]}" \
+ --with-udev-rules-dir="${SYS_DIR[udevrules]}" \
  --with-systemdsystemunitdir=${SYS_DIR[systemdsystemunitdir]} \
- --with-asound-state-dir=/var/lib/alsa
-make ${JOBS}
+ --with-asound-state-dir="${SYS_DIR[var]}/lib/alsa"
+make ${JOBS} V=1
 make install DESTDIR="${PKG}"
-install.dat doinst.sh ${PKG}/install
-install.dir ${PKG}/etc/rc.d
-install.bin rc.alsa ${PKG}/etc/rc.d/rc.alsa.new
+install.dir ${PKG}${SYS_DIR[etc]}/{rc,modprobe}.d
+install.bin rc.alsa ${PKG}${SYS_DIR[etc]}/rc.d/rc.alsa.new
+install.cfg snd-pcsp.conf.modprobe ${PKG}${SYS_DIR[etc]}/modprobe.d/snd-pcsp.conf.new
+install.dir ${PKG}${SYS_DIR[share]}/applications
+install.dat alsamixer.desktop ${PKG}${SYS_DIR[share]}/applications
 mv \
- ${PKG}/usr/man/man7 \
- ${PKG}/usr/man/man8
+ ${PKG}${SYS_DIR[man]}/man7 \
+ ${PKG}${SYS_DIR[man]}/man8
 mv \
- ${PKG}/usr/man/man1/alsactl.1 \
- ${PKG}/usr/man/man8/alsactl.8
+ ${PKG}${SYS_DIR[man]}/man1/alsactl.1 \
+ ${PKG}${SYS_DIR[man]}/man8/alsactl.8
 }

@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=softraid
 VERSION=3.2.6
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -32,6 +32,25 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+config etc/mdadm.conf.new
+EOF
+
 # Sources
 
 SRCNAME[0]=mdadm
@@ -41,17 +60,16 @@ SRCCOPY[0]="GPL2"
 
 build0()
 {
-make ${JOBS} CXFLAGS="${FLAGS}" CONFFILE2="/etc/conf.d/mdadm.conf"
+make ${JOBS} CXFLAGS="${FLAGS}" CONFFILE2="${SYS_DIR[etc]}/mdadm.conf"
 make install \
- MANDIR="/usr/man" \
- BINDIR="/usr/sbin" \
- UDEVDIR="$(pkg-config udev --variable=udevdir)/rules.d" \
+ MANDIR="${SYS_DIR[man]}" \
+ BINDIR="${SYS_DIR[sbin]}" \
+ UDEVDIR="${SYS_DIR[udevrules]}" \
  DESTDIR="${PKG}"
 doc AUTHORS
 changelog ANNOUNCE-${SRCVERS[0]}
-install.dat doinst.sh ${PKG}/install
-install.dir ${PKG}/etc/conf.d
-install.dat mdadm.conf-example ${PKG}/etc/conf.d/mdadm.conf.new
+install.dir ${PKG}${SYS_DIR[etc]}
+install.dat mdadm.conf-example ${PKG}${SYS_DIR[etc]}/mdadm.conf.new
 #FIXME: compat symlinks
 install.dir ${PKG}/sbin
 (

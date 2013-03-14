@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=fuse
 VERSION=2.9.2
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -32,6 +32,32 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+# Keep same perms on rc.fuse.new:
+if [ -e etc/rc.d/rc.fuse ]; then
+  cp -a etc/rc.d/rc.fuse etc/rc.d/rc.fuse.new.incoming
+  cat etc/rc.d/rc.fuse.new > etc/rc.d/rc.fuse.new.incoming
+  mv etc/rc.d/rc.fuse.new.incoming etc/rc.d/rc.fuse.new
+fi
+
+config etc/rc.d/rc.fuse.new
+EOF
+
 # Sources
 
 SRCNAME[0]=${NAME}
@@ -41,31 +67,32 @@ SRCCOPY[0]="GPL2 LGPL2"
 
 build0()
 {
-MOUNT_FUSE_PATH="/usr/sbin" \
-UDEV_RULES_PATH="$(pkg-config udev --variable=udevdir)/rules.d" \
-INIT_D_PATH="/etc/rc.d" \
+MOUNT_FUSE_PATH="${SYS_DIR[sbin]}" \
+UDEV_RULES_PATH="${SYS_DIR[udevrules]}" \
+INIT_D_PATH="${SYS_DIR[etc]}/rc.d" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --disable-rpath \
  --disable-static \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --with-pkgconfigdir=/usr/lib$(libdirsuffix)/pkgconfig \
- --docdir=/usr/doc/${SRCNAME[0]}-${SRCVERS[0]} \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --with-pkgconfigdir="${SYS_DIR[share]}/pkgconfig" \
+ --docdir="${SYS_DIR[doc]}/${SRCNAME[0]}-${SRCVERS[0]}" \
  --enable-lib \
  --enable-util
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS FAQ
 changelog ChangeLog
-install.dat doinst.sh ${PKG}/install
 # Move the start|stop script of fuse to the right place.
-mv ${PKG}/etc/rc.d/fuse ${PKG}/etc/rc.d/rc.fuse.new
+mv \
+ ${PKG}${SYS_DIR[etc]}/rc.d/fuse \
+ ${PKG}${SYS_DIR[etc]}/rc.d/rc.fuse.new
 # udev handles device node creation
 rm -rf ${PKG}/dev
 }

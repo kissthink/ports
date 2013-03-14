@@ -7,7 +7,7 @@ source /usr/src/ports/Build/build.sh
 NAME=disks
 VERSION=$(date +%Y%m%d)
 BUILD=1
-DEPENDS=('glib >= 2.34.3-1' 'udev >= 173-1' 'polkit >= 0.104-1')
+DEPENDS=('glib >= 2.34.3-1' 'udev >= 173-1' 'polkit >= 0.105-1')
 
 # Description
 
@@ -42,6 +42,7 @@ SRCCOPY[0]="LGPL21"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -49,15 +50,17 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --includedir=/usr/include/atasmart \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --includedir="${SYS_DIR[include]}/atasmart" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
-rm -rf ${PKG}/usr/share
+rm -rf \
+ ${PKG}${SYS_DIR[share]}/vala \
+ ${PKG}${SYS_DIR[doc]}/libatasmart
 }
 
 SRCNAME[1]=hdparm
@@ -67,7 +70,7 @@ SRCPACK[1]=http://downloads.sourceforge.net/project/${SRCNAME[1]}/${SRCNAME[1]}/
 build1()
 {
 make ${JOBS} OPTS="${FLAGS}"
-make install DESTDIR="${PKG}" binprefix="/usr" mandir="/usr/man"
+make install DESTDIR="${PKG}" binprefix="${SYS_DIR[usr]}" mandir="${SYS_DIR[man]}"
 changelog Changelog
 license LICENSE.TXT
 }
@@ -79,8 +82,10 @@ SRCCOPY[2]="LGPL2 GPL2"
 
 build2()
 {
-LIBATASMART_CFLAGS="-I${PKG}/usr/include/atasmart" \
-LIBATASMART_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -latasmart" \
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' udisks/Makefile.in
+sed -i 's|$(udevdir)/rules.d|$(udevdir)|g' data/Makefile.in
+LIBATASMART_CFLAGS="-I${PKG}${SYS_DIR[include]}/atasmart" \
+LIBATASMART_LIBS="-L${PKG}${SYS_DIR[lib]} -latasmart" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -88,16 +93,20 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --libexec=/usr/lib$(libdirsuffix)/exec \
- --localstatedir=/var \
- --with-html-dir="${SYS_DIR[html]}"
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --libexec="${SYS_DIR[lib]}/exec" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --with-html-dir="${SYS_DIR[html]}" \
+ --with-udevdir="${SYS_DIR[udevrules]}"
+#FIXME: systemd
 # --with-systemdsystemunitdir="${SYS_DIR[systemdsystemunitdir]}"
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
+# No development docs
+rm -rf ${PKG}${SYS_DIR[html]}
 }

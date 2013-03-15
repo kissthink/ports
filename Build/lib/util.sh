@@ -37,6 +37,11 @@ function dir.make()
   fi
 }
 
+function config()
+{
+  mv "${1}" "${1}.new"
+}
+
 function doc()
 {
   dir.make "${SRCDOCDIR[${source}]}"

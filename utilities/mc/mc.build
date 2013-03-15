@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=mc
 VERSION=4.8.7
-BUILD=1
+BUILD=2
 DEPENDS=('glib >= 2.34.3-1' 'libssh2 >= 1.4.3-1')
 
 # Description
@@ -33,6 +33,31 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+config etc/mc/mc.keymap.new
+config etc/mc/mc.menu.new
+config etc/mc/mcedit.menu.new
+config etc/mc/filehighlight.ini.new
+config etc/mc/sfs.ini.new
+config etc/mc/mc.ext.new
+config etc/mc/edit.indent.rc.new
+EOF
+
 # Sources
 
 SRCNAME[0]=${NAME}
@@ -42,7 +67,7 @@ SRCCOPY[0]="GPL3"
 
 build0()
 {
-CPPFLAGS="-I/usr/include/ssh2" \
+CPPFLAGS="-I${SYS_DIR[include]}/ssh2" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -51,12 +76,12 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-rpath \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --libexecdir=/usr/lib$(libdirsuffix)/exec \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --libexecdir="${SYS_DIR[lib]}/exec" \
+ --localstatedir="${SYS_DIR[var]}" \
  --enable-mclib \
  --with-search-engine=glib \
  --with-screen=ncurses
@@ -64,36 +89,21 @@ make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-install.dat doinst.sh ${PKG}/install
-mv \
- ${PKG}/etc/mc/mc.keymap \
- ${PKG}/etc/mc/mc.keymap.new
-mv \
- ${PKG}/etc/mc/mc.menu \
- ${PKG}/etc/mc/mc.menu.new
-mv \
- ${PKG}/etc/mc/mcedit.menu \
- ${PKG}/etc/mc/mcedit.menu.new
-mv \
- ${PKG}/etc/mc/filehighlight.ini \
- ${PKG}/etc/mc/filehighlight.ini.new
-mv \
- ${PKG}/etc/mc/sfs.ini \
- ${PKG}/etc/mc/sfs.ini.new
-mv \
- ${PKG}/etc/mc/mc.ext \
- ${PKG}/etc/mc/mc.ext.new
-mv \
- ${PKG}/etc/mc/edit.indent.rc \
- ${PKG}/etc/mc/edit.intent.rc.new
-install.dir ${PKG}/etc/profile.d
+config ${PKG}${SYS_DIR[etc]}/mc/mc.keymap
+config ${PKG}${SYS_DIR[etc]}/mc/mc.menu
+config ${PKG}${SYS_DIR[etc]}/mc/mcedit.menu
+config ${PKG}${SYS_DIR[etc]}/mc/filehighlight.ini
+config ${PKG}${SYS_DIR[etc]}/mc/sfs.ini
+config ${PKG}${SYS_DIR[etc]}/mc/mc.ext
+config ${PKG}${SYS_DIR[etc]}/mc/edit.indent.rc
+install.dir ${PKG}${SYS_DIR[etc]}/profile.d
 (
-  cd ${PKG}/etc/profile.d
-  mv ${PKG}/usr/lib$(libdirsuffix)/exec/mc/mc.csh .
-  mv ${PKG}/usr/lib$(libdirsuffix)/exec/mc/mc.sh .
+  cd ${PKG}${SYS_DIR[etc]}/profile.d
+  mv ${PKG}${SYS_DIR[lib]}/exec/mc/mc.csh .
+  mv ${PKG}${SYS_DIR[lib]}/exec/mc/mc.sh .
 )
-install.dir ${PKG}/usr/share/applications
-install.dat mc.desktop ${PKG}/usr/share/applications
-install.dir ${PKG}/usr/share/icons/hicolor/32x32/apps
-install.dat mc.png ${PKG}/usr/share/icons/hicolor/32x32/apps
+install.dir ${PKG}${SYS_DIR[share]}/applications
+install.dat mc.desktop ${PKG}${SYS_DIR[share]}/applications
+install.dir ${PKG}${SYS_DIR[share]}/icons/hicolor/32x32/apps
+install.dat mc.png ${PKG}${SYS_DIR[share]}/icons/hicolor/32x32/apps
 }

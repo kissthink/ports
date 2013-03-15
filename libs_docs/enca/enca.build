@@ -1,0 +1,66 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=enca
+VERSION=1.14
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: enca (Extremely Naive Charset Analyser)
+${NAME}:
+${NAME}: A library and command line frontend for encoding detection and
+${NAME}: conversion of character set encodings.
+${NAME}:
+${NAME}: Homepage: http://cihar.com/software/enca
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://cihar.com/software/enca/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-rpath \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix="${SYS_DIR[usr]}" \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --includedir="${SYS_DIR[include]}/enca" \
+ --libexecdir="${SYS_DIR[lib]}/exec" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --with-html-dir="${SYS_DIR[html]}"
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS THANKS FAQ
+changelog ChangeLog
+# No development docs
+rm -rf ${PKG}${SYS_DIR[html]}
+}

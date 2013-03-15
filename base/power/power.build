@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=power
 VERSION=0.9.19
-BUILD=1
-DEPENDS=('glib >= 2.34.3-1' 'dbus_glib >= 0.100-1' 'udev >= 173-1' 'polkit >= 0.105-1' 'usb >= 1.0.11-1')
+BUILD=2
+DEPENDS=('glib >= 2.34.3-1' 'dbus_glib >= 0.100.2-1' 'udev >= 173-1' 'polkit >= 0.105-1' 'usb >= 1.0.14-1')
 
 # Description
 
@@ -33,6 +33,25 @@ ${NAME}:
 ${NAME}: Homepage: http://upower.freedesktop.org
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+config etc/UPower/UPower.conf.new
+EOF
+
 # Sources
 
 SRCNAME[0]=upower
@@ -42,6 +61,8 @@ SRCCOPY[0]="GPL2"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
+sed -i 's|$(slashlibdir)/udev/rules.d|$(datarootdir)/udev/rules|g' rules/Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -52,12 +73,12 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-shared=yes \
  --enable-introspection=no \
  --enable-man-pages=no \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --libexecdir=/usr/lib$(libdirsuffix)/exec \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --libexecdir="${SYS_DIR[lib]}/exec" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-html-dir="${SYS_DIR[html]}" \
  --with-systemdsystemunitdir="${SYS_DIR[systemdsystemunitdir]}" \
  --with-backend=linux
@@ -66,14 +87,7 @@ make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-install.dat doinst.sh ${PKG}/install
-mv \
- ${PKG}/etc/UPower/UPower.conf \
- ${PKG}/etc/UPower/UPower.conf.new
-mv \
- ${PKG}/lib/* \
- ${PKG}/usr/lib$(libdirsuffix)
-rmdir ${PKG}/lib
+config ${PKG}${SYS_DIR[etc]}/UPower/UPower.conf
 }
 
 SRCNAME[1]=cpufrequtils
@@ -87,10 +101,9 @@ make ${JOBS} \
  V="true" \
  PROC="false" \
  OPTIMIZATION="${FLAGS}"
-make install DESTDIR="${PKG}" libdir="/usr/lib$(libdirsuffix)"
+make install DESTDIR="${PKG}" libdir="${SYS_DIR[lib]}"
 doc AUTHORS
-rm -f \
- ${PKG}/usr/lib$(libdirsuffix)/*.a
+rm -f ${PKG}${SYS_DIR[lib]}/*.a
 }
 
 SRCNAME[2]=pm-utils
@@ -98,29 +111,26 @@ SRCVERS[2]=1.4.1
 SRCPACK[2]=http://pm-utils.freedesktop.org/releases/${SRCNAME[2]}-${SRCVERS[2]}.tar.gz
 SRCCOPY[2]="GPL2"
 
-PMUTILSLIBDIR=/usr/share/pm-utils
+PMUTILSLIBDIR=${SYS_DIR[share]}/pm-utils
 
 build2()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/share \
- --localstatedir=/var \
- --docdir=${SYS_DIR[doc]}/${SRCNAME[2]}-${SRCVERS[2]}
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[share]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --docdir="${SYS_DIR[doc]}/${SRCNAME[2]}-${SRCVERS[2]}"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS README.SLACKWARE
 changelog ChangeLog
 rm -f ${PKG}${PMUTILSLIBDIR}/{sleep.d/55NetworkManager,power.d/{harddrive,disable_wol,hal-cd-polling}}
-mv \
- ${PKG}/usr/share/pkgconfig/*.pc \
- ${PKG}/usr/lib$(libdirsuffix)/pkgconfig
-rmdir ${PKG}/usr/share/pkgconfig
 }
 
 SRCNAME[3]=pm-quirks

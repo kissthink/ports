@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=bin
 VERSION=$(date +%Y%m%d)
-BUILD=2
+BUILD=3
 DEPENDS=('udev >= 173-1')
 OPTDEPENDS=('libxml >= 2.9.0-2' 'xz >= 5.0.4-1' 'bzip2 >= 1.0.6-1')
 

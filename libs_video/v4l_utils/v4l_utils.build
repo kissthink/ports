@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=v4l_utils
-VERSION=0.8.9
+VERSION=0.9.3
 BUILD=1
 
 # Description
@@ -41,13 +41,32 @@ SRCCOPY[0]="LGPL21 GPL2"
 
 build0()
 {
-make ${JOBS} CFLAGS="${FLAGS}" LIBDIR="/usr/lib$(libdirsuffix)" \
- PREFIX="/usr" LIBSUBDIR="exec/v4l" INCLUDEDIR="/usr/include/v4l" \
- MANDIR="/usr/man" UDEVRULESDIR="$(pkg-config udev --variable=udevdir)/rules.d"
-make install DESTDIR="${PKG}" LIBDIR="/usr/lib$(libdirsuffix)" \
- PREFIX="/usr" LIBSUBDIR="exec/v4l" INCLUDEDIR="/usr/include/v4l" \
- MANDIR="/usr/man" UDEVRULESDIR="$(pkg-config udev --variable=udevdir)/rules.d"
+sed -i 's|pkgconfigdir=$libdir/pkgconfig|pkgconfigdir=$datadir/pkgconfig|g' configure
+sed -i 's|udevrulesdir=$with_udevdir/rules.d|udevrulesdir=$with_udevdir|g' configure
+sed -i 's|keytablesystemdir=$with_udevdir/rc_keymaps|keytablesystemdir=/usr/share/hwdata/rc_keymaps|g' configure
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --disable-rpath \
+ --enable-shared=yes \
+ --enable-static=no \
+ --prefix="${SYS_DIR[usr]}" \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --includedir="${SYS_DIR[include]}/v4l" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --disable-qv4l2 \
+ --with-libv4l2subdir="exec/v4l" \
+ --with-libv4l1subdir="exec/v4l" \
+ --with-libv4lconvertsubdir="exec/v4l" \
+ --with-udevdir="${SYS_DIR[udevrules]}"
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
 changelog ChangeLog
+rmdir ${PKG}${SYS_DIR[etc]}/rc_keymaps
 }
 
 SRCNAME[1]=w_scan
@@ -60,11 +79,11 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc README doc/README.file_formats

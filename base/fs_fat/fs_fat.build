@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=fs_fat
 VERSION=3.0.16
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -53,4 +53,16 @@ changelog ChangeLog
   echo ".so man8/dosfsck.8" > fsck.vfat.8
 )
 rm -rf ${PKG}${SYS_DIR[doc]}/${SRCNAME[0]}
+}
+
+SRCNAME[1]=fatsort
+SRCVERS[1]=0.9.17.269
+SRCPACK[1]=${URL[sf]}/fatsort/${SRCNAME[1]}-${SRCVERS[1]}.tar.gz
+SRCCOPY[1]="GPL2"
+
+build1()
+{
+make ${JOBS} CFLAGS+="${FLAGS}"
+make install DESTDIR="${PKG}" MANDIR="${SYS_DIR[man]}/man8" SBINDIR="${SYS_DIR[sbin]}"
+changelog CHANGES
 }

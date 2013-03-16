@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=gzip
 VERSION=1.5
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -32,6 +32,21 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+# Install the texinfo files
+
+install_info()
+{
+  if [ -x ${SYS_DIR[bin]}/install-info ]; then
+    ${SYS_DIR[bin]}/install-info --info-dir=\${SYS_DIR[share]}/info \${SYS_DIR[share]}/info/\${1}.info.gz 2> /dev/null
+  fi
+}
+
+install_info gzip
+EOF
+
 # Sources
 
 SRCNAME[0]=${NAME}
@@ -46,33 +61,27 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --disable-silent-rules \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
  --infodir="${SYS_DIR[info]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS THANKS
 changelog NEWS
 # Already included in the ncompress package
-rm -f ${PKG}/usr/bin/uncompress
-#FIXME: compat
-(
-install.dir ${PKG}/bin
-cd ${PKG}/bin
-ln -sf /usr/bin/zcmp
-ln -sf /usr/bin/zfgrep
-ln -sf /usr/bin/zless
-ln -sf /usr/bin/zforce
-ln -sf /usr/bin/gunzip
-ln -sf /usr/bin/zcat
-ln -sf /usr/bin/znew
-ln -sf /usr/bin/gzip
-ln -sf /usr/bin/zdiff
-ln -sf /usr/bin/zegrep
-ln -sf /usr/bin/gzexe
-ln -sf /usr/bin/zmore
-)
+rm -f ${PKG}${SYS_DIR[bin]}/uncompress
+}
+
+SRCNAME[1]=pigz
+SRCVERS[1]=2.3
+SRCPACK[1]=http://zlib.net/pigz/${SRCNAME[1]}-${SRCVERS[1]}.tar.gz
+
+build1()
+{
+make CFLAGS="${FLAGS}"
+make install install-compat DESTDIR="${PKG}" PREFIX="${SYS_DIR[usr]}"
+doc README
 }

@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=kmod
 VERSION=12
-BUILD=1
+BUILD=2
 DEPENDS=('xz >= 5.0.4-1')
 
 # Description
@@ -33,6 +33,25 @@ ${NAME}: Homepage: http://git.profusion.mobi/cgit.cgi/kmod.git
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+config etc/depmod.d/search.conf.new
+EOF
+
 # Sources
 
 SRCNAME[0]=${NAME}
@@ -42,6 +61,7 @@ SRCCOPY[0]="GPL2"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -49,12 +69,12 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --includedir=/usr/include/kmod \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --includedir="${SYS_DIR[include]}/kmod" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-html-dir="${SYS_DIR[html]}" \
  --with-rootprefix="" \
  --with-zlib \
@@ -62,22 +82,19 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 changelog NEWS
-install.dat doinst.sh ${PKG}/install
-install.dir ${PKG}/etc/{depmod,modprobe}.d
-install.dat search.conf ${PKG}/etc/depmod.d/search.conf.new
+install.dir ${PKG}${SYS_DIR[etc]}/{depmod,modprobe}.d
+install.dat search.conf.new ${PKG}${SYS_DIR[etc]}/depmod.d
 #FIXME: compatibility symlinks
 (
-  install.dir ${PKG}/{bin,sbin,usr/bin,usr/sbin}
-  cd ${PKG}/bin
-  ln -sf /usr/bin/kmod lsmod
+  install.dir ${PKG}/{sbin,${SYS_DIR[bin]},${SYS_DIR[sbin]}}
   cd ${PKG}/sbin
-  ln -sf /usr/bin/kmod lsmod
-  cd ${PKG}/usr/bin
+  ln -sf ${SYS_DIR[bin]}/kmod lsmod
+  cd ${PKG}${SYS_DIR[bin]}
   ln -sf kmod lsmod
-  for dir in "/sbin" "/usr/sbin"; do
+  for dir in "/sbin" "${SYS_DIR[sbin]}"; do
   cd ${PKG}${dir}
     for tool in mod{probe,info} {ins,rm,dep}mod; do
-      ln -sf /usr/bin/kmod ${tool}
+      ln -sf ${SYS_DIR[bin]}/kmod ${tool}
     done
   done
 )

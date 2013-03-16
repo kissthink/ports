@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=qemu
-VERSION=1.3.0
+VERSION=1.4.0
 BUILD=1
-DEPENDS=('glib >= 2.34.2-1' 'sdl >= 1.2.15-1' 'curl >= 7.28.0-1')
+DEPENDS=('glib >= 2.34.3-1' 'sdl >= 1.2.15-1' 'curl >= 7.29.0-1')
 
 # Description
 
@@ -33,6 +33,16 @@ ${NAME}:   launch Linux processes compiled for one CPU on another CPU.
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+if grep "^kvm::" etc/group 1> /dev/null 2> /dev/null ; then
+  true
+else
+  echo "kvm:x:78:kvm" >> etc/group
+fi
+EOF
+
 # Sources
 
 SRCNAME[0]=${NAME}
@@ -45,12 +55,12 @@ build0()
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --extra-cflags="${FLAGS}" \
- --prefix=/usr \
- --sysconfdir=/etc \
- --datadir="/usr/share/application-data" \
+ --prefix="${SYS_DIR[usr]}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --datadir="${SYS_DIR[share]}/application-data" \
  --mandir="${SYS_DIR[man]}" \
  --docdir="${SYS_DIR[html]}/${SRCNAME[0]}" \
- --libexecdir="/usr/lib$(libdirsuffix)/exec" \
+ --libexecdir="${SYS_DIR[lib]}/exec" \
  --audio-drv-list="alsa sdl" \
  --audio-card-list="ac97 es1370 sb16 cs4231a adlib gus hda" \
  --enable-tcg-interpreter \
@@ -61,7 +71,6 @@ doc MAINTAINERS
 changelog Changelog
 make V="1"
 make install DESTDIR="${PKG}/"
-install.dat doinst.sh ${PKG}/install
-install.dir ${PKG}/$(pkg-config udev --variable=udevdir)/rules.d
-install.dat 65-kvm.rules ${PKG}/$(pkg-config udev --variable=udevdir)/rules.d
+install.dir ${PKG}${SYS_DIR[udevrules]}
+install.dat 65-kvm.rules ${PKG}${SYS_DIR[udevrules]}
 }

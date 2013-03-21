@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=make
 VERSION=3.82
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -32,6 +32,21 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+# Install the texinfo files
+
+install_info()
+{
+  if [ -x ${SYS_DIR[bin]}/install-info ]; then
+    ${SYS_DIR[bin]}/install-info --info-dir=\${SYS_DIR[share]}/info \${SYS_DIR[share]}/info/\${1}.info.gz 2> /dev/null
+  fi
+}
+
+install_info make
+EOF
+
 # Sources
 
 SRCNAME[0]=${NAME}
@@ -45,15 +60,13 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
- --enable-static=no \
- --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
  --infodir="${SYS_DIR[info]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
-make -j 2
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
+make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS

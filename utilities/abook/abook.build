@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=abook
-VERSION=20120322
+VERSION=20130120
 BUILD=1
 
 # Description
@@ -46,14 +46,14 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --disable-rpath \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS}
+( cd po ; make update-gmo )
 make install DESTDIR="${PKG}"
 doc AUTHORS THANKS FAQ sample.abookrc
 changelog ChangeLog
-rm -rf ${PKG}/usr/share
 }

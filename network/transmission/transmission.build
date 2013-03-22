@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=transmission
-VERSION=2.76
+VERSION=2.77
 BUILD=1
-DEPENDS=('gtk+ >= 3.6.4-1' 'libevent >= 2.0.20-1' 'curl >= 7.28.0-1' 'openssl >= 0.9.8x-1')
+DEPENDS=('gtk+ >= 3.6.4-1' 'libevent >= 2.0.20-1' 'curl >= 7.29.0-1' 'openssl >= 1.0.1d-1')
 
 # Description
 
@@ -41,7 +41,8 @@ SRCPACK[0]=http://mirrors.m0k.org/transmission/files/${SRCNAME[0]}-${SRCVERS[0]}
 
 build0()
 {
-CPPFLAGS="-I/usr/include/event" \
+sed -i 's|${datarootdir}/${PACKAGE_NAME}/${subdir}|${datarootdir}/application-data/${PACKAGE_NAME}/${subdir}|g' $(find web -name Makefile.in)
+CPPFLAGS="-I${SYS_DIR[include]}/event" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -49,11 +50,11 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --enable-cli \
  --enable-daemon
 make ${JOBS} V=1

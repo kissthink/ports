@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=aircrackng
 VERSION=1.1
-BUILD=1
-DEPENDS=('tcpip >= 3.2.0-1' 'wireless >= 20120226-1' 'sqlite >= 3.7.10-1' 'openssl >= 0.9.8t-1')
+BUILD=2
+DEPENDS=('tcpip >= 20130209-1' 'wireless >= 20130122-1' 'sqlite >= 3.7.15.2-1' 'openssl >= 1.0.1d-1')
 
 # Description
 
@@ -42,8 +42,8 @@ SRCCOPY[0]="GPL2"
 
 build0()
 {
-make ${JOBS} COMMON_FLAGS="${FLAGS}" SQLITE="true" prefix="/usr"
-make install DESTDIR="${PKG}" prefix="/usr"
+make ${JOBS} COMMON_FLAGS="${FLAGS}" SQLITE="true" prefix="${SYS_DIR[usr]}" mandir="${SYS_DIR[man]}/man1"
+make install DESTDIR="${PKG}" prefix="${SYS_DIR[usr]}" mandir="${SYS_DIR[man]}/man1"
 doc AUTHORS
 changelog ChangeLog
 }

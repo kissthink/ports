@@ -34,6 +34,7 @@ EOF
 
 cat >> ${PKG}/install/doinst.sh <<EOF
 #!/bin/sh
+
 config() {
   NEW="\$1"
   OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
@@ -47,7 +48,9 @@ config() {
   # Otherwise, we leave the .new copy for the admin to consider...
 }
 
-config etc/conf.d/conntrackd.conf.new
+config etc/iptables/conntrackd.conf.new
+config etc/iptables/ipset.conf.new
+config etc/iptables/arptables.conf.new
 EOF
 
 # Sources
@@ -69,7 +72,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-shared=yes \
  --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir="${SYS_DIR[etc]}" \
+ --sysconfdir="${SYS_DIR[etc]}/iptables" \
  --libdir="${SYS_DIR[lib]}" \
  --localstatedir="${SYS_DIR[var]}" \
  ${*}
@@ -109,7 +112,7 @@ make install DESTDIR="${PKG}"
 }
 
 SRCNAME[3]=libnetfilter_conntrack
-SRCVERS[3]=1.0.2
+SRCVERS[3]=1.0.3
 SRCPACK[3]=http://ftp.netfilter.org/pub/${SRCNAME[3]}/${SRCNAME[3]}-${SRCVERS[3]}.tar.bz2
 SRCCOPY[3]="GPL2"
 
@@ -141,7 +144,7 @@ make install DESTDIR="${PKG}"
 }
 
 SRCNAME[5]=libnetfilter_acct
-SRCVERS[5]=1.0.1
+SRCVERS[5]=1.0.2
 SRCPACK[5]=http://ftp.netfilter.org/pub/${SRCNAME[5]}/${SRCNAME[5]}-${SRCVERS[5]}.tar.bz2
 SRCCOPY[5]="GPL2"
 
@@ -183,7 +186,7 @@ make install DESTDIR="${PKG}"
 }
 
 SRCNAME[8]=nfacct
-SRCVERS[8]=1.0.0
+SRCVERS[8]=1.0.1
 SRCPACK[8]=http://ftp.netfilter.org/pub/${SRCNAME[8]}/${SRCNAME[8]}-${SRCVERS[8]}.tar.bz2
 SRCCOPY[8]="GPL2"
 
@@ -199,7 +202,7 @@ make install DESTDIR="${PKG}"
 }
 
 SRCNAME[9]=conntrack-tools
-SRCVERS[9]=1.4.0
+SRCVERS[9]=1.4.1
 SRCPACK[9]=http://ftp.netfilter.org/pub/${SRCNAME[9]}/${SRCNAME[9]}-${SRCVERS[9]}.tar.bz2
 SRCCOPY[9]="GPL2"
 
@@ -224,12 +227,14 @@ make install DESTDIR="${PKG}"
 doc AUTHORS
 install.dir ${PKG}${SYS_DIR[systemdsystemunitdir]}
 install.dat conntrackd.service ${PKG}${SYS_DIR[systemdsystemunitdir]}
-install.dir ${PKG}${SYS_DIR[conf]}
-install.cfg doc/helper/conntrackd.conf ${PKG}${SYS_DIR[conf]}/conntrackd.conf.new
+install.dir ${PKG}${SYS_DIR[etc]}/iptables
+install.cfg doc/helper/conntrackd.conf ${PKG}${SYS_DIR[etc]}/iptables/conntrackd.conf.new
+install.dir ${PKG}${SYS_DIR[etc]}/tmpfiles.d
+install.dat conntrackd.conf.tmpfiles ${PKG}${SYS_DIR[etc]}/tmpfiles.d/conntrackd.conf
 }
 
 SRCNAME[10]=iptables
-SRCVERS[10]=1.4.17
+SRCVERS[10]=1.4.18
 SRCPACK[10]=http://ftp.netfilter.org/pub/${SRCNAME[10]}/${SRCNAME[10]}-${SRCVERS[10]}.tar.bz2
 SRCCOPY[10]="GPL2"
 
@@ -275,12 +280,35 @@ make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 changelog ChangeLog
 sed -i "s|@SYSTEMDSYSTEMSCRIPTDIR@|${SYS_DIR[systemdsystemscriptdir]}|g" ipset.service
-install.dir ${PKG}${SYS_DIR[etc]}
-touch ${PKG}${SYS_DIR[etc]}/ipset.conf
+install.dir ${PKG}${SYS_DIR[etc]}/iptables
+touch ${PKG}${SYS_DIR[etc]}/iptables/ipset.conf.new
 install.dir ${PKG}${SYS_DIR[share]}/pkgconfig
 install.dat lib/libipset.pc ${PKG}${SYS_DIR[share]}/pkgconfig
 install.dir ${PKG}${SYS_DIR[systemdsystemunitdir]}
 install.dat ipset.service ${PKG}${SYS_DIR[systemdsystemunitdir]}
 install.dir ${PKG}${SYS_DIR[systemdsystemscriptdir]}
 install.bin ipset-systemd ${PKG}${SYS_DIR[systemdsystemscriptdir]}/ipset
+install.dir ${PKG}${SYS_DIR[bashcompletiondir]}
+install.dat utils/ipset_bash_completion/ipset_bash_completion \
+ ${PKG}${SYS_DIR[bashcompletiondir]}/ipset
+}
+
+SRCNAME[12]=arptables
+SRCVERS[12]=v0.0.4
+SRCPACK[12]=${URL[sf]}/ebtables/arptables/${SRCNAME[12]}-${SRCVERS[12]}/${SRCNAME[12]}-${SRCVERS[12]}.tar.gz
+SRCCOPY[12]="GPL2"
+
+build12()
+{
+make ${JOBS}
+make install DESTDIR="${PKG}" \
+ PREFIX="${SYS_DIR[usr]}" MANDIR="${SYS_DIR[man]}"
+sed -i "s|@SYSTEMDSYSTEMSCRIPTDIR@|${SYS_DIR[systemdsystemscriptdir]}|g" arptables.service
+install.dir ${PKG}${SYS_DIR[etc]}/iptables
+touch ${PKG}${SYS_DIR[etc]}/iptables/arptables.conf.new
+install.dir ${PKG}${SYS_DIR[systemdsystemunitdir]}
+install.dat arptables.service ${PKG}${SYS_DIR[systemdsystemunitdir]}
+install.dir ${PKG}${SYS_DIR[systemdsystemscriptdir]}
+install.bin arptables.systemd ${PKG}${SYS_DIR[systemdsystemscriptdir]}/arptables
+rm -rf ${PKG}${SYS_DIR[etc]}/rc.d
 }

@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=asunder
 VERSION=2.2
-BUILD=1
-DEPENDS=('gtk+ >= 2.24.10-1' 'cdparanoia >= 10.2-1' 'libcddb >= 1.3.2-1')
+BUILD=2
+DEPENDS=('gtk+ >= 2.24.14-1' 'cdparanoia >= 10.2-1' 'libcddb >= 1.3.2-1')
 
 # Description
 
@@ -46,11 +46,11 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS

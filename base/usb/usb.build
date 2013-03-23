@@ -7,7 +7,7 @@ source /usr/src/ports/Build/build.sh
 NAME=usb
 MAJOR=1.0
 VERSION=${MAJOR}.14
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -42,6 +42,7 @@ SRCCOPY[0]="LGPL21"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -49,11 +50,11 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS THANKS
@@ -67,10 +68,9 @@ SRCCOPY[1]="LGPL21"
 
 build1()
 {
-sed -i "s|@USB10LIBDIR@|/lib$(libdirsuffix)|g" libusb.pc.in
-sed -i "s|@USB10LIBDIR@|/lib$(libdirsuffix)|g" libusb-config.in
-LIBUSB_1_0_CFLAGS="-I${PKG}/usr/include/libusb-1.0" \
-LIBUSB_1_0_LIBS="-L${PKG}/lib$(libdirsuffix)" \
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
+LIBUSB_1_0_CFLAGS="-I${PKG}${SYS_DIR[include]}/libusb-1.0" \
+LIBUSB_1_0_LIBS="-L${PKG}${SYS_DIR[lib]}" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -78,11 +78,11 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=yes \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS THANKS
@@ -96,35 +96,30 @@ SRCCOPY[2]="GPL2"
 
 build2()
 {
-LIBUSB_CFLAGS="-I${PKG}/usr/include" \
-LIBUSB_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lusb-1.0" \
-CFLAGS="${FLAGS} -I${PKG}/usr/include -I${PKG}/usr/include/libusb-1.0" \
-CXXFLAGS="${FLAGS} -I${PKG}/usr/include -I${PKG}/usr/include/libusb-1.0" \
+LIBUSB_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+LIBUSB_LIBS="-L${PKG}${SYS_DIR[lib]} -lusb-1.0" \
+CFLAGS="${FLAGS} -I${PKG}${SYS_DIR[include]} -I${PKG}${SYS_DIR[include]}/libusb-1.0" \
+CXXFLAGS="${FLAGS} -I${PKG}${SYS_DIR[include]} -I${PKG}${SYS_DIR[include]}/libusb-1.0" \
 LDFLAGS="-L${PKG}/lib$(libdirsuffix)" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --disable-silent-rules \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --datadir=/usr/share/hwdata \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --datadir="${SYS_DIR[share]}/hwdata" \
  --disable-usbids
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-sed "s|@usbids@|/usr/share/hwdata/usb.ids|g" update-usbids.sh.in > ${PKG}/usr/sbin/update-usbids
-chmod 0755 ${PKG}/usr/sbin/update-usbids
-install.dir ${PKG}/usr/lib$(libdirsuffix)
-mv \
- ${PKG}/usr/share/pkgconfig/*.pc \
- ${PKG}/usr/lib$(libdirsuffix)/pkgconfig
+sed "s|@usbids@|${SYS_DIR[share]}/hwdata/usb.ids|g" update-usbids.sh.in > ${PKG}${SYS_DIR[sbin]}/update-usbids
+chmod 0755 ${PKG}${SYS_DIR[sbin]}/update-usbids
 rm -rf \
- ${PKG}/usr/bin/lsusb.py \
- ${PKG}/usr/share
+ ${PKG}${SYS_DIR[bin]}/lsusb.py
 }
 
 SRCNAME[3]=usbids
@@ -134,12 +129,7 @@ SRCOPTS[3]="nosrcroot nounpack"
 
 build3()
 {
-install.dir ${PKG}/usr/share/hwdata
-rm -f ${PKG}/usr/share/hwdata/usb.ids
-install.dat ${CWD}/usb.ids ${PKG}/usr/share/hwdata
-# Workaround for The Slackware Mess(tm)
-(
-  cd ${PKG}/usr/share
-  ln -sf hwdata/usb.ids usb.ids
-)
+install.dir ${PKG}${SYS_DIR[share]}/hwdata
+rm -f ${PKG}${SYS_DIR[share]}/hwdata/usb.ids
+install.dat ${CWD}/usb.ids ${PKG}${SYS_DIR[share]}/hwdata
 }

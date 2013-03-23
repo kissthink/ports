@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=wavemon
 VERSION=0.7.5
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -44,14 +44,14 @@ build0()
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS} CFLAGS="${FLAGS}"
 make install DESTDIR="${PKG}"
 doc AUTHORS THANKS
 changelog NEWS
-rm -rf ${PKG}/usr/share
+rm -rf ${PKG}${SYS_DIR[share]}/wavemon
 }

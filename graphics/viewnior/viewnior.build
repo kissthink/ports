@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=viewnior
 VERSION=1.3
-BUILD=1
-DEPENDS=('gtk+ >= 2.24.10-1')
+BUILD=2
+DEPENDS=('gtk+ >= 2.24.14-1')
 
 # Description
 
@@ -50,11 +50,11 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-shared=yes \
  --enable-debug=no \
  --enable-shave=no \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS

@@ -7,9 +7,9 @@ source /usr/src/ports/Build/build.sh
 NAME=evince
 MAJOR=3.6
 VERSION=${MAJOR}.1
-BUILD=2
+BUILD=3
 DEPENDS=('gtk+ >= 3.6.4-1' 'gnome_keyring >= 3.6.2-1')
-OPTDEPENDS=('poppler >= 0.22.0-1' 'djvulibre >= 3.5.25.3-1' 'libtiff >= 4.0.3-1' 'libspectre >= 0.2.7-1' 'libgxps >= 0.2.2-1')
+OPTDEPENDS=('poppler >= 0.22.2-1' 'djvulibre >= 3.5.25.3-1' 'libtiff >= 4.0.3-1' 'libspectre >= 0.2.7-1' 'libgxps >= 0.2.2-1')
 
 # Description
 
@@ -61,6 +61,7 @@ SRCCOPY[0]="GPL2"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \

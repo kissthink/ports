@@ -5,10 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=cups
-VERSION=1.6.1
+VERSION=1.6.2
 BUILD=1
-DEPENDS=('gnutls >= 3.1.6-1' 'avahi >= 0.6.31-1' 'libpng >= 1.5.14-1' 'libtiff >= 4.0.3-1')
-OPTDEPENDS=('usb >= 1.0.14-1' 'qpdf >= 4.0.1-1'  'poppler >= 0.22.0-1' 'freetype >= 2.4.11-1' 'fontconfig >= 2.10.91-1')
+DEPENDS=('gnutls >= 3.1.10-1' 'avahi >= 0.6.31-1' 'libpng >= 1.5.14-1' 'libtiff >= 4.0.3-1')
+OPTDEPENDS=('usb >= 1.0.14-1' 'qpdf >= 4.0.1-1'  'poppler >= 0.22.2-1' 'freetype >= 2.4.11-1' 'fontconfig >= 2.10.91-1')
 
 # Description
 
@@ -32,6 +32,48 @@ ${NAME}: drivers, and tools for creating additional printer drivers and other
 ${NAME}: CUPS services.
 ${NAME}:
 ${NAME}: Homepage: http://www.cups.org
+EOF
+
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+config etc/dbus-1/system.d/cups.conf.new
+config etc/cups/printers.conf.new
+config etc/cups/classes.conf.new
+config etc/cups/subscriptions.conf.new
+config etc/cups/client.conf.new
+config etc/cups/snmp.conf.new
+config etc/cups/cupsd.conf.new
+config etc/cups/cups-files.conf.new
+config etc/cups/cups-browsed.conf.new
+config etc/foomatic/filter.conf.new
+
+# Leave any new rc.cups with the same permissions as the old one:
+# This is a kludge, but it's because there's no --reference option
+# on busybox's 'chmod':
+if [ -e etc/rc.d/rc.cups ]; then
+  if [ -x etc/rc.d/rc.cups ]; then
+    chmod 755 etc/rc.d/rc.cups.new
+  else
+    chmod 644 etc/rc.d/rc.cups.new
+  fi
+fi
+
+# Then config() it:
+config etc/rc.d/rc.cups.new
 EOF
 
 # Sources
@@ -73,7 +115,6 @@ make install BUILDROOT="${PKG}"
 doc CREDITS.txt
 changelog CHANGES.txt
 license LICENSE.txt
-install.dat doinst.sh ${PKG}/install
 # Make these directories again to remove unneeded perms
 install.dir ${PKG}${SYS_DIR[etc]}/cups
 install.dir ${PKG}${SYS_DIR[var]}/spool
@@ -88,7 +129,7 @@ chgrp lp ${PKG}${SYS_DIR[etc]}/cups/{printers,classes,subscriptions,client}.conf
 (
   cd ${PKG}${SYS_DIR[lib]}/exec/cups/backend
   if [ ! -e smb ]; then
-    ln -sf /usr/bin/smbspool smb
+    ln -sf ${SYS_DIR[bin]}/smbspool smb
   fi
 )
 mv \
@@ -97,6 +138,9 @@ mv \
 mv \
  ${PKG}${SYS_DIR[etc]}/dbus-1/system.d/cups.conf \
  ${PKG}${SYS_DIR[etc]}/dbus-1/system.d/cups.conf.new
+mv \
+ ${PKG}${SYS_DIR[etc]}/cups/cups-files.conf \
+ ${PKG}${SYS_DIR[etc]}/cups/cups-files.conf.new
 mv \
  ${PKG}${SYS_DIR[etc]}/cups/cupsd.conf \
  ${PKG}${SYS_DIR[etc]}/cups/cupsd.conf.new
@@ -111,11 +155,12 @@ rm -rf \
 }
 
 SRCNAME[1]=cups-filters
-SRCVERS[1]=1.0.29
+SRCVERS[1]=1.0.31
 SRCPACK[1]=http://www.openprinting.org/download/cups-filters/${SRCNAME[1]}-${SRCVERS[1]}.tar.xz
 
 build1()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 CPPFLAGS="-I${PKG}${SYS_DIR[include]}" \
 LDFLAGS="-L${PKG}${SYS_DIR[lib]}" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
@@ -142,6 +187,9 @@ changelog NEWS
 install.dir ${PKG}${SYS_DIR[etc]}/fonts.d
 install.dir ${PKG}${SYS_DIR[systemdsystemunitdir]}
 install.dat cups-browsed.service ${PKG}${SYS_DIR[systemdsystemunitdir]}
+mv \
+ ${PKG}${SYS_DIR[etc]}/cups/cups-browsed.conf \
+ ${PKG}${SYS_DIR[etc]}/cups/cups-browsed.conf.new
 # Compress some driver files, adopted from Fedora
 find ${PKG}${SYS_DIR[share]}/ppd -name "*.ppd" | xargs gzip -n9f
 # Use this trick instead of installing cups-samba
@@ -154,7 +202,7 @@ rm -rf \
 }
 
 SRCNAME[2]=foomatic-filters
-SRCVERS[2]=4.0.12
+SRCVERS[2]=4.0.17
 SRCPACK[2]=http://www.openprinting.org/download/foomatic/${SRCNAME[2]}-${SRCVERS[2]}.tar.gz
 SRCCOPY[2]="GPL2"
 
@@ -173,4 +221,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 make ${JOBS}
 make install-main install-cups DESTDIR="${PKG}"
 changelog ChangeLog
+mv \
+ ${PKG}${SYS_DIR[etc]}/foomatic/filter.conf \
+ ${PKG}${SYS_DIR[etc]}/foomatic/filter.conf.new
 }

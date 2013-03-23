@@ -5,8 +5,8 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=audit
-VERSION=2.2.2
-BUILD=2
+VERSION=2.2.3
+BUILD=1
 
 # Description
 
@@ -53,7 +53,7 @@ config etc/audit/auditd.conf.new
 config etc/audit/audit.rules.new
 config etc/audisp/audisp-remote.conf.new
 config etc/audisp/audispd.conf.new
-config etc/audisp/zos-remote.conf.new
+#config etc/audisp/zos-remote.conf.new
 config etc/rc.d/rc.auditd.new
 EOF
 
@@ -67,6 +67,7 @@ SRCCOPY[0]="GPL2"
 build0()
 {
 sed -i 's|/usr/lib/systemd/system|/usr/share/systemd/system|g' init.d/Makefile.in
+sed -i 's|SUBDIRS = builtins zos-remote remote|SUBDIRS = builtins remote|g' audisp/plugins/Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -86,6 +87,7 @@ make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS THANKS
 changelog ChangeLog
+install.dir ${PKG}${SYS_DIR[etc]}/rc.d
 install.cfg rc.auditd ${PKG}${SYS_DIR[etc]}/rc.d/rc.auditd.new
 mv \
  ${PKG}${SYS_DIR[etc]}/libaudit.conf \
@@ -102,11 +104,12 @@ mv \
 mv \
  ${PKG}${SYS_DIR[etc]}/audisp/audispd.conf \
  ${PKG}${SYS_DIR[etc]}/audisp/audispd.conf.new
-mv \
- ${PKG}${SYS_DIR[etc]}/audisp/zos-remote.conf \
- ${PKG}${SYS_DIR[etc]}/audisp/zos-remote.conf.new
+#mv \
+# ${PKG}${SYS_DIR[etc]}/audisp/zos-remote.conf \
+# ${PKG}${SYS_DIR[etc]}/audisp/zos-remote.conf.new
 rm -rf \
  ${PKG}${SYS_DIR[etc]}/rc.d/init.d \
  ${PKG}${SYS_DIR[etc]}/sysconfig \
+ ${PKG}${SYS_DIR[man]}/man?/*zos-remote* \
  ${PKG}${SYS_DIR[lib]}/python*/site-packages/audit.py?
 }

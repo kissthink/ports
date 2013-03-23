@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=whowatch
 VERSION=1.8.3
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -44,17 +44,17 @@ build0()
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
-make -j 2
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
+make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog ChangeLog
-install.dir ${PKG}/usr/bin
-install.bin src/whowatch ${PKG}/usr/bin
-install.dir ${PKG}/usr/man/man1
-install.man whowatch.1 ${PKG}/usr/man/man1
+install.dir ${PKG}${SYS_DIR[bin]}
+install.bin src/whowatch ${PKG}${SYS_DIR[bin]}
+install.dir ${PKG}${SYS_DIR[man]}/man1
+install.man whowatch.1 ${PKG}${SYS_DIR[man]}/man1
 }

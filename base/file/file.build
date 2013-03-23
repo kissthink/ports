@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=file
-VERSION=5.13
+VERSION=5.14
 BUILD=1
 
 # Description

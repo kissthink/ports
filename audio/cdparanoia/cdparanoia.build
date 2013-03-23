@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=cdparanoia
 VERSION=10.2
-BUILD=2
+BUILD=3
 
 # Description
 
@@ -44,32 +44,28 @@ build0()
 CFLAGS="${FLAGS} -fPIC" CXXFLAGS="${FLAGS} -fPIC" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --includedir=/usr/include/cdda \
- --localstatedir=/var
-make -j 2
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --includedir="${SYS_DIR[include]}/cdda" \
+ --localstatedir="${SYS_DIR[var]}"
+make ${JOBS}
 make install DESTDIR="${PKG}"
 doc README
-rm -f \
- ${PKG}/usr/lib$(libdirsuffix)/*.a
-chmod 0755 ${PKG}/usr/lib$(libdirsuffix)/lib*.so*
+rm -f ${PKG}${SYS_DIR[lib]}/*.a
+chmod 0755 ${PKG}${SYS_DIR[lib]}/lib*.so*
 }
 
 SRCNAME[1]=cd-discid
-SRCVERS[1]=1.3
-SRCPACK[1]=${SRCNAME[1]}-${SRCVERS[1]}.tar.xz
+SRCVERS[1]=1.3.1
+SRCPACK[1]=http://linukz.org/download/${SRCNAME[1]}-${SRCVERS[1]}.tar.gz
 SRCCOPY[1]="GPL2"
 
 build1()
 {
 make ${JOBS} CFLAGS="${FLAGS}"
+make install PREFIX="${PKG}/usr"
 doc README
 changelog changelog
-install.dir ${PKG}/usr/bin
-install.bin cd-discid ${PKG}/usr/bin
-install.dir ${PKG}${SYS_DIR[man]}/man1
-install.man cd-discid.1 ${PKG}${SYS_DIR[man]}/man1
 }

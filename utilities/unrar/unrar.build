@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=unrar
-VERSION=4.0.7
+VERSION=4.2.4
 BUILD=1
 
 # Description
@@ -41,9 +41,9 @@ SRCROOT[0]=${NAME}
 
 build0()
 {
-make -j 2 -f makefile.unix CXXFLAGS="${FLAGS}"
+make ${JOBS} -f makefile.unix CXXFLAGS="${FLAGS}"
 doc readme.txt
 license license.txt
-install.dir ${PKG}/${SYS_DIR[bin]}
-install.bin unrar ${PKG}/${SYS_DIR[bin]}
+install.dir ${PKG}${SYS_DIR[bin]}
+install.bin unrar ${PKG}${SYS_DIR[bin]}
 }

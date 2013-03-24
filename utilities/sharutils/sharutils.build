@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=sharutils
-VERSION=4.11.1
+VERSION=4.13.3
 BUILD=1
 
 # Description
@@ -32,11 +32,26 @@ ${NAME}: Homepage: http://www.gnu.org/software/sharutils
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+# Install the texinfo files
+
+install_info()
+{
+  if [ -x ${SYS_DIR[bin]}/install-info ]; then
+    ${SYS_DIR[bin]}/install-info --info-dir=\${SYS_DIR[share]}/info \${SYS_DIR[share]}/info/\${1}.info.gz 2> /dev/null
+  fi
+}
+
+install_info sharutils
+EOF
+
 # Sources
 
 SRCNAME[0]=${NAME}
 SRCVERS[0]=${VERSION}
-SRCPACK[0]=${URL[gnu]}/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCPACK[0]=${URL[gnu]}/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
 SRCCOPY[0]="GPL3"
 
 build0()
@@ -46,17 +61,16 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --disable-rpath \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
  --infodir="${SYS_DIR[info]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
-make -j 2
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
+make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS THANKS
 changelog NEWS
 # headers are not needed
-rm -rf \
- ${PKG}/usr/include
+rm -rf ${PKG}${SYS_DIR[include]}
 }

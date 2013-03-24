@@ -7,7 +7,7 @@ source /usr/src/ports/Build/build.sh
 NAME=wireless
 VERSION=$(date '+%Y%m%d')
 BUILD=1
-DEPENDS=('tcpip >= 20130122-1' 'gnutls >= 3.1.6-1' 'dbus >= 1.4.24-1')
+DEPENDS=('tcpip >= 20130209-1' 'gnutls >= 3.1.10-1' 'dbus >= 1.4.24-1')
 #FIXME: enable EAP_FAST
 
 # Description
@@ -34,13 +34,33 @@ ${NAME}:
 ${NAME}:
 EOF
 
-REGBINLOCATION="/usr/share/net"
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+config etc/conf.d/wpa_supplicant.conf.new
+config etc/logrotate.d/wpa_supplicant.new
+EOF
+
+REGBINLOCATION="${SYS_DIR[share]}/net"
 
 # Sources
 
 SRCNAME[0]=wireless-regdb
-SRCVERS[0]=2013.01.11
-SRCPACK[0]=http://linuxwireless.org/download/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCVERS[0]=2013.02.13
+SRCPACK[0]=http://linuxwireless.org/download/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
 SRCCOPY[0]="MIT"
 
 build0()
@@ -59,20 +79,20 @@ SRCCOPY[1]="MIT"
 build1()
 {
 make ${JOBS} \
- OPTFLAGS="${FLAGS} -I/usr/include/gcrypt -I/usr/include/gpg-error" \
+ OPTFLAGS="${FLAGS} -I${SYS_DIR[include]}/gcrypt -I${SYS_DIR[include]}/gpg-error" \
  REG_BIN="${PKG}${REGBINLOCATION}/regulatory.bin" \
- UDEV_RULE_DIR="$(pkg-config udev --variable=udevdir)/rules.d"
+ UDEV_RULE_DIR="${SYS_DIR[udevrules]}"
 make install DESTDIR="${PKG}" \
- SBINDIR="/usr/sbin" \
- UDEV_RULE_DIR="$(pkg-config udev --variable=udevdir)/rules.d"
+ SBINDIR="${SYS_DIR[sbin]}" \
+ UDEV_RULE_DIR="${SYS_DIR[udevrules]}"
 #FIXME: packages should never compress manual pages!
 gunzip ${PKG}${SYS_DIR[man]}/man?/*.?.gz
 #FIXME: compat
 install.dir ${PKG}/sbin
 (
   cd ${PKG}/sbin
-  ln -sf /usr/sbin/crda
-  ln -sf /usr/sbin/regdbdump
+  ln -sf ${SYS_DIR[sbin]}/crda
+  ln -sf ${SYS_DIR[sbin]}/regdbdump
 )
 }
 
@@ -84,7 +104,7 @@ SRCCOPY[2]="MIT"
 build2()
 {
 make OPTFLAGS="${FLAGS}" V="1"
-make install DESTDIR="${PKG}" MANDIR="${SYS_DIR[man]}" BINDIR="/usr/sbin"
+make install DESTDIR="${PKG}" MANDIR="${SYS_DIR[man]}" BINDIR="${SYS_DIR[sbin]}"
 #FIXME: packages should never compress manual pages!
 gunzip ${PKG}${SYS_DIR[man]}/man?/*.?.gz
 }
@@ -101,16 +121,14 @@ build3()
 cd wpa_supplicant
 make install \
  DESTDIR="${PKG}" \
- CONFDIR=/etc/conf.d \
- MANDIR=/usr/man \
- DOCDIR=/usr/doc/"${SRCNAME[3]}-${SRCVERS[3]}"
+ CONFDIR="${SYS_DIR[conf]}" \
+ MANDIR="${SYS_DIR[man]}" \
+ DOCDIR="${SYS_DIR[doc]}/${SRCNAME[3]}-${SRCVERS[3]}"
 )
-doc README.slackware
-install.dat doinst.sh ${PKG}/install
 mv \
- ${PKG}/etc/conf.d/wpa_supplicant.conf \
- ${PKG}/etc/conf.d/wpa_supplicant.conf.sample
-install -m 0600 wpa_supplicant.conf.new ${PKG}/etc/conf.d
-install.dir ${PKG}/etc/logrotate.d
-install.cfg wpa_supplicant.logrotate ${PKG}/etc/logrotate.d/wpa_supplicant.new
+ ${PKG}${SYS_DIR[conf]}/wpa_supplicant.conf \
+ ${PKG}${SYS_DIR[conf]}/wpa_supplicant.conf.sample
+install -m 0600 wpa_supplicant.conf.new ${PKG}${SYS_DIR[conf]}
+install.dir ${PKG}${SYS_DIR[etc]}/logrotate.d
+install.cfg wpa_supplicant.logrotate ${PKG}${SYS_DIR[etc]}/logrotate.d/wpa_supplicant.new
 }

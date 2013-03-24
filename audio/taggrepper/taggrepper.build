@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=taggrepper
-VERSION=0.03.1
+VERSION=0.04
 BUILD=1
-DEPENDS=('libid3tag >= 0.15.1-1' 'libvorbis >= 1.3.2-1' 'flac >= 1.2.1-1' 'file >= 5.05-1' 'pcre >= 8.13-1')
+DEPENDS=('libid3tag >= 0.15.1b-1' 'libvorbis >= 1.3.3-1' 'flac >= 1.2.1-1' 'file >= 5.14-1' 'pcre >= 8.32-1')
 
 # Description
 
@@ -37,7 +37,7 @@ EOF
 
 SRCNAME[0]=${NAME}
 SRCVERS[0]=${VERSION}
-SRCPACK[0]=${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCPACK[0]=http://alioth.debian.org/~akumar/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
 SRCCOPY[0]="BSD3"
 
 build0()
@@ -46,15 +46,15 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-libmagic \
  --with-libvorbisfile \
  --with-libflac
-make -j 2
+make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog ChangeLog

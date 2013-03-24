@@ -7,8 +7,8 @@ source /usr/src/ports/Build/build.sh
 NAME=xchat
 MAJOR=2.8
 VERSION=${MAJOR}.8
-BUILD=1
-DEPENDS=('gtk+ >= 2.24.4-1' 'openssl >= 0.9.8q-1' 'libntlm >= 1.3-1' 'dbus_glib >= 0.94-1')
+BUILD=2
+DEPENDS=('gtk+ >= 2.24.14-1' 'openssl >= 1.0.1d-1' 'libntlm >= 1.3-1' 'dbus_glib >= 0.100.2-1')
 
 # Description
 
@@ -43,6 +43,8 @@ SRCCOPY[0]="GPL2"
 
 build0()
 {
+sed -i 's|${libdir}/xchat|${libdir}/plugins/xchat|g' configure
+LIBS+="-lgmodule-2.0" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -50,27 +52,28 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-rpath \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --enable-openssl=/usr \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --disable-textfe \
  --enable-spell=static \
+ --enable-openssl \
+ --enable-dbus \
  --enable-shm \
  --enable-ipv6 \
  --enable-ntlm
-make -j 2
+make ${JOBS}
 make install DESTDIR="${PKG}"
 changelog ChangeLog
-install.dir ${PKG}/usr/share/html/xchat
-install.dat faq.html ${PKG}/usr/share/html/xchat
+install.dir ${PKG}${SYS_DIR[html]}/xchat
+install.dat faq.html ${PKG}${SYS_DIR[html]}/xchat
 install.dir ${PKG}${SYS_DIR[man]}/man1
 install.man xchat.1 ${PKG}${SYS_DIR[man]}/man1
-install.dir ${PKG}/usr/include/xchat
-install.dat plugins/xchat-plugin.h ${PKG}/usr/include/xchat
-rm -rf \
- ${PKG}/etc
+install.dir ${PKG}${SYS_DIR[include]}/xchat
+install.dat plugins/xchat-plugin.h ${PKG}${SYS_DIR[include]}/xchat
+rm -rf ${PKG}${SYS_DIR[etc]}
 }
 
 SRCNAME[1]=${NAME}

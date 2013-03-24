@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=tetrix
 VERSION=2.3
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -41,7 +41,7 @@ SRCCOPY[0]="GPL2"
 
 build0()
 {
-make -j 2 OPTS="${FLAGS}"
+make ${JOBS} OPTS="${FLAGS}"
 make install DESTDIR="${PKG}" MANDIR="${SYS_DIR[man]}"
 doc README
 }

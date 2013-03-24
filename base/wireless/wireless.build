@@ -129,6 +129,7 @@ mv \
  ${PKG}${SYS_DIR[conf]}/wpa_supplicant.conf \
  ${PKG}${SYS_DIR[conf]}/wpa_supplicant.conf.sample
 install -m 0600 wpa_supplicant.conf.new ${PKG}${SYS_DIR[conf]}
-install.dir ${PKG}${SYS_DIR[etc]}/logrotate.d
+install.dir ${PKG}${SYS_DIR[etc]}/{logrotate,tmpfiles}.d
 install.cfg wpa_supplicant.logrotate ${PKG}${SYS_DIR[etc]}/logrotate.d/wpa_supplicant.new
+install.cfg wpa_supplicant.conf.tmpfiles ${PKG}${SYS_DIR[etc]}/tmpfiles.d/wpa_supplicant.conf
 }

@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=shared_mime_info
-VERSION=1.0
+VERSION=1.1
 BUILD=1
-DEPENDS=('glib >= 2.30.2-1' 'libxml >= 2.7.8-1' 'zlib >= 1.2.5-1')
+DEPENDS=('glib >= 2.34.3-1' 'libxml >= 2.9.0-1')
 
 # Description
 
@@ -33,6 +33,14 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+if [ -x ${SYS_DIR[bin]}/update-mime-database ]; then
+  chroot . update-mime-database ${SYS_DIR[share]}/mime 1> /dev/null 2> /dev/null
+fi
+EOF
+
 # Sources
 
 SRCNAME[0]=shared-mime-info
@@ -47,19 +55,14 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --disable-silent-rules \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 changelog NEWS
-install.dir ${PKG}/var/log/setup
-install.dir ${PKG}/usr/lib$(libdirsuffix)
-install.dat doinst.sh ${PKG}/install
-install.bin setup.07.update-mime-database ${PKG}/var/log/setup
-mv \
- ${PKG}/usr/share/pkgconfig \
- ${PKG}/usr/lib$(libdirsuffix)
+install.dir ${PKG}${SYS_DIR[var]}/log/setup
+install.bin setup.07.update-mime-database ${PKG}${SYS_DIR[var]}/log/setup
 }

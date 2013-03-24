@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=testdisk
-VERSION=6.12
+VERSION=6.13
 BUILD=1
-DEPENDS=('e2fsprogs >= 1.41.11-1' 'fs_ntfs >= 2011.4.12-1' 'libjpeg >= 1.1.1-1')
+DEPENDS=('fs_ext >= 1.42.7-1' 'fs_ntfs >= 2013.1.13-1' 'libjpeg >= 1.2.1-1')
 
 # Description
 
@@ -46,17 +46,17 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
  --docdir="${SYS_DIR[doc]}"/${SRCNAME[0]} \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --enable-ncmouse
-make -j 2
+make ${JOBS}
 make install DESTDIR="${PKG}"
+# Don't install this kind of docs, we do that ourselves
+rm -rf ${PKG}${SYS_DIR[doc]}
 doc AUTHORS THANKS
 changelog NEWS
-rm -rf \
- ${PKG}/usr/share
 }

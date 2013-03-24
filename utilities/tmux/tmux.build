@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=tmux
 VERSION=1.7
-BUILD=1
-DEPENDS=('libevent >= 2.0.20-1')
+BUILD=2
+DEPENDS=('libevent >= 2.0.21-1')
 
 # Description
 
@@ -42,15 +42,15 @@ SRCPACK[0]=${URL[sf]}/${NAME}/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
 build0()
 {
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
-CPPFLAGS="-I/usr/include/event" \
+CPPFLAGS="-I${SYS_DIR[include]}/event" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc FAQ

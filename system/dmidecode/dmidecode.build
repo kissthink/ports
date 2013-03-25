@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=dmidecode
 VERSION=2.11
-BUILD=3
+BUILD=4
 
 # Description
 
@@ -44,8 +44,8 @@ build0()
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 make ${JOBS} OPTS="${FLAGS}"
 make install \
- prefix="/usr" \
- mandir="/usr/man" \
+ prefix="${SYS_DIR[usr]}" \
+ mandir="${SYS_DIR[man]}" \
  DESTDIR="${PKG}"
 doc AUTHORS
 changelog CHANGELOG

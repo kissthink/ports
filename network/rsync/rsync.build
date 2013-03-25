@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=rsync
 VERSION=3.0.9
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -44,12 +44,12 @@ build0()
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --with-rsyncd-conf=/etc/conf.d
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --with-rsyncd-conf="${SYS_DIR[conf]}"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 changelog NEWS

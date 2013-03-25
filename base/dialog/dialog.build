@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=dialog
-VERSION=1.1.20120706
+VERSION=1.2.20121230
 BUILD=1
 
 # Description
@@ -32,10 +32,29 @@ ${NAME}: Thomas E. Dickey.
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+config etc/conf.d/dialog.conf.new
+EOF
+
 # Sources
 
 SRCNAME[0]=${NAME}
-SRCVERS[0]=1.1-20120706
+SRCVERS[0]=1.2-20121230
 SRCPACK[0]=http://invisible-island.net/datafiles/release/${SRCNAME[0]}-${SRCVERS[0]}.tgz
 SRCCOPY[0]="LGPL21"
 
@@ -46,23 +65,17 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --build="${ARCH}-slackware-linux" \
  --disable-rpath-hack \
  --disable-static \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --enable-nls \
  --enable-widec \
  --with-ncursesw
 make ${JOBS}
 make install DESTDIR="${PKG}"
 changelog CHANGES
-install.dir ${PKG}/etc/conf.d
-install.dat samples/slackware.rc ${PKG}/etc/conf.d/dialog.conf
-#FIXME: compat
-(
-  install.dir ${PKG}/bin
-  cd ${PKG}/bin
-  ln -sf /usr/bin/dialog
-)
+install.dir ${PKG}${SYS_DIR[conf]}
+install.dat samples/slackware.rc ${PKG}${SYS_DIR[conf]}/dialog.conf.new
 }

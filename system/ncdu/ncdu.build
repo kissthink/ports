@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=ncdu
-VERSION=1.7
+VERSION=1.9
 BUILD=1
 
 # Description
@@ -45,16 +45,15 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-ncursesw
-make -j 2
+make ${JOBS}
 make install DESTDIR="${PKG}"
-doc AUTHORS
 changelog ChangeLog
-mkdir -p ${PKG}/usr/share/applications
-install -m 0644 ncdu.desktop ${PKG}/usr/share/applications
+install.dir ${PKG}${SYS_DIR[share]}/applications
+install.dat ncdu.desktop ${PKG}${SYS_DIR[share]}/applications
 }

@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=normalize
 VERSION=0.7.7
-BUILD=1
-DEPENDS=('alsa_lib >= 1.0.23-1' 'libsamplerate >= 0.1.7-1' 'curl >= 7.20.1-1')
+BUILD=2
+DEPENDS=('sound >= 1.0.26-1' 'libsamplerate >= 0.1.8-1' 'curl >= 7.29.0-1')
 
 # Description
 
@@ -42,20 +42,20 @@ SRCCOPY[0]="GPL2"
 
 build0()
 {
+CPPFLAGS="-I${SYS_DIR[include]}/mad" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --disable-xmms \
- --with-mad 
+ --with-mad \
  --without-audiofile
-make -j 2
+make ${JOBS}
 make install DESTDIR="${PKG}"
-
-changelog NEWS
 doc THANKS README
+changelog NEWS
 }

@@ -6,7 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=reaver
 VERSION=1.4
-BUILD=1
+BUILD=2
+DEPENDS=('tcpip >= 20130209-1')
 
 # Description
 
@@ -43,22 +44,23 @@ build0()
 {
 (
 cd src
-CPPFLAGS="-I/usr/include/sqlite-3" \
+LDFLAGS="-lnl-genl-3" \
+CPPFLAGS="-I${SYS_DIR[include]}/sqlite-3" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/var/lib \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[var]}/lib" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS} V=1
 #make install DESTDIR="${PKG}"
 )
 doc docs/README.{REAVER,WASH}
 install.dir ${PKG}${SYS_DIR[man]}/man1
 zcat docs/reaver.1.gz > ${PKG}${SYS_DIR[man]}/man1/reaver.1
-install.dir ${PKG}/usr/bin
-install.bin src/reaver src/wash ${PKG}/usr/bin
-install.dir ${PKG}/var/lib/reaver
+install.dir ${PKG}${SYS_DIR[bin]}
+install.bin src/reaver src/wash ${PKG}${SYS_DIR[bin]}
+install.dir ${PKG}${SYS_DIR[var]}/lib/reaver
 }

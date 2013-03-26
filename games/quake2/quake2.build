@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=quake2
 VERSION=5.10
-BUILD=1
-DEPENDS=('sdl >= 1.2.15-1' 'sound >= 1.0.26-1' 'libvorbis >= 1.3.3-1' 'libopenal >= 1.13-1')
+BUILD=2
+DEPENDS=('sdl >= 1.2.15-1' 'sound >= 1.0.26-1' 'libvorbis >= 1.3.3-1' 'libopenal >= 1.15.1-1')
 
 # Description
 
@@ -33,7 +33,7 @@ ${NAME}:
 ${NAME}:
 EOF
 
-QLIBDIR=/usr/lib$(libdirsuffix)/plugins/quake2
+QLIBDIR="${SYS_DIR[lib]}/plugins/quake2"
 
 # Sources
 
@@ -48,16 +48,16 @@ OPTS="${FLAGS} -DSYSTEMWIDE -DSYSTEMDIR=\\\"${QLIBDIR}\\\""
 doc README
 changelog CHANGELOG
 license LICENSE
-install.dir ${PKG}/usr/bin
-install.bin release/quake2 ${PKG}/usr/bin
-install.bin release/q2ded ${PKG}/usr/bin
+install.dir ${PKG}${SYS_DIR[bin]}
+install.bin release/quake2 ${PKG}${SYS_DIR[bin]}
+install.bin release/q2ded ${PKG}${SYS_DIR[bin]}
 install.dir ${PKG}${QLIBDIR}/baseq2
 install.bin release/ref_gl.so ${PKG}${QLIBDIR}
 install.bin release/baseq2/game.so ${PKG}${QLIBDIR}/baseq2
-install.dir ${PKG}/usr/share/applications
-install.dat quake2.desktop ${PKG}/usr/share/applications
-#install.dir ${PKG}/usr/share/icons/hicolor/48x48/apps
-#install.dat icon/Quake2.png ${PKG}/usr/share/icons/hicolor/48x48/apps/quake2.png
+install.dir ${PKG}${SYS_DIR[share]}/applications
+install.dat quake2.desktop ${PKG}${SYS_DIR[share]}/applications
+#install.dir ${PKG}${SYS_DIR[share]}/icons/hicolor/48x48/apps
+#install.dat icon/Quake2.png ${PKG}${SYS_DIR[share]}/icons/hicolor/48x48/apps/quake2.png
 }
 
 SRCNAME[1]=${NAME}-rogue
@@ -72,8 +72,8 @@ changelog CHANGELOG
 license LICENSE
 install.dir ${PKG}${QLIBDIR}/rogue
 install.bin release/game.so ${PKG}${QLIBDIR}/rogue
-install.dir ${PKG}/usr/share/applications
-install.dat quake2-rogue.desktop ${PKG}/usr/share/applications
+install.dir ${PKG}${SYS_DIR[share]}/applications
+install.dat quake2-rogue.desktop ${PKG}${SYS_DIR[share]}/applications
 }
 
 SRCNAME[2]=${NAME}-xatrix
@@ -88,8 +88,8 @@ changelog CHANGELOG
 license LICENSE
 install.dir ${PKG}${QLIBDIR}/xatrix
 install.bin release/game.so ${PKG}${QLIBDIR}/xatrix
-install.dir ${PKG}/usr/share/applications
-install.dat quake2-xatrix.desktop ${PKG}/usr/share/applications
+install.dir ${PKG}${SYS_DIR[share]}/applications
+install.dat quake2-xatrix.desktop ${PKG}${SYS_DIR[share]}/applications
 }
 
 SRCNAME[3]=${NAME}-ctf
@@ -104,6 +104,6 @@ changelog CHANGELOG
 license LICENSE
 install.dir ${PKG}${QLIBDIR}/ctf
 install.bin release/game.so ${PKG}${QLIBDIR}/ctf
-install.dir ${PKG}/usr/share/applications
-install.dat quake2-ctf.desktop ${PKG}/usr/share/applications
+install.dir ${PKG}${SYS_DIR[share]}/applications
+install.dat quake2-ctf.desktop ${PKG}${SYS_DIR[share]}/applications
 }

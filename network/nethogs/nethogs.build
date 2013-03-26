@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=nethogs
 VERSION=0.8.0
-BUILD=1
-DEPENDS=('tcpip >= 3.2.0-1')
+BUILD=2
+DEPENDS=('tcpip >= 20130209-1')
 
 # Description
 
@@ -43,7 +43,7 @@ SRCCOPY[0]="GPL2"
 
 build0()
 {
-make ${JOBS} CFLAGS="${FLAGS}"
-make install DESTDIR="${PKG}"
-changelog ChangeLog
+make ${JOBS} CFLAGS="${FLAGS}" LDFLAGS="-lnl-genl-3"
+make install DESTDIR="${PKG}${SYS_DIR[usr]}"
+changelog Changelog
 }

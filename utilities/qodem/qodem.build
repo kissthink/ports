@@ -5,8 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=qodem
-VERSION=0.3.2
-BUILD=1
+VERSION=1.0alpha
+BUILD=2
+DEPENDS=('libssh2 >= 1.4.3-1' 'miniupnpc >= 1.8.20130211-1')
 
 # Description
 
@@ -41,21 +42,23 @@ SRCCOPY[0]="GPL2"
 
 build0()
 {
+CPPFLAGS="$(pkg-config libssh2 --cflags) -I${SYS_DIR[include]}/gpg-error -I${SYS_DIR[include]}/gcrypt" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
- --prefix=/usr \
+ --disable-rpath \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --disable-sdl \
- --enable-qsl
-make -j 2
+ --enable-upnp
+make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS CREDITS
 changelog ChangeLog
-mkdir -p ${PKG}/usr/share/applications
-install -m 0644 qodem.desktop ${PKG}/usr/share/applications
+install.dir ${PKG}${SYS_DIR[share]}/applications
+install.dat qodem.desktop ${PKG}${SYS_DIR[share]}/applications
 }

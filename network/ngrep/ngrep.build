@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=ngrep
 VERSION=1.45
-BUILD=1
-DEPENDS=('tcpip >= 3.2.0-1')
+BUILD=2
+DEPENDS=('tcpip >= 20130209-1' 'pcre >= 8.32-1')
 
 # Description
 
@@ -41,17 +41,20 @@ SRCPACK[0]=${URL[sf]}/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
 
 build0()
 {
+LDFLAGS="-lnl-genl-3 -lpcre" \
+CPPFLAGS="-I${SYS_DIR[include]}/pcre" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc/conf.d \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --with-pcap-includes=/usr/include/pcap \
- --enable-ipv6
-make -j 2
+ --sysconfdir="${SYS_DIR[conf]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --with-pcap-includes="${SYS_DIR[include]}/pcap" \
+ --enable-ipv6 \
+ --enable-pcre
+make ${JOBS}
 make install DESTDIR="${PKG}"
 doc doc/CREDITS.txt
 changelog doc/CHANGES.txt

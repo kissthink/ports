@@ -1,0 +1,62 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=cdrdao
+VERSION=1.2.3
+BUILD=1
+DEPENDS=('libao >= 1.1.0-1' 'lame >= 3.99.5-1' 'libmad >= 0.15.1b-1' 'libvorbis >= 1.3.3-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: cdrdao (CD burning utility)
+${NAME}:
+${NAME}: cdrdao burns proper disc-at-once (DAO) audio discs. In DAO mode the
+${NAME}: disc is written in one shot, so you don't have to have irritating 2
+${NAME}: second gaps interrupting a live recording.
+${NAME}:
+${NAME}: Homepage: http://cdrdao.sf.net
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=${URL[sf]}/cdrdao/cdrdao/${SRCVERS[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+sed -i 's|$(datadir)/cdrdao|$(datadir)/application-data/cdrdao|g' dao/Makefile.in
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --prefix="${SYS_DIR[usr]}" \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --with-lame \
+ --with-ogg-support \
+ --with-mp3-support
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS CREDITS
+changelog ChangeLog
+}

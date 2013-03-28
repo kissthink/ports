@@ -1,0 +1,54 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=antiword
+VERSION=0.37
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: antiword
+${NAME}:
+${NAME}: Antiword converts MS Word files (.doc) to text or postcript. Version
+${NAME}: 2 and version 6 and later Word files are supported. It is a great
+${NAME}: utility to have to read the contents of Word files on the console, 
+${NAME}: but it can be also useful if you just want to extract the text from
+${NAME}: Word files and save as it as a plain text file.
+${NAME}:
+${NAME}: Homepage: http://www.winfield.demon.nl
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://www.winfield.demon.nl/linux/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+cmake \
+-DCMAKE_C_FLAGS:STRING="${FLAGS}" \
+-DCMAKE_VERBOSE_MAKEFILE:BOOL="on" \
+-DCMAKE_INSTALL_PREFIX:PATH="${SYS_DIR[usr]}" \
+-DSYSTEM_RESOURCE_DIR:PATH="share/application-data/antiword" \
+-DUSER_RESOURCE_DIR:PATH=".local/share/antiword" \
+CMakeLists.txt
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog Docs/ChangeLog
+}

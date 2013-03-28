@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=libopus
 VERSION=1.0.2
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -57,5 +57,34 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
-rm -rf ${PKG}${SYS_DIR[doc]}/${SRCMAME[0]}
+rm -rf ${PKG}${SYS_DIR[doc]}/${SRCNAME[0]}
+}
+
+SRCNAME[1]=opusfile
+SRCVERS[1]=0.2
+SRCPACK[1]=http://downloads.xiph.org/releases/${SRCNAME[1]}/${SRCNAME[1]}-${SRCVERS[1]}.tar.gz
+SRCCOPY[1]="BSD3"
+
+build1()
+{
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
+PKG_CONFIG_PATH="${PKG}${SYS_DIR[share]}/pkgconfig" \
+CPPFLAGS="-I${PKG}${SYS_DIR[include]}/opus" \
+LDFLAGS="-L${PKG}${SYS_DIR[lib]}" \
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix="${SYS_DIR[usr]}" \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+rm -rf ${PKG}${SYS_DIR[doc]}/${SRCNAME[1]}
 }

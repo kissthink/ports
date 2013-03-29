@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=bash
 MAJOR=4.2
-VERSION=${MAJOR}.39
+VERSION=${MAJOR}.45
 BUILD=1
 
 # Description
@@ -33,6 +33,48 @@ ${NAME}: Bash must be present for the system to boot properly.
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+# Install the texinfo files
+
+install_info()
+{
+  if [ -x ${SYS_DIR[bin]}/install-info ]; then
+    ${SYS_DIR[bin]}/install-info --info-dir=\${SYS_DIR[share]}/info \${SYS_DIR[share]}/info/\${1}.info.gz 2> /dev/null
+  fi
+}
+
+install_info bash
+
+if [ -r usr/bin/bash ]; then
+  mv usr/bin/bash usr/bin/bash.old
+fi
+
+mv usr/bin/bash4.new usr/bin/bash
+
+if [ -f usr/bin/bash.old ]; then
+  rm -f usr/bin/bash.old
+fi
+
+if [ ! -r etc/shells ]; then
+  touch etc/shells
+  chmod 0644 etc/shells
+fi
+
+if fgrep "/usr/bin/bash" etc/shells 1> /dev/null 2> /dev/null ; then
+  true
+else
+  echo "/usr/bin/bash" >> etc/shells
+fi
+
+if fgrep "/usr/bin/rbash" etc/shells 1> /dev/null 2> /dev/null ; then
+  true
+else
+  echo "/usr/bin/rbash" >> etc/shells
+fi
+EOF
+
 # Sources
 
 SRCNAME[0]=${NAME}
@@ -45,31 +87,25 @@ build0()
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
  --infodir="${SYS_DIR[info]}" \
- --sysconfdir=/etc \
- --localstatedir=/var \
- --bindir=/usr/bin \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --bindir="${SYS_DIR[bin]}" \
  --with-curses
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS COMPAT
 changelog NEWS
-install.dat doinst.sh ${PKG}/install
 install.man doc/*.1 ${PKG}${SYS_DIR[man]}/man1
-mv ${PKG}/usr/bin/bash ${PKG}/usr/bin/bash4.new
+mv ${PKG}${SYS_DIR[bin]}/bash ${PKG}${SYS_DIR[bin]}/bash4.new
 rm -f \
- ${PKG}/usr/bin/bashbug \
+ ${PKG}${SYS_DIR[bin]}/bashbug \
  ${PKG}${SYS_DIR[man]}/man1/bashbug.1
 #FIXME: compat
-install.dir ${PKG}/bin
 (
-  cd ${PKG}/bin
-  ln -sf /usr/bin/bash bash
-)
-(
-  cd ${PKG}/usr/bin
+  cd ${PKG}${SYS_DIR[bin]}
   ln -sf bash rbash
   ln -sf bash sh
 )

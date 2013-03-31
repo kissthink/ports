@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=hatari
-VERSION=1.6.1
+VERSION=1.6.2
 BUILD=1
-DEPENDS=('sdl >= 1.2.14-1' 'libpng >= 1.5.9-1')
+DEPENDS=('sdl >= 1.2.15-1')
 
 # Description
 
@@ -42,27 +42,27 @@ SRCCOPY[0]="GPL2"
 
 build0()
 {
+sed -i 's|share/hatari|share/application-data/hatari|g' CMakeLists.txt
 cmake \
  -DCMAKE_C_FLAGS:STRING="${FLAGS}" \
  -DCMAKE_CXX_FLAGS:STRING="${FLAGS}" \
  -DCMAKE_VERBOSE_MAKEFILE:BOOL="on" \
- -DCMAKE_INSTALL_PREFIX:PATH="/usr" \
- -DMANDIR:STRING="man/man1" \
+ -DCMAKE_INSTALL_PREFIX:PATH="${SYS_DIR[usr]}" \
  -DDOCDIR:STRING="share/html/hatari" \
 .
 make ${JOBS}
 make install DESTDIR="${PKG}"
-doc readme.txt doc/{authors,release-notes,keymap-sample,emutos}.txt
-changelog doc/changelog.txt
-install.dat hatari.desktop ${PKG}/usr/share/applications
+doc doc/{authors,keymap-sample}.txt
+changelog doc/release-notes.txt
+install.dat hatari.desktop ${PKG}${SYS_DIR[share]}/applications
 mv \
- ${PKG}/usr/share/icons/hicolor/32x32/apps/hatari-icon.png \
- ${PKG}/usr/share/icons/hicolor/32x32/apps/hatari.png
+ ${PKG}${SYS_DIR[share]}/icons/hicolor/32x32/apps/hatari-icon.png \
+ ${PKG}${SYS_DIR[share]}/icons/hicolor/32x32/apps/hatari.png
 gunzip ${PKG}${SYS_DIR[man]}/man?/*.?.gz
 rm -rf \
  ${PKG}${SYS_DIR[html]}/hatari/*.txt \
- ${PKG}/usr/bin/hatariui \
+ ${PKG}${SYS_DIR[bin]}/hatariui \
  ${PKG}${SYS_DIR[man]}/man1/hatariui.1 \
- ${PKG}/usr/share/applications/hatariui.desktop \
- ${PKG}/usr/share/hatari/{hatariui,hconsole}
+ ${PKG}${SYS_DIR[share]}/applications/hatariui.desktop \
+ ${PKG}${SYS_DIR[share]}/application-data/hatari/{hatariui,hconsole}
 }

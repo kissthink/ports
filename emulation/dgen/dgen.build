@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=dgen
-VERSION=1.30
+VERSION=1.32
 BUILD=1
-DEPENDS=('sdl >= 1.2.14-1' 'libarchive >= 3.0.3-1')
+DEPENDS=('sdl >= 1.2.15-1')
 
 # Description
 
@@ -42,26 +42,24 @@ SRCCOPY[0]="BSD3"
 
 build0()
 {
-CPPFLAGS="-I/usr/include/archive" \
+CPPFLAGS="-I${SYS_DIR[include]}/archive" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --disable-silent-rules \
  --enable-debug=no \
- --enable-static=no \
- --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS sample.dgenrc
 changelog ChangeLog
-install.dir ${PKG}/usr/share/applications
-install.dat dgen.desktop ${PKG}/usr/share/applications
-install.dir ${PKG}/usr/share/icons/hicolor/48x48/apps
-install.dat dgen.png ${PKG}/usr/share/icons/hicolor/48x48/apps
+install.dir ${PKG}${SYS_DIR[share]}/applications
+install.dat dgen.desktop ${PKG}${SYS_DIR[share]}/applications
+install.dir ${PKG}${SYS_DIR[share]}/icons/hicolor/48x48/apps
+install.dat dgen.png ${PKG}${SYS_DIR[share]}/icons/hicolor/48x48/apps
 }

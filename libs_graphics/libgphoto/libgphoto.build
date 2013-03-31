@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=libgphoto
-VERSION=2.5.0
+VERSION=2.5.1.1
 BUILD=1
-DEPENDS=('usb >= 1.0.14-1' 'libexif >= 0.6.21-1' 'libjpeg >= 1.2.0-1')
+DEPENDS=('usb >= 1.0.14-1' 'libexif >= 0.6.21-1' 'libjpeg >= 1.2.1-1')
 
 # Description
 
@@ -42,28 +42,30 @@ SRCCOPY[0]="LGPL21"
 
 build0()
 {
-udevscriptdir="$(pkg-config udev --variable=udevdir)" \
-utilsdir="/usr/lib$(libdirsuffix)/exec" \
+sed -i 's|${libdir}/pkgconfig|${datarootdir}/pkgconfig|g' configure libgphoto2_port/configure
+sed -i 's|$(datadir)/$(PACKAGE)/$(VERSION)/konica|$(datadir)/application-data/$(PACKAGE)/$(VERSION)/konica|g' camlibs/konica/Makefile-files camlibs/konica/localization/Makefile.in
+udevscriptdir="${SYS_DIR[udevscripts]}" \
+utilsdir="${SYS_DIR[lib]}/exec" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
+ --disable-silent-rules \
  --disable-rpath \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-html-dir=${SYS_DIR[html]} \
- --with-camlibdir=/usr/lib$(libdirsuffix)/plugins/gphoto2/camlib
-make ${JOBS}
+ --with-libusb=no
+make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS MAINTAINERS
 changelog NEWS
 rm -rf \
- ${PKG}/usr/bin \
- ${PKG}/usr/share/doc \
- ${PKG}/usr/lib$(libdirsuffix)/libgphoto2_port/*/usb.so
+ ${PKG}${SYS_DIR[bin]} \
+ ${PKG}${SYS_DIR[share]}/doc/${SRCNAME[0]}{,_port}
 }

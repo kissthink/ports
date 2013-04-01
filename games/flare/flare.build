@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=flare
-VERSION=0.17.1
+VERSION=0.18
 BUILD=1
 DEPENDS=('sdl >= 1.2.15-1')
 
@@ -22,7 +22,7 @@ cat > ${PKG}/install/slack-desc <<EOF
 $(padd)|-----handy-ruler------------------------------------------------------|
 ${NAME}: flare (hack and slash game)
 ${NAME}:
-${NAME}: An action role playing game.
+${NAME}: An single player 2D action role playing game.
 ${NAME}:
 ${NAME}: Homepage: http://flarerpg.org
 ${NAME}:
@@ -36,20 +36,21 @@ EOF
 # Sources
 
 SRCNAME[0]=${NAME}
-SRCVERS[0]=v017_1
-SRCPACK[0]=https://github.com/downloads/clintbellanger/flare/${SRCNAME[0]}_linux_${SRCVERS[0]}.tar.gz
-SRCROOT[0]=${SRCNAME[0]}_${SRCVERS[0]}
+SRCVERS[0]=v018
+SRCPACK[0]=https://github.com/downloads/clintbellanger/flare/${SRCNAME[0]}_src_${SRCVERS[0]}.tar.gz
+SRCROOT[0]="${SRCNAME[0]}_src_${SRCVERS[0]}"
 SRCCOPY[0]="GPL3"
 
 build0()
 {
 cmake \
+ -DCMAKE_BUILD_TYPE:STRING="Release" \
  -DCMAKE_VERBOSE_MAKEFILE:BOOL="on" \
  -DCMAKE_CXX_FLAGS:STRING="${FLAGS}" \
  -DCMAKE_INSTALL_PREFIX:STRING="/usr" \
+ -DDATADIR:STRING="share/application-data/flare" \
  -DBINDIR:STRING="bin" \
 .
 make ${JOBS}
 make install DESTDIR="${PKG}"
-doc credits.html
 }

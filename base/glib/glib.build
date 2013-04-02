@@ -51,7 +51,7 @@ sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 export PKG_CONFIG_PATH="${PKG}${SYS_DIR[share]}/pkgconfig"
 export LD_LIBRARY_PATH="${PKG}${SYS_DIR[lib]}"
 export LDFLAGS="-L${PKG}${SYS_DIR[lib]}"
-export CPPFLAGS="-I${SYS_DIR[include]}/libelf -I${PKG}${SYS_DIR[include]}/gio-unix-2.0 -I${PKG}${SYS_DIR[include]}/glib-2.0 -I${PKG}${SYS_DIR[include]}/x86_64/glib-2.0"
+export CPPFLAGS="-I${SYS_DIR[include]}/libelf -I${PKG}${SYS_DIR[include]}/gio-unix-2.0 -I${PKG}${SYS_DIR[include]}/glib-2.0 -I${PKG}${SYS_DIR[include]}/$(uname -m)/glib-2.0"
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -78,8 +78,7 @@ SRCCOPY[0]="LGPL2"
 
 build0()
 {
-sed -i 's|configexecincludedir = $(libdir)/glib-2.0/include|configexecincludedir = $(includedir)/x86_64/glib-2.0|g' glib/Makefile.in
-sed -i 's|-I${libdir}/glib-2.0/include|-I${includedir}/x86_64/glib-2.0|g' glib-2.0.pc.in
+sed -i "s|@ARCHITECTURE@|$(uname -m)|g" glib/Makefile.{am,in} glib-2.0.pc.in
 sed -i 's|codegendir = $(libdir)/gdbus-2.0/codegen|codegendir = $(libdir)/exec/gdbus-2.0/codegen|g' gio/gdbus-2.0/codegen/Makefile.in
 sed -i 's|@libdir@|@libdir@/exec|g' gio/gdbus-2.0/codegen/gdbus-codegen.in
 configure \

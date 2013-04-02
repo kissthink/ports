@@ -7,8 +7,8 @@ source /usr/src/ports/Build/build.sh
 NAME=gtk_engine_murrine
 MAJOR=0.98
 VERSION=${MAJOR}.2
-BUILD=1
-DEPENDS=('gtk+ >= 2.24.10-1')
+BUILD=2
+DEPENDS=('gtk+ >= 2.24.17-1')
 
 # Description
 
@@ -43,6 +43,7 @@ SRCCOPY[0]="LGPL3"
 
 build0()
 {
+sed -i 's|$(libdir)/gtk-2.0|$(libdir)/plugins/gtk-2.0|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -50,11 +51,11 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --enable-animation \
  --enable-animationrtl
 make ${JOBS}

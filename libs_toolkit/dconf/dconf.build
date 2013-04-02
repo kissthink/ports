@@ -7,7 +7,9 @@ source /usr/src/ports/Build/build.sh
 NAME=dconf
 MAJOR=0.16
 VERSION=${MAJOR}.0
-BUILD=1
+BUILD=2
+DEPENDS=('glib >= 2.36.0-1')
+OPTDEPENDS=('gtk+ >= 3.6.4-1')
 
 # Description
 
@@ -40,6 +42,12 @@ cat >> ${PKG}/install/doinst.sh <<EOF
 
 if [ -x ${SYS_DIR[bin]}/gio-querymodules ]; then
   ${SYS_DIR[bin]}/gio-querymodules ${GIO_MODULE_DIR}
+fi
+
+# Compile settings data schemas
+
+if [ -x ${SYS_DIR[bin]}/glib-compile-schemas ]; then
+  ${SYS_DIR[bin]}/glib-compile-schemas ${SYS_DIR[share]}/glib-2.0/schemas
 fi
 EOF
 

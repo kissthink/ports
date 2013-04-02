@@ -5,8 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=distcc
-VERSION=2.18.3
+VERSION=3.1
 BUILD=1
+#DEPENDS=('avahi >= 0.6.31-1')
+OPTDEPENDS=('gtk+ >= 2.24.14-1')
 
 # Description
 
@@ -32,6 +34,28 @@ ${NAME}: distcc was written by Martin Pool.
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+config etc/conf.d/distccd.conf.new
+config etc/distcc/clients.allow.new
+config etc/distcc/commands.allow.sh.new
+config etc/distcc/hosts.new
+EOF
+
 # Sources
 
 SRCNAME[0]=${NAME}
@@ -44,22 +68,36 @@ build0()
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --disable-Werror \
  --with-gtk \
- --without-gnome
-make -j 2
+ --without-gnome \
+ --without-avahi
+make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-install.dir ${PKG}/usr/share/applications
-mv ${PKG}/usr/share/distcc/distccmon-gnome.desktop ${PKG}/usr/share/applications
-install.dir ${PKG}/usr/share/icons/hicolor/64x64/apps
-mv ${PKG}/usr/share/distcc/distccmon-gnome-icon.png ${PKG}/usr/share/icons/hicolor/64x64/apps
+config ${PKG}${SYS_DIR[etc]}/distcc/clients.allow
+config ${PKG}${SYS_DIR[etc]}/distcc/commands.allow.sh
+config ${PKG}${SYS_DIR[etc]}/distcc/hosts
+install.dir ${PKG}${SYS_DIR[etc]}/conf.d
+install.cfg distccd.conf.d ${PKG}${SYS_DIR[etc]}/conf.d/distccd.conf.new
+install.dir ${PKG}${SYS_DIR[share]}/systemd/system
+install.dat distccd.service ${PKG}${SYS_DIR[share]}/systemd/system
+install.dir ${PKG}${SYS_DIR[share]}/applications
+mv ${PKG}${SYS_DIR[share]}/distcc/distccmon-gnome.desktop ${PKG}${SYS_DIR[share]}/applications
+install.dir ${PKG}${SYS_DIR[share]}/icons/hicolor/64x64/apps
+mv ${PKG}${SYS_DIR[share]}/distcc/distccmon-gnome-icon.png ${PKG}${SYS_DIR[share]}/icons/hicolor/64x64/apps
+# FIXME: We'll add pump and the include_server when we can do subpackages
 rm -rf \
- ${PKG}/usr/share/doc \
- ${PKG}/usr/share/distcc
+ ${PKG}${SYS_DIR[share]}/doc/${SRCNAME[0]} \
+ ${PKG}${SYS_DIR[share]}/distcc \
+ ${PKG}${SYS_DIR[bin]}/pump \
+ ${PKG}${SYS_DIR[man]}/man?/{pump,include_server}.? \
+ ${PKG}${SYS_DIR[lib]}64 \
+ ${PKG}${SYS_DIR[etc]}/default
 }

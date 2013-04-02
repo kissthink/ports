@@ -5,10 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=gdk_pixbuf
-MAJOR=2.26
-VERSION=${MAJOR}.5
+MAJOR=2.28
+VERSION=${MAJOR}.0
 BUILD=1
-DEPENDS=('glib >= 2.34.3-1' 'xorg_libs >= 7.7-1')
+DEPENDS=('glib >= 2.36.0-1' 'xorg_libs >= 7.7-1')
 OPTIONS="symprepend"
 
 # Description
@@ -35,6 +35,14 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+# Query for gdk-pixbuf loaders
+
+if [ -x ${SYS_DIR[bin]}/gdk-pixbuf-query-loaders ]; then
+  ${SYS_DIR[bin]}/gdk-pixbuf-query-loaders --update-cache
+fi
+EOF
+
 # Sources
 
 SRCNAME[0]=gdk-pixbuf
@@ -44,6 +52,8 @@ SRCCOPY[0]="LGPL2"
 
 build0()
 {
+sed -i 's|$(libdir)/gdk-pixbuf-2.0|$(libdir)/plugins/gdk-pixbuf-2.0|g' gdk-pixbuf/Makefile.{in,am}
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -53,20 +63,21 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-static=no \
  --enable-introspection=no \
  --enable-debug=minimum \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --with-html-dir=/usr/share/html \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --with-html-dir="${SYS_DIR[html]}" \
  --with-libjasper=yes
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-install.dat doinst.sh ${PKG}/install
-install.dir ${PKG}/var/cache/gdk-pixbuf-2.0/2.10.0
-touch ${PKG}/var/cache/gdk-pixbuf-2.0/2.10.0/loaders.cache
-rm -f \
- ${PKG}/usr/lib$(libdirsuffix)/*/*/*/*.a
+install.dir ${PKG}${SYS_DIR[var]}/cache/gdk-pixbuf-2.0/2.10.0
+touch ${PKG}${SYS_DIR[var]}/cache/gdk-pixbuf-2.0/2.10.0/loaders.cache
+# No development docs
+rm -rf \
+ ${PKG}${SYS_DIR[html]} \
+ ${PKG}${SYS_DIR[lib]}/*/*/*/*.a
 }

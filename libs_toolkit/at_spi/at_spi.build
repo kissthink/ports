@@ -5,10 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=at_spi
-MAJOR=2.6
-VERSION=${MAJOR}.3
+MAJOR=2.8
+VERSION=${MAJOR}.0
 BUILD=1
-DEPENDS=('atk >= 2.6.0-1' 'dbus >= 1.4.24-1')
+DEPENDS=('atk >= 2.8.0-1' 'dbus >= 1.4.24-1')
 
 # Description
 
@@ -32,16 +32,6 @@ ${NAME}:
 ${NAME}:
 ${NAME}:
 ${NAME}:
-EOF
-
-cat >> ${PKG}/install/doinst.sh <<EOF
-#!/bin/sh
-
-# Compile settings data schemas
-
-if [ -x ${SYS_DIR[bin]}/glib-compile-schemas ]; then
-  ${SYS_DIR[bin]}/glib-compile-schemas ${SYS_DIR[share]}/glib-2.0/schemas
-fi
 EOF
 
 # Sources
@@ -77,7 +67,7 @@ rm -rf ${PKG}${SYS_DIR[html]}
 }
 
 SRCNAME[1]=at-spi2-atk
-SRCVERS[1]=${MAJOR}.2
+SRCVERS[1]=${MAJOR}.0
 SRCPACK[1]=${URL[gnome]}/{SRCNAME[1]}/${MAJOR}/${SRCNAME[1]}-${SRCVERS[1]}.tar.xz
 SRCCOPY[1]="LGPL2"
 

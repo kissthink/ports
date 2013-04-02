@@ -7,7 +7,7 @@ source /usr/src/ports/Build/build.sh
 NAME=gdk_pixbuf
 MAJOR=2.28
 VERSION=${MAJOR}.0
-BUILD=1
+BUILD=2
 DEPENDS=('glib >= 2.36.0-1' 'xorg_libs >= 7.7-1')
 OPTIONS="symprepend"
 
@@ -53,6 +53,7 @@ SRCCOPY[0]="LGPL2"
 build0()
 {
 sed -i 's|$(libdir)/gdk-pixbuf-2.0|$(libdir)/plugins/gdk-pixbuf-2.0|g' gdk-pixbuf/Makefile.{in,am}
+sed -i 's|gdk_pixbuf_binarydir=@libdir@/gdk-pixbuf|gdk_pixbuf_binarydir=@libdir@/plugins/gdk-pixbuf|g' gdk-pixbuf-2.0.pc.in
 sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \

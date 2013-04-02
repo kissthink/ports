@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=dcron
 VERSION=4.5
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -32,6 +32,31 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+config etc/conf.d/crond.conf.new
+
+if [ ! -r var/spool/cron/crontabs/root ]; then
+  mv var/spool/cron/crontabs/root.new var/spool/cron/crontabs/root
+else
+  rm -f var/spool/cron/crontabs/root.new
+fi
+EOF
+
 # Sources
 
 SRCNAME[0]=${NAME}
@@ -41,20 +66,24 @@ SRCCOPY[0]="GPL2"
 
 build0()
 {
-make ${JOBS} CFLAGS+="${FLAGS}" PREFIX="/usr"
-make install DESTDIR="${PKG}" PREFIX="/usr" MANDIR="/usr/man"
+make ${JOBS} CFLAGS+="${FLAGS}" PREFIX="${SYS_DIR[usr]}"
+make install DESTDIR="${PKG}" PREFIX="${SYS_DIR[usr]}" MANDIR="${SYS_DIR[man]}"
 changelog CHANGELOG
-install.dat doinst.sh ${PKG}/install
-install.dir ${PKG}/etc/cron.{d,hourly,daily,weekly,monthly}
-chmod 0751 ${PKG}/var/spool/cron
-chmod 0750 ${PKG}/var/spool/cron/cron{tabs,stamps}
-chmod 4711 ${PKG}/usr/bin/crontab
-chmod 0755 ${PKG}/usr/sbin/crond
-install -m 0600 crontab.root ${PKG}/var/spool/cron/crontabs/root.new
-install.bin run-parts ${PKG}/usr/sbin
+install.dir ${PKG}${SYS_DIR[etc]}/conf.d
+install.cfg extra/crond.conf ${PKG}${SYS_DIR[etc]}/conf.d/crond.conf.new
+install.dir ${PKG}${SYS_DIR[share]}/vim/ftplugin
+install.dat extra/crontab.vim ${PKG}${SYS_DIR[share]}/vim/ftplugin
+install.dir ${PKG}${SYS_DIR[systemdsystemunitdir]}
+install.dat dcron.service ${PKG}${SYS_DIR[systemdsystemunitdir]}
+#FIXME: perhaps all this stuff should be renamed to dcron so that other versions
+#of cron may be installed at the same time
+chmod 0751 ${PKG}${SYS_DIR[var]}/spool/cron
+chmod 0750 ${PKG}${SYS_DIR[var]}/spool/cron/cron{tabs,stamps}
+chmod 4711 ${PKG}${SYS_DIR[usr]}/bin/crontab
+chmod 0755 ${PKG}${SYS_DIR[usr]}/sbin/crond
+#FIXME: this goes away when we switch to systemd
+install.dir ${PKG}${SYS_DIR[etc]}/cron.{d,hourly,daily,weekly,monthly}
+install -m 0600 crontab.root ${PKG}${SYS_DIR[var]}/spool/cron/crontabs/root.new
+install.bin run-parts ${PKG}${SYS_DIR[usr]}/sbin
 install.man run-parts.8 ${PKG}${SYS_DIR[man]}/man8
-install.dir ${PKG}/usr/share/vim/ftplugin
-install.dat extra/crontab.vim ${PKG}/usr/share/vim/ftplugin
-#install.dir ${PKG}/etc/conf.d
-#install.cfg extra/crond.conf ${PKG}/etc/conf.d/crond.conf.new
 }

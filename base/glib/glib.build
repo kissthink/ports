@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=glib
-MAJOR=2.34
-VERSION=${MAJOR}.3
-BUILD=2
+MAJOR=2.36
+VERSION=${MAJOR}.0
+BUILD=1
 DEPENDS=('libraries >= 20130211-1')
 OPTIONS="symprepend"
 
@@ -38,10 +38,10 @@ EOF
 export GIO_MODULE_DIR="${SYS_DIR[lib]}/plugins/gio-2.0"
 
 cat >> ${PKG}/install/doinst.sh <<EOF
-# Add the gtk+ modules to the cache
+# Add the gio modules to the cache
 
-if [ -x /usr/bin/gio-querymodules ]; then
-  /usr/bin/gio-querymodules ${GIO_MODULE_DIR}
+if [ -x ${SYS_DIR[bin]}/gio-querymodules ]; then
+  ${SYS_DIR[bin]}/gio-querymodules ${GIO_MODULE_DIR}
 fi
 EOF
 
@@ -51,7 +51,7 @@ sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 export PKG_CONFIG_PATH="${PKG}${SYS_DIR[share]}/pkgconfig"
 export LD_LIBRARY_PATH="${PKG}${SYS_DIR[lib]}"
 export LDFLAGS="-L${PKG}${SYS_DIR[lib]}"
-export CPPFLAGS="-I${SYS_DIR[include]}/libelf -I${PKG}${SYS_DIR[include]}/gio-unix-2.0 -I${PKG}${SYS_DIR[include]}/glib-2.0"
+export CPPFLAGS="-I${SYS_DIR[include]}/libelf -I${PKG}${SYS_DIR[include]}/gio-unix-2.0 -I${PKG}${SYS_DIR[include]}/glib-2.0 -I${PKG}${SYS_DIR[include]}/x86_64/glib-2.0"
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -78,8 +78,8 @@ SRCCOPY[0]="LGPL2"
 
 build0()
 {
-sed -i 's|configexecincludedir = $(libdir)/glib-2.0/include|configexecincludedir = $(includedir)/glib-2.0|g' glib/Makefile.in
-sed -i 's|-I${libdir}/glib-2.0/include||g' glib-2.0.pc.in
+sed -i 's|configexecincludedir = $(libdir)/glib-2.0/include|configexecincludedir = $(includedir)/x86_64/glib-2.0|g' glib/Makefile.in
+sed -i 's|-I${libdir}/glib-2.0/include|-I${includedir}/x86_64/glib-2.0|g' glib-2.0.pc.in
 sed -i 's|codegendir = $(libdir)/gdbus-2.0/codegen|codegendir = $(libdir)/exec/gdbus-2.0/codegen|g' gio/gdbus-2.0/codegen/Makefile.in
 sed -i 's|@libdir@|@libdir@/exec|g' gio/gdbus-2.0/codegen/gdbus-codegen.in
 configure \
@@ -98,7 +98,7 @@ rm -rf \
 }
 
 SRCNAME[1]=${NAME}-networking
-SRCVERS[1]=${MAJOR}.2
+SRCVERS[1]=${MAJOR}.0
 SRCPACK[1]=${URL[gnome]}/${SRCNAME[1]}/${MAJOR}/${SRCNAME[1]}-${SRCVERS[1]}.tar.xz
 SRCCOPY[1]="LGPL2"
 
@@ -110,29 +110,6 @@ configure
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 changelog NEWS
-}
-
-DCONFM=0.14
-SRCNAME[2]=dconf
-SRCVERS[2]=${DCONFM}.1
-SRCPACK[2]=${URL[gnome]}/${SRCNAME[2]}/${DCONFM}/${SRCNAME[2]}-${SRCVERS[2]}.tar.xz
-SRCCOPY[2]="LGPL21"
-
-build2()
-{
-sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' {client,dbus-1}/Makefile.in
-LIBS="-lglib-2.0 -lgmodule-2.0" \
-configure \
- --with-gio-modules-dir="${GIO_MODULE_DIR}" \
- --disable-editor
-make ${JOBS} V=1
-make install DESTDIR="${PKG}"
-changelog NEWS
-# No development docs
-rm -rf \
- ${PKG}${SYS_DIR[html]} \
- ${PKG}${SYS_DIR[man]}/man1/dconf-editor.1 \
- ${PKG}${SYS_DIR[share]}/vala
 }
 
 #INTROM=1.34

@@ -5,10 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=gnome_keyring
-MAJOR=3.6
-VERSION=${MAJOR}.2
-BUILD=2
-DEPENDS=('gcr >= 3.6.2-1' 'capabilities >= 20130117-1')
+MAJOR=3.8
+VERSION=${MAJOR}.0
+BUILD=1
+DEPENDS=('gcr >= 3.8.0-1')
 
 # Description
 
@@ -32,6 +32,16 @@ ${NAME}: to manage certificates and keys on smart cards or secure storage.
 ${NAME}:
 ${NAME}: Homepage: http://live.gnome.org/GnomeKeyring
 ${NAME}:
+EOF
+
+cat > ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+# Compile settings data schemas
+
+if [ -x ${SYS_DIR[bin]}/glib-compile-schemas ]; then
+  ${SYS_DIR[bin]}/glib-compile-schemas ${SYS_DIR[share]}/glib-2.0/schemas
+fi
 EOF
 
 # Sources
@@ -60,7 +70,6 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --libexecdir="${SYS_DIR[lib]}/exec" \
  --localstatedir="${SYS_DIR[var]}" \
  --with-html-dir="${SYS_DIR[html]}" \
- --with-root-certs="${SYS_DIR[etc]}/ssl/certs" \
  --with-pkcs11-modules="${SYS_DIR[lib]}/plugins/pkcs11" \
  --disable-schemas-compile \
  --disable-pam

@@ -5,10 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=libsoup
-MAJOR=2.40
-VERSION=${MAJOR}.3
+MAJOR=2.42
+VERSION=${MAJOR}.0
 BUILD=1
-DEPENDS=('glib >= 2.34.3-1' 'libxml >= 2.9.0-1')
+DEPENDS=('glib >= 2.36.0-1' 'libxml >= 2.9.0-1' 'sqlite >= 3.7.15.2-1')
 
 # Description
 
@@ -43,6 +43,7 @@ SRCCOPY[0]="LGPL2"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -58,7 +59,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --libdir="${SYS_DIR[lib]}" \
  --localstatedir="${SYS_DIR[var]}" \
  --with-html-dir="${SYS_DIR[html]}"
-# --without-gnome ?
+#FIXME: gstreamer still requires libsoup-gnome (--without-gnome)
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS

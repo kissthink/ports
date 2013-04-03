@@ -5,10 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=gcr
-MAJOR=3.6
-VERSION=${MAJOR}.2
-BUILD=3
-DEPENDS=('libgcrypt >= 1.5.0-1' 'gtk+ >= 3.6.4-1')
+MAJOR=3.8
+VERSION=${MAJOR}.0
+BUILD=1
+DEPENDS=('libgcrypt >= 1.5.0-1' 'gtk+ >= 3.8.0-1')
 
 # Description
 
@@ -38,20 +38,21 @@ cat >> ${PKG}/install/doinst.sh <<EOF
 #!/bin/sh
 
 # Compile settings data schemas
-if [ -x /usr/bin/glib-compile-schemas ]; then
-  /usr/bin/glib-compile-schemas ${SYS_DIR[share]}/glib-2.0/schemas
+
+if [ -x ${SYS_DIR[bin]}/glib-compile-schemas ]; then
+  ${SYS_DIR[bin]}/glib-compile-schemas ${SYS_DIR[share]}/glib-2.0/schemas
 fi
 
-if [ -x /usr/bin/gtk-update-icon-cache ]; then
-  /usr/bin/gtk-update-icon-cache -q -t -f ${SYS_DIR[share]}/icons/hicolor
+if [ -x ${SYS_DIR[bin]}/gtk-update-icon-cache ]; then
+  ${SYS_DIR[bin]}/gtk-update-icon-cache -q -t -f ${SYS_DIR[share]}/icons/hicolor
 fi
 
-if [ -x /usr/bin/update-mime-database ]; then
-  /usr/bin/update-mime-database ${SYS_DIR[share]}/mime &> /dev/null
+if [ -x ${SYS_DIR[bin]}/update-mime-database ]; then
+  ${SYS_DIR[bin]}/update-mime-database ${SYS_DIR[share]}/mime &> /dev/null
 fi
 
-if [ -x /usr/bin/update-desktop-database ]; then
-  /usr/bin/update-desktop-database -q
+if [ -x ${SYS_DIR[bin]}/update-desktop-database ]; then
+  ${SYS_DIR[bin]}/update-desktop-database -q
 fi
 EOF
 
@@ -64,8 +65,8 @@ SRCCOPY[0]="LGPL2"
 
 build0()
 {
-sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' gc{r,k}/Makefile.in
-sed -i 's|uidir = $(datadir)/gcr-@GCR_MAJOR@/ui|uidir = $(datadir)/application-data/gcr-@GCR_MAJOR@/ui|g' gcr/Makefile.in
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' $(find . -name "Makefile.in")
+sed -i 's|uidir = $(datadir)/gcr-@GCR_MAJOR@/ui|uidir = $(datadir)/application-data/gcr-@GCR_MAJOR@/ui|g' ui/Makefile.in
 sed -i 's|pkcs11standalonedir="${libdir}/gnome-keyring/devel"|pkcs11standalonedir="${libdir}/plugins/gnome-keyring/devel"|g' configure
 CPPFLAGS="-I${SYS_DIR[include]}/gpg-error -I${SYS_DIR[include]}/gcrypt" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \

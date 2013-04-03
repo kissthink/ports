@@ -7,8 +7,8 @@ source /usr/src/ports/Build/build.sh
 NAME=gtk_engine_unico
 MAJOR=1.0
 VERSION=${MAJOR}.2
-BUILD=1
-DEPENDS=('gtk+ >= 3.4.3-1')
+BUILD=2
+DEPENDS=('gtk+ >= 3.8.0-1')
 
 # Description
 
@@ -43,6 +43,7 @@ SRCCOPY[0]="LGPL21"
 
 build0()
 {
+sed -i 's|$(libdir)/gtk-3.0|$(libdir)/plugins/gtk-3.0|g' unico/Makefile.{am,in}
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -50,11 +51,11 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS

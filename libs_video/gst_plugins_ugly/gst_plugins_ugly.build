@@ -5,10 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=gst_plugins_ugly
-VERSION=1.0.5
+VERSION=1.0.6
 BUILD=1
-DEPENDS=('gstreamer >= 1.0.5-1')
-OPTDEPENDS=('liba52 >= 0.7.5cvs-1' 'libcdio >= 0.83-1' 'libdvd >= 4.2.0-1' 'lame >= 3.99.5-1' 'libmad >= 0.15.1b-1' 'libx264 >= 20130206-1')
+DEPENDS=('gstreamer >= 1.0.6-1')
+OPTDEPENDS=('liba52 >= 0.7.5cvs-1' 'libcdio >= 0.90-1' 'libdvd >= 4.2.0-1' 'lame >= 3.99.5-1' 'libmad >= 0.15.1b-1' 'libx264 >= 20130206-1')
 
 # Description
 

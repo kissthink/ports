@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=libcdio
 VERSION=0.90
-BUILD=1
+BUILD=3
 
 # Description
 
@@ -34,12 +34,7 @@ EOF
 
 # Sources
 
-SRCNAME[0]=${NAME}
-SRCVERS[0]=${VERSION}
-SRCPACK[0]=${URL[gnu]}/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
-SRCCOPY[0]="GPL3"
-
-build0()
+configure()
 {
 sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
@@ -52,16 +47,47 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-shared=yes \
  --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --infodir="${SYS_DIR[info]}" \
  --sysconfdir="${SYS_DIR[etc]}" \
  --libdir="${SYS_DIR[lib]}" \
  --localstatedir="${SYS_DIR[var]}" \
- --disable-example-progs
+ --disable-example-progs \
+ ${*}
+}
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=${URL[gnu]}/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="GPL3"
+
+build0()
+{
+configure \
+ --infodir="${SYS_DIR[info]}"
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS THANKS
 changelog NEWS
+sed -i "/LIBCDIO_SOURCE_PATH/s|.*|/* #undef LIBCDIO_SOURCE_PATH */|" \
+ ${PKG}${SYS_DIR[include]}/cdio/cdio_config.h
 rm -rf \
  ${PKG}${SYS_DIR[man]}/jp \
  ${PKG}${SYS_DIR[info]}
+}
+
+SRCNAME[1]=${NAME}-paranoia
+SRCVERS[1]=10.2+${VERSION}
+SRCPACK[1]=${URL[gnu]}/${SRCNAME[0]}/${SRCNAME[1]}-${SRCVERS[1]}.tar.bz2
+SRCCOPY[1]="GPL2"
+
+build1()
+{
+LIBCDIO_LIBS="-L${PKG}${SYS_DIR[lib]} -lcdio -lm" \
+LIBCDIO_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+CPPFLAGS="${LIBCDIO_CFLAGS}" \
+configure
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS THANKS
+changelog NEWS
+rm -rf ${PKG}${SYS_DIR[man]}/jp
 }

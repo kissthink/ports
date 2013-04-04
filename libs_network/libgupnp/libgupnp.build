@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=libgupnp
-VERSION=0.18.4
+VERSION=0.20.1
 BUILD=1
-DEPENDS=('glib >= 2.34.3-1' 'libsoup >= 2.40.3-1')
+DEPENDS=('glib >= 2.36.0-1' 'libsoup >= 2.42.0-1')
 
 # Description
 
@@ -37,11 +37,12 @@ EOF
 
 GUPNPREPO=http://gupnp.org/sites/all/files/sources
 
-GTKINCS="-I${SYS_DIR[include]}/glib-2.0 -I/usr/lib$(libdirsuffix)/glib-2.0/include"
+GTKINCS="$(pkg-config glib-2.0 --cflags)"
 GSSDPINCS="-I${SYS_DIR[include]}/libsoup-2.4 -I${SYS_DIR[include]}/libxml2"
 
 configure()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.{am,in}
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
   --build="${ARCH}-slackware-linux" \
@@ -61,7 +62,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 }
 
 SRCNAME[0]=gssdp
-SRCVERS[0]=0.12.2
+SRCVERS[0]=0.14.2
 SRCPACK[0]=${GUPNPREPO}/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
 SRCCOPY[0]="LGPL2"
 

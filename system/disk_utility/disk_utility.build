@@ -5,9 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=disk_utility
-VERSION=3.6.1
+VERSION=3.8.0
 BUILD=1
-DEPENDS=('gtk+ >= 3.6.4-1' 'disks >= 20130110-1' 'libsecret >= 0.12-1' 'pwquality >= 1.2.1-1')
+DEPENDS=('gtk+ >= 3.8.0-1' 'disks >= 20130404-1' 'libsecret >= 0.14-1' 'pwquality >= 1.2.1-1')
+OPTDEPENDS=('libdvd >= 4.2.0-1')
 
 # Description
 
@@ -34,17 +35,19 @@ ${NAME}:
 EOF
 
 cat > ${PKG}/install/doinst.sh <<EOF
-if [ -x /usr/bin/glib-compile-schemas ]; then
-  /usr/bin/glib-compile-schemas /usr/share/glib-2.0/schemas
+#!/bin/sh
+
+if [ -x ${SYS_DIR[bin]}/glib-compile-schemas ]; then
+  ${SYS_DIR[bin]}/glib-compile-schemas ${SYS_DIR[share]}/glib-2.0/schemas
 fi
 
-if [ -x /usr/bin/update-desktop-database ]; then
-  /usr/bin/update-desktop-database -q usr/share/applications >/dev/null 2>&1
+if [ -x ${SYS_DIR[bin]}/update-desktop-database ]; then
+  ${SYS_DIR[bin]}/update-desktop-database -q ${SYS_DIR[share]}/applications >/dev/null 2>&1
 fi
 
-if [ -e usr/share/icons/hicolor/icon-theme.cache ]; then
-  if [ -x /usr/bin/gtk-update-icon-cache ]; then
-    /usr/bin/gtk-update-icon-cache -q usr/share/icons/hicolor >/dev/null 2>&1
+if [ -e ${SYS_DIR[share]}/icons/hicolor/icon-theme.cache ]; then
+  if [ -x ${SYS_DIR[bin]}/gtk-update-icon-cache ]; then
+    ${SYS_DIR[bin]}/gtk-update-icon-cache -q ${SYS_DIR[share]}/icons/hicolor >/dev/null 2>&1
   fi
 fi
 EOF
@@ -65,12 +68,14 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --libexecdir=/usr/lib$(libdirsuffix)/exec \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --libexecdir="${SYS_DIR[lib]}/exec" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --disable-gsd-plugin
+#FIXME: systemd
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS

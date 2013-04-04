@@ -7,7 +7,7 @@ source /usr/src/ports/Build/build.sh
 NAME=disks
 VERSION=$(date +%Y%m%d)
 BUILD=1
-DEPENDS=('glib >= 2.34.3-1' 'udev >= 173-1' 'polkit >= 0.105-1')
+DEPENDS=('glib >= 2.36.0-1' 'udev >= 173-1' 'polkit >= 0.105-1')
 
 # Description
 
@@ -76,7 +76,7 @@ license LICENSE.TXT
 }
 
 SRCNAME[2]=udisks
-SRCVERS[2]=2.0.1
+SRCVERS[2]=2.1.0
 SRCPACK[2]=http://udisks.freedesktop.org/releases/${SRCNAME[2]}-${SRCVERS[2]}.tar.bz2
 SRCCOPY[2]="LGPL2 GPL2"
 

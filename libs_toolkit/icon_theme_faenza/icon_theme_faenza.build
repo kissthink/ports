@@ -7,7 +7,7 @@ source /usr/src/ports/Build/build.sh
 NAME=icon_theme_faenza
 VERSION=1.3.1
 ARCH=noarch
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -33,6 +33,20 @@ ${NAME}:
 ${NAME}:
 EOF
 
+SETS="Faenza Faenza-Dark Faenza-Darker Faenza-Darkest Faenza-Radiance Faenza-Ambiance"
+
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+# Update icon theme caches
+
+if [ -x ${SYS_DIR[bin]}/gtk-update-icon-cache ]; then
+  for SET in "${SETS}"; do
+    ${SYS_DIR[bin]}/gtk-update-icon-cache -q -t -f ${SYS_DIR[share]}/icons/\${SET}
+  done
+fi
+EOF
+
 # Sources
 
 SRCNAME[0]=faenza-icon-theme
@@ -45,44 +59,26 @@ build0()
 {
 doc AUTHORS
 changelog ChangeLog
-install.dir ${PKG}/usr/share/icons
-for tarball in Faenza Faenza-Dark Faenza-Darker Faenza-Darkest Faenza-Radiance Faenza-Ambiance; do
-  src.unpack ${tarball}.tar.gz --cd ${PKG}/usr/share/icons
+install.dir ${PKG}${SYS_DIR[share]}/icons
+for tarball in ${SETS}; do
+  src.unpack ${tarball}.tar.gz --cd ${PKG}${SYS_DIR[share]}/icons
+  install.dir ${PKG}${SYS_DIR[var]}/cache/${tarball}
+  touch  ${PKG}${SYS_DIR[var]}/cache/${tarball}/icon-theme.cache
+  (
+    cd ${PKG}${SYS_DIR[share]}/icons/${tarball}
+    ln -sf ${SYS_DIR[var]}/cache/${tarball}/icon-theme.cache
+  )
 done
-chmod 0644 \
- ${PKG}/usr/share/icons/*/index.theme
+chmod 0644 ${PKG}${SYS_DIR[share]}/icons/*/index.theme
 }
 
-SRCNAME[1]=Faenza-Fresh
-SRCVERS[1]=0.2
-SRCPACK[1]=${SRCNAME[1]}_v${SRCVERS[1]}.tar.bz2
-SRCOPTS[1]="nosrcroot"
+SRCNAME[1]=faenza-extras
+SRCVERS[1]=0.1
+SRCPACK[1]=${SRCNAME[1]}-${SRCVERS[1]}.tar.xz
+SRCOPTS[1]="pkgunpack"
+SRCCOPY[1]="GPL3"
 
 build1()
 {
-install.dir ${PKG}/usr/share/icons/Faenza/apps/scalable
-install.dat Faenza-Fresh/apps/scalable/*.svg \
- ${PKG}/usr/share/icons/Faenza/apps/scalable
-for size in 16 22 24 32 48; do
-  install.dir ${PKG}/usr/share/icons/Faenza/apps/${size}
-  install.dat Faenza-Fresh/apps/${size}/*.png \
-   ${PKG}/usr/share/icons/Faenza/apps/${size}
-done
-}
-
-SRCNAME[2]=Faenza
-SRCVERS[2]=Addons
-SRCPACK[2]=${SRCNAME[2]}${SRCVERS[2]}.tar.gz
-SRCOPTS[2]="nosrcroot"
-
-build2()
-{
-install.dir ${PKG}/usr/share/icons/Faenza/apps/scalable
-install.dat Faenza/apps/scalable/*.svg \
- ${PKG}/usr/share/icons/Faenza/apps/scalable
-for size in 22 24 32 48; do
-  install.dir ${PKG}/usr/share/icons/Faenza/apps/${size}
-  install.dat Faenza/apps/${size}/*.png \
-   ${PKG}/usr/share/icons/Faenza/apps/${size}
-done
+  echo "Nothing to do here !"
 }

@@ -5,8 +5,8 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=icon_theme_gnome
-MAJOR=3.2
-VERSION=${MAJOR}.1
+MAJOR=3.8
+VERSION=${MAJOR}.0
 ARCH=noarch
 BUILD=1
 
@@ -34,6 +34,14 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat > ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+if [ -x ${SYS_DIR[bin]}/gtk-update-icon-cache ]; then
+  ${SYS_DIR[bin]}/gtk-update-icon-cache -q -t -f ${SYS_DIR[share]}/icons/hicolor
+fi
+EOF
+
 # Sources
 
 SRCNAME[0]=gnome-icon-theme
@@ -46,19 +54,14 @@ build0()
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-install.dir ${PKG}/usr/lib$(libdirsuffix)
-mv \
- ${PKG}/usr/share/pkgconfig \
- ${PKG}/usr/lib$(libdirsuffix)
-rm -rf \
- ${PKG}/usr/share/locale
+rm -rf ${PKG}${SYS_DIR[share]}/locale
 }

@@ -5,8 +5,8 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=dbus
-VERSION=1.4.24
-BUILD=4
+VERSION=1.6.8
+BUILD=1
 
 # Description
 
@@ -32,6 +32,35 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+# Keep same perms on rc.messagebus.new:
+
+if [ -e etc/rc.d/rc.messagebus ]; then
+  cp -a etc/rc.d/rc.messagebus etc/rc.d/rc.messagebus.new.incoming
+  cat etc/rc.d/rc.messagebus.new > etc/rc.d/rc.messagebus.new.incoming
+  mv etc/rc.d/rc.messagebus.new.incoming etc/rc.d/rc.messagebus.new
+fi
+
+config etc/rc.d/rc.messagebus.new
+config etc/dbus-1/session.conf.new
+config etc/dbus-1/system.conf.new
+EOF
+
 # Sources
 
 SRCNAME[0]=${NAME}
@@ -40,7 +69,8 @@ SRCPACK[0]=http://dbus.freedesktop.org/releases/dbus/${SRCNAME[0]}-${SRCVERS[0]}
 
 build0()
 {
-ac_cv_have_abstract_sockets=yes \
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
+sed -i "s|@ARCHITECTURE@|$(uname -m)|g" dbus/Makefile.{am,in} dbus-1.pc.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -48,24 +78,28 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
  --htmldir="${SYS_DIR[html]}/${SRCNAME[0]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --libexecdir=/usr/lib$(libdirsuffix)/exec \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --libexecdir="${SYS_DIR[lib]}/exec" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --with-init-scripts=slackware \
+ --with-system-pid-file="${SYS_DIR[run]}/dbus/pid" \
+ --with-system-socket="${SYS_DIR[run]}/dbus/system_bus_socket" \
+ --with-console-auth-dir="${SYS_DIR[run]}/console" \
+ --with-systemdsystemunitdir="${SYS_DIR[systemdsystemunitdir]}" \
+ --with-xml=expat \
+ --disable-verbose-mode \
+ --disable-doxygen-docs \
  --disable-tests \
  --disable-asserts \
  --disable-dnotify \
  --enable-inotify \
- --enable-x11-autolaunch \
- --with-init-scripts=slackware \
- --with-system-pid-file=/run/dbus/dbus.pid \
- --with-system-socket=/var/run/dbus/system_bus_socket \
- --with-xml=expat \
- --with-console-auth-dir=/run/consolekit \
- --with-systemdsystemunitdir="${SYS_DIR[systemdsystemunitdir]}"
+ --enable-x11-autolaunch
+#FIXME: systemd
+#--enable-systemd
 #--enable-userdb-cache
 #--enable-console-owner-file
 #--with-console-owner-file=
@@ -73,22 +107,27 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 #--with-session-socket-dir=/tmp
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
-doc AUTHORS doc/system-activation.txt
+doc AUTHORS
 changelog NEWS
 license COPYING
-install.dir ${PKG}/usr/bin
-install.dir ${PKG}/etc/rc.d
-install.dat doinst.sh ${PKG}/install
-install.bin rc.messagebus.new ${PKG}/etc/rc.d
+install.dir ${PKG}${SYS_DIR[bin]}
+install.dir ${PKG}${SYS_DIR[etc]}/rc.d
+install.bin rc.messagebus.new ${PKG}${SYS_DIR[etc]}/rc.d
 rm -rf \
- ${PKG}/etc/rc.d/rc.messagebus \
- ${PKG}/usr/sbin \
- ${PKG}/usr/share/{dbus-1,doc} \
- ${PKG}/usr/lib$(libdirsuffix)/exec/dbus-1
-mv \
- ${PKG}/etc/dbus-1/session.conf \
- ${PKG}/etc/dbus-1/session.conf.new
-mv \
- ${PKG}/etc/dbus-1/system.conf \
- ${PKG}/etc/dbus-1/system.conf.new
+ ${PKG}${SYS_DIR[etc]}/rc.d/rc.messagebus \
+ ${PKG}${SYS_DIR[sbin]} \
+ ${PKG}${SYS_DIR[share]}/dbus-1 \
+ ${PKG}${SYS_DIR[lib]}/exec/dbus-1 \
+ ${PKG}${SYS_DIR[doc]}/dbus \
+ ${PKG}${SYS_DIR[html]}
+config ${PKG}${SYS_DIR[etc]}/dbus-1/session.conf
+config ${PKG}${SYS_DIR[etc]}/dbus-1/system.conf
+chown messagebus ${PKG}${SYS_DIR[var]}/lib/dbus
+#FIXME: compat
+install.dir ${PKG}${SYS_DIR[var]}/run/dbus
+(
+  cd ${PKG}${SYS_DIR[var]}/run/dbus
+  ln -s ${SYS_DIR[run]}/dbus/system_bus_socket
+)
 }
+

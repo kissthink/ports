@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=pragha
 VERSION=1.1.2
-BUILD=1
-DEPENDS=('gtk+ >= 3.6.4-1' 'gstreamer >= 1.0.5-1' 'sqlite >= 3.7.15.2-1' 'liblastfm >= 20121125-1' 'taglib >= 1.8-1' 'libcdio >= 0.83-1')
+BUILD=2
+DEPENDS=('gtk+ >= 3.8.0-1' 'gstreamer >= 1.0.6-1' 'sqlite >= 3.7.15.2-1' 'liblastfm >= 20121125-1' 'taglib >= 1.8-1' 'libcdio >= 0.90-1')
 
 # Description
 
@@ -42,6 +42,7 @@ SRCCOPY[0]="GPL3"
 
 build0()
 {
+CPPFLAGS="-DHAVE_PARANOIA_NEW_INCLUDES" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \

@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=farstream
 VERSION=0.2.2
-BUILD=1
-DEPENDS=('gstreamer >= 1.0.5-1' 'libgupnp >= 0.18.4-1')
+BUILD=2
+DEPENDS=('gstreamer >= 1.0.6-1' 'libgupnp >= 0.20.1-1')
 
 # Description
 
@@ -36,7 +36,7 @@ EOF
 # Sources
 
 SRCNAME[0]=libnice
-SRCVERS[0]=0.1.3
+SRCVERS[0]=0.1.4
 SRCPACK[0]=http://nice.freedesktop.org/releases/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
 SRCCOPY[0]="LGPL21 MPL11"
 
@@ -98,5 +98,7 @@ make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-rm -rf ${PKG}${SYS_DIR[html]}
+rm -rf \
+ ${PKG}${SYS_DIR[bin]}/*-example \
+ ${PKG}${SYS_DIR[html]}
 }

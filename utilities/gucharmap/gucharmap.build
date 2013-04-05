@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=gucharmap
-VERSION=3.6.1
+VERSION=3.8.0
 BUILD=1
-DEPENDS=('gtk+ >= 3.6.4-1')
+DEPENDS=('gtk+ >= 3.8.0-1')
 
 # Description
 
@@ -37,8 +37,17 @@ cat > ${PKG}/install/doinst.sh <<EOF
 #!/bin/sh
 
 # Compile settings data schemas
-if [ -x /usr/bin/glib-compile-schemas ]; then
-  /usr/bin/glib-compile-schemas /usr/share/glib-2.0/schemas
+
+if [ -x ${SYS_DIR[bin]}/glib-compile-schemas ]; then
+  ${SYS_DIR[bin]}/glib-compile-schemas ${SYS_DIR[share]}/glib-2.0/schemas
+fi
+
+if [ -x ${SYS_DIR[bin]}/update-desktop-database ]; then
+  ${SYS_DIR[bin]}/update-desktop-database -q
+fi
+
+if [ -x ${SYS_DIR[bin]}/gtk-update-icon-cache ]; then
+  ${SYS_DIR[bin]}/gtk-update-icon-cache -q -t -f ${SYS_DIR[share]}/icons/hicolor
 fi
 EOF
 

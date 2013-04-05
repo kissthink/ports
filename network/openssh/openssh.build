@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=openssh
-VERSION=6.1p1
+VERSION=6.2p1
 BUILD=1
-DEPENDS=('openssl >= 1.0.1c-1' 'tcpip >= 20130122-1')
+DEPENDS=('openssl >= 1.0.1e-1' 'tcpip >= 20130209-1')
 
 # Description
 
@@ -33,6 +33,47 @@ ${NAME}: and Dug Song. It has a homepage at http://www.openssh.com
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+config etc/ssh/ssh_config.new
+config etc/ssh/sshd_config.new
+config etc/rc.d/rc.sshd.new
+
+# If the sshd user/group/shadow don't exist, add them:
+
+if ! grep -q "^sshd:" etc/passwd ; then
+  echo "sshd:x:33:33:sshd:/:" >> etc/passwd
+fi
+
+if ! grep -q "^sshd:" etc/group ; then
+  echo "sshd::33:sshd" >> etc/group
+fi
+
+if ! grep -q "^sshd:" etc/shadow ; then
+  echo "sshd:*:9797:0:::::" >> etc/shadow
+fi
+
+# Add a btmp file to store login failure if one doesn't exist:
+
+if [ ! -r var/log/btmp ]; then
+  ( cd var/log ; umask 077 ; touch btmp )
+fi
+EOF
+
 # Sources
 
 SRCNAME[0]=${NAME}
@@ -45,35 +86,35 @@ build0()
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc/ssh \
- --libdir=/usr/lib$(libdirsuffix) \
- --libexecdir=/usr/lib$(libdirsuffix)/exec \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}/ssh" \
+ --libdir="${SYS_DIR[lib]}" \
+ --libexecdir="${SYS_DIR[lib]}/exec" \
+ --localstatedir="${SYS_DIR[var]}" \
  --without-pam \
- --with-xauth=/usr/bin/xauth \
- --with-pid-dir=/run/sshd \
+ --with-xauth="${SYS_DIR[bin]}/xauth" \
+ --with-pid-dir="${SYS_DIR[run]}/sshd" \
  --with-default-path="/usr/local/sbin:/usr/sbin:/usr/local/bin:/usr/bin" \
  --with-md5-passwords \
  --with-tcp-wrappers \
  --with-privsep-user=sshd \
- --with-privsep-path=/var/empty
+ --with-privsep-path="${SYS_DIR[var]}/empty"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc CREDITS README.{dns,privsep,tun}
 changelog ChangeLog
-license LICENSE
-install.dat doinst.sh ${PKG}/install
-install.dir ${PKG}/var/empty
-install.dir ${PKG}/etc/rc.d
-install.bin rc.sshd.new ${PKG}/etc/rc.d
-install.bin contrib/ssh-copy-id ${PKG}/usr/bin
+license LICENCE
+install.dir ${PKG}${SYS_DIR[var]}/empty
+install.dir ${PKG}${SYS_DIR[etc]}/{rc.d,tmpfiles.d}
+install.bin rc.sshd.new ${PKG}${SYS_DIR[etc]}/rc.d
+install.dat sshd.conf.tmpfilesd ${PKG}${SYS_DIR[etc]}/tmpfiles.d/sshd.conf
+install.bin contrib/ssh-copy-id ${PKG}${SYS_DIR[bin]}
 install.man contrib/ssh-copy-id.1 ${PKG}${SYS_DIR[man]}/man1
 install.dir ${PKG}${SYS_DIR[systemdsystemunitdir]}
 install.cfg systemd/* ${PKG}${SYS_DIR[systemdsystemunitdir]}
 (
-  cd ${PKG}/etc/ssh
+  cd ${PKG}${SYS_DIR[etc]}/ssh
   rm -f ssh_host*key.*
   mv ssh_config ssh_config.new
   mv sshd_config sshd_config.new

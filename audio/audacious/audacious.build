@@ -6,9 +6,9 @@ source /usr/src/ports/Build/build.sh
 
 NAME=audacious
 VERSION=3.3.4
-BUILD=1
-DEPENDS=('gtk+ >= 3.6.4-1' 'dbus_glib >= 0.100-1')
-OPTDEPENDS=('mpg123 >= 1.14.4-1' 'ffmpeg >= 1.1.2-1' 'curl >= 7.29.0-1')
+BUILD=2
+DEPENDS=('gtk+ >= 3.8.0-1' 'dbus_glib >= 0.100-1')
+OPTDEPENDS=('mpg123 >= 1.15.3-1' 'ffmpeg >= 1.2-1' 'curl >= 7.29.0-1' 'libcdio >= 0.90-1')
 
 # Description
 

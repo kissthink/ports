@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=icon_theme
-VERSION=0.8.90
+VERSION=$(date +%Y%m%d)
 ARCH=noarch
-BUILD=2
+BUILD=1
 
 # Description
 
@@ -22,8 +22,8 @@ cat > ${PKG}/install/slack-desc <<EOF
 $(padd)|-----handy-ruler------------------------------------------------------|
 ${NAME}: icon_theme
 ${NAME}:
-${NAME}: The default icon set which is Tango. It follows the icon theme 
-${NAME}: specification. This specification is available at:
+${NAME}: The default icon set. It follows the icon theme specification. This
+${NAME}: specification is available at:
 ${NAME}:
 ${NAME}:   http://www.freedesktop.org/standards/icon-theme-spec
 ${NAME}:
@@ -31,6 +31,17 @@ ${NAME}:
 ${NAME}:
 ${NAME}:
 ${NAME}:
+EOF
+
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+# Update icon theme caches
+
+if [ -x ${SYS_DIR[bin]}/gtk-update-icon-cache ]; then
+  ${SYS_DIR[bin]}/gtk-update-icon-cache -q -t -f ${SYS_DIR[share]}/icons/hicolor
+  ${SYS_DIR[bin]}/gtk-update-icon-cache -q -t -f ${SYS_DIR[share]}/icons/gnome
+fi
 EOF
 
 # Sources
@@ -44,73 +55,49 @@ build0()
 {
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
-make -j 2
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
+make ${JOBS}
 make install DESTDIR="${PKG}"
 changelog ChangeLog
-mkdir -p ${PKG}/var/log/setup
-install.dat doinst.sh ${PKG}/install
-install.bin setup.08.gtk-update-icon-cache ${PKG}/var/log/setup
+install.dir ${PKG}${SYS_DIR[var]}/{log/setup,cache/icons/hicolor}
+install.bin setup.08.gtk-update-icon-cache ${PKG}${SYS_DIR[var]}/log/setup
+touch ${PKG}${SYS_DIR[var]}/cache/icons/hicolor/icon-theme.cache
+(
+  cd ${PKG}${SYS_DIR[share]}/icons/hicolor
+  ln -sf ${SYS_DIR[var]}/cache/icons/hicolor/icon-theme.cache
+)
 }
 
-SRCNAME[1]=tango-icon-theme
-SRCVERS[1]=0.8.90
-SRCPACK[1]=http://tango.freedesktop.org/releases/${SRCNAME[1]}-${SRCVERS[1]}.tar.bz2
+SRCNAME[1]=gnome-icon-theme
+ICONTM=3.8
+SRCVERS[1]=${ICONTM}.0
+SRCPACK[1]=ftp://ftp.gnome.org/pub/gnome/sources/${SRCNAME[1]}/${ICONTM}/${SRCNAME[1]}-${SRCVERS[1]}.tar.xz
+SRCCOPY[1]="LGPL3 CCBYSA3"
 
 build1()
 {
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
-  --prefix=/usr \
-  --mandir="${SYS_DIR[man]}" \
-  --sysconfdir=/etc \
-  --localstatedir=/var \
-  --enable-png-creation
-make
+ --build="${ARCH}-slackware-linux" \
+ --prefix="${SYS_DIR[usr]}" \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
+make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
-changelog ChangeLog
-rm -rf \
- ${PKG}/usr/share/locale
-mv \
- ${PKG}/usr/share/icons/Tango \
- ${PKG}/usr/share/icons/tango
-}
-
-SRCNAME[2]=tango
-SRCVERS[2]=extras
-SRCPACK[2]=${SRCNAME[2]}-${SRCVERS[2]}.tar.xz
-SRCOPTS[2]="pkgunpack"
-
-linkicon()
-{
-  if [ -e "${1}" ]; then
-    ln -s "../${1}" "${2}"
-  fi
-}
-
-build2()
-{
-cd usr/share/icons/tango
-for size in 16 22 24 32 48 64 72 96 128 scalable; do
-if [[ "${size}" == "scalable" ]]; then
-  SIZEDIR="${size}"
-else
-  SIZEDIR="${size}x${size}"
-fi
+changelog NEWS
+install.dir ${PKG}${SYS_DIR[var]}/cache/icons/gnome
+touch ${PKG}${SYS_DIR[var]}/cache/icons/gnome/icon-theme.cache
 (
-  cd "${SIZEDIR}"
-  linkicon "devices/input-keyboard.png" "apps/preferences-desktop-keyboard.png"
-  linkicon "devices/input-keyboard.svg" "apps/preferences-desktop-keyboard.svg"
-  linkicon "emblems/emblem-symbolic-link.png" "actions/insert-link.png"
-  linkicon "emblems/emblem-symbolic-link.svg" "actions/insert-link.png"
-  linkicon "places/folder.png" "mimetypes/inode-directory.png"
-  linkicon "places/folder.svg" "mimetypes/inode-directory.svg"
-  linkicon "status/network-idle.svg" "apps/preferences-system-network.svg"
-  linkicon "status/network-idle.png" "apps/preferences-system-network.png"
+  cd ${PKG}${SYS_DIR[share]}/icons/gnome
+  ln -sf ${SYS_DIR[var]}/cache/icons/gnome/icon-theme.cache
 )
-done
+# Why does an icon theme need to be translated?
+rm -rf ${PKG}${SYS_DIR[share]}/locale
 }

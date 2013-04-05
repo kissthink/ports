@@ -36,10 +36,27 @@ ${NAME}:
 EOF
 
 cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
 # Do the module querying after installation...
 
+export GTK_IM_MODULE_FILE="${SYS_DIR[var]}/cache/gtk-3.0/immodules.cache"
+
 if [ -x ${SYS_DIR[bin]}/gtk-query-immodules-3.0 ]; then
-  ${SYS_DIR[bin]}/gtk-query-immodules-3.0 > ${SYS_DIR[etc]}/gtk-3.0/gtk.immodules
+  ${SYS_DIR[bin]}/gtk-query-immodules-3.0 --update-cache
 fi
 
 # Compile settings data schemas
@@ -47,6 +64,8 @@ fi
 if [ -x ${SYS_DIR[bin]}/glib-compile-schemas ]; then
   ${SYS_DIR[bin]}/glib-compile-schemas ${SYS_DIR[share]}/glib-2.0/schemas
 fi
+
+config etc/gtk-3.0/im-multipress.conf.new
 EOF
 
 # Sources
@@ -88,8 +107,14 @@ make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-touch ${PKG}${SYS_DIR[etc]}/gtk-3.0/gtk.immodules
+install.dir ${PKG}${SYS_DIR[etc]}/profile.d
+install.bin gtk+3.sh ${PKG}${SYS_DIR[etc]}/profile.d
+install.bin gtk+3.csh ${PKG}${SYS_DIR[etc]}/profile.d
+config ${PKG}${SYS_DIR[etc]}/gtk-3.0/im-multipress.conf
+install.dir ${PKG}${SYS_DIR[var]}/cache/gtk-3.0
+touch ${PKG}${SYS_DIR[var]}/cache/gtk-3.0/immodules.cache
 # We can include the demos while Gtk+ 3 is not deprecated
+# but ideally this should be in a subpackage
 #rm -rf \
 # ${PKG}/usr/share/gtk-3.0/demo \
 # ${PKG}/usr/bin/gtk3-demo* \

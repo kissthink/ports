@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=htop
 VERSION=1.0.2
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -45,11 +45,11 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc/conf.d \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[conf]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --enable-native-affinity \
  --enable-cgroup \
  --enable-unicode \

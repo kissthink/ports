@@ -5,10 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=seahorse
-MAJOR=3.6
-VERSION=${MAJOR}.3
+MAJOR=3.8
+VERSION=${MAJOR}.0
 BUILD=1
-DEPENDS=('gtk+ >= 3.6.4-1' 'gcr >= 3.6.2-1' 'gpgme >= 1.3.2-1' 'libsecret >= 0.12-1' 'libsoup >= 2.40.2-1')
+DEPENDS=('gtk+ >= 3.8.0-1' 'gcr >= 3.8.0-1' 'gpgme >= 1.3.2-1' 'libsecret >= 0.14-1' 'libsoup >= 2.42.0-1')
 OPTDEPENDS=('openssh >= 6.1p1-1')
 
 # Description
@@ -39,16 +39,17 @@ cat > ${PKG}/install/doinst.sh <<EOF
 #!/bin/sh
 
 # Compile settings data schemas
-if [ -x /usr/bin/glib-compile-schemas ]; then
-  /usr/bin/glib-compile-schemas /usr/share/glib-2.0/schemas
+
+if [ -x ${SYS_DIR[bin]}/glib-compile-schemas ]; then
+  ${SYS_DIR[bin]}/glib-compile-schemas ${SYS_DIR[share]}/glib-2.0/schemas
 fi
 
-if [ -x /usr/bin/update-desktop-database ]; then
-  /usr/bin/update-desktop-database -q
+if [ -x ${SYS_DIR[bin]}/update-desktop-database ]; then
+  ${SYS_DIR[bin]}/update-desktop-database -q
 fi
 
-if [ -x /usr/bin/gtk-update-icon-cache ]; then
-  /usr/bin/gtk-update-icon-cache -q -t -f /usr/share/icons/hicolor
+if [ -x ${SYS_DIR[bin]}/gtk-update-icon-cache ]; then
+  ${SYS_DIR[bin]}/gtk-update-icon-cache -q -t -f ${SYS_DIR[share]}/icons/hicolor
 fi
 EOF
 
@@ -70,18 +71,18 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-static=no \
  --enable-shared=yes \
  --enable-debug=no \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix)/exec \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}/exec" \
+ --localstatedir="${SYS_DIR[var]}" \
  --disable-sharing \
  --disable-ldap
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS MAINTAINERS THANKS
 changelog NEWS
-sed -i "s|@LIBEXECDIR@|/usr/lib$(libdirsuffix)/exec|g" seahorse-ssh-askpass.sh
-install.dir ${PKG}/usr/bin
-install.bin seahorse-ssh-askpass.sh ${PKG}/usr/bin/seahorse-ssh-askpass
+sed -i "s|@LIBEXECDIR@|${SYS_DIR[lib]}/exec|g" seahorse-ssh-askpass.sh
+install.dir ${PKG}${SYS_DIR[bin]}
+install.bin seahorse-ssh-askpass.sh ${PKG}${SYS_DIR[bin]}/seahorse-ssh-askpass
 }

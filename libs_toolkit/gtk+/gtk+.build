@@ -7,7 +7,7 @@ source /usr/src/ports/Build/build.sh
 NAME=gtk+
 MAJOR=2.24
 VERSION=${MAJOR}.17
-BUILD=1
+BUILD=2
 DEPENDS=('xorg_libs >= 7.7-1' 'gdk_pixbuf >= 2.28.0-1' 'cairo >= 1.12.12-1' 'atk >= 2.8.0-1' 'pango >= 1.34.0-1')
 OPTIONS="symprepend"
 
@@ -36,11 +36,28 @@ ${NAME}:
 EOF
 
 cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
 # Do the module querying after installation...
 
 if [ -x ${SYS_DIR[bin]}/gtk-query-immodules-2.0 ]; then
-  ${SYS_DIR[bin]}/gtk-query-immodules-2.0 > ${SYS_DIR[etc]}/gtk-2.0/gtk.immodules
+  ${SYS_DIR[bin]}/gtk-query-immodules-2.0 > ${SYS_DIR[var]}/cache/gtk-2.0/gtk.immodules
 fi
+
+config etc/gtk-2.0/im-multipress.conf.new
 EOF
 
 # Sources
@@ -58,7 +75,6 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
  --libdir="${SYS_DIR[lib]}" \
- --localstatedir="${SYS_DIR[var]}" \
  ${*}
 }
 
@@ -75,6 +91,7 @@ configure \
  --enable-introspection=no \
  --enable-debug=minimum \
  --sysconfdir="${SYS_DIR[etc]}" \
+ --localstatedir="${SYS_DIR[var]}/cache" \
  --with-html-dir="${SYS_DIR[html]}" \
  --with-xinput=yes
 make ${JOBS} V=1
@@ -84,7 +101,9 @@ changelog NEWS
 install.dir ${PKG}${SYS_DIR[etc]}/profile.d
 install.bin gtk+.sh ${PKG}${SYS_DIR[etc]}/profile.d
 install.bin gtk+.csh ${PKG}${SYS_DIR[etc]}/profile.d
-touch ${PKG}${SYS_DIR[etc]}/gtk-2.0/gtk.immodules
+config ${PKG}${SYS_DIR[etc]}/gtk-2.0/im-multipress.conf
+install.dir ${PKG}${SYS_DIR[var]}/cache/gtk-2.0
+touch ${PKG}${SYS_DIR[var]}/cache/gtk-2.0/gtk.immodules
 #cp -r \
 # docs/tutorial/html \
 # ${PKG}${SYS_DIR[share]}/html/gtk_tutorial
@@ -112,6 +131,7 @@ GTK_CFLAGS="-I${PKG}${SYS_DIR[include]}/gtk-2.0 -I${PKG}${SYS_DIR[include]}/$(un
 GTK_LIBS="-L${PKG}${SYS_DIR[lib]} -lgtk-x11-2.0" \
 configure \
  --sysconfdir="${SYS_DIR[etc]}/gtk-2.0" \
+ --localstatedir="${SYS_DIR[var]}" \
  --enable-animation \
  --disable-schema
 make ${JOBS} V=1

@@ -5,10 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=bluetoothapplet
-MAJOR=3.6
-VERSION=${MAJOR}.1
+MAJOR=3.8
+VERSION=${MAJOR}.0
 BUILD=1
-DEPENDS=('gtk+ >= 3.6.2-1' 'libnotify >= 0.7.5-1' 'obex >= 0.48-1')
+DEPENDS=('gtk+ >= 3.8.0-1' 'libnotify >= 0.7.5-1' 'bluetooth >= 4.101-1')
 
 # Description
 
@@ -34,6 +34,18 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat > ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+if [ -x ${SYS_DIR[bin]}/update-desktop-database ]; then
+  ${SYS_DIR[bin]}/update-desktop-database -q
+fi
+
+if [ -x ${SYS_DIR[bin]}/gtk-update-icon-cache ]; then
+  ${SYS_DIR[bin]}/gtk-update-icon-cache -q -t -f ${SYS_DIR[share]}/icons/hicolor
+fi
+EOF
+
 # Sources
 
 SRCNAME[0]=gnome-bluetooth
@@ -43,6 +55,9 @@ SRCCOPY[0]="GPL2 LGPL21"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
+sed -i 's|pkglibdir = $(libdir)/@PACKAGE@|pkglibdir = $(libdir)|g' $(find . -name "Makefile.in")
+sed -i 's|$(libdir)/gnome-bluetooth/plugins|$(libdir)/plugins/gnome-bluetooth|g' $(find . -name "Makefile.in")
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -51,16 +66,20 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-rpath \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --with-html-dir="${SYS_DIR[html]}" \
  --disable-icon-update \
- --disable-desktop-update \
- --with-html-dir="${SYS_DIR[html]}"
+ --disable-desktop-update
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
+install.dir ${PKG}${SYS_DIR[share]}/Thunar/sendto
+install.dat thunar-sendto-bluetooth.desktop ${PKG}${SYS_DIR[share]}/Thunar/sendto
+# No development docs
+rm -rf ${PKG}${SYS_DIR[html]}
 }

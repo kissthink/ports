@@ -28,8 +28,10 @@ DIST_FLAGS[i486]="${CPU_FLAGS[i486]} ${DIST_FLAGS[all]}"
 DIST_FLAGS[i586]="${CPU_FLAGS[i586]} ${DIST_FLAGS[all]}"
 DIST_FLAGS[i686]="${CPU_FLAGS[i686]} ${DIST_FLAGS[all]}"
 DIST_FLAGS[x86_64]="${CPU_FLAGS[x86_64]} ${DIST_FLAGS[all]}"
+DEBUG_FLAGS[all]="-g"
 
 JOBS="-j 2"
+DEBUG="no"
 
 # Filesystem layout
 

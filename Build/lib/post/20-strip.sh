@@ -25,27 +25,31 @@
 
 if [[ ! "${OPTIONS}" == *nostrip* ]]; then
 
-  info "Stripping debugging symbols from binaries"
+  if [[ ! "${DEBUG}" == yes ]]; then
 
-  # Allow the for loop to work on files with spaces
-  saveifs="${IFS}"
-  IFS=$(echo -en "\n\b")
+    info "Stripping debugging symbols from binaries"
 
-  for file in $(find ${PKG}); do
+    # Allow the for loop to work on files with spaces
+    saveifs="${IFS}"
+    IFS=$(echo -en "\n\b")
 
-    filetype="$(file -bi ${file})"
+    for file in $(find ${PKG}); do
 
-    case "${filetype}" in
-      *"application/x-executable; charset=binary"*)
-        strip "${file}"
-      ;;
-      *"application/x-sharedlib; charset=binary"*)
-        strip --strip-unneeded "${file}"
-      ;;
-    esac
+      filetype="$(file -bi ${file})"
 
-  done
+      case "${filetype}" in
+        *"application/x-executable; charset=binary"*)
+          strip "${file}"
+        ;;
+        *"application/x-sharedlib; charset=binary"*)
+          strip --strip-unneeded "${file}"
+        ;;
+      esac
 
-  IFS="${saveifs}"
+    done
+
+    IFS="${saveifs}"
+
+  fi
 
 fi

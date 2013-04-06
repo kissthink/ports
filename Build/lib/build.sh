@@ -40,6 +40,10 @@ if [[ "${*}" == *--verbose* ]]; then
   DISPLAY[debug]=yes
 fi
 
+if [[ "${*}" == *--debug* ]]; then
+  DEBUG=yes
+fi
+
 # Create package root
 dir.make "${PKG}/install"
 

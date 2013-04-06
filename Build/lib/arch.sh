@@ -60,6 +60,10 @@ function def_flags()
       echo -n "${DIST_FLAGS[all]}"
     ;;
   esac
+
+  if [[ "${DEBUG}" == yes ]]; then
+    echo -n " ${DEBUG_FLAGS[all]}"
+  fi
 }
 
 function cpufamily()

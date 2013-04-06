@@ -1,0 +1,77 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=gdb
+VERSION=7.5.1
+BUILD=1
+DEPENDS=('expat >= 2.1.0-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: gdb (the GNU symbolic debugger)
+${NAME}:
+${NAME}: GDB, the GNU debugger, allows you see what is going on inside another
+${NAME}: program while it executes -- or what another program was doing at the
+${NAME}: moment it crashed. GDB can do four main kinds of things to help you
+${NAME}: catch bugs in the act: 1) Start your program, specifying anything
+${NAME}: that might affect its behavior. 2) Make your program stop on
+${NAME}: specified conditions. 3) xamine what has happened, when your program
+${NAME}: has stopped. 4) Change things in your program, so you can experiment
+${NAME}: with correcting the effects of one bug and go on to learn about
+${NAME}: another. It supports C, C++, ObjC, Pascal and many other languages.
+EOF
+
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+# Install the texinfo files
+
+for file in gdb gdbint stabs; do
+if [ -x ${SYS_DIR[bin]}/install-info ]; then
+  ${SYS_DIR[bin]}/install-info --info-dir=${SYS_DIR[info]} ${SYS_DIR[info]}/\${file}.gz 2> /dev/null
+fi
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=ftp://sourceware.org/pub/gdb/releases/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCCOPY[0]="GPL2 LGPL2 GPL3 LGPL3"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --prefix="${SYS_DIR[usr]}" \
+ --mandir="${SYS_DIR[man]}" \
+ --infodir="${SYS_DIR[info]}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --with-system-readline
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog ChangeLog
+rm -rf \
+ ${PKG}${SYS_DIR[lib]}/lib{bfd,iberty,opcodes}* \
+ ${PKG}${SYS_DIR[lib]}64 \
+ ${PKG}${SYS_DIR[info]}/{annotate,bfd,configure,standards}* \
+ ${PKG}${SYS_DIR[include]} \
+ ${PKG}${SYS_DIR[share]}/locale
+}

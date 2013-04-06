@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=mc
-VERSION=4.8.7
-BUILD=2
-DEPENDS=('glib >= 2.34.3-1' 'libssh2 >= 1.4.3-1')
+VERSION=4.8.8
+BUILD=1
+DEPENDS=('glib >= 2.36.0-1' 'libssh2 >= 1.4.3-1')
 
 # Description
 

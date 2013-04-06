@@ -49,6 +49,12 @@ config() {
 }
 
 config etc/pkcs11/pkcs11.conf.new
+
+# Install the texinfo files
+
+if [ -x ${SYS_DIR[bin]}/install-info ]; then
+  ${SYS_DIR[bin]}/install-info --info-dir=${SYS_DIR[info]} ${SYS_DIR[info]}/rluserman.info.gz 2> /dev/null
+fi
 EOF
 
 # Sources
@@ -76,7 +82,7 @@ changelog ChangeLog
 }
 
 SRCNAME[1]=gmp
-SRCVERS[1]=5.1.0
+SRCVERS[1]=5.1.1
 SRCPACK[1]=ftp://ftp.gmplib.org/pub/gmp-${SRCVERS[1]}/${SRCNAME[1]}-${SRCVERS[1]}.tar.xz
 SRCCOPY[1]="GPL3 LGPL3"
 
@@ -105,7 +111,7 @@ rm -rf ${PKG}${SYS_DIR[info]}
 }
 
 SRCNAME[2]=mpfr
-SRCVERS[2]=3.1.1
+SRCVERS[2]=3.1.2
 SRCPACK[2]=http://www.mpfr.org/mpfr-current/${SRCNAME[2]}-${SRCVERS[2]}.tar.xz
 SRCCOPY[2]="GPL3 LGPL3"
 
@@ -170,7 +176,7 @@ rm -rf ${PKG}${SYS_DIR[info]}
 }
 
 SRCNAME[4]=libtasn1
-SRCVERS[4]=3.2
+SRCVERS[4]=3.3
 SRCPACK[4]=http://ftp.gnupg.org/pub/gnutls/${SRCNAME[4]}/${SRCNAME[4]}-${SRCVERS[4]}.tar.gz
 SRCCOPY[4]="LGPL21 GPL3"
 
@@ -219,13 +225,13 @@ SRCCOPY[6]="LGPL21"
 
 build6()
 {
+#NOTE: cannot use --disable-static as it breaks the build
 sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --enable-shared \
- --disable-static \
  --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
  --infodir="${SYS_DIR[info]}" \
@@ -237,17 +243,20 @@ make install DESTDIR="${PKG}"
 changelog NEWS
 chmod 0755 ${PKG}${SYS_DIR[lib]}/*.so*
 # No development docs
-rm -rf ${PKG}${SYS_DIR[info]}
+rm -rf \
+ ${PKG}${SYS_DIR[info]} \
+ ${PKG}${SYS_DIR[lib]}/lib{nettle,hogweed}.a
 }
 
 SRCNAME[7]=libffi
-SRCVERS[7]=3.0.11
+SRCVERS[7]=3.0.13
 SRCPACK[7]=ftp://sourceware.org/pub/${SRCNAME[7]}/${SRCNAME[7]}-${SRCVERS[7]}.tar.gz
 SRCCOPY[7]="MIT"
 
 build7()
 {
 sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
+sed -i "s|@ARCHITECTURE@|$(uname -m)|g" include/Makefile.{am,in} libffi.pc.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -263,6 +272,11 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 make ${JOBS}
 make install DESTDIR="${PKG}"
 changelog ChangeLog
+#FIXME: kludge
+mv \
+ ${PKG}${SYS_DIR[lib]}64/* \
+ ${PKG}${SYS_DIR[lib]}
+rmdir ${PKG}${SYS_DIR[lib]}64
 # No development docs
 rm -rf ${PKG}${SYS_DIR[info]}
 }
@@ -293,7 +307,7 @@ changelog CHANGES
 }
 
 SRCNAME[9]=p11-kit
-SRCVERS[9]=0.14
+SRCVERS[9]=0.18.0
 SRCPACK[9]=http://p11-glue.freedesktop.org/releases/${SRCNAME[9]}-${SRCVERS[9]}.tar.gz
 SRCCOPY[9]="BSD3"
 
@@ -311,6 +325,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-rpath \
  --enable-static=no \
  --enable-shared=yes \
+ --enable-debug=no \
  --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
  --sysconfdir="${SYS_DIR[etc]}" \
@@ -318,8 +333,8 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --localstatedir="${SYS_DIR[var]}" \
  --with-html-dir="${SYS_DIR[html]}" \
  --with-module-path="${SYS_DIR[lib]}/plugins/pkcs11"
-# --with-system-anchors="${SYS_DIR[share]}/ca-certificates"
-#--with-system-config= --with-system-certificates=
+#--with-trust-paths="${SYS_DIR[share]}/ca-certificates"
+#--with-system-config=
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
@@ -328,4 +343,42 @@ mv \
  ${PKG}${SYS_DIR[etc]}/pkcs11/pkcs11.conf.example \
  ${PKG}${SYS_DIR[etc]}/pkcs11/pkcs11.conf.new
 rm -rf ${PKG}${SYS_DIR[html]}
+}
+
+#NOTE: ncurses is a dependency of readline
+
+SRCNAME[10]=readline
+SRCVERS[10]=6.2
+SRCPACK[10]=${URL[gnu]}/readline/${SRCNAME[10]}-${SRCVERS[10]}.tar.gz
+SRCCOPY[10]="GPL2"
+
+build10()
+{
+case "$(uname -m)" in
+  x86_64)
+    PIC="-fPIC"
+  ;;
+esac
+sed -i 's|$(prefix)/lib/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
+sed -i 's|-Wl,-rpath,$(libdir) ||g' support/shobj-conf
+CFLAGS="${FLAGS} ${PIC}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --enable-static=yes \
+ --enable-shared=yes \
+ --prefix="${SYS_DIR[usr]}" \
+ --mandir="${SYS_DIR[man]}" \
+ --infodir="${SYS_DIR[info]}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --enable-multibyte \
+ --with-curses
+make ${JOBS} SHLIB_LIBS="-lncurses"
+make install DESTDIR="${PKG}"
+changelog CHANGES
+rm -rf \
+ ${PKG}${SYS_DIR[share]}/readline \
+ ${PKG}${SYS_DIR[info]}/{history,readline}*
+#chmod 0755 ${PKG}${SYS_DIR[lib]}/libreadline*.so.*
 }

@@ -6,9 +6,10 @@ source /usr/src/ports/Build/build.sh
 
 NAME=networkmanager
 MAJOR=0.9
-VERSION=${MAJOR}.7.995
+VERSION=${MAJOR}.8.0
 BUILD=1
-DEPENDS=('glib >= 2.34.3-1' 'dbus >= 1.4.24-1' 'udev >= 173-1' 'gnutls >= 3.1.6-1' 'tcpip >= 20130122-1' 'libsoup >= 2.40.2-1')
+DEPENDS=('glib >= 2.36.0-1' 'dbus >= 1.6.8-1' 'udev >= 173-1' 'gnutls >= 3.1.10-1' 'tcpip >= 20130209-1' 'libsoup >= 2.42.0-1')
+OPTDEPENDS=('ppp >= 2.4.5-1' 'wireless >= 20130324-1')
 
 # Description
 
@@ -34,6 +35,42 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat > ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+preserve_perms() {
+  NEW="\$1"
+  OLD="\$(dirname \${NEW})/\$(basename \${NEW} .new)"
+  if [ -e \${OLD} ]; then
+    cp -a \${OLD} \${NEW}.incoming
+    cat \${NEW} > \${NEW}.incoming
+    mv \${NEW}.incoming \${NEW}
+  fi
+  config \${NEW}
+}
+
+if [ -e etc/HOSTNAME ]; then
+  sed -i "s|@myhostname@|\$(cat etc/HOSTNAME | cut -f1 -d .)|g" \
+    etc/NetworkManager/NetworkManager.conf.new
+fi
+
+preserve_perms etc/rc.d/rc.networkmanager.new
+config etc/NetworkManager/NetworkManager.conf.new
+EOF
+
 # Sources
 
 SRCNAME[0]=NetworkManager
@@ -43,7 +80,9 @@ SRCCOPY[0]="GPL2"
 
 build0()
 {
-#FIXME: systemd
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' $(find . -name "Makefile.in")
+sed -i 's|pkglibdir = $(libdir)/@PACKAGE@|pkglibdir = $(libdir)/plugins/@PACKAGE@|g' $(find . -name "Makefile.in")
+sed -i 's|$(UDEV_BASE_DIR)/rules.d|$(UDEV_BASE_DIR)|g' callouts/Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -53,34 +92,34 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-static=no \
  --enable-shared=yes \
  --enable-introspection=no \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --libexecdir=/usr/lib$(libdirsuffix)/exec \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --libexecdir="${SYS_DIR[lib]}/exec" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-html-dir="${SYS_DIR[html]}" \
- --with-system-ca-path=/usr/share/ca-certificates \
+ --with-system-ca-path="${SYS_DIR[share]}/ca-certificates" \
  --with-systemdsystemunitdir="${SYS_DIR[systemdsystemunitdir]}" \
- --with-udev-dir="$(pkg-config udev --variable=udevdir)" \
- --with-pppd-plugin-dir="/usr/lib$(libdirsuffix)/pppd/2.4.5" \
+ --with-udev-dir="${SYS_DIR[udevrules]}" \
+ --with-pppd-plugin-dir="${SYS_DIR[lib]}/plugins/pppd/2.4.5" \
  --with-session-tracking=consolekit \
  --with-suspend-resume=upower \
  --with-crypto=gnutls \
- --with-libnl=3 \
- --with-dhcpcd=/usr/sbin/dhcpcd \
+ --with-dhcpcd="${SYS_DIR[sbin]}/dhcpcd" \
  --with-dhclient=yes \
  --disable-qt \
  --enable-modify-system \
  --enable-polkit \
  --enable-ppp \
  --enable-concheck
+#FIXME: systemd
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-install.dat doinst.sh ${PKG}/install
-install.dir ${PKG}/etc/rc.d
-install.dat rc.networkmanager.new ${PKG}/etc/rc.d
-install.cfg NetworkManager.conf.new ${PKG}/etc/NetworkManager
+install.dir ${PKG}${SYS_DIR[etc]}/rc.d
+install.dat rc.networkmanager.new ${PKG}${SYS_DIR[etc]}/rc.d
+install.cfg NetworkManager.conf.new ${PKG}${SYS_DIR[etc]}/NetworkManager
+rmdir ${PKG}${SYS_DIR[lib]}/plugins/NetworkManager
 }

@@ -6,9 +6,9 @@ source /usr/src/ports/Build/build.sh
 
 NAME=sqlite
 MAJOR=3
-MINOR=7.15.2
+MINOR=7.16.1
 VERSION=${MAJOR}.${MINOR}
-BUILD=2
+BUILD=1
 
 # Description
 
@@ -37,11 +37,12 @@ EOF
 # Sources
 
 SRCNAME[0]=${NAME}-src
-SRCVERS[0]=3071502
+SRCVERS[0]=3071601
 SRCPACK[0]=http://www.sqlite.org/${SRCNAME[0]}-${SRCVERS[0]}.zip
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(prefix)/share/pkgconfig|g' Makefile.in
 # sqlite refuses to compile with -ffast-math
 CPPFLAGS="-DSQLITE_ENABLE_COLUMN_METADATA=1 -DSQLITE_DISABLE_DIRSYNC=1 -DSQLITE_ENABLE_FTS3=3 -DSQLITE_ENABLE_RTREE=1 -DSQLITE_SECURE_DELETE=1 -DSQLITE_ENABLE_UNLOCK_NOTIFY=1" \
 CFLAGS="${FLAGS%-ffast-math}" CXXFLAGS="${FLAGS%-ffast-math}" \

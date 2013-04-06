@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=gettext
-VERSION=0.18.2
+VERSION=0.18.2.1
 BUILD=1
 DEPENDS=('expat >= 2.1.0-1')
 
@@ -34,10 +34,13 @@ ${NAME}:
 EOF
 
 cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
 # Install the texinfo files
-if [ -x /usr/bin/install-info ]; then
-  /usr/bin/install-info --info-dir=${SYS_DIR[info]} ${SYS_DIR[info]}/gettext.info.gz 2> /dev/null
-  /usr/bin/install-info --info-dir=${SYS_DIR[info]} ${SYS_DIR[info]}/autosprintf.info.gz 2> /dev/null
+
+if [ -x ${SYS_DIR[bin]}/install-info ]; then
+  ${SYS_DIR[bin]}/install-info --info-dir=${SYS_DIR[info]} ${SYS_DIR[info]}/gettext.info.gz 2> /dev/null
+  ${SYS_DIR[bin]}/install-info --info-dir=${SYS_DIR[info]} ${SYS_DIR[info]}/autosprintf.info.gz 2> /dev/null
 fi
 EOF
 

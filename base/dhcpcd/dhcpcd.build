@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=dhcpcd
-VERSION=5.6.6
+VERSION=5.6.8
 BUILD=1
 
 # Description
@@ -32,6 +32,25 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+config etc/dhcpcd.conf.new
+EOF
+
 # Sources
 
 SRCNAME[0]=${NAME}
@@ -44,24 +63,22 @@ build0()
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --libexecdir=/usr/share/net/dhcpcd \
- --dbdir=/var/lib/dhcpcd \
- --rundir=/run/dhcpcd
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --libexecdir="${SYS_DIR[share]}/net/dhcpcd" \
+ --dbdir="${SYS_DIR[var]}/lib/dhcpcd" \
+ --rundir="${SYS_DIR[run]}/dhcpcd"
 make ${JOBS}
 make install DESTDIR="${PKG}" HOOKSCRIPTS="50-ntp.conf 50-yp.conf"
 doc README
-mv \
- ${PKG}/etc/dhcpcd.conf \
- ${PKG}/etc/dhcpcd.conf.new
+config ${PKG}${SYS_DIR[etc]}/dhcpcd.conf
 #FIXME: compat
 install.dir ${PKG}/sbin
 (
   cd ${PKG}/sbin
-  ln -sf /usr/sbin/dhcpcd
+  ln -sf ${SYS_DIR[sbin]}/dhcpcd
 )
 }

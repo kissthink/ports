@@ -5,8 +5,8 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=sudo
-VERSION=1.8.6p4
-BUILD=2
+VERSION=1.8.6p7
+BUILD=1
 
 # Description
 
@@ -34,6 +34,7 @@ EOF
 
 cat >> ${PKG}/install/doinst.sh <<EOF
 #!/bin/sh
+
 config() {
   NEW="\$1"
   OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
@@ -46,6 +47,7 @@ config() {
   fi
   # Otherwise, we leave the .new copy for the admin to consider...
 }
+
 config etc/sudoers.new
 rm -f etc/sudoers.new
 EOF
@@ -71,19 +73,18 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --libexecdir="${SYS_DIR[lib]}"/plugins/sudo \
  --localstatedir="${SYS_DIR[var]}" \
  --sbindir="${SYS_DIR[sbin]}" \
- --with-docdir="${SYS_DIR[doc]}/sudo" \
  --with-timedir="${SYS_DIR[run]}/sudo" \
  --with-passprompt="[sudo] password for %p: " \
  --with-logging="syslog" \
  --with-logfac="authpriv" \
+ --with-editor="${SYS_DIR[bin]}/vi" \
  --with-ignore-dot \
  --with-tty-tickets \
  --with-env-editor \
  --disable-pam-session \
  --with-pam=no \
 #FIXME: pam (--with-pam-login)
-#FIXME: default editor (--with-editor=/usr/bin/vi|/usr/bin/nano ?)
-#NOTE: --with-linux-audit ? 
+#NOTE: --with-linux-audit ?
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc doc/CONTRIBUTORS doc/UPGRADE doc/sample.{sudo.conf,sudoers}
@@ -98,10 +99,8 @@ install.dat sudo.conf.tmpfiles ${PKG}${SYS_DIR[etc]}/tmpfiles.d/sudo.conf
 rm -f ${PKG}${SYS_DIR[man]}/man8/sudoedit.8
 echo ".so man8/sudo.8" > ${PKG}${SYS_DIR[man]}/man8/sudoedit.8
 chmod 0755 ${PKG}${SYS_DIR[lib]}/plugins/sudo/*.so
-mv \
- ${PKG}${SYS_DIR[etc]}/sudoers \
- ${PKG}${SYS_DIR[etc]}/sudoers.new
+config ${PKG}${SYS_DIR[etc]}/sudoers
 rm -rf \
  ${PKG}${SYS_DIR[run]} \
- ${PKG}${SYS_DIR[share]}/doc
+ ${PKG}${SYS_DIR[doc]}/sudo
 }

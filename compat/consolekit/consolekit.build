@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=consolekit
 VERSION=0.4.6
-BUILD=4
+BUILD=5
 
 # Description
 

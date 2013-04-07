@@ -7,7 +7,7 @@ source /usr/src/ports/Build/build.sh
 NAME=gnome_keyring
 MAJOR=3.8
 VERSION=${MAJOR}.0
-BUILD=1
+BUILD=2
 DEPENDS=('gcr >= 3.8.0-1')
 
 # Description
@@ -41,6 +41,12 @@ cat > ${PKG}/install/doinst.sh <<EOF
 
 if [ -x ${SYS_DIR[bin]}/glib-compile-schemas ]; then
   ${SYS_DIR[bin]}/glib-compile-schemas ${SYS_DIR[share]}/glib-2.0/schemas
+fi
+
+# Allow gnome-keyring-daemon to use secure memory
+
+if [ -x ${SYS_DIR[bin]}/setcap ]; then
+  ${SYS_DIR[bin]}/setcap cap_ipc_lock=ep ${SYS_DIR[bin]}/gnome-keyring-daemon
 fi
 EOF
 

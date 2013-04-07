@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=avahi
 VERSION=0.6.31
-BUILD=1
-DEPENDS=('libdaemon >= 0.14-1')
+BUILD=2
+DEPENDS=('libdaemon >= 0.14-1' 'expat >= 2.1.0-1')
 
 # Description
 
@@ -33,6 +33,62 @@ ${NAME}:
 ${NAME}: Homepage: http://avahi.org
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+config etc/rc.d/rc.avahidaemon.new
+config etc/rc.d/rc.avahidnsconfd.new
+config etc/avahi/avahi-daemon.conf.new
+config etc/mdns.allow.new
+
+# If the avahi users/groups don't exist add them
+
+if grep "^avahi:x:" etc/passwd 1> /dev/null 2> /dev/null ; then
+  true
+else
+  echo "avahi:x:61:61:avahi:/:/bin/false" >> etc/passwd
+fi
+if grep "^avahi::" etc/group 1> /dev/null 2> /dev/null ; then
+  true
+else
+  echo "avahi::61:avahi" >> etc/group
+fi
+if grep "^avahi:" etc/shadow 1> /dev/null 2> /dev/null ; then
+  true
+else
+  echo "avahi:*:9797:0:::::" >> etc/shadow
+fi
+
+if grep "^autoipd:x:" etc/passwd 1> /dev/null 2> /dev/null ; then
+  true
+else
+  echo "autoipd:x:62:62:autoipd:/:/bin/false" >> etc/passwd
+fi
+if grep "^autoipd::" etc/group 1> /dev/null 2> /dev/null ; then
+  true
+else
+  echo "autoipd::62:autoipd" >> etc/group
+fi
+if grep "^autoipd:" etc/shadow 1> /dev/null 2> /dev/null ; then
+  true
+else
+  echo "autoipd:*:9797:0:::::" >> etc/shadow
+fi
+EOF
+
 # Sources
 
 SRCNAME[0]=${NAME}
@@ -42,6 +98,7 @@ SRCCOPY[0]="LGPL21"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.{am,in}
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -50,11 +107,11 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-static=no \
  --enable-shared=yes \
  --enable-introspection=no \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --disable-qt3 \
  --disable-qt4 \
  --disable-python \
@@ -70,18 +127,16 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --with-autoipd-user=autoipd \
  --with-autoipd-group=autoipd \
  --with-avahi-priv-access-group=netdev
-#FIXME: dbus socket will go in /run one day
 make ${JOBS}
 make install DESTDIR="${PKG}"
-install.dat doinst.sh ${PKG}/install
-install.cfg mdns.allow.new ${PKG}/etc
+install.cfg mdns.allow.new ${PKG}${SYS_DIR[etc]}
 for manpage in \
  avahi-browse-domains avahi-publish-address avahi-publish-service \
  avahi-resolve-address avahi-resolve-host-name bvnc; do
- rm -f $PKG/usr/man/man?/${manpage}.?
+ rm -f ${PKG}${SYS_DIR[man]}/man?/${manpage}.?
 done
 (
-  cd ${PKG}/usr/man/man1
+  cd ${PKG}${SYS_DIR[man]}/man1
   echo ".so man/man1/avahi-browse.1" > avahi-browse-domains.1
   echo ".so man/man1/avahi-publish.1" > avahi-publish-address.1
   echo ".so man/man1/avahi-publish.1" > avahi-publish-service.1
@@ -89,18 +144,12 @@ done
   echo ".so man/man1/avahi-resolve.1" > avahi-resolve-host-name.1
   echo ".so man/man1/bssh.1" > bvnc.1
 )
-mv \
- ${PKG}/etc/rc.d/rc.avahidaemon \
- ${PKG}/etc/rc.d/rc.avahidaemon.new
-mv \
- ${PKG}/etc/rc.d/rc.avahidnsconfd \
- ${PKG}/etc/rc.d/rc.avahidnsconfd.new
-mv \
- ${PKG}/etc/avahi/avahi-daemon.conf \
- ${PKG}/etc/avahi/avahi-daemon.conf.new
-rmdir \
- ${PKG}/var \
- ${PKG}/usr/lib$(libdirsuffix)/avahi
+config ${PKG}${SYS_DIR[etc]}/rc.d/rc.avahidaemon
+config ${PKG}${SYS_DIR[etc]}/rc.d/rc.avahidnsconfd
+config ${PKG}${SYS_DIR[etc]}/avahi/avahi-daemon.conf
+rm -rf \
+ ${PKG}${SYS_DIR[var]} \
+ ${PKG}${SYS_DIR[lib]}/avahi
 }
 
 SRCNAME[1]=nss-mdns
@@ -116,14 +165,22 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-dependency-tracking \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --disable-lynx \
  --enable-avahi
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc README
+#FIXME: compat
+(
+  install.dir ${PKG}/lib64
+  cd ${PKG}/lib64
+  for link in libnss_mdns{4,6,,_minimal,{4,6}_minimal}.so.2; do
+    ln -sf ${SYS_DIR[lib]}/${link}
+  done
+)
 }

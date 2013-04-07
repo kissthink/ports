@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=libxslt
 VERSION=1.1.28
-BUILD=1
+BUILD=2
 DEPENDS=('libxml >= 2.9.0-1')
 
 # Description
@@ -42,6 +42,9 @@ SRCCOPY[0]="MIT"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.{am,in}
+sed -i 's|$(libdir)/libxslt-plugins|$(libdir)/plugins/libxslt|g' libxslt/Makefile.{am,in}
+sed -i 's|$module_prefix/lib/libxslt-plugins|$module_prefix/lib/plugins/libxslt|g' configure configure.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -49,25 +52,19 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --docdir="${SYS_DIR[doc]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-html-dir="${SYS_DIR[doc]}"
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
+# No development docs
+rm -rf ${PKG}${SYS_DIR[doc]}
 doc AUTHORS
 changelog NEWS
-install.dir ${PKG}${SYS_DIR[html]}
-mv \
- ${DOC}/html \
- ${PKG}${SYS_DIR[html]}
-(
-  cd ${PKG}${SYS_DIR[html]}
-  mv html ${SRCNAME[0]}
-)
-rm -rf \
- ${PKG}/usr/share/doc
+#FIXME: make a python_libxslt subpackage one of these days
+rm -rf ${PKG}${SYS_DIR[lib]}/{xsltConf.sh,plugins,python*}
 }

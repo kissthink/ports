@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=policykit
 VERSION=0.105
-BUILD=2
-DEPENDS=('glib >= 2.34.3-1')
+BUILD=3
+DEPENDS=('glib >= 2.36.0-1')
 
 # Description
 
@@ -33,6 +33,26 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+config etc/polkit-1/localauthority/50-local.d/20-plugdev-group-mount-override.pkla.new
+config etc/polkit-1/localauthority/50-local.d/10-org.freedesktop.NetworkManager.pkla.new
+EOF
+
 # Sources
 
 SRCNAME[0]=polkit
@@ -42,6 +62,8 @@ SRCCOPY[0]="LGPL2"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' $(find . -name "Makefile.in")
+sed -i 's|$(libdir)/polkit-1/extensions|$(libdir)/plugins/polkit-1|g' $(find . -name "Makefile.in")
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -51,24 +73,23 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-examples \
  --enable-static=no \
  --enable-shared=yes \
- --enable-man-pages=no \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --libexecdir=/usr/lib$(libdirsuffix)/exec \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --libexecdir="${SYS_DIR[lib]}/exec" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-html-dir="${SYS_DIR[html]}" \
  --with-authfw=shadow \
  --with-os-type=Slackware \
  --enable-verbose-mode
+#FIXME: pam support
+#FIXME: systemd support
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 changelog NEWS
-install.dat doinst.sh ${PKG}/install
-install.dat *.pkla.new ${PKG}/etc/polkit-1/localauthority/50-local.d
+install.dat *.pkla.new ${PKG}${SYS_DIR[etc]}/polkit-1/localauthority/50-local.d
 # Fix your scripty shit polkit people
-rm -rf ${PKG}/usr/man
-#FIXME: pam support
-#FIXME: systemd support
+#  --enable-man-pages=no \
+# rm -rf ${PKG}${SYS_DIR[man]}
 }

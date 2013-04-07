@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=freedoom
-VERSION=0.7
+VERSION=0.8beta1
 BUILD=1
-DEPENDS=('sdl >= 1.2.14-1' 'pcre >= 8.30-1' 'libmad >= 0.15.1b-1' 'libvorbis >= 1.3.2-1' 'libpng >= 1.5.9-1')
+DEPENDS=('sdl >= 1.2.15-1' 'pcre >= 8.32-1' 'libmad >= 0.15.1b-1' 'libvorbis >= 1.3.3-1' 'libpng >= 1.5.14-1')
 
 # Description
 
@@ -36,7 +36,7 @@ EOF
 # Sources
 
 SRCNAME[0]=${NAME}-iwad
-SRCVERS[0]=${VERSION}
+SRCVERS[0]=0.8-beta1
 SRCPACK[0]=http://download.savannah.gnu.org/releases/freedoom/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.zip
 SRCCOPY[0]="BSD3"
 
@@ -44,11 +44,11 @@ build0()
 {
 doc CREDITS
 changelog ChangeLog
-install.dir ${PKG}/usr/share/application-data/freedoom
-install.dat doom2.wad ${PKG}/usr/share/application-data/freedoom
-install.dir ${PKG}/usr/share/{applications,icons/hicolor/48x48/apps}
-install.dat freedoom.desktop ${PKG}/usr/share/applications
-install.dat freedoom.png ${PKG}/usr/share/icons/hicolor/48x48/apps
+install.dir ${PKG}${SYS_DIR[share]}/application-data/freedoom
+install.dat doom2.wad ${PKG}${SYS_DIR[share]}/application-data/freedoom
+install.dir ${PKG}${SYS_DIR[share]}/{applications,icons/hicolor/48x48/apps}
+install.dat freedoom.desktop ${PKG}${SYS_DIR[share]}/applications
+install.dat freedoom.png ${PKG}${SYS_DIR[share]}/icons/hicolor/48x48/apps
 }
 
 SRCNAME[1]=prboom-plus
@@ -58,7 +58,7 @@ SRCCOPY[0]="GPL2"
 
 build1()
 {
-CPPFLAGS="-I/usr/include/mad" \
+CPPFLAGS="-I${SYS_DIR[include]}/mad" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -66,20 +66,20 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --with-waddir=/usr/share/application-data/prboom-plus
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --with-waddir="${SYS_DIR[share]}/application-data/prboom-plus"
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-install.dir ${PKG}/usr/share/application-data/prboom-plus
+install.dir ${PKG}${SYS_DIR[share]}/application-data/prboom-plus
 (
-  cd ${PKG}/usr/share/application-data/prboom-plus
-  ln -s /usr/share/application-data/freedoom/doom2.wad
+  cd ${PKG}${SYS_DIR[share]}/application-data/prboom-plus
+  ln -s ${SYS_DIR[share]}/application-data/freedoom/doom2.wad
 )
-rm -rf ${PKG}/usr/share/doc
+rm -rf ${PKG}${SYS_DIR[doc]}/prboom-plus
 }

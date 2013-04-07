@@ -7,7 +7,7 @@ source /usr/src/ports/Build/build.sh
 NAME=glib
 MAJOR=2.36
 VERSION=${MAJOR}.0
-BUILD=1
+BUILD=2
 DEPENDS=('libraries >= 20130211-1')
 OPTIONS="symprepend"
 

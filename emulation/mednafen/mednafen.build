@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=mednafen
-VERSION=0.8d3
-BUILD=2
-DEPENDS=('sdl >= 1.2.14-1' 'libsndfile >= 1.0.25-1' 'libcdio >= 0.83-1')
+VERSION=0.9.28
+BUILD=1
+DEPENDS=('sdl >= 1.2.15-1' 'libsndfile >= 1.0.25-1' 'libcdio >= 0.83-1')
 
 # Description
 
@@ -36,33 +36,35 @@ EOF
 # Sources
 
 SRCNAME[0]=${NAME}
-SRCVERS[0]=0.8.D.3
+SRCVERS[0]=${VERSION}-wip
 SRCPACK[0]=${URL[sf]}/${SRCNAME[0]}/Mednafen/${SRCVERS[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
 SRCROOT[0]=${SRCNAME[0]}
 SRCCOPY[0]="GPL2"
 
 build0()
 {
-CFLAGS="${FLAGS} -fpermissive" CXXFLAGS="${FLAGS} -fpermissive" \
+CFLAGS="${FLAGS%-ffast-math} -fpermissive" CXXFLAGS="${FLAGS%-ffast-math} -fpermissive" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
+ --disable-silent-rules \
+ --disable-rpath \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --enable-threads=posix
-make ${JOBS}
+make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog ChangeLog
-install.dir ${PKG}/${SYS_DIR[html]}/${SRCNAME[0]}
-install.doc Documentation/*.html ${PKG}/${SYS_DIR[html]}/${SRCNAME[0]}
-install.dir ${PKG}/usr/share/applications
-install.dat mednafen.desktop ${PKG}/usr/share/applications
-install.dir ${PKG}/usr/share/icons/hicolor/48x48/apps
-install.dat mednafen.png ${PKG}/usr/share/icons/hicolor/48x48/apps
+install.dir ${PKG}${SYS_DIR[html]}/${SRCNAME[0]}
+install.doc Documentation/*.html ${PKG}${SYS_DIR[html]}/${SRCNAME[0]}
+install.dir ${PKG}${SYS_DIR[share]}/applications
+install.dat mednafen.desktop ${PKG}${SYS_DIR[share]}/applications
+install.dir ${PKG}${SYS_DIR[share]}/icons/hicolor/48x48/apps
+install.dat mednafen.png ${PKG}${SYS_DIR[share]}/icons/hicolor/48x48/apps
 }

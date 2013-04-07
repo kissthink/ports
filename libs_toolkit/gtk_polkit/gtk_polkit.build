@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=gtk_polkit
 VERSION=0.105
-BUILD=1
-DEPENDS=('gtk+ >= 3.6.4-1' 'polkit >= 0.105-1')
+BUILD=2
+DEPENDS=('gtk+ >= 3.8.0-1' 'polkit >= 0.105-1')
 
 # Description
 
@@ -47,17 +47,14 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --disable-silent-rules \
- --disable-introspection \
- --disable-examples \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --libexecdir=/usr/lib$(libdirsuffix)/exec \
- --localstatedir=/var \
- --with-html-dir="${SYS_DIR[html]}"
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --libexecdir="${SYS_DIR[lib]}/exec" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS

@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=dbus
 VERSION=1.6.8
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -119,15 +119,9 @@ rm -rf \
  ${PKG}${SYS_DIR[share]}/dbus-1 \
  ${PKG}${SYS_DIR[lib]}/exec/dbus-1 \
  ${PKG}${SYS_DIR[doc]}/dbus \
- ${PKG}${SYS_DIR[html]}
+ ${PKG}${SYS_DIR[html]} \
+ ${PKG}${SYS_DIR[var]}/run
 config ${PKG}${SYS_DIR[etc]}/dbus-1/session.conf
 config ${PKG}${SYS_DIR[etc]}/dbus-1/system.conf
 chown messagebus ${PKG}${SYS_DIR[var]}/lib/dbus
-#FIXME: compat
-install.dir ${PKG}${SYS_DIR[var]}/run/dbus
-(
-  cd ${PKG}${SYS_DIR[var]}/run/dbus
-  ln -s ${SYS_DIR[run]}/dbus/system_bus_socket
-)
 }
-

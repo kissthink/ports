@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=consolekit
 VERSION=0.4.6
-BUILD=3
+BUILD=4
 
 # Description
 
@@ -32,6 +32,37 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+preserve_perms() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  if [ -e \$OLD ]; then
+    cp -a \$OLD \${NEW}.incoming
+    cat \$NEW > \${NEW}.incoming
+    mv \${NEW}.incoming \$NEW
+  fi
+  config \$NEW
+}
+
+config etc/ConsoleKit/seats.d/00-primary.seat.new
+preserve_perms etc/rc.d/rc.consolekit.new
+EOF
+
 # Sources
 
 SRCNAME[0]=ConsoleKit
@@ -41,6 +72,7 @@ SRCCOPY[0]="GPL2"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' libck-connector/Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -48,31 +80,29 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --libexecdir=/usr/lib$(libdirsuffix)/exec \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --libexecdir="${SYS_DIR[lib]}/exec" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --with-pid-file="${SYS_DIR[run]}/consolekit/pid" \
  --without-systemdsystemunitdir \
- --with-pid-file=/var/run/ConsoleKit/consolekit.pid \
  --enable-pam-module=no
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-install.dat doinst.sh ${PKG}/install
-install.dir ${PKG}/etc/rc.d
-install.bin rc.consolekit.new ${PKG}/etc/rc.d
-install.dir ${PKG}/usr/lib$(libdirsuffix)/ConsoleKit/run-session.d
-install.bin pam-foreground-compat.ck \
- ${PKG}/usr/lib$(libdirsuffix)/ConsoleKit/run-session.d
+install.dir ${PKG}${SYS_DIR[etc]}/{rc.d,tmpfiles.d}
+install.bin rc.consolekit.new ${PKG}${SYS_DIR[etc]}/rc.d
+install.dat consolekit.conf.tmpfiles ${PKG}${SYS_DIR[etc]}/tmpfiles.d/consolekit.conf
+install.dir ${PKG}${SYS_DIR[share]}/ConsoleKit/run-session.d
+install.bin pam-foreground-compat.ck ${PKG}${SYS_DIR[share]}/ConsoleKit/run-session.d
+config ${PKG}${SYS_DIR[etc]}/ConsoleKit/seats.d/00-primary.seat
 mv \
- ${PKG}/etc/ConsoleKit/seats.d/00-primary.seat \
- ${PKG}/etc/ConsoleKit/seats.d/00-primary.seat.new
-mv \
- ${PKG}/etc/dbus-1/system.d/ConsoleKit.conf \
- ${PKG}/etc/dbus-1/system.d/org.freedesktop.ConsoleKit.conf
+ ${PKG}${SYS_DIR[etc]}/dbus-1/system.d/ConsoleKit.conf \
+ ${PKG}${SYS_DIR[etc]}/dbus-1/system.d/org.freedesktop.ConsoleKit.conf
 rm -rf \
- ${PKG}/usr/man
+ ${PKG}${SYS_DIR[var]}/run
+# ${PKG}${SYS_DIR[man]}
 }

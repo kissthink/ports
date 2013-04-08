@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=httping
-VERSION=2.1
+VERSION=2.2
 BUILD=1
-DEPENDS=('openssl >= 1.0.1d-1')
+DEPENDS=('openssl >= 1.0.1e-1' 'fftw >= 3.3.3-1')
 
 # Description
 
@@ -41,10 +41,13 @@ SRCPACK[0]=http://www.vanheusden.com/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.t
 
 build0()
 {
-make ${JOBS} OFLAGS="${FLAGS}" DEBUG="no" TFO="yes"
-make install DESTDIR="${PKG}" \
- MANDIR="${SYS_DIR[man]}" \
- DOCDIR="${SYS_DIR[doc]}/${SRCVERS[0]}"
+cmake \
+ -DCMAKE_C_FLAGS:STRING="${FLAGS}" \
+ -DCMAKE_CXX_FLAGS:STRING="${FLAGS}" \
+ -DCMAKE_VERBOSE_MAKEFILE:BOOL="on" \
+ -DCMAKE_INSTALL_PREFIX:PATH="${SYS_DIR[usr]}" \
+CMakeLists.txt
 license license.txt
-rm -rf ${PKG}${SYS_DIR[doc]}/${SRCVERS[0]}
+make ${JOBS}
+make install DESTDIR="${PKG}"
 }

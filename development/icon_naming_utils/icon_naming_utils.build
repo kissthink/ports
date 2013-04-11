@@ -6,9 +6,9 @@ source /usr/src/ports/Build/build.sh
 
 NAME=icon_naming_utils
 VERSION=0.8.90
-BUILD=1
+BUILD=2
 ARCH=noarch
-DEPENDS=('perl >= 5.10.1-1')
+DEPENDS=('perl >= 5.12.3-1')
 
 # Description
 
@@ -46,13 +46,13 @@ build0()
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --libexecdir=/usr/share/icon-naming-utils
-make -j 2
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --libexecdir="${SYS_DIR[share]}/icon-naming-utils"
+make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog ChangeLog

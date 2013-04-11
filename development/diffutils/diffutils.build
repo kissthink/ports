@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=diffutils
-VERSION=3.2
+VERSION=3.3
 BUILD=1
 
 # Description
@@ -32,6 +32,21 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+# Install the texinfo files
+
+install_info()
+{
+  if [ -x ${SYS_DIR[bin]}/install-info ]; then
+    ${SYS_DIR[bin]}/install-info --info-dir=\${SYS_DIR[share]}/info \${SYS_DIR[share]}/info/\${1}.info.gz 2> /dev/null
+  fi
+}
+
+install_info diffutils
+EOF
+
 # Sources
 
 SRCNAME[0]=${NAME}
@@ -47,17 +62,35 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-dependency-tracking \
  --disable-silent-rules \
  --disable-rpath \
- --enable-static=no \
- --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
  --infodir="${SYS_DIR[info]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS THANKS
 changelog NEWS
-install.dat doinst.sh ${PKG}/install
+}
+
+SRCNAME[1]=diffstat
+SRCVERS[1]=1.56
+SRCPACK[1]=ftp://invisible-island.net/diffstat/${SRCNAME[1]}-${SRCVERS[1]}.tgz
+SRCCOPY[1]="MIT"
+
+build1()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --prefix="${SYS_DIR[usr]}" \
+ --mandir="${SYS_DIR[man]}" \
+ --infodir="${SYS_DIR[info]}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+changelog CHANGES
 }

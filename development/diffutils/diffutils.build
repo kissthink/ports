@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=diffutils
 VERSION=3.3
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -75,7 +75,7 @@ changelog NEWS
 }
 
 SRCNAME[1]=diffstat
-SRCVERS[1]=1.56
+SRCVERS[1]=1.57
 SRCPACK[1]=ftp://invisible-island.net/diffstat/${SRCNAME[1]}-${SRCVERS[1]}.tgz
 SRCCOPY[1]="MIT"
 

@@ -5,9 +5,8 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=fs_cifs
-VERSION=5.9
+VERSION=6.0
 BUILD=1
-DEPENDS=('capabilities >= 20130117-1')
 
 # Description
 
@@ -28,7 +27,7 @@ ${NAME}: is based on the SMB (Server Message Block) protocol widely in use by
 ${NAME}: personal computers and workstations running a wide variety of
 ${NAME}: operating systems.
 ${NAME}:
-${NAME}:
+${NAME}: Homepage: https://wiki.samba.org/index.php/LinuxCIFS_utils
 ${NAME}:
 ${NAME}:
 EOF
@@ -42,16 +41,16 @@ SRCCOPY[0]="GPL3"
 
 build0()
 {
-ROOTSBINDIR="/usr/sbin" \
+ROOTSBINDIR="${SYS_DIR[sbin]}" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-libcap-ng=yes
 #FIXME: systemd --enable-systemd
 make ${JOBS}

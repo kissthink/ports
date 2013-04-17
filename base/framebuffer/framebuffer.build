@@ -27,9 +27,28 @@ ${NAME}: consoles. This package includes the following framebuffer utilities:
 ${NAME}:
 ${NAME}:   * fbset (view and change framebuffer settings)
 ${NAME}:   * fbi (display images)
+${NAME}:   * fbcat (dump the console screen to a file)
 ${NAME}:
 ${NAME}:
-${NAME}:
+EOF
+
+cat > ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+config etc/fb.modes.new
 EOF
 
 # Sources
@@ -42,10 +61,10 @@ SRCCOPY[0]="GPL2"
 build0()
 {
 make ${JOBS} CFLAGS="${FLAGS}"
-make install DESTDIR="${PKG}" PREFIX="/usr" MANDIR="/usr/man"
-doc etc/fb.modes.Falcon etc/fb.modes.NTSC etc/fb.modes.PAL
-install.dir ${PKG}/etc
-install.cfg etc/fb.modes.ATI ${PKG}/etc/fb.modes
+make install DESTDIR="${PKG}" PREFIX="${SYS_DIR[usr]}" MANDIR="${SYS_DIR[man]}"
+doc etc/fb.modes.{Falcon,NTSC,PAL,ATI}
+install.dir ${PKG}${SYS_DIR[etc]}
+install.cfg etc/fb.modes.ATI ${PKG}${SYS_DIR[etc]}/fb.modes.new
 }
 
 SRCNAME[1]=fbida
@@ -56,10 +75,10 @@ SRCCOPY[1]="GPL2"
 build1()
 {
 make ${JOBS} verbose=yes OPTS="${FLAGS}"
-make install DESTDIR="${PKG}" prefix="/usr"
+make install DESTDIR="${PKG}" prefix="${SYS_DIR[usr]}"
 changelog Changes
 rm -f \
- ${PKG}/usr/bin/{fbgs,exiftran} \
+ ${PKG}${SYS_DIR[bin]}/{fbgs,exiftran} \
  ${PKG}${SYS_DIR[man]}/man1/{fbgs,exiftran}.1
 }
 
@@ -72,8 +91,8 @@ build2()
 {
 make ${JOBS} CFLAGS="${FLAGS}"
 changelog doc/changelog
-install.dir ${PKG}/usr/bin
-install.bin fb{cat,grab} ${PKG}/usr/bin
+install.dir ${PKG}${SYS_DIR[bin]}
+install.bin fb{cat,grab} ${PKG}${SYS_DIR[bin]}
 install.dir ${PKG}${SYS_DIR[man]}/man1
 install.man doc/fb{cat,grab}.1 ${PKG}${SYS_DIR[man]}/man1
 }

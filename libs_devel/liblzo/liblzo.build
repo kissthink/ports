@@ -1,0 +1,61 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=liblzo
+VERSION=2.06
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: lzo (Lempel-Ziv-Oberhumer)
+${NAME}:
+${NAME}: A lossless data compression library which is suitable for data
+${NAME}: de-/compression in real-time. This means it favours speed over
+${NAME}: compression ratio. Decompression requires no memory. In addition
+${NAME}: there are slower compression levels achieving a quite competitive
+${NAME}: compression ratio while still decompressing at this very high speed.
+${NAME}:
+${NAME}: Homepage: http://www.oberhumer.com/opensource/lzo
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=lzo
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://www.oberhumer.com/opensource/lzo/download/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-static=yes \
+ --enable-shared=no \
+ --prefix="${SYS_DIR[usr]}" \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS THANKS
+changelog NEWS
+rm -rf ${PKG}${SYS_DIR[doc]}/lzo
+}

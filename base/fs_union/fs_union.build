@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=fs_union
-VERSION=0.25
+VERSION=0.26
 BUILD=1
-DEPENDS=('fuse >= 2.8.7-1')
+DEPENDS=('fuse >= 2.9.2-1')
 
 # Description
 
@@ -37,18 +37,18 @@ EOF
 
 SRCNAME[0]=unionfs-fuse
 SRCVERS[0]=${VERSION}
-SRCPACK[0]=http://podgorny.cz/unionfs-fuse/releases/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCPACK[0]=http://podgorny.cz/unionfs-fuse/releases/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
 SRCCOPY[0]="BSD3"
 
 build0()
 {
 cmake \
  -DCMAKE_VERBOSE_MAKEFILE:BOOL="on" \
- -DCMAKE_INSTALL_PREFIX:STRING="/usr" \
+ -DCMAKE_INSTALL_PREFIX:STRING="${SYS_DIR[usr]}" \
  -DCMAKE_C_FLAGS_RELEASE:STRING="${FLAGS}" \
  -DCMAKE_C_FLAGS_DEBUG:STRING="" \
  -DWITH_XATTR:BOOL="on" \
- -DMAN_INSTALL_DIR:STRING="/usr/man" \
+ -DMAN_INSTALL_DIR:STRING="${SYS_DIR[man]}" \
 .
 make ${JOBS}
 make install DESTDIR="${PKG}"
@@ -59,6 +59,6 @@ changelog NEWS
   echo ".so man8/unionfs-fuse.8" > unionfs.8
   echo ".so man8/unionfs-fuse.8" > mount.unionfs.8
 )
-install.dir ${PKG}/usr/sbin
-install.bin mount.unionfs ${PKG}/usr/sbin
+install.dir ${PKG}${SYS_DIR[sbin]}
+install.bin mount.unionfs ${PKG}${SYS_DIR[sbin]}
 }

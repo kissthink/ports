@@ -5,9 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=fs_btr
-CHECKOUT=20121005
+CHECKOUT=20130318
 VERSION=0.20.${CHECKOUT}
 BUILD=1
+OPTDEPENDS=('fs_ext >= 1.42.7-1')
 
 # Description
 
@@ -42,7 +43,9 @@ SRCCOPY[0]="GPL2"
 
 build0()
 {
-make ${JOBS} CFLAGS="${FLAGS}"
-make install DESTDIR="${PKG}" prefix="/usr" bindir="/usr/sbin"
+sed -i 's|$(prefix)/man|$(prefix)/share/man|g' man/Makefile
+make ${JOBS} CFLAGS="${FLAGS}" V=1
+make install DESTDIR="${PKG}" prefix="${SYS_DIR[usr]}" bindir="${SYS_DIR[sbin]}"
 gunzip ${PKG}${SYS_DIR[man]}/man?/*.?.gz
+chmod 0644 ${PKG}${SYS_DIR[lib]}/*.a
 }

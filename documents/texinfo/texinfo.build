@@ -1,0 +1,99 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=texinfo
+VERSION=5.1
+BUILD=1
+OPTDEPENDS=('perl >= 5.12.3-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: texinfo (GNU software documentation system)
+${NAME}:
+${NAME}: 'Texinfo' is a documentation system that uses a single source file to
+${NAME}: produce both on-line information and printed output. Using Texinfo,
+${NAME}: you can create a printed document with the normal features of a book, 
+${NAME}: including chapters, sections, cross references, and indices. From the
+${NAME}: same Texinfo source file, you can create a menu-driven, on-line Info
+${NAME}: file with nodes, menus, cross references, and indices.
+${NAME}:
+${NAME}: This package is needed to read the documentation files in /usr/info.
+${NAME}:
+EOF
+
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+install_info()
+{
+  for file in "\${*}"; do
+    if [ -x usr/bin/install-info ]; then
+      usr/bin/install-info --info-dir=usr/share/info usr/share/info/\${file}.info.xz 2> /dev/null
+    fi
+  done
+}
+
+# If no dir file exists, we'll assume it's a fresh installation and create one
+# Otherwise, we'll throw out the new copy to preserve what's already installed
+
+if [ -e usr/info/dir ]; then
+  # If there is no topmost node, this dir file is broken, so replace it:
+  if ! grep -q "Node: Top" usr/info/dir ; then
+    mv usr/info/dir.new usr/info/dir
+  fi
+else
+  mv usr/info/dir.new usr/info/dir
+fi
+
+# Install texinfo files
+
+install_info info info-stnd texinfo
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=${URL[gnu]}/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+SRCCOPY[0]="GPL3"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --disable-rpath \
+ --prefix="${SYS_DIR[usr]}" \
+ --mandir="${SYS_DIR[man]}" \
+ --infodir="${SYS_DIR[info]}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
+#FIXME: --with-external-libintl-perl
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+install.dat dir.new ${PKG}${SYS_DIR[info]}
+#FIXME: Why do these file have no .info suffix?
+(
+  cd ${PKG}${SYS_DIR[info]}
+  for file in texinfo*; do
+    mv "${file}" "${file}.info"
+  done
+)
+}

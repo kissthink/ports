@@ -48,13 +48,20 @@ config() {
   # Otherwise, we leave the .new copy for the admin to consider...
 }
 
+install_info()
+{
+  for file in "\${*}"; do
+    if [ -x usr/bin/install-info ]; then
+      usr/bin/install-info --info-dir=usr/share/info usr/share/info/\${file}.info.xz 2> /dev/null
+    fi
+  done
+}
+
+# Install texinfo files
+
+install_info rluserman
+
 config etc/pkcs11/pkcs11.conf.new
-
-# Install the texinfo files
-
-if [ -x ${SYS_DIR[bin]}/install-info ]; then
-  ${SYS_DIR[bin]}/install-info --info-dir=${SYS_DIR[info]} ${SYS_DIR[info]}/rluserman.info.gz 2> /dev/null
-fi
 EOF
 
 # Sources

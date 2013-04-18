@@ -1,0 +1,77 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=indent
+VERSION=2.2.11
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: indent (changes the appearance of a C program)
+${NAME}:
+${NAME}: GNU indent changes the appearance of a C program by inserting or
+${NAME}: deleting whitespace according to a plethora of options. Some canned
+${NAME}: styles of formatting (like the GNU style, Kernighan & Ritchie style,
+${NAME}: and original Berkeley style) are supported as well.
+${NAME}:
+${NAME}: GNU indent is a descendant of BSD indent.
+${NAME}:
+${NAME}: Homepage: http://www.gnu.org/software/indent
+${NAME}:
+EOF
+
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+# Install texinfo files
+
+install_info()
+{
+  for file in "\${*}"; do
+    if [ -x usr/bin/install-info ]; then
+      usr/bin/install-info --info-dir=usr/share/info usr/share/info/\${file}.info.xz 2> /dev/null
+    fi
+  done
+}
+
+install_info indent
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://ftp.de.debian.org/debian/pool/main/i/indent/${SRCNAME[0]}_${SRCVERS[0]}.orig.tar.gz
+SRCCOPY[0]="GPL3"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-rpath \
+ --prefix="${SYS_DIR[usr]}" \
+ --mandir="${SYS_DIR[man]}" \
+ --infodir="${SYS_DIR[info]}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
+make ${JOBS}
+make install DESTDIR="${PKG}" docdir="${SYS_DIR[doc]}/indent"
+doc AUTHORS
+changelog ChangeLog
+rm -rf ${PKG}${SYS_DIR[doc]}/indent
+}

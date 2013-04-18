@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=gtick
-VERSION=0.4.2
+VERSION=0.5.2
 BUILD=1
-DEPENDS=('gtk+ >= 2.22.1-1' 'libsndfile >= 1.0.23-1')
+DEPENDS=('gtk+ >= 2.24.17-1' 'libsndfile >= 1.0.25-1')
 
 # Description
 
@@ -46,13 +46,15 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
- --prefix=/usr \
+ --disable-rpath \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --enable-threads=posix
-make -j 2
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --enable-threads=posix \
+ --with-sndfile
+make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS THANKS
 changelog ChangeLog

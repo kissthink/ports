@@ -31,7 +31,7 @@ if [[ ! "${OPTIONS}" == *normla* ]]; then
   saveifs="${IFS}"
   IFS="$(echo -en "\n\b")"
 
-  for file in $(find ${PKG}); do
+  for file in $(find ${PKG} -name "*.la"); do
 
     filetype="$(file ${file})"
 

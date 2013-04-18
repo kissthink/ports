@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=httping
-VERSION=2.2
+VERSION=2.2.1
 BUILD=1
 DEPENDS=('openssl >= 1.0.1e-1' 'fftw >= 3.3.3-1')
 

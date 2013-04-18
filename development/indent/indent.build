@@ -35,8 +35,6 @@ EOF
 cat >> ${PKG}/install/doinst.sh <<EOF
 #!/bin/sh
 
-# Install texinfo files
-
 install_info()
 {
   for file in "\${*}"; do
@@ -45,6 +43,8 @@ install_info()
     fi
   done
 }
+
+# Install texinfo files
 
 install_info indent
 EOF

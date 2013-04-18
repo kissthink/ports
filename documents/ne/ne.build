@@ -36,14 +36,16 @@ EOF
 cat >> ${PKG}/install/doinst.sh <<EOF
 #!/bin/sh
 
-# Install the texinfo files
-
 install_info()
 {
-  if [ -x ${SYS_DIR[bin]}/install-info ]; then
-    ${SYS_DIR[bin]}/install-info --info-dir=\${SYS_DIR[share]}/info \${SYS_DIR[share]}/info/\${1}.info.gz 2> /dev/null
-  fi
+  for file in "\${*}"; do
+    if [ -x usr/bin/install-info ]; then
+      usr/bin/install-info --info-dir=usr/share/info usr/share/info/\${file}.info.xz 2> /dev/null
+    fi
+  done
 }
+
+# Install texinfo files
 
 install_info ne
 EOF

@@ -49,7 +49,7 @@ alias install.dir='install -m 0755 -d -D'
 
 alias z.doc='xz -9f'
 alias z.man='xz -9f'
-alias z.info='gzip -9nf'
+alias z.info='xz -9f'
 
 alias unz.patch='xzcat'
 

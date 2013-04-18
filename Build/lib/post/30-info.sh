@@ -31,7 +31,7 @@ if [[ ! "${OPTIONS}" == *noinfoz* ]]; then
     "${PKG}/usr/info/dir" \
     "${PKG}/usr/share/info/dir"
 
-  for file in $(find ${PKG} -path '*usr*info/*info*'); do
+  for file in $(find ${PKG} -path '*usr*info/*.info*'); do
     chmod 0644 "${file}"
     z.info "${file}"
   done

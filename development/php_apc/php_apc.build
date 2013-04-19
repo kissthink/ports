@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=php_apc
-VERSION=3.1.9
+VERSION=3.1.13
 BUILD=1
 DEPENDS=('php >= 5.3.8-1')
 
@@ -33,6 +33,25 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+config etc/php.d/apc.ini.new
+EOF
+
 # Sources
 
 SRCNAME[0]=APC
@@ -46,12 +65,11 @@ phpize
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
- --enable-apc=shared,/usr
-make -j 2
+ --enable-apc=shared,${SYS_DIR[usr]}
+make ${JOBS}
 make install INSTALL_ROOT="${PKG}"
 doc INSTALL NOTICE
 changelog CHANGELOG
-install.dat doinst.sh ${PKG}/install
-install.dir ${PKG}/etc/php.d
-install.cfg apc.ini ${PKG}/etc/php.d/apc.ini.new
+install.dir ${PKG}${SYS_DIR[etc]}/php.d
+install.cfg apc.ini ${PKG}${SYS_DIR[etc]}/php.d/apc.ini.new
 }

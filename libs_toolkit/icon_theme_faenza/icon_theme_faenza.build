@@ -7,7 +7,7 @@ source /usr/src/ports/Build/build.sh
 NAME=icon_theme_faenza
 VERSION=1.3.1
 ARCH=noarch
-BUILD=2
+BUILD=3
 
 # Description
 
@@ -40,9 +40,9 @@ cat >> ${PKG}/install/doinst.sh <<EOF
 
 # Update icon theme caches
 
-if [ -x ${SYS_DIR[bin]}/gtk-update-icon-cache ]; then
+if [ -x usr/bin/gtk-update-icon-cache ]; then
   for SET in "${SETS}"; do
-    ${SYS_DIR[bin]}/gtk-update-icon-cache -q -t -f ${SYS_DIR[share]}/icons/\${SET}
+    usr/bin/gtk-update-icon-cache -q -t -f usr/share/icons/\${SET}
   done
 fi
 EOF
@@ -62,11 +62,11 @@ changelog ChangeLog
 install.dir ${PKG}${SYS_DIR[share]}/icons
 for tarball in ${SETS}; do
   src.unpack ${tarball}.tar.gz --cd ${PKG}${SYS_DIR[share]}/icons
-  install.dir ${PKG}${SYS_DIR[var]}/cache/${tarball}
-  touch  ${PKG}${SYS_DIR[var]}/cache/${tarball}/icon-theme.cache
+  install.dir ${PKG}${SYS_DIR[var]}/cache/icons/${tarball}
+  touch  ${PKG}${SYS_DIR[var]}/cache/icons/${tarball}/icon-theme.cache
   (
     cd ${PKG}${SYS_DIR[share]}/icons/${tarball}
-    ln -sf ${SYS_DIR[var]}/cache/${tarball}/icon-theme.cache
+    ln -sf ${SYS_DIR[var]}/cache/icons/${tarball}/icon-theme.cache
   )
 done
 chmod 0644 ${PKG}${SYS_DIR[share]}/icons/*/index.theme

@@ -5,9 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=pidgin
-VERSION=2.10.4
+VERSION=2.10.7
 BUILD=1
-DEPENDS=('gtk+ >= 2.24.10-1' 'libxml >= 2.7.8-1')
+DEPENDS=('gtk+ >= 2.24.17-1' 'libxml >= 2.9.0-1' 'gnutls >= 3.1.10-1' 'gstreamer >= 1.0.6-1' 'farstream >= 0.2.2-1' 'dbus_glib >= 0.100.2-1' 'networkmanager >= 0.9.8.0-1')
+OPTDEPENDS=('libotr >= 4.0.0-1' 'libnotify >= 0.7.5-1' 'avahi >= 0.6.31-1')
 
 # Description
 
@@ -33,9 +34,34 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat > ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+if [ -x usr/bin/gtk-update-icon-cache ]; then
+  usr/bin/gtk-update-icon-cache -q -t -f usr/share/icons/hicolor
+fi
+EOF
+
 # Sources
 
-export PKG_CONFIG_PATH="${PKG}/usr/lib$(libdirsuffix)/pkgconfig"
+export PKG_CONFIG_PATH="${PKG}${SYS_DIR[share]}/pkgconfig"
+export PIDGIN_INCS="-I${PKG}${SYS_DIR[include]}/pidgin -I${PKG}${SYS_DIR[include]}/libpurple"
+
+configure()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix="${SYS_DIR[usr]}" \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ ${*}
+}
 
 SRCNAME[0]=${NAME}
 SRCVERS[0]=${VERSION}
@@ -44,51 +70,46 @@ SRCCOPY[0]="GPL2"
 
 build0()
 {
-CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
-./configure \
- --build="${ARCH}-slackware-linux" \
- --disable-dependency-tracking \
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' $(find . -name "Makefile.in")
+sed -i 's|$(libdir)/gnt|$(libdir)/plugins/gnt|g' $(find finch -name "Makefile.in")
+sed -i 's|$(libdir)/finch|$(libdir)/plugins/finch|g' $(find finch -name "Makefile.in")
+sed -i 's|$(libdir)/pidgin|$(libdir)/plugins/pidgin|g' $(find pidgin -name "Makefile.in")
+sed -i 's|${libdir}/pidgin|${libdir}/plugins/pidgin|g' $(find pidgin -name "*.pc.in")
+sed -i 's|$(libdir)/purple-$(PURPLE_MAJOR_VERSION)|$(libdir)/plugins/purple-$(PURPLE_MAJOR_VERSION)|g' $(find libpurple -name "Makefile.in")
+sed -i 's|${libdir}/purple-@PURPLE_MAJOR_VERSION@|${libdir}/plugins/purple-@PURPLE_MAJOR_VERSION@|g' $(find libpurple -name "*.pc.in")
+configure \
  --disable-silent-rules \
- --enable-static=no \
- --enable-shared=yes \
- --prefix=/usr \
- --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
  --disable-debug \
  --disable-perl \
  --disable-tcl \
+ --disable-doxygen \
+ --disable-schemas-install \
  --disable-startup-notification \
  --disable-meanwhile \
  --disable-gtkspell \
+ --disable-gstreamer \
+ --disable-vv \
  --enable-gnutls=yes \
- --enable-cap
-make ${JOBS}
+ --enable-cap \
+ --enable-nm \
+ --with-system-ssl-certs="${SYS_DIR[etc]}/ssl/certs"
+make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS COPYRIGHT doc/gtkrc-2.0
 changelog ChangeLog
+#FIXME: Finch ought to be a subpackage
 }
 
 SRCNAME[1]=${NAME}-otr
-SRCVERS[1]=3.2.0
+SRCVERS[1]=4.0.0
 SRCPACK[1]=${URL[sf]}/${SRCNAME[1]}/${SRCNAME[1]}-${SRCVERS[1]}.tar.gz
 SRCCOPY[1]="GPL2"
 
 build1()
 {
-CPPFLAGS="-I${PKG}/usr/include/pidgin -I${PKG}/usr/include/libpurple" \
-CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
-./configure \
- --build="${ARCH}-slackware-linux" \
- --disable-dependency-tracking \
- --enable-static=no \
- --enable-shared=yes \
- --prefix=/usr \
- --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+sed -i 's|${libdir}/pidgin|${libdir}/plugins/pidgin|g' Makefile.{am,in}
+CPPFLAGS="${PIDGIN_INCS}" \
+configure
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
@@ -101,31 +122,23 @@ SRCPACK[2]=${SRCNAME[2]}-${SRCVERS[2]}.tar.xz
 
 build2()
 {
+sed -i 's|$(LIBDIR)/purple-2|$(LIBDIR)/plugins/purple-2|g' Makefile
 make ${JOBS} CFLAGS="${FLAGS}" Q="" \
- EXTRA_CFLAGS="-I${PKG}/usr/include/pidgin -I${PKG}/usr/include/libpurple" \
- EXTRA_LIBS="-L${PKG}/usr/lib$(libdirsuffix)"
-make install DESTDIR="${PKG}" LIBDIR="/usr/lib$(libdirsuffix)"
+ EXTRA_CFLAGS="${PIDGIN_INCS}" \
+ EXTRA_LIBS="-L${PKG}${SYS_DIR[lib]}"
+make install DESTDIR="${PKG}" LIBDIR="${SYS_DIR[lib]}"
 }
 
-SRCNAME[3]=pidgin-libnotify-plus
-SRCVERS[3]=20110902
+SRCNAME[3]=purple-libnotify-plus
+SRCVERS[3]=20130423
 SRCPACK[3]=${SRCNAME[3]}-${SRCVERS[3]}.tar.xz
 SRCCOPY[3]="GPL3"
 
 build3()
 {
-CPPFLAGS="-I${PKG}/usr/include/pidgin -I${PKG}/usr/include/libpurple" \
-CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
-./configure \
- --build="${ARCH}-slackware-linux" \
- --disable-dependency-tracking \
- --enable-static=no \
- --enable-shared=yes \
- --prefix=/usr \
- --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+CPPFLAGS="${PIDGIN_INCS}" \
+configure \
+ --with-purple-plugindir="${SYS_DIR[lib]}/plugins/purple-2"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
@@ -138,18 +151,9 @@ SRCCOPY[4]="GPL2"
 
 build4()
 {
-PIDGIN_CFLAGS="-I${PKG}/usr/include/pidgin -I${PKG}/usr/include/libpurple" \
-CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
-./configure \
- --build="${ARCH}-slackware-linux" \
- --disable-dependency-tracking \
- --enable-static=no \
- --enable-shared=yes \
- --prefix=/usr \
- --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+sed -i 's|$(libdir)/pidgin|$(libdir)/plugins/pidgin|g' $(find . -name "Makefile.in")
+PIDGIN_CFLAGS="${PIDGIN_INCS}" \
+configure
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
@@ -164,8 +168,8 @@ SRCCOPY[5]="GPL3"
 build5()
 {
 make ${JOBS} OPTS="${FLAGS}" \
- EXTRA_CFLAGS="-I${PKG}/usr/include/pidgin -I${PKG}/usr/include/libpurple" \
- EXTRA_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lpurple"
-make install DESTDIR="${PKG}" PREFIX="/usr"
+ EXTRA_CFLAGS="${PIDGIN_INCS}" \
+ EXTRA_LIBS="-L${PKG}${SYS_DIR[lib]} -lpurple"
+make install DESTDIR="${PKG}" PREFIX="${SYS_DIR[usr]}"
 changelog ChangeLog
 }

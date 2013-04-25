@@ -61,6 +61,9 @@ for size in 256 128 64 48 32 24 22 16; do
   install.dir ${dir}
   ( cd ${dir} ; ln -sf /opt/google/chrome/product_logo_${size}.png google-chrome.png )
 done
+# Add a symlink for libbz2.so.1.0 as it doesn't link against libbz2.so.1 as it
+# should
+( cd ${PKG}/opt/google/chrome ; ln -sf ${SYS_DIR[lib]}/libbz2.so.1 libbz2.so.1.0 )
 # Delete superfluous stuff
 rm -rf \
  ${PKG}${SYS_DIR[etc]} \

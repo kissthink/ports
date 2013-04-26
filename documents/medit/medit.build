@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=medit
 VERSION=1.1.1
-BUILD=1
-DEPENDS=('gtk+ >= 2.24.10-1' 'expat >= 2.0.1-1' 'libxml >= 2.8.0-1')
+BUILD=2
+DEPENDS=('gtk+ >= 2.24.17-1' 'expat >= 2.1.0-1' 'libxml >= 2.9.0-1')
 
 # Description
 
@@ -47,16 +47,16 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --disable-silent-rules \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-python=no \
  --with-fam=yes
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 changelog NEWS
 rm -f \
- ${PKG}/usr/share/icons/hicolor/icon-theme.cache
+ ${PKG}${SYS_DIR[share]}/icons/hicolor/icon-theme.cache
 }

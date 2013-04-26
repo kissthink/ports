@@ -1,0 +1,121 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=stunnel
+VERSION=4.56
+BUILD=1
+DEPENDS=('tcpip >= 20130209-1' 'openssl >= 1.0.1e-1')
+OPTDEPENDS=('perl >= 5.12.3-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: stunnel (Universal SSL tunnel)
+${NAME}:
+${NAME}: The stunnel program is designed to work as an SSL encryption wrapper
+${NAME}: between remote client and local (inetd-startable) or remote servers.
+${NAME}: The goal is to facilitate SSL encryption and authentication for
+${NAME}: non-SSL-aware programs.
+${NAME}:
+${NAME}: stunnel can be used to add SSL functionality to commonly used inetd
+${NAME}: daemons like POP-2, POP-3 and IMAP servers without any changes in
+${NAME}: the programs' code.
+${NAME}:
+EOF
+
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+# Add stunnel user & group
+
+if ! grep -q "^stunnel:" etc/group ; then
+  echo "stunnel::34:stunnel" >> etc/group
+fi
+
+if ! grep -q "^stunnel:" etc/passwd ; then
+  echo "stunnel:x:34:34:stunnel:/run/stunnel:/bin/false" >> etc/passwd
+fi
+
+if ! grep -q "^stunnel:" etc/shadow ; then
+  echo "stunnel:*:9797:0:::::" >> etc/shadow
+fi
+
+# Create chroot dir if it doesn't exist
+
+if [ ! -d run/stunnel ]; then
+  install -d -m 0770 -o stunnel -g stunnel run/stunnel
+fi
+
+config etc/stunnel/stunnel.cnf.new
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://www.usenix.org.uk/mirrors/stunnel/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+
+build0()
+{
+sed -i 's|$(libdir)/@PACKAGE@|$(libdir)/plugins/@PACKAGE@|g' src/Makefile.{am,in}
+sed -i 's|$(localstatedir)/run/stunnel|/run/stunnel|g' src/Makefile.{am,in}
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix="${SYS_DIR[usr]}" \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --disable-libwrap \
+ --enable-ipv6
+#NOTE: don't erase the libtool file ?
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS CREDITS
+changelog ChangeLog
+license COPYING
+install.dir ${PKG}${SYS_DIR[etc]}/{stunnel,tmpfiles.d}
+install.cfg tools/stunnel.cnf ${PKG}${SYS_DIR[etc]}/stunnel/stunnel.cnf.new
+install.bin generate-stunnel-key.sh ${PKG}${SYS_DIR[etc]}/stunnel
+install.dat stunnel.conf.tmpfiles ${PKG}${SYS_DIR[etc]}/tmpfiles.d/stunnel.conf
+install.dir ${PKG}${SYS_DIR[systemdsystemunitdir]}
+install.dat tools/stunnel.service ${PKG}${SYS_DIR[systemdsystemunitdir]}
+install.dir ${PKG}${SYS_DIR[man]}/{pl,fr}/man8
+mv \
+ ${PKG}${SYS_DIR[man]}/man8/stunnel.pl.8 \
+ ${PKG}${SYS_DIR[man]}/pl/man8/stunnel.8
+mv \
+ ${PKG}${SYS_DIR[man]}/man8/stunnel.fr.8 \
+ ${PKG}${SYS_DIR[man]}/fr/man8/stunnel.8
+rm -rf \
+  ${PKG}${SYS_DIR[doc]}/stunnel \
+  ${PKG}${SYS_DIR[var]}
+}

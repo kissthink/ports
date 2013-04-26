@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=logrotate
 VERSION=3.8.3
-BUILD=2
+BUILD=3
 
 # Description
 
@@ -32,6 +32,25 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+config etc/logrotate.conf.new
+EOF
+
 # Sources
 
 SRCNAME[0]=${NAME}
@@ -44,9 +63,8 @@ build0()
 make ${JOBS} RPM_OPT_FLAGS="${FLAGS}"
 make install PREFIX="${PKG}" MANDIR="${SYS_DIR[man]}"
 changelog CHANGES
-install.dat doinst.sh ${PKG}/install
-install.dir ${PKG}/etc/{logrotate.d,cron.daily}
-install.dir ${PKG}/var/lib/logrotate
-install.cfg logrotate.conf ${PKG}/etc/logrotate.conf.new
-install.bin logrotate.cron ${PKG}/etc/cron.daily/logrotate
+install.dir ${PKG}${SYS_DIR[etc]}/{logrotate.d,cron.daily}
+install.dir ${PKG}${SYS_DIR[var]}/lib/logrotate
+install.cfg logrotate.conf ${PKG}${SYS_DIR[etc]}/logrotate.conf.new
+install.bin logrotate.cron ${PKG}${SYS_DIR[etc]}/cron.daily/logrotate
 }

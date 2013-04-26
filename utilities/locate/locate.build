@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=locate
 VERSION=0.26
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -32,6 +32,38 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+config etc/conf.d/updatedb.conf.new
+
+if ! grep ^locate: etc/group 1> /dev/null 2> /dev/null ; then
+  echo "locate::21:" >> etc/group
+fi
+
+if [ ! -d var/cache/locate ]; then
+  mkdir -p var/cache/locate
+  chown root.locate var/cache/locate
+  chmod 0750 var/cache/locate
+fi
+
+chown root.locate usr/bin/locate
+chmod 2755 usr/bin/locate
+EOF
+
 # Sources
 
 SRCNAME[0]=mlocate
@@ -46,19 +78,16 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --disable-rpath \
- --enable-static=no \
- --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc/conf.d \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var/cache
+ --sysconfdir="${SYS_DIR[conf]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}/cache"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-install.dat doinst.sh ${PKG}/install
-install.dir ${PKG}/etc/{conf.d,cron.daily}
-install.bin locate.cron ${PKG}/etc/cron.daily/locate
-install.cfg updatedb.conf ${PKG}/etc/conf.d/updatedb.conf.new
+install.dir ${PKG}${SYS_DIR[etc]}/{conf.d,cron.daily}
+install.bin locate.cron ${PKG}${SYS_DIR[etc]}/cron.daily/locate
+install.cfg updatedb.conf ${PKG}${SYS_DIR[conf]}/updatedb.conf.new
 }

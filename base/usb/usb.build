@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=usb
 MAJOR=1.0
-VERSION=${MAJOR}.14
-BUILD=2
+VERSION=${MAJOR}.15
+BUILD=1
 
 # Description
 
@@ -58,7 +58,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS THANKS
-changelog NEWS
+changelog ChangeLog
 }
 
 SRCNAME[1]=libusb-compat

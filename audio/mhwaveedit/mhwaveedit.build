@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=mhwaveedit
 VERSION=1.4.22
-BUILD=1
-DEPENDS=('gtk+ >= 2.24.10-1' 'libsamplerate >= 0.1.8-1' 'sound >= 1.0.24-1' 'jack >= 1.9.7-1')
+BUILD=2
+DEPENDS=('gtk+ >= 2.24.17-1' 'libsamplerate >= 0.1.8-1' 'sound >= 1.0.27-1' 'jack >= 1.9.8-1')
 
 # Description
 
@@ -46,14 +46,14 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-double-samples \
  --with-default-driver=alsa \
- --with-default-ladspa-path=/usr/lib$(libdirsuffix)/exec/ladspa \
+ --with-default-ladspa-path="${SYS_DIR[lib]}/plugins/ladspa" \
  --with-default-mixerapp="xfce4-mixer" \
  --without-sdl \
  --without-oss \
@@ -63,8 +63,8 @@ make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-install.dir ${PKG}/usr/share/applications
-install.dat mhwaveedit.desktop ${PKG}/usr/share/applications
-install.dir ${PKG}/usr/share/icons/hicolor/48x48/apps
-install.dat mhwaveedit.png ${PKG}/usr/share/icons/hicolor/48x48/apps
+install.dir ${PKG}${SYS_DIR[share]}/applications
+install.dat mhwaveedit.desktop ${PKG}${SYS_DIR[share]}/applications
+install.dir ${PKG}${SYS_DIR[share]}/icons/hicolor/48x48/apps
+install.dat mhwaveedit.png ${PKG}${SYS_DIR[share]}/icons/hicolor/48x48/apps
 }

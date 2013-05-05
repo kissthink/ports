@@ -5,8 +5,8 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=sound
-VERSION=1.0.26
-BUILD=3
+VERSION=1.0.27
+BUILD=1
 
 # Description
 
@@ -50,6 +50,10 @@ config() {
 
 config etc/modprobe.d/snd-pcsp.conf.new
 config etc/rc.d/rc.alsa.new
+
+if [ ! -d run/alsactl ]; then
+  install -d -m 0755 run/alsactl
+fi
 EOF
 
 # Sources
@@ -108,11 +112,13 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --with-alsa-prefix="${PKG}${SYS_DIR[lib]}" \
  --with-alsa-inc-prefix="${PKG}${SYS_DIR[include]}" \
  --with-udev-rules-dir="${SYS_DIR[udevrules]}" \
- --with-systemdsystemunitdir=${SYS_DIR[systemdsystemunitdir]} \
- --with-asound-state-dir="${SYS_DIR[var]}/lib/alsa"
+ --with-systemdsystemunitdir="${SYS_DIR[systemdsystemunitdir]}" \
+ --with-asound-state-dir="${SYS_DIR[var]}/lib/alsa" \
+ --with-alsactl-pidfile-dir="${SYS_DIR[run]}/alsactl"
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
-install.dir ${PKG}${SYS_DIR[etc]}/{rc,modprobe}.d
+install.dir ${PKG}${SYS_DIR[etc]}/{rc,modprobe,tmpfiles}.d
+install.cfg alsactl.conf.tmpfiles ${PKG}${SYS_DIR[etc]}/tmpfiles.d/alsactl.conf
 install.bin rc.alsa ${PKG}${SYS_DIR[etc]}/rc.d/rc.alsa.new
 install.cfg snd-pcsp.conf.modprobe ${PKG}${SYS_DIR[etc]}/modprobe.d/snd-pcsp.conf.new
 install.dir ${PKG}${SYS_DIR[share]}/applications

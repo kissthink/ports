@@ -6,9 +6,9 @@ source /usr/src/ports/Build/build.sh
 
 NAME=xfce_terminal
 MAJOR=0.6
-VERSION=${MAJOR}.1
+VERSION=${MAJOR}.2
 BUILD=1
-DEPENDS=('xfce >= 4.10-5' 'vte >= 0.28.2-1')
+DEPENDS=('xfce >= 4.10-6' 'vte >= 0.28.2-1')
 
 # Description
 
@@ -49,16 +49,15 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-dependency-tracking \
  --disable-silent-rules \
  --enable-debug=minimum \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --libexecdir=/usr/lib$(libdirsuffix)/exec \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --libexecdir="${SYS_DIR[lib]}/exec" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 changelog NEWS
 rm -rf \
- ${PKG}/usr/share/doc \
- ${PKG}/usr/share/gnome-control-center
+ ${PKG}${SYS_DIR[share]}/gnome-control-center
 }

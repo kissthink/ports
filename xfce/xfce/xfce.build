@@ -6,10 +6,10 @@ source /usr/src/ports/Build/build.sh
 
 NAME=xfce
 MAJOR=4.10
-VERSION=${MAJOR}
-BUILD=6
-DEPENDS=('gtk+ >= 2.24.14-1' 'icon_theme >= 0.8.90-1' 'dbus_glib >= 0.100-1' 'libwnck >= 2.31.0-1' 'libxklavier >= 5.2.1-1' 'libnotify >= 0.7.5-1' 'libcanberra >= 0.29-1' 'gamin >= 0.1.10-1')
-OPTDEPENDS=('poppler >= 0.20.2-1')
+VERSION=${MAJOR}.1
+BUILD=1
+DEPENDS=('gtk+ >= 2.24.17-1' 'icon_theme >= 0.8.90-1' 'dbus_glib >= 0.100.2-1' 'libwnck >= 2.31.0-1' 'libxklavier >= 5.3-1' 'libnotify >= 0.7.5-1' 'libcanberra >= 0.30-1' 'gamin >= 0.1.10-1')
+OPTDEPENDS=('poppler >= 0.22.2-1' 'libsoup >= 2.42.0-1')
 
 # Description
 
@@ -36,8 +36,10 @@ ${NAME}:
 EOF
 
 cat >> ${PKG}/install/doinst.sh <<EOF
-if [ ! -e /etc/X11/xinit/xinitrc ]; then
-  ( cd /etc/X11/xinit ; ln -sf xinitrc.xfce xinitrc )
+#!/bin/sh
+
+if [ ! -e etc/X11/xinit/xinitrc ]; then
+  ( cd etc/X11/xinit ; ln -sf xinitrc.xfce xinitrc )
 fi
 EOF
 
@@ -46,12 +48,14 @@ EOF
 XFCEREPO="http://archive.xfce.org/src"
 XFCEREL="http://archive.xfce.org/xfce/${VERSION}/src"
 
-export PKG_CONFIG_PATH="${PKG}/usr/lib$(libdirsuffix)/pkgconfig"
-export LDFLAGS="-L${PKG}/usr/lib$(libdirsuffix)"
-export CPPFLAGS="-I${PKG}/usr/include/tumbler-1 -I${PKG}/usr/include/garcon-1 -I${PKG}/usr/include/exo-1 -I${PKG}/usr/include/xfce4 -I${PKG}/usr/include/xfce4/libxfce4ui-1 -I${PKG}/usr/include/xfce4/xfconf-0 -I${PKG}/usr/include/xfce4/libxfce4kbd-private-2 -I${PKG}/usr/include/xfce4/libxfce4panel-1.0 -I${PKG}/usr/include/thunarx-2"
+export PKG_CONFIG_PATH="${PKG}${SYS_DIR[share]}/pkgconfig"
+export LDFLAGS="-L${PKG}${SYS_DIR[lib]}"
+export CPPFLAGS="-I${PKG}${SYS_DIR[include]}/tumbler-1 -I${PKG}${SYS_DIR[include]}/garcon-1 -I${PKG}${SYS_DIR[include]}/exo-1 -I${PKG}${SYS_DIR[include]}/xfce4 -I${PKG}${SYS_DIR[include]}/xfce4/libxfce4ui-1 -I${PKG}${SYS_DIR[include]}/xfce4/xfconf-0 -I${PKG}${SYS_DIR[include]}/xfce4/libxfce4kbd-private-2 -I${PKG}${SYS_DIR[include]}/xfce4/libxfce4panel-1.0 -I${PKG}${SYS_DIR[include]}/thunarx-2"
 
 configure()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' $(find . -name "Makefile.in")
+sed -i 's|$(libdir)/xfce4/panel/plugins|$(libdir)/plugins/xfce4/panel|g' $(find . -name "Makefile.in")
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
   --build="${ARCH}-slackware-linux" \
@@ -60,18 +64,18 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
   --enable-static=no \
   --enable-shared=yes \
   --enable-debug=minimum \
-  --prefix=/usr \
+  --prefix="${SYS_DIR[usr]}" \
   --mandir="${SYS_DIR[man]}" \
-  --sysconfdir=/etc \
-  --libdir=/usr/lib$(libdirsuffix) \
-  --localstatedir=/var \
+  --sysconfdir="${SYS_DIR[etc]}" \
+  --libdir="${SYS_DIR[lib]}" \
+  --localstatedir="${SYS_DIR[var]}" \
   --with-html-dir="${SYS_DIR[html]}" \
-  --with-helper-path-prefix="/usr/lib$(libdirsuffix)/exec" \
+  --with-helper-path-prefix="${SYS_DIR[lib]}/exec" \
   ${*}
 }
 
 SRCNAME[0]=libxfce4util
-SRCVERS[0]=${MAJOR}.0
+SRCVERS[0]=${MAJOR}.1
 SRCPACK[0]=${XFCEREL}/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
 SRCCOPY[0]="LGPL2"
 
@@ -82,12 +86,14 @@ make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS THANKS
 changelog NEWS
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
+rm -rf \
+ ${PKG}${SYS_DIR[html]} \
+ ${PKG}${SYS_DIR[lib]}/*.la 
 }
 
 SRCNAME[1]=garcon
 GARCONM=0.2
-SRCVERS[1]=${GARCONM}.0
+SRCVERS[1]=${GARCONM}.1
 SRCPACK[1]=${XFCEREL}/${SRCNAME[1]}-${SRCVERS[1]}.tar.bz2
 SRCCOPY[1]="LGPL2 FDL11"
 
@@ -98,24 +104,31 @@ make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
+rm -rf \
+ ${PKG}${SYS_DIR[html]} \
+ ${PKG}${SYS_DIR[lib]}/*.la
 }
 
 SRCNAME[2]=tumbler
 TUMBLERM=0.1
-SRCVERS[2]=${TUMBLERM}.27
+SRCVERS[2]=${TUMBLERM}.29
 SRCPACK[2]=${XFCEREL}/${SRCNAME[2]}-${SRCVERS[2]}.tar.bz2
 SRCCOPY[2]="GPL2"
 
 build2()
 {
+sed -i 's|$(libdir)/tumbler-$(TUMBLER_VERSION_API)/plugins|$(libdir)/plugins/tumbler-$(TUMBLER_VERSION_API)|g' $(find . -name "Makefile.in")
+sed -i 's|$(libdir)/tumbler-$(TUMBLER_VERSION_API)|$(libdir)/exec/tumbler-$(TUMBLER_VERSION_API)|g' tumblerd/Makefile.in
+sed -i 's|@libdir@/tumbler-@TUMBLER_VERSION_API@/tumblerd|@libdir@/exec/tumbler-@TUMBLER_VERSION_API@/tumblerd|g' tumblerd/*.service.in
 configure \
  --disable-ffmpeg-thumbnailer
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
+rm -rf \
+ ${PKG}${SYS_DIR[html]} \
+ ${PKG}${SYS_DIR[lib]}/*.la
 }
 
 SRCNAME[3]=xfconf
@@ -125,14 +138,16 @@ SRCCOPY[3]="GPL2"
 
 build3()
 {
-CPPFLAGS="-I${PKG}/usr/include/xfce4" \
-LDFLAGS="-L${PKG}/usr/lib$(libdirsuffix)" \
+CPPFLAGS="-I${PKG}${SYS_DIR[include]}/xfce4" \
+LDFLAGS="-L${PKG}${SYS_DIR[lib]}" \
 configure
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
+rm -rf \
+ ${PKG}${SYS_DIR[html]} \
+ ${PKG}${SYS_DIR[lib]}/*.la
 }
 
 SRCNAME[4]=libxfce4ui
@@ -147,7 +162,9 @@ make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
+rm -rf \
+ ${PKG}${SYS_DIR[html]} \
+ ${PKG}${SYS_DIR[lib]}/*.la
 }
 
 SRCNAME[5]=exo
@@ -165,11 +182,13 @@ make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS THANKS
 changelog NEWS
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
+rm -rf \
+ ${PKG}${SYS_DIR[html]} \
+ ${PKG}${SYS_DIR[lib]}/*.la
 }
 
 SRCNAME[6]=xfce4-settings
-SRCVERS[6]=${MAJOR}.0
+SRCVERS[6]=${MAJOR}.1
 SRCPACK[6]=${XFCEREL}/${SRCNAME[6]}-${SRCVERS[6]}.tar.bz2
 SRCCOPY[6]="GPL2"
 
@@ -187,11 +206,11 @@ make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
+rm -f ${PKG}${SYS_DIR[lib]}/*.la
 }
 
 SRCNAME[7]=xfwm4
-SRCVERS[7]=${MAJOR}.0
+SRCVERS[7]=${MAJOR}.1
 SRCPACK[7]=${XFCEREL}/${SRCNAME[7]}-${SRCVERS[7]}.tar.bz2
 SRCCOPY[7]="GPL2"
 
@@ -206,27 +225,30 @@ make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
+rm -f ${PKG}${SYS_DIR[lib]}/*.la
 }
 
 SRCNAME[8]=xfce4-panel
-SRCVERS[8]=${MAJOR}.0
+SRCVERS[8]=${MAJOR}.1
 SRCPACK[8]=${XFCEREL}/${SRCNAME[8]}-${SRCVERS[8]}.tar.bz2
 SRCCOPY[8]="GPL2 LGPL21"
 
 build8()
 {
+sed -i 's|$(libdir)/xfce4|$(libdir)/plugins/xfce4|g' panel/Makefile.in
 configure \
  --enable-gio-unix
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS THANKS
 changelog NEWS
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
+rm -rf \
+ ${PKG}${SYS_DIR[html]} \
+ ${PKG}${SYS_DIR[lib]}/*.la
 }
 
 SRCNAME[9]=xfce4-appfinder
-SRCVERS[9]=${MAJOR}.0
+SRCVERS[9]=${MAJOR}.1
 SRCPACK[9]=${XFCEREL}/${SRCNAME[9]}-${SRCVERS[9]}.tar.bz2
 SRCCOPY[9]="GPL2"
 
@@ -237,16 +259,18 @@ make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
+rm -f ${PKG}${SYS_DIR[lib]}/*.la
 }
 
 SRCNAME[10]=Thunar
-SRCVERS[10]=1.6.2
+SRCVERS[10]=1.6.3
 SRCPACK[10]=${XFCEREL}/${SRCNAME[10]}-${SRCVERS[10]}.tar.bz2
 SRCCOPY[10]="GPL2 LGPL2"
 
 build10()
 {
+sed -i 's|$(libdir)/thunarx-$(THUNARX_VERSION_API)|$(libdir)/plugins/thunarx-$(THUNARX_VERSION_API)|g' $(find . -name "Makefile.in")
+sed -i 's|${libdir}/thunarx-@THUNARX_VERSION_API@|${libdir}/plugins/thunarx-@THUNARX_VERSION_API@|g' thunarx/thunarx-2.pc.in
 configure \
  --docdir="${SYS_DIR[doc]}/${SRCNAME[10],,}-${SRCVERS[10]}" \
  --enable-gio-unix \
@@ -260,11 +284,12 @@ make install DESTDIR="${PKG}"
 doc AUTHORS THANKS
 changelog NEWS
 rm -rf \
- ${PKG}/usr/lib$(libdirsuffix)/*.la
+ ${PKG}${SYS_DIR[html]} \
+ ${PKG}${SYS_DIR[lib]}/*.la
 }
 
 SRCNAME[11]=xfdesktop
-SRCVERS[11]=${MAJOR}.0
+SRCVERS[11]=${MAJOR}.2
 SRCPACK[11]=${XFCEREL}/${SRCNAME[11]}-${SRCVERS[11]}.tar.bz2
 SRCCOPY[11]="GPL2"
 
@@ -278,27 +303,28 @@ make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
+rm -f ${PKG}${SYS_DIR[lib]}/*.la
 }
 
 SRCNAME[12]=xfce4-session
-SRCVERS[12]=${MAJOR}.0
+SRCVERS[12]=${MAJOR}.1
 SRCPACK[12]=${XFCEREL}/${SRCNAME[12]}-${SRCVERS[12]}.tar.bz2
 SRCCOPY[12]="GPL2"
 
 build12()
 {
+sed -i 's|$(libdir)/xfce4/session/splash-engines|$(libdir)/plugins/xfce4/session/splash-engines|g' $(find . -name "Makefile.in")
 configure \
- --disable-legacy-sm \
- --enable-libgnome-keyring
+ --disable-legacy-sm
+#FIXME: systemd (--enable-systemd)
 # --with-xession-prefix=WHERE xsession.desktop files go
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-install.dir ${PKG}/etc/X11/xinit
-install.bin xinitrc.xfce ${PKG}/etc/X11/xinit
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
+install.dir ${PKG}${SYS_DIR[etc]}/X11/xinit
+install.bin xinitrc.xfce ${PKG}${SYS_DIR[etc]}/X11/xinit
+rm -f ${PKG}${SYS_DIR[lib]}/*.la
 }
 
 SRCNAME[13]=thunar-volman
@@ -325,6 +351,7 @@ SRCCOPY[14]="GPL2"
 
 build14()
 {
+sed -i 's|$(libdir)/thunarx-2|$(libdir)/plugins/thunarx-2|g' $(find . -name "Makefile.in")
 configure
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
@@ -340,8 +367,9 @@ SRCCOPY[15]="GPL2"
 
 build15()
 {
+sed -i 's|$(libdir)/thunarx-2|$(libdir)/plugins/thunarx-2|g' $(find . -name "Makefile.in")
 configure \
- --libexecdir="/usr/lib$(libdirsuffix)/plugins/xfce4"
+ --libexecdir="${SYS_DIR[lib]}/plugins/xfce4"
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS THANKS
@@ -350,7 +378,7 @@ changelog NEWS
 
 SRCNAME[16]=xfce4-notifyd
 NOTIFM=0.2
-SRCVERS[16]=${NOTIFM}.2
+SRCVERS[16]=${NOTIFM}.3
 SRCPACK[16]=${XFCEREPO}/apps/${SRCNAME[16]}/${NOTIFM}/${SRCNAME[16]}-${SRCVERS[16]}.tar.bz2
 
 build16()
@@ -376,6 +404,7 @@ make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
+chmod 0755 ${PKG}${SYS_DIR[lib]}/plugins/xfce4/panel/libsystemload.so
 }
 
 SRCNAME[18]=xfce4-netload-plugin
@@ -401,24 +430,27 @@ SRCCOPY[19]="GPL2"
 
 build19()
 {
+sed -i 's|$(libexecdir)/xfce4/panel-plugins|$(libdir)/plugins/xfce4/panel|g' panel-plugin/Makefile.in
 configure
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
 mv \
- ${PKG}/usr/lib$(libdirsuffix)/xfce4/modules/*sensor*.so* \
- ${PKG}/usr/lib$(libdirsuffix)
+ ${PKG}${SYS_DIR[lib]}/xfce4/modules/*sensor*.so* \
+ ${PKG}${SYS_DIR[lib]}
+rm -rf ${PKG}${SYS_DIR[lib]}/xfce4
 }
 
 SRCNAME[20]=xfce4-weather-plugin
-SRCVERS[20]=0.8.2
+SRCVERS[20]=0.8.3
 SRCPACK[20]=${XFCEREPO}/panel-plugins/${SRCNAME[20]}/${SENSORM}/${SRCNAME[20]}-${SRCVERS[20]}.tar.bz2
 SRCCOPY[20]="GPL2"
 
 build20()
 {
-configure
+configure \
+ --enable-upower
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS

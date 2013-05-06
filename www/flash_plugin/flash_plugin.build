@@ -6,9 +6,9 @@ source /usr/src/ports/Build/build.sh
 
 NAME=flash_plugin
 MAJOR=11
-VERSION=${MAJOR}.2.202.262
+VERSION=${MAJOR}.2.202.280
 BUILD=1
-DEPENDS=('gtk+ >= 2.24.14-1')
+DEPENDS=('gtk+ >= 2.24.17-1')
 
 # Description
 

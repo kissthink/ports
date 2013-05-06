@@ -7,7 +7,7 @@ source /usr/src/ports/Build/build.sh
 NAME=xfce_taskmanager
 MAJOR=1.0
 VERSION=${MAJOR}.0
-BUILD=1
+BUILD=2
 DEPENDS=('libwnck >= 2.31.0-1')
 
 # Description
@@ -51,11 +51,11 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-static=no \
  --enable-shared=yes \
  --enable-debug=minimum \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --enable-wnck
 make ${JOBS}
 make install DESTDIR="${PKG}"

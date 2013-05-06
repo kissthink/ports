@@ -7,8 +7,8 @@ source /usr/src/ports/Build/build.sh
 NAME=xfce_screenshooter
 MAJOR=1.8
 VERSION=${MAJOR}.1
-BUILD=1
-DEPENDS=('xfce >= 4.10-1')
+BUILD=2
+DEPENDS=('xfce >= 4.10.1-1')
 
 # Description
 
@@ -43,6 +43,7 @@ SRCCOPY[0]="GPL2"
 
 build0()
 {
+sed -i 's|$(libdir)/xfce4/panel/plugins|$(libdir)/plugins/xfce4/panel|g' Makefile.{in,am}
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -51,19 +52,16 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-static=no \
  --enable-shared=yes \
  --enable-debug=minimum \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-install.dir ${PKG}/usr/lib$(libdirsuffix)/xfce4/panel/plugins
-mv \
- ${PKG}/usr/libexec/xfce4/panel-plugins/* \
- ${PKG}/usr/lib$(libdirsuffix)/xfce4/panel/plugins
 rm -rf \
- ${PKG}/usr/libexec
+ ${PKG}${SYS_DIR[share]}/xfce4/doc \
+ ${PKG}${SYS_DIR[doc]}/xfce4-screenshooter
 }

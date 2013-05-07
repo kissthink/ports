@@ -7,6 +7,7 @@ source /usr/src/ports/Build/build.sh
 NAME=pci
 VERSION=$(date '+%Y%m%d')
 BUILD=1
+DEPENDS=('kmod >= 12-1')
 
 # Description
 
@@ -35,7 +36,7 @@ EOF
 # Sources
 
 SRCNAME[0]=pciutils
-SRCVERS[0]=3.1.10
+SRCVERS[0]=3.2.0
 SRCPACK[0]=ftp://ftp.kernel.org/pub/software/utils/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
 SRCCOPY[0]="GPL2"
 

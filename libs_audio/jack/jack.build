@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=jack
-VERSION=1.9.8
+VERSION=1.9.9.5
 BUILD=1
 DEPENDS=('libsamplerate >= 0.1.8-1' 'celt >= 0.11.3-1')
 
@@ -37,17 +37,16 @@ EOF
 
 SRCNAME[0]=${NAME}
 SRCVERS[0]=${VERSION}
-SRCPACK[0]=http://www.grame.fr/~letz/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCPACK[0]=http://jackaudio.org/downloads/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
 SRCCOPY[0]="GPL2 LGPL2"
 
 build0()
 {
-cd ${SRCNAME[0]}-${SRCVERS[0]}
-export CPPFLAGS="${FLAGS} -I/usr/include/samplerate -I/usr/include/sndfile"
+export CPPFLAGS="${FLAGS} -I${SYS_DIR[include]}/samplerate -I${SYS_DIR[include]}/sndfile"
 ./waf configure \
- --prefix=/usr \
- --mandir="/man/man1" \
- --libdir="/lib$(libdirsuffix)" \
+ --prefix="${SYS_DIR[usr]}" \
+ --mandir="${SYS_DIR[man]}/man1" \
+ --libdir="${SYS_DIR[lib]}" \
  --alsa \
  --dbus \
  --classic
@@ -55,10 +54,8 @@ export CPPFLAGS="${FLAGS} -I/usr/include/samplerate -I/usr/include/sndfile"
 ./waf install --destdir="${PKG}"
 doc README
 changelog ChangeLog
-chmod 0755 \
- ${PKG}/usr/lib$(libdirsuffix)/jack/*.so \
- ${PKG}/usr/lib$(libdirsuffix)/*.so*
-UDEVDIR="$(pkg-config udev --variable=udevdir)"
-install.dir ${PKG}${UDEVDIR}/rules.d
-install.dat 40-hpet-permissions.rules ${PKG}${UDEVDIR}/rules.d
+install.dir ${PKG}${SYS_DIR[udevrules]}
+install.dat 40-hpet-permissions.rules ${PKG}${SYS_DIR[udevrules]}
+install.dir ${PKG}${SYS_DIR[etc]}/limits.d
+install.dat 99-audio.conf ${PKG}${SYS_DIR[etc]}/limits.d
 }

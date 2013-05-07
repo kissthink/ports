@@ -5,7 +5,8 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=cg_toolkit
-VERSION=3.1
+MAJOR=3.1
+VERSION=${MAJOR}.201204
 BUILD=1
 
 # Description
@@ -45,16 +46,15 @@ case "$(uname -m)" in
 esac
 
 SRCNAME[0]=Cg
-CGDATE=February2012
-SRCVERS[0]=${VERSION}_${CGDATE}
-SRCPACK[0]=http://developer.download.nvidia.com/cg/Cg_${VERSION}/Cg-${SRCVERS[0]}_${MYARCH}.tgz
+CGDATE=April2012
+SRCVERS[0]=${MAJOR}_${CGDATE}
+SRCPACK[0]=http://developer.download.nvidia.com/cg/Cg_${MAJOR}/Cg-${SRCVERS[0]}_${MYARCH}.tgz
 SRCOPTS[0]="pkgunpack"
 
 build0()
 {
-doc ${PKG}/usr/local/Cg/docs/{*_bumpdemo_Tutorial,Cg*Manual,CgReleaseNotes}.pdf
+doc ${PKG}/usr/local/Cg/docs/CgReleaseNotes.pdf
 license ${PKG}/usr/local/Cg/docs/license.txt
-install.dir ${PKG}/usr/share/html
-mv ${PKG}/usr/local/Cg/docs/html ${PKG}/usr/share/html/cg
+mv ${PKG}/usr/lib64 ${PKG}${SYS_DIR[lib]}
 rm -rf ${PKG}/usr/local
 }

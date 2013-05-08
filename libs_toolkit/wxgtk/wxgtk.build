@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=wxgtk
 VERSION=2.8.12
-BUILD=1
-DEPENDS=('gtk+ >= 2.24.6-1' 'gstreamer >= 0.10.35-1' 'mesa >= 7.11-1')
+BUILD=2
+DEPENDS=('gtk+ >= 2.24.17-1' 'mesa >= 9.0.1-1')
 
 # Description
 
@@ -47,24 +47,31 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --disable-rpath \
- --prefix=/usr \
+ --disable-precomp-headers \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --disable-optimize \
  --disable-compat26 \
+ --disable-mediactrl \
  --with-gtk=2 \
+ --with-regex=builtin \
  --with-opengl \
+ --with-libjpeg=sys \
+ --with-libtiff=sys \
+ --with-libpng=sys \
+ --with-libxpm=sys \
  --enable-unicode \
- --enable-graphics_ctx \
- --enable-mediactrl
-make -j 2
+ --enable-graphics_ctx
+make ${JOBS}
+make -C locale allmo
+make -C contrib/src
 make install DESTDIR="${PKG}"
+make -C contrib/src DESTDIR="${PKG}" install
 changelog docs/changes.txt
 license docs/preamble.txt COPYING.preamble
 license docs/licence.txt COPYING.wxwindows
-license docs/licendoc.txt COPYING.wxwindowsdocs
-install.dir ${PKG}${SYS_DIR[html]}/wxwidgets
-cp -r docs/html/* ${PKG}${SYS_DIR[html]}/wxwidgets
+rm -rf ${PKG}${SYS_DIR[share]}/bakefile
 }

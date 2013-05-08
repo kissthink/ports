@@ -5,9 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=audacity
-VERSION=2.0.0
-BUILD=2
-DEPENDS=('wxgtk >= 2.8.12-1' 'ffmpeg >= 0.11.1-1')
+VERSION=2.0.3
+BUILD=1
+DEPENDS=('wxgtk >= 2.8.12-1' 'sound >= 1.0.27-1' 'jack >= 1.9.9.5-1' 'libmad >= 0.15.1b-1' 'libvorbis >= 1.3.3-1' 'libopus >= 1.0.2-1' 'celt >= 0.11.3-1' 'libid3tag >= 0.15.1b-1' 'flac >= 1.2.1-1' 'libsndfile >= 1.0.25-1' 'libsoundtouch >= 1.7.1-1')
+#OPTDEPENDS=('ffmpeg >= 1.2-1')
 
 # Description
 
@@ -37,26 +38,25 @@ EOF
 
 SRCNAME[0]=${NAME}-minsrc
 SRCVERS[0]=${VERSION}
-SRCPACK[0]=http://${NAME}.googlecode.com/files/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCPACK[0]=http://${NAME}.googlecode.com/files/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
 SRCROOT[0]=${NAME}-src-${SRCVERS[0]}
-SRCCOPY[0]="GPL2"
 
 build0()
 {
 LDFLAGS="-lICE" \
-CPPFLAGS="-I/usr/include/id3tag -I/usr/include/sndfile -I/usr/include/samplerate" \
+CPPFLAGS="-I${SYS_DIR[include]}/id3tag -I${SYS_DIR[include]}/sndfile -I${SYS_DIR[include]}/samplerate" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --docdir="${SYS_DIR[doc]}/audacity" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --without-ffmpeg \
- --without-libresample \
  --with-ladspa \
  --with-expat=system \
  --with-libsndfile=system \
@@ -65,14 +65,13 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --with-vorbis=system \
  --with-libmad=system \
  --with-id3tag=system \
- --with-soundtouch=system \
- --with-ffmpeg=system
+ --with-soundtouch=system
 #FIXME: ffmpeg doesn't compile
-sed -i "s|__LIBDIR__|lib$(libdirsuffix)|g" src/effects/ladspa/LoadLadspa.cpp
+# --with-ffmpeg=system
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc README.txt
-gunzip ${PKG}/usr/man/man?/*.gz
-rm -rf \
- ${PKG}/usr/share/doc
+license LICENSE.txt
+gunzip ${PKG}${SYS_DIR[man]}/man?/*.gz
+rm -rf ${PKG}${SYS_DIR[doc]}/audacity
 }

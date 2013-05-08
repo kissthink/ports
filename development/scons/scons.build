@@ -5,10 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=scons
-VERSION=2.2.0
+VERSION=2.3.0
 BUILD=1
 ARCH=noarch
-DEPENDS=('python >= 2.6.6-1')
+DEPENDS=('python >= 2.7.4-1')
 
 # Description
 
@@ -52,4 +52,6 @@ python setup.py install \
  --no-version-script
 doc RELEASE.txt
 changelog CHANGES.txt
+# Fix to use /usr/bin/python2
+sed -i 's:^#!.*bin/env python:#!/usr/bin/env python2:' ${PKG}${SYS_DIR[bin]}/*
 }

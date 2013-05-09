@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=libdrm
-VERSION=2.4.42
+VERSION=2.4.44
 BUILD=1
-DEPENDS=('udev >= 173-1' 'pci >= 20130214-1')
+DEPENDS=('udev >= 173-1' 'pci >= 20130507-1')
 
 # Description
 

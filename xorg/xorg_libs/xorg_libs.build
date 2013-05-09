@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=xorg_libs
 VERSION=7.7
-BUILD=3
-DEPENDS=('freetype >= 2.4.11-1' 'fontconfig >= 2.10.91-1' 'expat >= 2.0.1-1')
+BUILD=4
+DEPENDS=('freetype >= 2.4.11-1' 'fontconfig >= 2.10.91-1' 'expat >= 2.1.0-1')
 
 # Description
 
@@ -37,12 +37,14 @@ EOF
 
 export XORGREPO="http://www.x.org/releases/X11R${VERSION}/src/everything"
 export XORGIREPO="http://xorg.freedesktop.org/archive/individual"
-export X_CFLAGS="-I${PKG}/usr/include"
-export X_LIBS="-L${PKG}/usr/lib$(libdirsuffix)"
-export PKG_CONFIG_PATH="${PKG}/usr/lib$(libdirsuffix)/pkgconfig:/usr/lib$(libdirsuffix)/pkgconfig"
+export X_CFLAGS="-I${PKG}${SYS_DIR[include]}"
+export X_LIBS="-L${PKG}${SYS_DIR[lib]}"
+export PKG_CONFIG_PATH="${PKG}${SYS_DIR[share]}/pkgconfig:${SYS_DIR[share]}/pkgconfig"
 
 configure()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.{in,am}
+sed -i 's|${libdir}/pkgconfig|${datarootdir}/pkgconfig|g' configure Makefile.{in,am}
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -50,12 +52,16 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-shared=yes \
  --enable-static=no \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --docdir="${SYS_DIR[doc]}/xorg-${VERSION}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  ${*}
+make ${JOBS} V=1 X11_LOCALEDATADIR="${SYS_DIR[share]}/locale"
+make install DESTDIR="${PKG}"
+rm -f ${PKG}${SYS_DIR[lib]}/*.la
 }
 
 SRCNAME[0]=libFS
@@ -65,11 +71,8 @@ SRCPACK[0]=${XORGIREPO}/lib/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
 build0()
 {
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 changelog ChangeLog
 license COPYING
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
 }
 
 SRCNAME[1]=libICE
@@ -79,12 +82,9 @@ SRCPACK[1]=${XORGIREPO}/lib/${SRCNAME[1]}-${SRCVERS[1]}.tar.bz2
 build1()
 {
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog ChangeLog
 license COPYING
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
 }
 
 SRCNAME[2]=libSM
@@ -93,16 +93,13 @@ SRCPACK[2]=${XORGIREPO}/lib/${SRCNAME[2]}-${SRCVERS[2]}.tar.bz2
 
 build2()
 {
-SM_CFLAGS="-I${PKG}/usr/include" \
-SM_LIBS="-L${PKG}/usr/lib$(libdirsuffix)" \
+SM_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+SM_LIBS="-L${PKG}${SYS_DIR[lib]}" \
 configure \
  --with-libuuid
-make ${JOBS}
-make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog ChangeLog
 license COPYING
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
 }
 
 SRCNAME[3]=libXau
@@ -112,12 +109,9 @@ SRCPACK[3]=${XORGIREPO}/lib/${SRCNAME[3]}-${SRCVERS[3]}.tar.bz2
 build3()
 {
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog ChangeLog
 license COPYING
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
 }
 
 SRCNAME[4]=libXdmcp
@@ -126,29 +120,23 @@ SRCPACK[4]=${XORGIREPO}/lib/${SRCNAME[4]}-${SRCVERS[4]}.tar.bz2
 
 build4()
 {
-XDMCP_CFLAGS="-I${PKG}/usr/include" \
-XDMCP_LIBS="-L${PKG}/usr/lib$(libdirsuffix)" \
+XDMCP_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+XDMCP_LIBS="-L${PKG}${SYS_DIR[lib]}" \
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog ChangeLog
 license COPYING
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
 }
 
 SRCNAME[5]=libfontenc
-SRCVERS[5]=1.1.1
+SRCVERS[5]=1.1.2
 SRCPACK[5]=${XORGIREPO}/lib/${SRCNAME[5]}-${SRCVERS[5]}.tar.bz2
 
 build5()
 {
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 changelog ChangeLog
 license COPYING
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
 }
 
 SRCNAME[6]=libxcb
@@ -157,18 +145,15 @@ SRCPACK[6]=${XORGIREPO}/lib/${SRCNAME[6]}-${SRCVERS[6]}.tar.bz2
 
 build6()
 {
-NEEDED_CFLAGS="-I${PKG}/usr/include" \
-NEEDED_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lXau" \
-XDMCP_CFLAGS="-I${PKG}/usr/include" \
-XDMCP_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lXdmcp" \
+NEEDED_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+NEEDED_LIBS="-L${PKG}${SYS_DIR[lib]} -lXau" \
+XDMCP_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+XDMCP_LIBS="-L${PKG}${SYS_DIR[lib]} -lXdmcp" \
 configure \
  --enable-xinput
 # --enable-selinux
-make ${JOBS}
-make install DESTDIR="${PKG}"
 changelog NEWS
 license COPYING
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
 }
 
 SRCNAME[7]=xcb-util
@@ -177,16 +162,13 @@ SRCPACK[7]=http://xcb.freedesktop.org/dist/${SRCNAME[7]}-${SRCVERS[7]}.tar.bz2
 
 build7()
 {
-XCB_CFLAGS="-I${PKG}/usr/include" \
-XCB_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lxcb -lXau" \
-XCB_SHM_CFLAGS="-I${PKG}/usr/include" \
-XCB_SHM_LIBS="-L${PKG}/usr/lib$(libdirsuffix)" \
-XCB_RENDER_CFLAGS="-I${PKG}/usr/include" \
-XCB_RENDER_LIBS="-L${PKG}/usr/lib$(libdirsuffix)" \
+XCB_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+XCB_LIBS="-L${PKG}${SYS_DIR[lib]} -lxcb -lXau" \
+XCB_SHM_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+XCB_SHM_LIBS="-L${PKG}${SYS_DIR[lib]}" \
+XCB_RENDER_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+XCB_RENDER_LIBS="-L${PKG}${SYS_DIR[lib]}" \
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
 }
 
 SRCNAME[8]=libX11
@@ -195,23 +177,21 @@ SRCPACK[8]=${XORGIREPO}/lib/${SRCNAME[8]}-${SRCVERS[8]}.tar.bz2
 
 build8()
 {
-X11_CFLAGS="-I${PKG}/usr/include" \
-X11_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lxcb" \
+X11_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+X11_LIBS="-L${PKG}${SYS_DIR[lib]} -lxcb" \
 configure \
- --with-locale-lib-dir=/usr/lib$(libdirsuffix)/plugins/X11/locale \
+ --with-locale-lib-dir="${SYS_DIR[lib]}/plugins/X11/locale" \
  --with-xcb=yes \
  --enable-secure-rpc \
  --enable-xlocaledir \
  --enable-loadable-i18n
-make ${JOBS}
-make install DESTDIR="${PKG}" X11_LOCALEDATADIR="/usr/share/locale"
-install.dir ${PKG}/etc/profile.d
-install.bin xlocale.sh ${PKG}/etc/profile.d
-install.bin xlocale.csh ${PKG}/etc/profile.d
+make install DESTDIR="${PKG}" 
 doc AUTHORS
 changelog ChangeLog
 license COPYING
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
+install.dir ${PKG}${SYS_DIR[etc]}/profile.d
+install.bin xlocale.sh ${PKG}${SYS_DIR[etc]}/profile.d
+install.bin xlocale.csh ${PKG}${SYS_DIR[etc]}/profile.d
 }
 
 SRCNAME[9]=libXext
@@ -220,15 +200,12 @@ SRCPACK[9]=${XORGIREPO}/lib/${SRCNAME[9]}-${SRCVERS[9]}.tar.bz2
 
 build9()
 {
-XEXT_CFLAGS="-I${PKG}/usr/include" \
-XEXT_LIBS="-L${PKG}/usr/lib$(libdirsuffix)" \
+XEXT_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+XEXT_LIBS="-L${PKG}${SYS_DIR[lib]}" \
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog ChangeLog
 license COPYING
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
 }
 
 SRCNAME[10]=libXfixes
@@ -237,31 +214,25 @@ SRCPACK[10]=${XORGIREPO}/lib/${SRCNAME[10]}-${SRCVERS[10]}.tar.bz2
 
 build10()
 {
-FIXESEXT_CFLAGS="-I${PKG}/usr/include" \
-FIXESEXT_LIBS="-L${PKG}/usr/lib$(libdirsuffix)" \
+FIXESEXT_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+FIXESEXT_LIBS="-L${PKG}${SYS_DIR[lib]}" \
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog ChangeLog
 license COPYING
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
 }
 
 SRCNAME[11]=libXi
-SRCVERS[11]=1.6.2
+SRCVERS[11]=1.7.1
 SRCPACK[11]=${XORGIREPO}/lib/${SRCNAME[11]}-${SRCVERS[11]}.tar.bz2
 
 build11()
 {
-XI_CFLAGS="-I${PKG}/usr/include" \
-XI_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lXext" \
+XI_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+XI_LIBS="-L${PKG}${SYS_DIR[lib]} -lXext" \
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 changelog ChangeLog
 license COPYING
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
 }
 
 SRCNAME[12]=libXinerama
@@ -270,14 +241,11 @@ SRCPACK[12]=${XORGIREPO}/lib/${SRCNAME[12]}-${SRCVERS[12]}.tar.bz2
 
 build12()
 {
-XINERAMA_CFLAGS="-I${PKG}/usr/include" \
-XINERAMA_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lXext" \
+XINERAMA_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+XINERAMA_LIBS="-L${PKG}${SYS_DIR[lib]} -lXext" \
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 changelog ChangeLog
 license COPYING
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
 }
 
 SRCNAME[13]=libXrender
@@ -286,15 +254,12 @@ SRCPACK[13]=${XORGIREPO}/lib/${SRCNAME[13]}-${SRCVERS[13]}.tar.bz2
 
 build13()
 {
-RENDER_CFLAGS="-I${PKG}/usr/include" \
-RENDER_LIBS="-L${PKG}/usr/lib$(libdirsuffix)" \
+RENDER_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+RENDER_LIBS="-L${PKG}${SYS_DIR[lib]}" \
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog ChangeLog
 license COPYING
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
 }
 
 SRCNAME[14]=libXres
@@ -303,15 +268,12 @@ SRCPACK[14]=${XORGIREPO}/lib/${SRCNAME[14]}-${SRCVERS[14]}.tar.bz2
 
 build14()
 {
-XRES_CFLAGS="-I${PKG}/usr/include" \
-XRES_LIBS="-L${PKG}/usr/lib$(libdirsuffix)" \
+XRES_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+XRES_LIBS="-L${PKG}${SYS_DIR[lib]}" \
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog ChangeLog
 license COPYING
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
 }
 
 SRCNAME[15]=libXv
@@ -320,15 +282,12 @@ SRCPACK[15]=${XORGIREPO}/lib/${SRCNAME[15]}-${SRCVERS[15]}.tar.bz2
 
 build15()
 {
-XV_CFLAGS="-I${PKG}/usr/include" \
-XV_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lXext" \
+XV_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+XV_LIBS="-L${PKG}${SYS_DIR[lib]} -lXext" \
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog ChangeLog
 license COPYING
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
 }
 
 SRCNAME[16]=libXvMC
@@ -337,14 +296,11 @@ SRCPACK[16]=${XORGIREPO}/lib/${SRCNAME[16]}-${SRCVERS[16]}.tar.bz2
 
 build16()
 {
-XVMC_CFLAGS="-I${PKG}/usr/include" \
-XVMC_LIBS="-L${PKG}/usr/lib$(libdirsuffix)" \
+XVMC_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+XVMC_LIBS="-L${PKG}${SYS_DIR[lib]}" \
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 changelog ChangeLog
 license COPYING
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
 }
 
 SRCNAME[17]=libXxf86dga
@@ -353,14 +309,11 @@ SRCPACK[17]=${XORGIREPO}/lib/${SRCNAME[17]}-${SRCVERS[17]}.tar.bz2
 
 build17()
 {
-XXF86DGA_CFLAGS="-I${PKG}/usr/include" \
-XXF86DGA_LIBS="-L${PKG}/usr/lib$(libdirsuffix)" \
+XXF86DGA_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+XXF86DGA_LIBS="-L${PKG}${SYS_DIR[lib]}" \
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 changelog ChangeLog
 license COPYING
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
 }
 
 SRCNAME[18]=libXxf86vm
@@ -369,14 +322,11 @@ SRCPACK[18]=${XORGIREPO}/lib/${SRCNAME[18]}-${SRCVERS[18]}.tar.bz2
 
 build18()
 {
-XXF86VM_CFLAGS="-I${PKG}/usr/include" \
-XXF86VM_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lXext" \
+XXF86VM_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+XXF86VM_LIBS="-L${PKG}${SYS_DIR[lib]} -lXext" \
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 changelog ChangeLog
 license COPYING
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
 }
 
 SRCNAME[19]=libdmx
@@ -385,14 +335,11 @@ SRCPACK[19]=${XORGIREPO}/lib/${SRCNAME[19]}-${SRCVERS[19]}.tar.bz2
 
 build19()
 {
-DMX_CFLAGS="-I${PKG}/usr/include" \
-DMX_LIBS="-L${PKG}/usr/lib$(libdirsuffix)" \
+DMX_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+DMX_LIBS="-L${PKG}${SYS_DIR[lib]}" \
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 changelog ChangeLog
 license COPYING
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
 }
 
 SRCNAME[20]=libxkbfile
@@ -401,14 +348,11 @@ SRCPACK[20]=${XORGIREPO}/lib/${SRCNAME[20]}-${SRCVERS[20]}.tar.bz2
 
 build20()
 {
-XKBFILE_CFLAGS="-I${PKG}/usr/include" \
-XKBFILE_LIBS="-L${PKG}/usr/lib$(libdirsuffix)" \
+XKBFILE_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+XKBFILE_LIBS="-L${PKG}${SYS_DIR[lib]}" \
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 changelog ChangeLog
 license COPYING
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
 }
 
 SRCNAME[21]=libXScrnSaver
@@ -417,15 +361,12 @@ SRCPACK[21]=${XORGIREPO}/lib/${SRCNAME[21]}-${SRCVERS[21]}.tar.bz2
 
 build21()
 {
-XSCRNSAVER_CFLAGS="-I${PKG}/usr/include" \
-XSCRNSAVER_LIBS="-L${PKG}/usr/lib$(libdirsuffix)" \
+XSCRNSAVER_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+XSCRNSAVER_LIBS="-L${PKG}${SYS_DIR[lib]}" \
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog ChangeLog
 license COPYING
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
 }
 
 SRCNAME[22]=libXcomposite
@@ -434,15 +375,12 @@ SRCPACK[22]=${XORGIREPO}/lib/${SRCNAME[22]}-${SRCVERS[22]}.tar.bz2
 
 build22()
 {
-XCOMPOSITE_CFLAGS="-I${PKG}/usr/include" \
-XCOMPOSITE_LIBS="-L${PKG}/usr/lib$(libdirsuffix)" \
+XCOMPOSITE_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+XCOMPOSITE_LIBS="-L${PKG}${SYS_DIR[lib]}" \
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog ChangeLog
 license COPYING
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
 }
 
 SRCNAME[23]=libXcursor
@@ -451,17 +389,14 @@ SRCPACK[23]=${XORGIREPO}/lib/${SRCNAME[23]}-${SRCVERS[23]}.tar.bz2
 
 build23()
 {
-XCURSOR_CFLAGS="-I${PKG}/usr/include" \
-XCURSOR_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lXrender -lXfixes" \
+XCURSOR_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+XCURSOR_LIBS="-L${PKG}${SYS_DIR[lib]} -lXrender -lXfixes" \
 configure
 # --with-icondir=
 # --with-cursorpath=
-make ${JOBS}
-make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog ChangeLog
 license COPYING
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
 }
 
 SRCNAME[24]=libXdamage
@@ -470,15 +405,12 @@ SRCPACK[24]=${XORGIREPO}/lib/${SRCNAME[24]}-${SRCVERS[24]}.tar.bz2
 
 build24()
 {
-XDAMAGE_CFLAGS="-I${PKG}/usr/include" \
-XDAMAGE_LIBS="-L${PKG}/usr/lib$(libdirsuffix)" \
+XDAMAGE_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+XDAMAGE_LIBS="-L${PKG}${SYS_DIR[lib]}" \
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog ChangeLog
 license COPYING
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
 }
 
 SRCNAME[25]=libXrandr
@@ -487,15 +419,12 @@ SRCPACK[25]=${XORGIREPO}/lib/${SRCNAME[25]}-${SRCVERS[25]}.tar.bz2
 
 build25()
 {
-RANDR_CFLAGS="-I${PKG}/usr/include" \
-RANDR_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lXext -lXrender" \
+RANDR_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+RANDR_LIBS="-L${PKG}${SYS_DIR[lib]} -lXext -lXrender" \
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog ChangeLog
 license COPYING
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
 }
 
 SRCNAME[26]=libXt
@@ -504,17 +433,14 @@ SRCPACK[26]=${XORGIREPO}/lib/${SRCNAME[26]}-${SRCVERS[26]}.tar.bz2
 
 build26()
 {
-XT_CFLAGS="-I${PKG}/usr/include" \
-XT_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lSM -lICE" \
+XT_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+XT_LIBS="-L${PKG}${SYS_DIR[lib]} -lSM -lICE" \
 configure \
- --with-appdefaultdir="/usr/share/X11/app-defaults" \
- --with-xfile-search-path="/usr/share/X11/app-defaults:/etc/X11/app-defaults"
-make ${JOBS}
-make install DESTDIR="${PKG}"
-#install.dir ${PKG}/usr/share/X11/app-defaults
+ --with-appdefaultdir="${SYS_DIR[share]}/X11/app-defaults" \
+ --with-xfile-search-path="${SYS_DIR[share]}/X11/app-defaults:${SYS_DIR[etc]}/X11/app-defaults"
+#install.dir ${PKG}${SYS_DIR[share]}/X11/app-defaults
 changelog ChangeLog
 license COPYING
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
 }
 
 SRCNAME[27]=libXtst
@@ -523,14 +449,11 @@ SRCPACK[27]=${XORGIREPO}/lib/${SRCNAME[27]}-${SRCVERS[27]}.tar.bz2
 
 build27()
 {
-XTST_CFLAGS="-I${PKG}/usr/include" \
-XTST_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lXext" \
+XTST_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+XTST_LIBS="-L${PKG}${SYS_DIR[lib]} -lXext" \
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 changelog ChangeLog
 license COPYING
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
 }
 
 SRCNAME[28]=libXpm
@@ -539,18 +462,15 @@ SRCPACK[28]=${XORGIREPO}/lib/${SRCNAME[28]}-${SRCVERS[28]}.tar.bz2
 
 build28()
 {
-SXPM_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lSM -lxcb -lICE -lXt -lX11 -lXext -lXau -lXdmcp" \
-XPM_CFLAGS="-I${PKG}/usr/include" \
-XPM_LIBS="-L${PKG}/usr/lib$(libdirsuffix)" \
-SXPM_CFLAGS="-I${PKG}/usr/include" \
+SXPM_LIBS="-L${PKG}${SYS_DIR[lib]} -lSM -lxcb -lICE -lXt -lX11 -lXext -lXau -lXdmcp" \
+XPM_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+XPM_LIBS="-L${PKG}${SYS_DIR[lib]}" \
+SXPM_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
 configure \
- --with-localedir=/usr/share/locale
-make ${JOBS}
-make install DESTDIR="${PKG}"
+ --with-localedir="${SYS_DIR[share]}/locale"
 doc AUTHORS
 changelog ChangeLog
 license COPYING
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
 }
 
 SRCNAME[29]=libXmu
@@ -559,16 +479,13 @@ SRCPACK[29]=${XORGIREPO}/lib/${SRCNAME[29]}-${SRCVERS[29]}.tar.bz2
 
 build29()
 {
-XMU_CFLAGS="-I${PKG}/usr/include" \
-XMU_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lXt -lXext" \
-XMUU_CFLAGS="-I${PKG}/usr/include" \
-XMUU_LIBS="-L${PKG}/usr/lib$(libdirsuffix)" \
+XMU_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+XMU_LIBS="-L${PKG}${SYS_DIR[lib]} -lXt -lXext" \
+XMUU_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+XMUU_LIBS="-L${PKG}${SYS_DIR[lib]}" \
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 changelog ChangeLog
 license COPYING
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
 }
 
 SRCNAME[30]=libXfont
@@ -577,16 +494,16 @@ SRCPACK[30]=${XORGIREPO}/lib/${SRCNAME[30]}-${SRCVERS[30]}.tar.bz2
 
 build30()
 {
-XFONT_CFLAGS="-I${PKG}/usr/include" \
-XFONT_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lfontenc" \
+#FIXME: a kludge to remove -Werror stuff so that libXfont compiles
+sed -i 's|$(CWARNFLAGS)||g' $(find . -name "Makefile.in")
+XFONT_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+XFONT_LIBS="-L${PKG}${SYS_DIR[lib]} -lfontenc" \
 configure \
+  --disable-strict-compilation \
   --with-bzip2
-make ${JOBS}
-make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog ChangeLog
 license COPYING
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
 }
 
 SRCNAME[31]=libXft
@@ -595,15 +512,12 @@ SRCPACK[31]=${XORGIREPO}/lib/${SRCNAME[31]}-${SRCVERS[31]}.tar.bz2
 
 build31()
 {
-XRENDER_CFLAGS="-I${PKG}/usr/include" \
-XRENDER_LIBS="-L${PKG}/usr/lib$(libdirsuffix)" \
+XRENDER_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+XRENDER_LIBS="-L${PKG}${SYS_DIR[lib]} -lXrender" \
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog ChangeLog
 license COPYING
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
 }
 
 SRCNAME[32]=libXaw
@@ -612,18 +526,13 @@ SRCPACK[32]=${XORGIREPO}/lib/${SRCNAME[32]}-${SRCVERS[32]}.tar.bz2
 
 build32()
 {
-XAW6_CFLAGS="-I${PKG}/usr/include" \
-XAW6_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lXmu -lXpm -lXext" \
-XAW7_CFLAGS="-I${PKG}/usr/include" \
-XAW7_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lXmu -lXpm -lXext" \
+XAW6_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+XAW6_LIBS="-L${PKG}${SYS_DIR[lib]} -lXmu -lXpm -lXext" \
+XAW7_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+XAW7_LIBS="-L${PKG}${SYS_DIR[lib]} -lXmu -lXpm -lXext" \
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 changelog ChangeLog
 license COPYING
-rm -rf \
- ${PKG}/usr/share/doc \
- ${PKG}/usr/lib$(libdirsuffix)/*.la
 }
 
 SRCNAME[33]=libXcm
@@ -632,17 +541,14 @@ SRCPACK[33]=${URL[sf]}/oyranos/${SRCNAME[33]}/libXcm-0.5/${SRCNAME[33]}-${SRCVER
 
 build33()
 {
-LDFLAGS="-L${PKG}/usr/lib$(libdirsuffix)" \
-libX11_CFLAGS="-I${PKG}/usr/include" \
-libXfixes_CFLAGS="-I${PKG}/usr/include" \
-libXmu_CFLAGS="-I${PKG}/usr/include" \
+LDFLAGS="-L${PKG}${SYS_DIR[lib]}" \
+libX11_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+libXfixes_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+libXmu_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog ChangeLog
 license COPYING
-rm -f ${PKG}/usr/lib$(libdirsuffix)/*.la
 }
 
 SRCNAME[34]=xcb-util-image
@@ -651,17 +557,15 @@ SRCPACK[34]=http://xcb.freedesktop.org/dist/${SRCNAME[34]}-${SRCVERS[34]}.tar.bz
 
 build34()
 {
-XPROTO_CFLAGS="-I${PKG}/usr/include" \
-XPROTO_LIBS="-L${PKG}/usr/lib$(libdirsuffix)" \
-XCB_CFLAGS="-I${PKG}/usr/include" \
-XCB_LIBS="-L${PKG}/usr/lib$(libdirsuffix) -lxcb -lxcb-util -lxcb-shm -lXau -lXdmcp" \
-XCB_SHM_CFLAGS="-I${PKG}/usr/include" \
-XCB_SHM_LIBS="-L${PKG}/usr/lib$(libdirsuffix)" \
-XCB_UTIL_CFLAGS="-I${PKG}/usr/include" \
-XCB_UTIL_LIBS="-L${PKG}/usr/lib$(libdirsuffix)" \
+XPROTO_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+XPROTO_LIBS="-L${PKG}${SYS_DIR[lib]}" \
+XCB_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+XCB_LIBS="-L${PKG}${SYS_DIR[lib]} -lxcb -lxcb-util -lxcb-shm -lXau -lXdmcp" \
+XCB_SHM_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+XCB_SHM_LIBS="-L${PKG}${SYS_DIR[lib]}" \
+XCB_UTIL_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+XCB_UTIL_LIBS="-L${PKG}${SYS_DIR[lib]}" \
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 changelog NEWS
 }
 
@@ -671,13 +575,11 @@ SRCPACK[35]=http://xcb.freedesktop.org/dist/${SRCNAME[35]}-${SRCVERS[35]}.tar.bz
 
 build35()
 {
-XPROTO_CFLAGS="-I${PKG}/usr/include" \
-XPROTO_LIBS="-L${PKG}/usr/lib$(libdirsuffix)" \
-XCB_CFLAGS="-I${PKG}/usr/include" \
-XCB_LIBS="-L${PKG}/usr/lib$(libdirsuffix)" \
+XPROTO_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+XPROTO_LIBS="-L${PKG}${SYS_DIR[lib]}" \
+XCB_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+XCB_LIBS="-L${PKG}${SYS_DIR[lib]}" \
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 changelog NEWS
 }
 
@@ -687,10 +589,10 @@ SRCPACK[36]=http://xcb.freedesktop.org/dist/${SRCNAME[36]}-${SRCVERS[36]}.tar.bz
 
 build36()
 {
-XCB_CFLAGS="-I${PKG}/usr/include" \
-XCB_LIBS="-L${PKG}/usr/lib$(libdirsuffix)" \
+XCB_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+XCB_LIBS="-L${PKG}${SYS_DIR[lib]}" \
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 changelog NEWS
+#FIXME: Add this to a subpackage one of these days
+rm -rf ${PKG}${SYS_DIR[doc]}/xorg-${VERSION}
 }

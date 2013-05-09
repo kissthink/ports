@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=libxml
 VERSION=2.9.0
-BUILD=3
+BUILD=4
 
 # Description
 
@@ -66,7 +66,6 @@ changelog NEWS
 # No development docs
 rm -rf \
  ${PKG}${SYS_DIR[lib]}/xml2Conf.sh \
- ${PKG}${SYS_DIR[lib]}/python* \
  ${PKG}${SYS_DIR[share]}/gtk-doc \
  ${PKG}${SYS_DIR[html]}
 }

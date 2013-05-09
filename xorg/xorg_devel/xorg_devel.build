@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=xorg_devel
 VERSION=7.7
-BUILD=2
+BUILD=3
 
 # Description
 
@@ -36,23 +36,27 @@ EOF
 
 export XORGREPO="http://www.x.org/releases/X11R${VERSION}/src/everything"
 export XORGIREPO="http://xorg.freedesktop.org/archive/individual"
-export X_CFLAGS="-I${PKG}/usr/include"
-export X_LIBS="-L${PKG}/usr/lib$(libdirsuffix)"
+export X_CFLAGS="-I${PKG}${SYS_DIR[include]}"
+export X_LIBS="-L${PKG}${SYS_DIR[lib]}"
 
 configure()
 {
-PKG_CONFIG_PATH="${PKG}/usr/lib$(libdirsuffix)/pkgconfig" \
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.{in,am}
+PKG_CONFIG_PATH="${PKG}${SYS_DIR[share]}/pkgconfig" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --disable-silent-rules \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --docdir="${SYS_DIR[doc]}/xorg-${VERSION}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  ${*}
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
 }
 
 SRCNAME[0]=util-macros
@@ -62,26 +66,18 @@ SRCPACK[0]=${XORGIREPO}/util/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
 build0()
 {
 configure
-make install DESTDIR="${PKG}"
 changelog ChangeLog
 license COPYING
-install.dir ${PKG}/usr/lib$(libdirsuffix)
-mv \
- ${PKG}/usr/share/pkgconfig \
- ${PKG}/usr/lib$(libdirsuffix)
-rm -rf \
- ${PKG}/usr/share/util-macros
+rm -rf ${PKG}${SYS_DIR[share]}/util-macros
 }
 
 SRCNAME[1]=xproto
-SRCVERS[1]=7.0.23
+SRCVERS[1]=7.0.24
 SRCPACK[1]=${XORGIREPO}/proto/${SRCNAME[1]}-${SRCVERS[1]}.tar.bz2
 
 build1()
 {
 configure
-make ${JOBS} V=1
-make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog ChangeLog
 license COPYING
@@ -95,8 +91,6 @@ build2()
 {
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 configure
-make ${JOBS} V=1
-make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog ChangeLog
 license COPYING
@@ -109,8 +103,6 @@ SRCPACK[3]=${XORGIREPO}/proto/${SRCNAME[3]}-${SRCVERS[3]}.tar.bz2
 build3()
 {
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 changelog ChangeLog
 license COPYING
 }
@@ -122,8 +114,6 @@ SRCPACK[4]=${XORGIREPO}/proto/${SRCNAME[4]}-${SRCVERS[4]}.tar.bz2
 build4()
 {
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 changelog ChangeLog
 license COPYING
 }
@@ -135,8 +125,6 @@ SRCPACK[5]=${XORGIREPO}/proto/${SRCNAME[5]}-${SRCVERS[5]}.tar.bz2
 build5()
 {
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 changelog ChangeLog
 license COPYING
 }
@@ -148,8 +136,6 @@ SRCPACK[6]=${XORGIREPO}/proto/${SRCNAME[6]}-${SRCVERS[6]}.tar.bz2
 build6()
 {
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 changelog ChangeLog
 license COPYING
 }
@@ -161,8 +147,6 @@ SRCPACK[7]=${XORGIREPO}/proto/${SRCNAME[7]}-${SRCVERS[7]}.tar.bz2
 build7()
 {
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 changelog ChangeLog
 license COPYING
 }
@@ -174,8 +158,6 @@ SRCPACK[8]=${XORGIREPO}/proto/${SRCNAME[8]}-${SRCVERS[8]}.tar.bz2
 build8()
 {
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 changelog ChangeLog
 license COPYING
 }
@@ -187,8 +169,6 @@ SRCPACK[9]=${XORGIREPO}/proto/${SRCNAME[9]}-${SRCVERS[9]}.tar.bz2
 build9()
 {
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 changelog ChangeLog
 license COPYING
 }
@@ -200,8 +180,6 @@ SRCPACK[10]=${XORGIREPO}/proto/${SRCNAME[10]}-${SRCVERS[10]}.tar.bz2
 build10()
 {
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 changelog ChangeLog
 license COPYING
 }
@@ -213,8 +191,6 @@ SRCPACK[11]=${XORGIREPO}/proto/${SRCNAME[11]}-${SRCVERS[11]}.tar.bz2
 build11()
 {
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 changelog ChangeLog
 license COPYING
 }
@@ -226,8 +202,6 @@ SRCPACK[12]=${XORGIREPO}/proto/${SRCNAME[12]}-${SRCVERS[12]}.tar.bz2
 build12()
 {
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 changelog ChangeLog
 license COPYING
 }
@@ -239,8 +213,6 @@ SRCPACK[13]=${XORGIREPO}/proto/${SRCNAME[13]}-${SRCVERS[13]}.tar.bz2
 build13()
 {
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 changelog ChangeLog
 license COPYING
 }
@@ -252,8 +224,6 @@ SRCPACK[14]=${XORGIREPO}/proto/${SRCNAME[14]}-${SRCVERS[14]}.tar.bz2
 build14()
 {
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 changelog ChangeLog
 license COPYING
 }
@@ -265,21 +235,17 @@ SRCPACK[15]=${XORGIREPO}/proto/${SRCNAME[15]}-${SRCVERS[15]}.tar.bz2
 build15()
 {
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 changelog ChangeLog
 license COPYING
 }
 
 SRCNAME[16]=inputproto
-SRCVERS[16]=2.2
+SRCVERS[16]=2.3
 SRCPACK[16]=${XORGIREPO}/proto/${SRCNAME[16]}-${SRCVERS[16]}.tar.bz2
 
 build16()
 {
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 changelog ChangeLog
 license COPYING
 }
@@ -291,8 +257,6 @@ SRCPACK[17]=${XORGIREPO}/proto/${SRCNAME[17]}-${SRCVERS[17]}.tar.bz2
 build17()
 {
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 changelog ChangeLog
 license COPYING
 }
@@ -304,8 +268,6 @@ SRCPACK[18]=${XORGIREPO}/proto/${SRCNAME[18]}-${SRCVERS[18]}.tar.bz2
 build18()
 {
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 changelog ChangeLog
 license COPYING
 }
@@ -317,8 +279,6 @@ SRCPACK[19]=${XORGIREPO}/proto/${SRCNAME[19]}-${SRCVERS[19]}.tar.bz2
 build19()
 {
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog ChangeLog
 license COPYING
@@ -331,8 +291,6 @@ SRCPACK[20]=${XORGIREPO}/proto/${SRCNAME[20]}-${SRCVERS[20]}.tar.bz2
 build20()
 {
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 changelog ChangeLog
 license COPYING
 }
@@ -344,8 +302,6 @@ SRCPACK[21]=${XORGIREPO}/proto/${SRCNAME[21]}-${SRCVERS[21]}.tar.bz2
 build21()
 {
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 changelog ChangeLog
 license COPYING
 }
@@ -357,8 +313,6 @@ SRCPACK[22]=${XORGIREPO}/proto/${SRCNAME[22]}-${SRCVERS[22]}.tar.bz2
 build22()
 {
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog ChangeLog
 license COPYING
@@ -371,8 +325,6 @@ SRCPACK[23]=${XORGIREPO}/proto/${SRCNAME[23]}-${SRCVERS[23]}.tar.bz2
 build23()
 {
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog ChangeLog
 license COPYING
@@ -385,8 +337,6 @@ SRCPACK[24]=${XORGIREPO}/proto/${SRCNAME[24]}-${SRCVERS[24]}.tar.bz2
 build24()
 {
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 changelog ChangeLog
 license COPYING
 }
@@ -398,12 +348,8 @@ SRCPACK[25]=http://xcb.freedesktop.org/dist/${SRCNAME[25]}-${SRCVERS[25]}.tar.bz
 build25()
 {
 configure \
- --datadir=/usr/share/application-data
-make ${JOBS}
-make install DESTDIR="${PKG}"
+ --datadir="${SYS_DIR[share]}/application-data"
 license COPYING
-rm -f \
-  ${PKG}/usr/lib$(libdirsuffix)/python*/site-packages/xcbgen/*.py?
 }
 
 SRCNAME[26]=libpthread-stubs
@@ -413,8 +359,6 @@ SRCPACK[26]=${XORGIREPO}/lib/${SRCNAME[26]}-${SRCVERS[26]}.tar.bz2
 build26()
 {
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 }
 
 SRCNAME[27]=xtrans
@@ -424,16 +368,8 @@ SRCPACK[27]=${XORGIREPO}/lib/${SRCNAME[27]}-${SRCVERS[27]}.tar.bz2
 build27()
 {
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 changelog ChangeLog
 license COPYING
-mv \
- ${PKG}/usr/share/pkgconfig/*.pc \
- ${PKG}/usr/lib$(libdirsuffix)/pkgconfig
-rm -rf \
- ${PKG}/usr/share/pkgconfig \
- ${PKG}/usr/share/doc
 }
 
 SRCNAME[28]=xcmiscproto
@@ -443,10 +379,8 @@ SRCPACK[28]=${XORGIREPO}/proto/${SRCNAME[28]}-${SRCVERS[28]}.tar.bz2
 build28()
 {
 configure
-make ${JOBS}
-make install DESTDIR="${PKG}"
 changelog ChangeLog
 license COPYING
-rm -rf \
- ${PKG}/usr/share/doc
+#FIXME: Make that a subpackage one of these days
+rm -rf ${PKG}${SYS_DIR[doc]}/xorg-${VERSION}
 }

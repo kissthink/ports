@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=bluetooth
 VERSION=4.101
-BUILD=1
-DEPENDS=('glib >= 2.32.3-1' 'dbus >= 1.4.20-1' 'libcapng >= 0.6.6-1')
+BUILD=2
+DEPENDS=('glib >= 2.36.0-1' 'dbus >= 1.6.8-1')
 
 # Description
 
@@ -33,6 +33,39 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+# Keep same perms on rc.bluetooth.new:
+if [ -e etc/rc.d/rc.bluetooth ]; then
+  cp -a etc/rc.d/rc.bluetooth etc/rc.d/rc.bluetooth.new.incoming
+  cat etc/rc.d/rc.bluetooth.new > etc/rc.d/rc.bluetooth.new.incoming
+  mv etc/rc.d/rc.bluetooth.new.incoming etc/rc.d/rc.bluetooth.new
+fi
+
+config etc/rc.d/rc.bluetooth.new
+config etc/bluetooth/audio.conf.new
+config etc/bluetooth/input.conf.new
+config etc/bluetooth/main.conf.new
+config etc/bluetooth/network.conf.new
+config etc/bluetooth/serial.conf.new
+config etc/bluetooth/rfcomm.conf.new
+config etc/modprobe.d/bluetooth.conf.new
+EOF
+
 # Sources
 
 SRCNAME[0]=bluez
@@ -42,6 +75,13 @@ SRCCOPY[0]="GPL2 LGPL21"
 
 build0()
 {
+sed -i 's|$(libdir)/alsa-lib|$(libdir)/plugins/alsa-1|g' Makefile.in
+sed -i 's|$(libdir)/cups/backend|$(libdir)/exec/cups/backend|g' Makefile.in
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
+sed -i 's|$(libdir)/bluetooth/plugins|$(libdir)/plugins/bluetooth|g' Makefile.{in,am}
+sed -i 's|${libdir}/bluetooth/plugins|${libdir}/plugins/bluetooth|g' configure acinclude.m4
+sed -i 's|udevdir = @UDEV_DIR@|udevdir = $(libdir)/exec/udev|g' Makefile.in
+sed -i 's|rulesdir = @UDEV_DIR@/rules.d|rulesdir = $(datadir)/udev/rules|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -49,16 +89,14 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-silent-rules \
  --enable-shared=yes \
  --enable-static=no \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --with-systemdunitdir="${SYS_DIR[systemdsystemunitdir]}" \
  --enable-alsa \
- --enable-gstreamer \
  --enable-usb \
- --enable-capng \
  --enable-pnat \
  --enable-tools \
  --enable-bccmd \
@@ -74,37 +112,59 @@ make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog ChangeLog
-install.dat doinst.sh ${PKG}/install
-install.dir ${PKG}/usr/lib$(libdirsuffix)/udev/rules.d
-install.bin bluetooth.sh ${PKG}/usr/lib$(libdirsuffix)/udev
-install.bin scripts/bluetooth_serial ${PKG}/usr/lib$(libdirsuffix)/udev
+install.dir ${PKG}${SYS_DIR[udevrules]}
+install.dir ${PKG}${SYS_DIR[udevscripts]}
+install.bin bluetooth.sh ${PKG}${SYS_DIR[udevscripts]}/bluetooth
+install.bin scripts/bluetooth_serial ${PKG}${SYS_DIR[udevscripts]}
 #FIXME: this will have to go when systemd arrives
-install.dat 97-bluetooth.rules ${PKG}/usr/lib$(libdirsuffix)/udev/rules.d
-install.dir ${PKG}/etc/{rc.d,modprobe.d,bluetooth}
-install.cfg bluetooth.modprobe ${PKG}/etc/modprobe.d/bluetooth.conf.new
-install.cfg rc.bluetooth ${PKG}/etc/rc.d/rc.bluetooth.new
+install.dat 97-bluetooth.rules ${PKG}${SYS_DIR[udevrules]}
+install.dir ${PKG}${SYS_DIR[etc]}/{rc.d,modprobe.d,bluetooth}
+install.cfg bluetooth.modprobe ${PKG}${SYS_DIR[etc]}/modprobe.d/bluetooth.conf.new
+install.cfg rc.bluetooth ${PKG}${SYS_DIR[etc]}/rc.d/rc.bluetooth.new
 install.cfg audio/audio.conf \
- ${PKG}/etc/bluetooth/audio.conf.new
+ ${PKG}${SYS_DIR[etc]}/bluetooth/audio.conf.new
 install.cfg input/input.conf \
- ${PKG}/etc/bluetooth/input.conf.new
+ ${PKG}${SYS_DIR[etc]}/bluetooth/input.conf.new
 install.cfg network/network.conf \
- ${PKG}/etc/bluetooth/network.conf.new
+ ${PKG}${SYS_DIR[etc]}/bluetooth/network.conf.new
 install.cfg serial/serial.conf \
- ${PKG}/etc/bluetooth/serial.conf.new
-mv \
- ${PKG}/etc/bluetooth/main.conf \
- ${PKG}/etc/bluetooth/main.conf.new
-mv \
- ${PKG}/etc/bluetooth/rfcomm.conf \
- ${PKG}/etc/bluetooth/rfcomm.conf.new
-mv \
- ${PKG}/usr/share/alsa \
- ${PKG}/etc
-mv \
- ${PKG}/etc/alsa/bluetooth.conf \
- ${PKG}/etc/alsa/bluetooth.conf.new
-rmdir \
- ${PKG}/usr/share
-rm -rf \
- ${PKG}/usr/lib$(libdirsuffix)/bluetooth
+ ${PKG}${SYS_DIR[etc]}/bluetooth/serial.conf.new
+config ${PKG}${SYS_DIR[etc]}/bluetooth/main.conf
+config ${PKG}${SYS_DIR[etc]}/bluetooth/rfcomm.conf
+rm -rf ${PKG}${SYS_DIR[lib]}/bluetooth
+# Remove this directory if there's no plugin in it
+rmdir ${PKG}${SYS_DIR[lib]}/plugins/bluetooth
+}
+
+SRCNAME[1]=obexd
+SRCVERS[1]=0.48
+SRCPACK[1]=http://www.kernel.org/pub/linux/bluetooth/${SRCNAME[1]}-${SRCVERS[1]}.tar.gz
+SRCCOPY[1]="GPL2"
+
+build1()
+{
+sed -i 's|${libdir}/obex/plugins|${libdir}/plugins/obex|g' configure
+BLUEZ_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+BLUEZ_LIBS="-L${PKG}${SYS_DIR[lib]} -lbluetooth" \
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix="${SYS_DIR[usr]}" \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --libexecdir="${SYS_DIR[lib]}/exec" \
+ --enable-usb \
+ --enable-pcsuite
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog ChangeLog
+# Remove this directory if there's no plugin in it
+rmdir ${PKG}${SYS_DIR[lib]}/plugins/obex
 }

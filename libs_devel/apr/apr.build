@@ -7,6 +7,7 @@ source /usr/src/ports/Build/build.sh
 NAME=apr
 VERSION=1.4.6
 BUILD=3
+OPTDEPENDS=('libdb >= 5.3.21-1' 'gdbm >= 1.10-1')
 
 # Description
 

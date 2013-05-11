@@ -8,7 +8,7 @@ NAME=python
 MAJOR=2.7
 VERSION=${MAJOR}.4
 BUILD=1
-DEPENDS=('bzip2 >= 1.0.6-1' 'gdbm >= 1.10-1' 'openssl >= 1.0.1e-1' 'expat >= 2.1.0-1' 'sqlite >= 3.7.16.1-1')
+OPTDEPENDS=('gdbm >= 1.10-1' 'bzip2 >= 1.0.6-1' 'openssl >= 1.0.1e-1' 'expat >= 2.1.0-1' 'sqlite >= 3.7.16.1-1')
 
 # Description
 

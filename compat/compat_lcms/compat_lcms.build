@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=compat_lcms
 VERSION=1.19
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -40,23 +40,24 @@ SRCPACK[0]=http://www.littlecms.com/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.{in,am}
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --includedir=/usr/include/lcms-1.0/lcms \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --includedir="${SYS_DIR[include]}/lcms-1.0/lcms" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
 rm -rf \
- ${PKG}/usr/bin \
+ ${PKG}${SYS_DIR[bin]} \
  ${PKG}${SYS_DIR[man]}
 }

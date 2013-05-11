@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=scummvm
-VERSION=1.4.1
+VERSION=1.5.0
 BUILD=1
-DEPENDS=('sdl >= 1.2.14-1')
+DEPENDS=('sdl >= 1.2.15-1' 'freetype >= 2.4.11-1' 'libmad >= 0.15.1b-1' 'libvorbis >= 1.3.3-1' 'flac >= 1.2.1-1')
 
 # Description
 
@@ -42,17 +42,18 @@ SRCCOPY[0]="GPL2 LGPL21 BSD3"
 
 build0()
 {
+CPPFLAGS="-I${SYS_DIR[include]}/mad" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --enable-verbose-build \
  --enable-release-mode \
  --default-dynamic \
  --disable-debug \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
  --docdir="${SYS_DIR[doc]}/${SRCNAME[0]}-${SRCVERS[0]}" \
- --libdir=/usr/lib$(libdirsuffix)/plugins \
- --datadir="/usr/share/application-data/${SRCNAME[0]}" \
+ --libdir="${SYS_DIR[lib]}/plugins" \
+ --datadir="${SYS_DIR[share]}/application-data/${SRCNAME[0]}" \
  --backend=sdl \
  --enable-plugins \
  --enable-all-engines
@@ -60,4 +61,5 @@ make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
+chmod 0755 ${PKG}${SYS_DIR[lib]}/plugins/scummvm/*.so
 }

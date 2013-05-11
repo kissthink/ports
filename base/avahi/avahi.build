@@ -7,7 +7,7 @@ source /usr/src/ports/Build/build.sh
 NAME=avahi
 VERSION=0.6.31
 BUILD=2
-DEPENDS=('libdaemon >= 0.14-1' 'expat >= 2.1.0-1')
+DEPENDS=('libdaemon >= 0.14-1' 'expat >= 2.1.0-1' 'gdbm >= 1.10-1')
 
 # Description
 

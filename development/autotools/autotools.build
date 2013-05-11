@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=autotools
 VERSION=2.69
-BUILD=4
+BUILD=5
 DEPENDS=('perl >= 5.12.3-1' 'm4 >= 1.4.16-1')
 
 # Description
@@ -33,6 +33,23 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+install_info()
+{
+  for file in "\${*}"; do
+    if [ -x usr/bin/install-info ]; then
+      usr/bin/install-info --info-dir=usr/share/info usr/share/info/\${file}.info.xz 2> /dev/null
+    fi
+  done
+}
+
+# Install texinfo files
+
+install_info autoconf automake automake-history libtool
+EOF
+
 # Sources
 
 configure()
@@ -40,12 +57,12 @@ configure()
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
  --infodir="${SYS_DIR[info]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  ${*}
 }
 
@@ -62,6 +79,8 @@ make install DESTDIR="${PKG}"
 doc AUTHORS THANKS
 changelog NEWS
 license COPYING.EXCEPTION COPYING.EXCEPTION
+# This is already in a few other packages
+rm -f ${PKG}${SYS_DIR[info]}/standards.info*
 }
 
 SRCNAME[1]=automake
@@ -94,8 +113,7 @@ make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS THANKS
 changelog NEWS
-rm -rf \
- ${PKG}/usr/share/doc
+rm -rf ${PKG}${SYS_DIR[doc]}/libtool
 }
 
 SRCNAME[3]=intltool

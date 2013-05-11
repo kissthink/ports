@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=libgphoto
 VERSION=2.5.1.1
-BUILD=1
-DEPENDS=('usb >= 1.0.14-1' 'libexif >= 0.6.21-1' 'libjpeg >= 1.2.1-1')
+BUILD=2
+DEPENDS=('usb >= 1.0.15-1' 'libexif >= 0.6.21-1' 'libjpeg >= 1.2.1-1')
 
 # Description
 

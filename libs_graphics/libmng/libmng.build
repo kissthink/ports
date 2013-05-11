@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=libmng
 VERSION=1.0.10
-BUILD=1
-DEPENDS=('compat_lcms >= 1.19-1' 'libjpeg >= 1.2.0-1')
+BUILD=2
+DEPENDS=('compat_lcms >= 1.19-1' 'libjpeg >= 1.2.1-1')
 
 # Description
 
@@ -42,21 +42,22 @@ SRCPACK[0]=${URL[sf]}/${SRCNAME[0]}/${SRCNAME[0]}-devel/${SRCVERS[0]}/${SRCNAME[
 build0()
 {
 chmod 0755 configure config.guess config.sub install-sh ltmain.sh missing
+CPPFLAGS="-I${SYS_DIR[include]}/lcms-1.0/lcms" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 changelog CHANGES
 license LICENSE
-install.dir ${PKG}/usr/lib$(libdirsuffix)/pkgconfig
-install.dat libmng.pc ${PKG}/usr/lib$(libdirsuffix)/pkgconfig
+install.dir ${PKG}${SYS_DIR[share]}/pkgconfig
+install.dat libmng.pc ${PKG}${SYS_DIR[share]}/pkgconfig
 }

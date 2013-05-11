@@ -6,9 +6,9 @@ source /usr/src/ports/Build/build.sh
 
 NAME=moc
 VERSION=2.5.0beta1
-BUILD=1
-DEPENDS=('alsa_lib >= 1.0.26-1' 'libsamplerate >= 0.1.8-1' 'curl >= 7.28.0-1')
-OPTDEPENDS=('ffmpeg >= 0.10.3-1')
+BUILD=2
+DEPENDS=('sound >= 1.0.27-1' 'jack >= 1.9.9.5-1' 'libsamplerate >= 0.1.8-1' 'curl >= 7.29.0-1' 'file >= 5.14-1' 'libdb >= 5.3.21-1' 'gnutls >= 3.1.10-1' 'libopus >= 1.0.2-1' 'celt >= 0.11.3-1')
+OPTDEPENDS=('libmad >= 0.15.1b-1' 'libvorbis >= 1.3.3-1' 'flac >= 1.2.1-1' 'libsndfile >= 1.0.25-1' 'libmodplug >= 0.8.8.4-1' 'libspeex >= 1.2rc1-1' 'libwavpack >= 4.60.1-1' 'ffmpeg >= 1.2-1' 'libmpcdec >= 1.2.6-1' 'taglib >= 1.8-1' 'libid3tag >= 0.15.1b-1')
 
 # Description
 
@@ -43,7 +43,7 @@ SRCCOPY[0]="GPL2"
 
 build0()
 {
-CPPFLAGS="-I/usr/include/mad -I/usr/include/id3tag" \
+CPPFLAGS="-I${SYS_DIR[include]}/mad -I${SYS_DIR[include]}/id3tag" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -52,12 +52,12 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-static=no \
  --enable-shared=yes \
  --disable-debug \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix)/plugins \
- --localstatedir=/var \
- --datadir=/usr/share/application-data \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}/plugins" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --datadir="${SYS_DIR[share]}/application-data" \
  --without-oss \
  --with-ncurses
 make ${JOBS}
@@ -70,11 +70,10 @@ make ${JOBS}
 make install DESTDIR="${PKG}"
 changelog NEWS
 doc AUTHORS THANKS config.example keymap.example
-install.dir ${PKG}/usr/share/applications
-install -m 0644 moc.desktop ${PKG}/usr/share/applications
+install.dir ${PKG}${SYS_DIR[share]}/applications
+install.dat moc.desktop ${PKG}${SYS_DIR[share]}/applications
 install.bin \
  decoder_plugins/{aac,mp3}/.libs/*.so \
- ${PKG}/usr/lib$(libdirsuffix)/plugins/moc/decoder_plugins
-rm -rf \
- $PKG/usr/share/doc
+ ${PKG}${SYS_DIR[lib]}/plugins/moc/decoder_plugins
+rm -rf ${PKG}${SYS_DIR[doc]}/moc
 }

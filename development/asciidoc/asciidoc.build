@@ -6,9 +6,9 @@ source /usr/src/ports/Build/build.sh
 
 NAME=asciidoc
 VERSION=8.6.8
-BUILD=1
+BUILD=2
 ARCH=noarch
-DEPENDS=('python >= 2.6.6-1' 'docbook >= 5.0-1')
+DEPENDS=('python >= 2.7.4-1' 'docbook >= 5.0-1')
 
 # Description
 
@@ -58,6 +58,6 @@ install.dir ${PKG}${SYS_DIR[share]}/vim/{syntax,ftdetect}
 install.dat vim/syntax/asciidoc.vim ${PKG}${SYS_DIR[share]}/vim/syntax
 install.dat vim/ftdetect/asciidoc_filetype.vim \
  ${PKG}${SYS_DIR[share]}/vim/ftdetect/asciidoc.vim
-install.dir ${PKG}${SYS_DIR[lib]}64/python2.6/site-packages
-install.dat asciidocapi.py ${PKG}${SYS_DIR[lib]}64/python2.6/site-packages
+install.dir ${PKG}${SYS_DIR[lib]}/python2.7/site-packages
+install.dat asciidocapi.py ${PKG}${SYS_DIR[lib]}/python2.7/site-packages
 }

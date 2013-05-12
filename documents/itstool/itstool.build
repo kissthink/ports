@@ -6,8 +6,9 @@ source /usr/src/ports/Build/build.sh
 
 NAME=itstool
 VERSION=1.2.0
-BUILD=1
-DEPENDS=('python >= 2.6.6-1')
+BUILD=2
+ARCH=noarch
+DEPENDS=('python >= 2.7.4-1' 'libxml >= 2.9.0-1')
 
 # Description
 
@@ -42,13 +43,15 @@ SRCCOPY[0]="GPL3"
 
 build0()
 {
+sed -i 's|#!/usr/bin/python|#!/usr/bin/python2|g' itstool itstool.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --datadir="${SYS_DIR[share]}/application-data"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 changelog NEWS

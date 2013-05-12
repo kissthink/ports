@@ -1,0 +1,48 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=python_m2crypto
+VERSION=0.21.1
+BUILD=1
+DEPENDS=('python >= 2.7.4-1' 'openssl >= 1.0.1e-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: python_m2crypto (cryptography toolkit for Python)
+${NAME}:
+${NAME}: M2Crypto is a crypto and SSL toolkit for Python. It includes:
+${NAME}: - RSA, DSA, DH, HMACs, message digests, symmetric ciphers (e.g. AES)
+${NAME}: - SSL functionality to implement clients and servers
+${NAME}: - HTTPS extensions to Python's httplib, urllib, and xmlrpclib
+${NAME}: - Unforgeable HMAC'ing AuthCookies for web session management
+${NAME}: - FTP/TLS client and server, S/MIME v2, ZServerSSL, ZSmime
+${NAME}:
+${NAME}: Homepage: http://chandlerproject.org/Projects/MeTooCrypto
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=M2Crypto
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://pypi.python.org/packages/source/M/M2Crypto/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+
+build0()
+{
+python2 setup.py build
+python2 setup.py install --root="${PKG}" --optimize="1"
+changelog CHANGES
+license LICENCE
+}

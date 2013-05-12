@@ -5,9 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=bluefish
-VERSION=2.2.3
+VERSION=2.2.4
 BUILD=1
-DEPENDS=('gtk+ >= 3.4.3-1' 'enchant >= 1.6.0-1')
+DEPENDS=('gtk+ >= 3.8.0-1' 'enchant >= 1.6.0-1')
+OPTDEPENDS=('gucharmap >= 3.8.0-1' 'python >= 2.7.4-1')
 
 # Description
 
@@ -33,6 +34,34 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+if [ ! -d etc/xml ]; then
+  mkdir -p etc/xml
+fi
+
+if [ ! -e etc/xml/catalog ]; then
+  xmlcatalog --noout --create etc/xml/catalog
+fi
+
+xmlcatalog --noout --add 'delegateURI' \
+    'http://bluefish.openoffice.nl/ns/bflang/2.0/' /usr/share/xml/bluefish \
+    etc/xml/catalog
+
+if [ -x usr/bin/update-desktop-database ]; then
+  usr/bin/update-desktop-database -q
+fi
+
+if [ -x usr/bin/gtk-update-icon-cache ]; then
+  usr/bin/gtk-update-icon-cache -q -t -f usr/share/icons/hicolor
+fi
+
+if [ -x usr/bin/update-mime-database ]; then
+  usr/bin/update-mime-database usr/share/mime > /dev/null
+fi
+EOF
+
 # Sources
 
 SRCNAME[0]=${NAME}
@@ -42,21 +71,26 @@ SRCCOPY[0]="GPL3"
 
 build0()
 {
+sed -i 's|/usr/bin/env python|/usr/bin/env python2|g' \
+ $(find . -name "*.py") data/{jsbeautify,lorem-ipsum-generator}
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix)/plugins \
- --localstatedir=/var \
- --enable-update-databases=no
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}/plugins" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --datadir="${SYS_DIR[share]}/application-data" \
+ --disable-update-databases \
+ --disable-xml-catalog-update \
+ --enable-spell-check 
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog ChangeLog
-rm -rf ${PKG}/usr/share/doc
+rm -rf ${PKG}${SYS_DIR[doc]}/bluefish
 }

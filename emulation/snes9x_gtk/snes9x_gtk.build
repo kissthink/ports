@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=snes9x_gtk
-VERSION=20130125
+VERSION=20130503
 BUILD=1
 DEPENDS=('gtk+ >= 3.6.4-1' 'sdl >= 1.2.15-1' 'libpng >= 1.5.13-1' 'sound >= 1.0.26-1' 'libxml >= 2.9.0-1')
 
@@ -49,11 +49,11 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --disable-silent-rules \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --without-oss \
  --with-gtk3
 make ${JOBS}

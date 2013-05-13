@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=libsoundtouch
 VERSION=1.7.1
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -57,5 +57,5 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --localstatedir="${SYS_DIR[var]}"
 make ${JOBS}
 make install DESTDIR="${PKG}"
-rm -rf ${PKG}/usr/doc/soundtouch
+rm -rf ${PKG}${SYS_DIR[usr]}/doc
 }

@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=linux_logo
 VERSION=5.11
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -42,17 +42,17 @@ SRCCOPY[0]="GPL2"
 build0()
 {
 ./configure \
- --prefix=/usr
+ --prefix="${SYS_DIR[usr]}"
 (
   cd logos
   mv banner.logo linux.logo
-  ln -sf distributions/slackware.logo banner.logo
+  ln -sf distributions/gnu-linux.logo banner.logo
 )
 make ${JOBS} CFLAGS="${FLAGS}"
-make install PREFIX="${PKG}/usr" INSTALL_MANPATH="${PKG}${SYS_DIR[man]}"
+make install PREFIX="${PKG}${SYS_DIR[usr]}" INSTALL_MANPATH="${PKG}${SYS_DIR[man]}"
 # Don't gzip man pages
 gunzip ${PKG}${SYS_DIR[man]}/man?/*.?.gz
 changelog CHANGES
-install.dir ${PKG}/etc/profile.d
-install.bin linux_logo.{sh,csh} ${PKG}/etc/profile.d
+install.dir ${PKG}${SYS_DIR[etc]}/profile.d
+install.bin linux_logo.{sh,csh} ${PKG}${SYS_DIR[etc]}/profile.d
 }

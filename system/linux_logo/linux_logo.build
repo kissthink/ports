@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=linux_logo
 VERSION=5.11
-BUILD=2
+BUILD=3
 
 # Description
 
@@ -43,11 +43,11 @@ build0()
 {
 ./configure \
  --prefix="${SYS_DIR[usr]}"
-(
-  cd logos
-  mv banner.logo linux.logo
-  ln -sf distributions/gnu-linux.logo banner.logo
-)
+#(
+#  cd logos
+#  mv banner.logo linux.logo
+#  cp classic.logo banner.logo
+#)
 make ${JOBS} CFLAGS="${FLAGS}"
 make install PREFIX="${PKG}${SYS_DIR[usr]}" INSTALL_MANPATH="${PKG}${SYS_DIR[man]}"
 # Don't gzip man pages

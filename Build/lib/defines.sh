@@ -32,7 +32,7 @@ alias host.arch='uname -m'
 alias src.download='curl -f -# -O -L'
 alias src.unpack='bsdtar xf'
 alias src.checksum='sha256sum'
-alias src.patch='patch -p1 -s'
+alias src.patch='patch -p1 -s -f'
 
 alias pkg.pack='/sbin/makepkg -l y -c n'
 

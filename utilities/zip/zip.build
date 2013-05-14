@@ -1,0 +1,66 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=zip
+VERSION=6.0
+BUILD=1
+DEPENDS=('bzip2 >= 1.0.6-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: zip (Info-ZIP's zip and unzip utilities)
+${NAME}:
+${NAME}: zip is a compression and file packaging utility for Unix, VMS, MSDOS,
+${NAME}: OS/2, Windows NT, Minix, Atari and Macintosh, Amiga and Acorn RISC
+${NAME}: OS. It is analogous to a combination of the UNIX commands tar(1) and
+${NAME}: compress(1) and is compatible with PKZIP (Phil Katz's ZIP). A
+${NAME}: companion program (unzip(1L)), unpacks zip archives.
+${NAME}:
+${NAME}: Homepage: http://www.info-zip.org
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=3.0
+SRCPACK[0]=${URL[sf]}/infozip/Zip%203.x%20%28latest%29/${SRCVERS[0]}/${SRCNAME[0]}${SRCVERS[0]/./}.tar.gz
+SRCROOT[0]=${SRCNAME[0]}${SRCVERS[0]/./}
+
+build0()
+{
+make ${JOBS} -f unix/Makefile LOCAL_ZIP="${FLAGS}" \
+ prefix="${SYS_DIR[usr]}" generic_gcc
+make install -f unix/Makefile \
+ prefix="${PKG}${SYS_DIR[usr]}" MANDIR="${PKG}${SYS_DIR[man]}/man1"
+changelog WHATSNEW
+license LICENSE
+}
+
+SRCNAME[1]=unzip
+SRCVERS[1]=6.0
+SRCPACK[1]=${URL[sf]}/infozip/UnZip%206.x%20%28latest%29/UnZip%20${SRCVERS[1]}/${SRCNAME[1]}${SRCVERS[1]/./}.tar.gz
+SRCROOT[1]=${SRCNAME[1]}${SRCVERS[1]/./}
+
+build1()
+{
+make ${JOBS} -f unix/Makefile LOCAL_UNZIP="${FLAGS}" \
+ prefix="${SYS_DIR[usr]}" generic
+make install -f unix/Makefile \
+ prefix="${PKG}${SYS_DIR[usr]}" MANDIR="${PKG}${SYS_DIR[man]}/man1"
+changelog History.600
+license LICENSE
+}

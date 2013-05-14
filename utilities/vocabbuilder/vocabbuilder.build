@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=vocabbuilder
 VERSION=1.0.0
-BUILD=1
-DEPENDS=('gtk+ >= 2.24.13-1' 'sqlite >= 3.7.10-1')
+BUILD=2
+DEPENDS=('gtk+ >= 2.24.17-1' 'sqlite >= 3.7.16.1-1')
 
 # Description
 
@@ -33,6 +33,14 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat > ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+if [ -x usr/bin/gtk-update-icon-cache ]; then
+  usr/bin/gtk-update-icon-cache -q -t -f usr/share/icons/hicolor
+fi
+EOF
+
 # Sources
 
 SRCNAME[0]=vocab-builder
@@ -42,20 +50,19 @@ SRCCOPY[0]="GPL3"
 
 build0()
 {
-CPPFLAGS="-I/usr/include/sqlite-3" \
+CPPFLAGS="-I${SYS_DIR[include]}/sqlite-3" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --disable-silent-rules \
- --disable-rpath \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS

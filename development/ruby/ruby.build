@@ -9,7 +9,7 @@ MAJOR=2.0
 MINOR=0
 PATCH=195
 VERSION=${MAJOR}.${MINOR}.${PATCH}
-BUILD=1
+BUILD=2
 OPTDEPENDS=('openssl >= 1.0.1e-1' 'libdb >= 5.3.21-1' 'gdbm >= 1.10-1')
 
 # Description

@@ -22,7 +22,6 @@
 # ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 info "Building ${SRCNAME[${source}]}-${SRCVERS[${source}]}"
 
 # Create the documentation directory now so that we are able to install stuff
@@ -34,10 +33,14 @@ else
 fi
 DOC="${SRCDOCDIR[${source}]}"
 
-pushd "${SRC}" >/dev/null
+if [[ ! "${SRCOPTS[${source}]}" == *skipsrcroot* ]]; then
+  pushd "${SRC}" >/dev/null
+fi
 
 #build${source} &>> "${BUILD[log]}"
 
 build${source}
 
-popd >/dev/null
+if [[ ! "${SRCOPTS[${source}]}" == *skipsrcroot* ]]; then
+  popd >/dev/null
+fi

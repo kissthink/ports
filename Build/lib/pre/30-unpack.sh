@@ -43,7 +43,9 @@ else
   if [[ "${SRCOPTS[${source}]}" == *pkgunpack* ]]; then
     pushd "${SRC}" >/dev/null
   else
-    pushd "${BUILD[dir]}" >/dev/null
+    if [[ ! "${SRCOPTS[${source}]}" == *skipsrcroot* ]]; then
+      pushd "${BUILD[dir]}" >/dev/null
+    fi
   fi
 fi
 
@@ -53,4 +55,6 @@ if [[ ! "${SRCOPTS[${source}]}" == *nounpack* ]]; then
   checkstatus ${?}
 fi
 
-popd >/dev/null
+if [[ ! "${SRCOPTS[${source}]}" == *skipsrcroot* ]]; then
+  popd >/dev/null
+fi

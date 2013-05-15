@@ -23,6 +23,8 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+if [[ ! "${SRCOPTS[${source}]}" == *skipsrcroot* ]]; then
+
 QUERY=$(find ${CWD} -name ${SRCNAME[${source}]}-${SRCVERS[${source}]}-\*.patch.xz -maxdepth 1 | sort)
 
 pushd "${SRC}" >/dev/null
@@ -33,3 +35,5 @@ for patch in ${QUERY}; do
 done
 
 popd >/dev/null
+
+fi

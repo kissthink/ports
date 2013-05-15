@@ -5,10 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=ruby_pkgconfig
-VERSION=1.1.3
+VERSION=1.1.4
 BUILD=1
 ARCH=noarch
-DEPENDS=('ruby >= 1.9.1_p431-1')
+DEPENDS=('ruby >= 2.0.0.195-1')
 
 # Description
 
@@ -36,14 +36,15 @@ EOF
 
 # Sources
 
-SRCNAME[0]=rcairo-pkg-config
+SRCNAME[0]=pkg-config
 SRCVERS[0]=${VERSION}
-SRCPACK[0]=${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
-SRCCOPY[0]="LGPL21"
+SRCPACK[0]=http://production.cf.rubygems.org/gems/${SRCNAME[0]}-${SRCVERS[0]}.gem
+SRCOPTS[0]="nounpack skipsrcroot"
 
 build0()
 {
-ruby setup.rb config
-ruby setup.rb install --prefix="${PKG}"
-changelog NEWS
+GEMDEFAULTDIR="$(ruby -rubygems -e 'puts Gem.default_dir')"
+gem install --no-user-install --ignore-dependencies --no-document \
+ -i "${PKG}${GEMDEFAULTDIR}" ${SRCNAME[0]}-${SRCVERS[0]}.gem
+rm -rf ${PKG}${GEMDEFAULTDIR}/{doc,build_info,cache}
 }

@@ -5,12 +5,12 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=ruby
-MAJOR=1.9
-MINOR=3
-PATCH=194
+MAJOR=2.0
+MINOR=0
+PATCH=195
 VERSION=${MAJOR}.${MINOR}.${PATCH}
 BUILD=1
-DEPENDS=('libraries >= 20120902-1')
+OPTDEPENDS=('openssl >= 1.0.1e-1' 'libdb >= 5.3.21-1' 'gdbm >= 1.10-1')
 
 # Description
 
@@ -36,31 +36,64 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+config etc/gemrc.new
+EOF
+
 # Sources
 
 SRCNAME[0]=${NAME}
 SRCVERS[0]=${MAJOR}.${MINOR}-p${PATCH}
-SRCPACK[0]=ftp://ftp.ruby-lang.org/pub/${SRCNAME[0]}/${MAJOR}/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
-SRCCOPY[0]="BSD2"
+SRCPACK[0]=ftp://ftp.ruby-lang.org/pub/${SRCNAME[0]}/${MAJOR}/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="BSD2 GPL2"
 
 build0()
 {
+sed -i 's|File.join(libdir, "pkgconfig")|File.join("/usr/share", "pkgconfig")|g' tool/rbinstall.rb
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --enable-shared \
  --enable-pthread \
  --disable-rpath \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
  --disable-install-doc \
- --with-rubylibprefix=/usr/lib$(libdirsuffix)/plugins/ruby
+ --enable-multiarch \
+ --with-ruby-version="minor" \
+ --with-sitedir="site_ruby" \
+ --with-vendordir="vendor_ruby" \
+ --with-rubylibprefix="${SYS_DIR[share]}/ruby" \
+ --with-rubyarchprefix="${SYS_DIR[lib]}/plugins/ruby" \
+ --with-rubysitearchprefix="${SYS_DIR[usr]}/local/lib/ruby"
 make ${JOBS}
 make install-nodoc DESTDIR="${PKG}"
-doc NEWS
-changelog ChangeLog
+changelog NEWS
 license COPYING
+install.dir ${PKG}${SYS_DIR[etc]}/profile.d
+install.cfg gemrc ${PKG}${SYS_DIR[etc]}/gemrc.new
+install.bin ruby.{sh,csh} ${PKG}${SYS_DIR[etc]}/profile.d
+(
+  cd ${PKG}${SYS_DIR[share]}/pkgconfig
+  ln -s ruby-${MAJOR}.pc ruby.pc
+)
+rm -rf ${PKG}${SYS_DIR[usr]}/local
 }

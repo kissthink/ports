@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=ruby_cairo
-VERSION=1.10.0
+VERSION=1.12.4
 BUILD=1
-DEPENDS=('ruby >= 1.9.1_p431-1' 'cairo >= 1.12.2-1')
+DEPENDS=('ruby >= 2.0.0.195-1' 'cairo >= 1.12.12-1')
 
 # Description
 
@@ -35,16 +35,23 @@ EOF
 
 # Sources
 
-SRCNAME[0]=rcairo
+SRCNAME[0]=cairo
 SRCVERS[0]=${VERSION}
-SRCPACK[0]=http://cairographics.org/releases/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
-SRCCOPY[0]="GPL2 RUBY"
+SRCPACK[0]=http://production.cf.rubygems.org/gems/${SRCNAME[0]}-${SRCVERS[0]}.gem
+SRCOPTS[0]="nounpack skipsrcroot"
 
 build0()
 {
-ruby extconf.rb
-make ${JOBS} cflags="${FLAGS}"
-make install DESTDIR="${PKG}"
-doc AUTHORS
-changelog NEWS
+GEMDEFAULTDIR="$(ruby -rubygems -e 'puts Gem.default_dir')"
+GEMDIR="${PKG}${GEMDEFAULTDIR}/gems/${SRCNAME[0]}-${SRCVERS[0]}"
+
+gem install -V --no-user-install --ignore-dependencies --no-document \
+ -i "${PKG}${GEMDEFAULTDIR}" ${SRCNAME[0]}-${SRCVERS[0]}.gem
+install.dir ${PKG}${SYS_DIR[lib]}/plugins/ruby/2.0
+mv ${GEMDIR}/lib/cairo.so ${PKG}${SYS_DIR[lib]}/plugins/ruby/2.0
+install.dir ${PKG}${SYS_DIR[include]}/ruby-2.0
+mv ${GEMDIR}/lib/rb_cairo.h ${PKG}${SYS_DIR[include]}/ruby-2.0
+rm -rf \
+ ${PKG}${GEMDEFAULTDIR}/{doc,build_info,cache} \
+ ${GEMDIR}/{ext,samples}
 }

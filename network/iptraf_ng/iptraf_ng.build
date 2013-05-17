@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=iptraf_ng
 VERSION=1.1.3.1
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -41,16 +41,16 @@ SRCCOPY[0]="GPL2"
 
 build0()
 {
-CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+CFLAGS="${FLAGS} -std=gnu99" CXXFLAGS="${FLAGS} -std=gnu99" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
  --infodir="${SYS_DIR[info]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --sbindir=/usr/sbin
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --sbindir="${SYS_DIR[sbin]}"
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS FAQ
@@ -58,7 +58,7 @@ changelog CHANGES
 install.dir ${PKG}${SYS_DIR[html]}/${SRCNAME[0]}/stylesheet-images
 install.doc Documentation/*.{html,png} ${PKG}${SYS_DIR[html]}/${SRCNAME[0]}
 install.doc Documentation/stylesheet-images/*.gif ${PKG}${SYS_DIR[html]}/${SRCNAME[0]}/stylesheet-images
-install.dir ${PKG}/var/{lib,log}/iptraf-ng
-install.dir ${PKG}/etc/logrotate.d
-install.bin iptraf-ng-logrotate.conf ${PKG}/etc/logrotate.d/iptraf-ng
+install.dir ${PKG}${SYS_DIR[var]}/{lib,log}/iptraf-ng
+install.dir ${PKG}${SYS_DIR[etc]}/logrotate.d
+install.bin iptraf-ng-logrotate.conf ${PKG}${SYS_DIR[etc]}/logrotate.d/iptraf-ng
 }

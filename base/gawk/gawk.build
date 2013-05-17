@@ -5,8 +5,8 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=gawk
-VERSION=4.0.2
-BUILD=2
+VERSION=4.1.0
+BUILD=1
 
 # Description
 
@@ -58,10 +58,13 @@ SRCCOPY[0]="GPL3"
 
 build0()
 {
+sed -i 's|$(libdir)/@PACKAGE@|$(libdir)/plugins/@PACKAGE@|g' Makefile.in
+sed -i 's|${libdir}/gawk|${libdir}/plugins/gawk|g' extension/configure
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
+ --disable-silent-rules \
  --disable-rpath \
  --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
@@ -70,7 +73,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --libdir="${SYS_DIR[lib]}" \
  --localstatedir="${SYS_DIR[var]}" \
  --libexecdir="${SYS_DIR[lib]}/exec"
-make ${JOBS}
+make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
@@ -78,13 +81,9 @@ changelog NEWS
   cd ${PKG}${SYS_DIR[bin]}
   ln -sf gawk-${SRCVERS[0]} awk
   ln -sf gawk-${SRCVERS[0]} gawk
-  ln -sf pgawk-${SRCVERS[0]} pgawk
 )
 (
   cd ${PKG}${SYS_DIR[man]}/man1
-  rm -f pgawk.1
   echo ".so man1/gawk.1" > awk.1
-  echo ".so man1/gawk.1" > pgawk.1
-  echo ".so man1/gawk.1" > dgawk.1
 )
 }

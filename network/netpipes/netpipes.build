@@ -1,0 +1,46 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=netpipes
+VERSION=4.2
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: netpipes (TCP/IP pipe utilities)
+${NAME}:
+${NAME}: Robert Forsman's netpipes package makes TCP/IP streams usable in
+${NAME}: shell scripts. It can also simplify client/server code by allowing
+${NAME}: the programmer to skip all the tedious programming bits related to
+${NAME}: sockets and concentrate on writing a filter/service. Here's an
+${NAME}: example of what you can do with 'faucet' and 'hose', two netpipes
+${NAME}: commands:
+${NAME}:
+${NAME}: server$ faucet 3000 -out tar cf - .
+${NAME}: client$ hose server 3000 -in tar xvf -
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}-export
+SRCPACK[0]=http://web.purplefrog.com/~thoth/netpipes/ftp/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+make ${JOBS} CDEBUGFLAGS="${FLAGS}"
+make install INSTROOT="${PKG}${SYS_DIR[usr]}" INSTMAN="${PKG}${SYS_DIR[man]}"
+}

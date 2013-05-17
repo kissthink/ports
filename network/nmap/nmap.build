@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=nmap
-VERSION=6.01
+VERSION=6.25
 BUILD=1
-DEPENDS=('tcpip >= 3.2.0-1' 'openssl >= 0.9.8x-1' 'pcre >= 8.31-1' 'lua >= 5.2.0-1')
+DEPENDS=('tcpip >= 20130209-1' 'openssl >= 1.0.1e-1' 'pcre >= 8.32-1' 'lua >= 5.2.2-1')
 
 # Description
 
@@ -42,22 +42,23 @@ SRCCOPY[0]="GPL2"
 
 build0()
 {
+CPPFLAGS="-I${SYS_DIR[include]}/pcap" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" MYCFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
  --enable-static=yes \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --libexecdir=/usr/lib$(libdirsuffix)/exec \
- --localstatedir=/var \
- --with-openssl=/usr \
- --with-libpcap=/usr \
- --with-libpcre=/usr \
- --with-liblua=/usr \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --libexecdir="${SYS_DIR[lib]}/exec" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --with-openssl="${SYS_DIR[usr]}" \
+ --with-libpcap="${SYS_DIR[usr]}" \
+ --with-libpcre="${SYS_DIR[usr]}" \
+ --with-liblua="${SYS_DIR[usr]}" \
  --with-libdnet=included \
  --with-liblinear=included \
  --without-nmap-update \
@@ -68,7 +69,7 @@ make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog CHANGELOG
-#rmdir ${PKG}/usr/share/nping
+#rmdir ${PKG}${SYS_DIR[share]}/nping
 rm -f \
-  ${PKG}/usr/lib$(libdirsuffix)/*.a
+  ${PKG}${SYS_DIR[lib]}/*.a
 }

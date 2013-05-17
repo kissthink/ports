@@ -1,0 +1,114 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=mutt-kz
+VERSION=20130515
+BUILD=1
+DEPENDS=('openssl >= 1.0.1e-1' 'libgsasl >= 1.8.0-1' 'libnotmuch >= 0.15-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: mutt-kz (mail user agent)
+${NAME}:
+${NAME}: Mutt is a small but very powerful text-based MIME mail client. Mutt
+${NAME}: is highly configurable, and is well suited to the mail power user
+${NAME}: with advanced features like key bindings, keyboard macros, mail
+${NAME}: threading, regular expression searches and a powerful pattern
+${NAME}: matching language for selecting groups of messages. Mutt-kz is a
+${NAME}: fork of Mutt that adds notmuch support, sidebar and other
+${NAME}: improvements.
+${NAME}:
+${NAME}: Homepage: https://github.com/karelzak/mutt-kz
+EOF
+
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+config etc/mutt/mutt.conf.new
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=ftp://ftp.mutt.org/mutt/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+CPPFLAGS="-I${SYS_DIR[include]}/idn" \
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --prefix="${SYS_DIR[usr]}" \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir="${SYS_DIR[etc]}/mutt" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --with-mailpath="${SYS_DIR[var]}/spool/mail" \
+ --with-docdir="${SYS_DIR[doc]}/${NAME}-${VERSION}" \
+ --without-wc-funcs \
+ --with-ssl \
+ --enable-locales-fix \
+ --enable-gpgme \
+ --enable-notmuch \
+ --enable-pop \
+ --enable-imap \
+ --enable-smtp \
+ --enable-hcache \
+ --with-curses="${SYS_DIR[usr]}" \
+ --with-ssl="${SYS_DIR[usr]}" \
+ --with-sasl="${SYS_DIR[usr]}" \
+ --with-idn
+# --with-gnutls="${SYS_DIR[usr]}"
+make ${JOBS} V=1
+make install DESTDIR="${PKG}"
+changelog NEWS
+mv \
+ ${PKG}${SYS_DIR[etc]}/mutt/Muttrc \
+ ${PKG}${SYS_DIR[etc]}/mutt/mutt.conf.new
+mv \
+ ${PKG}${SYS_DIR[etc]}/mutt/Muttrc.dist \
+ ${PKG}${SYS_DIR[etc]}/mutt/mutt.conf.dist
+mv \
+ ${DOC}/samples/{colors.*,*.rc,sample.*} \
+ ${PKG}${SYS_DIR[etc]}/mutt
+install.dir ${PKG}${SYS_DIR[html]}/mutt
+mv \
+ ${DOC}/*.html \
+ ${PKG}${SYS_DIR[html]}/mutt
+rm -rf \
+ ${PKG}${SYS_DIR[etc]}/mutt/mime.types* \
+ ${PKG}${SYS_DIR[bin]}/{flea,muttbug} \
+ ${PKG}${SYS_DIR[man]}/man?/{flea,muttbug}.? \
+ ${DOC}/samples \
+ ${DOC}/{COPYRIGHT,GPL,INSTALL,README*,TODO,NEWS,UPDATING} \
+ ${DOC}/{applying-patches,*-*otes,manual}.txt
+}

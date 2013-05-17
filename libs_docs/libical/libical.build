@@ -5,8 +5,8 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=libical
-VERSION=0.48
-BUILD=2
+VERSION=1.0
+BUILD=1
 
 # Description
 
@@ -41,19 +41,18 @@ SRCCOPY[0]="LGPL21 MPL1"
 
 build0()
 {
-CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
-./configure \
- --build="${ARCH}-slackware-linux" \
- --disable-dependency-tracking \
- --enable-static=no \
- --enable-shared=yes \
- --prefix="${SYS_DIR[usr]}" \
- --mandir="${SYS_DIR[man]}" \
- --sysconfdir="${SYS_DIR[etc]}" \
- --libdir="${SYS_DIR[lib]}" \
- --localstatedir="${SYS_DIR[var]}"
+sed -i 's|${LIB_INSTALL_DIR}/pkgconfig|${SHARE_INSTALL_DIR}/pkgconfig|g' CMakeLists.txt
+cmake \
+ -DCMAKE_BUILD_TYPE:STRING="Release" \
+ -DCMAKE_CXX_FLAGS:STRING="${FLAGS}" \
+ -DCMAKE_C_FLAGS:STRING="${FLAGS}" \
+ -DCMAKE_VERBOSE_MAKEFILE:BOOL="on" \
+ -DCMAKE_INSTALL_PREFIX:PATH="${SYS_DIR[usr]}" \
+CMakeLists.txt
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc THANKS
 changelog ChangeLog
+license LICENSE
+rm -f ${PKG}${SYS_DIR[lib]}/*.a
 }

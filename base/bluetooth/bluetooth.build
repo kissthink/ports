@@ -6,8 +6,9 @@ source /usr/src/ports/Build/build.sh
 
 NAME=bluetooth
 VERSION=4.101
-BUILD=2
+BUILD=3
 DEPENDS=('glib >= 2.36.0-1' 'dbus >= 1.6.8-1')
+OPTDEPENDS=('libical >= 1.0-1')
 
 # Description
 

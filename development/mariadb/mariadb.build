@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=mariadb
-VERSION=5.3.5
+VERSION=5.5.30
 BUILD=1
-DEPENDS=('openssl >= 0.9.8t-1')
+OPTDEPENDS=('openssl >= 1.0.1e-1')
 
 # Description
 
@@ -25,7 +25,7 @@ ${NAME}:
 ${NAME}: A true multi-user, multi-threaded SQL database server which is
 ${NAME}: a backward compatible, drop-in replacement of the MySQL database
 ${NAME}: server. It includes all major open source storage engines, including
-${NAME}: the Maria storage engine.
+${NAME}: the Aria storage engine.
 ${NAME}:
 ${NAME}: Homepage: http://mariadb.org
 ${NAME}:
@@ -33,69 +33,166 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+# If the mariadb user and group do not exist, add them
+
+if grep "^mariadb:x:" etc/passwd 1> /dev/null 2> /dev/null ; then
+  true
+else
+  echo "mariadb:x:27:27:MariaDB:/var/lib/mariadb:/bin/bash" >> etc/passwd
+fi
+if grep "^mariadb:x:" etc/group 1> /dev/null 2> /dev/null ; then
+  true
+else
+  echo "mariadb:x:27:" >> etc/group
+fi
+if grep "^mariadb:" etc/shadow 1> /dev/null 2> /dev/null ; then
+  true
+else
+  echo "mariadb:*:9797:0:::::" >> etc/shadow
+fi
+
+# Fix directory permissions
+
+(
+  cd var/lib
+  chown mariadb.mariadb mariadb
+  chmod 750 mariadb
+)
+
+# Create mariadb's run directory if it's not already there
+
+if [ ! -d run/mariadb ]; then
+  install -m 0750 -o mariadb -g mariadb -d run/mariadb
+fi
+
+# Initialize the database if it isn't
+
+if [ ! -d var/lib/mariadb/mysql ]; then
+  usr/bin/mysql_install_db --user=mariadb --basedir=usr --datadir=var/lib/mariadb
+  chown -R mariadb.mariadb var/lib/mariadb &>/dev/null
+fi
+
+# Keep same perms on rc.mariadb.new:
+
+if [ -e etc/rc.d/rc.mariadb ]; then
+  cp -a etc/rc.d/rc.mariadb etc/rc.d/rc.mariadb.new.incoming
+  cat etc/rc.d/rc.mariadb.new > etc/rc.d/rc.mariadb.new.incoming
+  mv etc/rc.d/rc.mariadb.new.incoming etc/rc.d/rc.mariadb.new
+fi
+
+config etc/rc.d/rc.mariadb.new
+config etc/mariadb/mysqlaccess.conf.new
+config etc/mariadb/my.cnf.new
+config etc/mariadb/my.cnf.d/client.cnf.new
+config etc/mariadb/my.cnf.d/mysql-clients.cnf.new
+config etc/mariadb/my.cnf.d/server.cnf.new
+config etc/logrotate.d/mariadb.new
+EOF
+
 # Sources
 
 SRCNAME[0]=${NAME}
-SRCVERS[0]=5.3.5-ga
+SRCVERS[0]=${VERSION}
 SRCPACK[0]=http://downloads.askmonty.org/f/${SRCNAME[0]}-${SRCVERS[0]}/kvm-tarbake-jaunty-x86/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
-SRCOPTS[0]="GPL2"
-# normla nostrip
+SRCCOPY[0]="GPL2 LGPL21"
+# normla nostrip ?
 
 build0()
 {
-CFLAGS="-fPIC ${FLAGS} -fno-strict-aliasing" \
-CXXFLAGS="-fPIC ${FLAGS} -fno-strict-aliasing -felide-constructors -fno-rtti" \
-./configure \
- --build="${ARCH}-slackware-linux" \
- --disable-dependency-tracking \
- --enable-static=no \
- --enable-shared=yes \
- --prefix=/usr \
- --mandir="${SYS_DIR[man]}" \
- --infodir="${SYS_DIR[info]}" \
- --sysconfdir=/etc/mariadb \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var/lib/mariadb \
- --libexecdir=/usr/lib$(libdirsuffix)/exec/mariadb \
- --without-debug \
- --without-readline \
- --enable-assembler \
- --with-ssl \
- --with-unix-socket-path=/run/mariadb/mariadb.sock \
- --with-mysqld-user=mariadb \
- --with-plugins="xtradb,partition,csv,heap,myisam,myisammrg" \
- --with-big-tables \
- --with-charset=utf8 \
- --with-extra-charsets=complex \
- --with-collation=utf8_general_ci
+cmake \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DMANUFACTURER="Tightware" \
+    -DCMAKE_C_FLAGS="-fPIC ${FLAGS} -DBIG_JOINS=1 -fno-strict-aliasing" \
+    -DCMAKE_CXX_FLAGS="-fPIC ${FLAGS} -DBIG_JOINS=1 -fno-strict-aliasing -felide-constructors -fno-rtti" \
+    -DWITH_MYSQLD_LDFLAGS="${LDFLAGS}" \
+    -DCMAKE_INSTALL_PREFIX="${SYS_DIR[usr]}" \
+    -DMYSQL_DATADIR="${SYS_DIR[var]}/lib/mariadb" \
+    -DMYSQL_UNIX_ADDR="${SYS_DIR[run]}/mariadb/mariadb.sock" \
+    -DINSTALL_SCRIPTDIR="${SYS_DIR[bin]}" \
+    -DINSTALL_INCLUDEDIR="${SYS_DIR[include]}/mariadb" \
+    -DINSTALL_SYSCONFDIR="${SYS_DIR[etc]}/mariadb" \
+    -DINSTALL_MANDIR="${SYS_DIR[man]}" \
+    -DINSTALL_PLUGINDIR="${SYS_DIR[lib]}/plugins/mariadb" \
+    -DINSTALL_SHAREDIR="${SYS_DIR[share]}" \
+    -DINSTALL_MYSQLSHAREDIR="share/application-data/mariadb" \
+    -DINSTALL_SUPPORTFILESDIR="${SYS_DIR[doc]}/mariadb/sample" \
+    -DINSTALL_DOCREADMEDIR="${SYS_DIR[doc]}/mariadb" \
+    -DINSTALL_DOCDIR="${SYS_DIR[doc]}/mariadb" \
+    -DINSTALL_SQLBENCHDIR="${SYS_DIR[usr]}/src" \
+    -DINSTALL_MYSQLTESTDIR="${SYS_DIR[usr]}/src" \
+    -DMYSQLD_USER="mariadb" \
+    -DDEFAULT_CHARSET=utf8 \
+    -DDEFAULT_COLLATION=utf8_general_ci \
+    -DENABLED_LOCAL_INFILE=ON \
+    -DUSE_ARIA_FOR_TMP_TABLES=ON \
+    -DWITH_ZLIB=system \
+    -DWITH_SSL=system \
+    -DWITH_READLINE=ON \
+    -DWITH_LIBWRAP=OFF \
+    -DWITH_EXTRA_CHARSETS=complex \
+    -DWITH_EMBEDDED_SERVER=ON \
+    -DWITH_ARCHIVE_STORAGE_ENGINE=1 \
+    -DWITH_BLACKHOLE_STORAGE_ENGINE=1 \
+    -DWITH_INNOBASE_STORAGE_ENGINE=1 \
+    -DWITH_PARTITION_STORAGE_ENGINE=1 \
+    -DWITHOUT_EXAMPLE_STORAGE_ENGINE=1 \
+    -DWITHOUT_FEDERATED_STORAGE_ENGINE=1 \
+    -DWITHOUT_PBXT_STORAGE_ENGINE=1 \
+CMakeLists.txt
 make ${JOBS}
 make install DESTDIR="${PKG}"
-license EXCEPTIONS-CLIENT
-install.dat doinst.sh ${PKG}/install
-install.dir ${PKG}${SYS_DIR[etc]}/rc.d
+install.dir ${PKG}${SYS_DIR[var]}/lib/mariadb
+install.dir ${PKG}${SYS_DIR[etc]}/{rc.d,tmpfiles.d}
 install.dat rc.mariadb.new ${PKG}${SYS_DIR[etc]}/rc.d/rc.mariadb.new
-install.dir ${PKG}/var/lib/mariadb
+install.dat mariadb.conf.tmpfiles ${PKG}${SYS_DIR[etc]}/tmpfiles.d/mariadb.conf
+install.dir ${PKG}${SYS_DIR[systemdsystemunitdir]}
+install.dat mariadb.service ${PKG}${SYS_DIR[systemdsystemunitdir]}
+install.bin mysqld-post.sh ${PKG}${SYS_DIR[bin]}/mysqld-post
+install.dat support-files/{my-*.cnf,*.ini} ${PKG}${SYS_DIR[etc]}/mariadb
+install.cfg scripts/mysqlaccess.conf ${PKG}${SYS_DIR[etc]}/mariadb
+mv \
+ ${PKG}${SYS_DIR[lib]}/plugins/mariadb/daemon_example.ini \
+ ${PKG}${SYS_DIR[etc]}/mariadb
+config ${PKG}${SYS_DIR[etc]}/logrotate.d/mariadb
+config ${PKG}${SYS_DIR[etc]}/mariadb/mysqlaccess.conf
+config ${PKG}${SYS_DIR[etc]}/mariadb/my.cnf
+config ${PKG}${SYS_DIR[etc]}/mariadb/my.cnf.d/client.cnf
+config ${PKG}${SYS_DIR[etc]}/mariadb/my.cnf.d/mysql-clients.cnf
+config ${PKG}${SYS_DIR[etc]}/mariadb/my.cnf.d/server.cnf
+
+#FIXME: compat
+
 (
-  cd ${PKG}/usr/lib$(libdirsuffix)
-  rm -f libmysqlclient.so libmysqlclient.so.16
-  ln -sf mysql/libmysqlclient.so .
-  ln -sf mysql/libmysqlclient.so.16 .
-  rm -f libmysqlclient_r.so libmysqlclient_r.so.16
-  ln -sf mysql/libmysqlclient_r.so .
-  ln -sf mysql/libmysqlclient_r.so.16 .
+  cd ${PKG}${SYS_DIR[include]}
+  ln -sf mariadb mysql
 )
-install.dir ${PKG}${SYS_DIR[etc]}/mariadb
-install.dat support-files/my-*.cnf ${PKG}${SYS_DIR[etc]}/mariadb
-mv ${PKG}/usr/share/mysql/*.ini ${PKG}${SYS_DIR[etc]}/mariadb
-install.dir ${PKG}/usr/src
-mv ${PKG}/usr/sql-bench ${PKG}/usr/src
+
 # Unneeded stuff
+
 rm -rf \
- ${PKG}${SYS_DIR[man]}/man1/{mysqlman,mysql.server,make_win_*,comp_err}.1 \
- ${PKG}/usr/mysql-test \
- ${PKG}/usr/share/mysql/*.cnf \
- ${PKG}/usr/share/mysql/mi_test_all* \
- ${PKG}/usr/share/mysql/binary-configure \
- ${PKG}/usr/share/mysql/mysql-log-rotate \
- ${PKG}/usr/share/mysql/mysql*.server
+ ${PKG}${SYS_DIR[lib]}/libmysql{d,client,client_r}.a \
+ ${PKG}${SYS_DIR[bin]}/rcmysql \
+ ${PKG}${SYS_DIR[etc]}/init.d \
+ ${PKG}${SYS_DIR[man]}/man1/{mysqlman,mysql.server,mysql*test*.pl}.1 \
+ ${PKG}${SYS_DIR[usr]}/src \
+ ${PKG}${SYS_DIR[usr]}/data \
+ ${PKG}${SYS_DIR[doc]}/mariadb
+
+#FIXME: Make subpackages of mysql-test and sql-bench
 }

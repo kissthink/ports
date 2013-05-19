@@ -5,9 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=apache
-VERSION=2.4.3
+VERSION=2.4.4
 BUILD=1
-DEPENDS=('apr >= 1.4.6-2' 'expat >= 2.0.1-1')
+DEPENDS=('apr >= 1.4.6-1' 'expat >= 2.1.0-1' 'pcre >= 8.32-1')
+OPTDEPENDS=('file >= 5.14-1' 'openssl >= 1.0.1e-1' 'lua >= 5.2.2-1')
 
 # Description
 
@@ -33,6 +34,58 @@ ${NAME}: its variants.
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+# If the apache user and group do not exist, add them
+
+if grep "^apache:x:" etc/passwd 1> /dev/null 2> /dev/null ; then
+  true
+else
+  echo "apache:x:80:80:Apache:/srv/www:/bin/false" >> etc/passwd
+fi
+if grep "^apache:x:" etc/group 1> /dev/null 2> /dev/null ; then
+  true
+else
+  echo "apache:x:80:" >> etc/group
+fi
+if grep "^apache:" etc/shadow 1> /dev/null 2> /dev/null ; then
+  true
+else
+  echo "apache:*:9797:0:::::" >> etc/shadow
+fi
+
+# Create apache's run directory if it isn't there
+
+if [ ! -d run/apache ]; then
+  install -m 0755 -d run/apache
+fi
+
+config etc/rc.d/rc.httpd.new
+config etc/logrotate.d/apache.new
+
+# Now copy the Apache config files into place if there are not existing copies:
+
+for cfgfile in httpd.conf magic mime.types; do
+   if [ ! -f etc/apache/\${cfgfile} ]; then
+      cp -a etc/apache/\${cfgfile}.default etc/apache/\${cfgfile}
+   fi
+done
+EOF
+
 # Sources
 
 SRCNAME[0]=httpd
@@ -46,17 +99,23 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --build="${ARCH}-slackware-linux" \
  --enable-so \
  --with-mpm=worker \
+ --enable-layout=Slackware \
  --enable-mpms-shared=all \
  --enable-mods-shared=all \
+ --enable-modules=all \
  --enable-pie \
  --enable-ssl \
+ --enable-dbd \
  --enable-cgi \
+ --enable-cgid \
+ --enable-deflate \
  --enable-rewrite \
  --enable-vhost-alias \
  --enable-proxy \
  --enable-proxy-http \
  --enable-proxy-ftp \
  --enable-proxy-balancer \
+ --enable-proxy-connect \
  --enable-cache \
  --enable-mem-cache \
  --enable-file-cache \
@@ -70,7 +129,9 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-speling \
  --disable-ldap \
  --with-libxml2 \
+ --with-pcre="${SYS_DIR[usr]}"
  ${*}
+ # --enable-ldap \
  # --enable-authnz-ldap \
  # --enable-lua \
  # --enable-luajit \
@@ -78,30 +139,42 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 
 build0()
 {
-if [ "$(uname -m)" == "x86_64" ]; then
-configure \
- --enable-layout=Slackware64
-else
-configure \
- --enable-layout=Slackware
-fi
+sed -e 's|User daemon|User apache|g' \
+    -e 's|Group daemon|Group apache|g' \
+    -i docs/conf/httpd.conf.in
+configure
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc ABOUT_APACHE README
 changelog CHANGES
 license LICENSE
-install.dat doinst.sh ${PKG}/install
-install.dir ${PKG}/etc/rc.d
-install.bin rc.httpd.new ${PKG}/etc/rc.d
+install.dir ${PKG}${SYS_DIR[etc]}/{rc.d,tmpfiles.d,logrotate.d}
+install.bin rc.httpd.new ${PKG}${SYS_DIR[etc]}/rc.d
+install.cfg apache.conf.tmpfiles ${PKG}${SYS_DIR[etc]}/tmpfiles.d/apache.conf
+install.cfg apache.logrotate ${PKG}${SYS_DIR[etc]}/logrotate.d/apache.new
+install.dir ${PKG}${SYS_DIR[systemdsystemunitdir]}
+install.cfg apache.service ${PKG}${SYS_DIR[systemdsystemunitdir]}
+mv \
+ ${PKG}${SYS_DIR[etc]}/apache/httpd.conf \
+ ${PKG}${SYS_DIR[etc]}/apache/httpd.conf.default
+mv \
+ ${PKG}${SYS_DIR[etc]}/apache/mime.types \
+ ${PKG}${SYS_DIR[etc]}/apache/mime.types.default
+mv \
+ ${PKG}${SYS_DIR[etc]}/apache/magic \
+ ${PKG}${SYS_DIR[etc]}/apache/magic.default
 rm -rf \
- ${PKG}/run
-mv \
- ${PKG}/etc/apache/httpd.conf \
- ${PKG}/etc/apache/httpd.conf.default
-mv \
- ${PKG}/etc/apache/mime.types \
- ${PKG}/etc/apache/mime.types.default
-mv \
- ${PKG}/etc/apache/magic \
- ${PKG}/etc/apache/magic.default
+ ${PKG}${SYS_DIR[run]}
+sed \
+    -e 's|#\(LoadModule negotiation_module \)|\1|' \
+    -e 's|#\(LoadModule include_module \)|\1|' \
+    -e 's|#\(LoadModule userdir_module \)|\1|' \
+    -e 's|#\(LoadModule slotmem_shm_module \)|\1|' \
+    -e 's|#\(Include /etc/apache/extra/httpd-multilang-errordoc.conf\)|\1|' \
+    -e 's|#\(Include /etc/apache/extra/httpd-autoindex.conf\)|\1|' \
+    -e 's|#\(Include /etc/apache/extra/httpd-languages.conf\)|\1|' \
+    -e 's|#\(Include /etc/apache/extra/httpd-userdir.conf\)|\1|' \
+    -e 's|#\(Include /etc/apache/extra/httpd-default.conf\)|\1|' \
+    -e 's|#\(Include /etc/apache/extra/httpd-mpm.conf\)|\1|' \
+    -i ${PKG}${SYS_DIR[etc]}/apache/httpd.conf.default
 }

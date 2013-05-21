@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=php_apc
 VERSION=3.1.13
-BUILD=1
-DEPENDS=('php >= 5.3.8-1')
+BUILD=2
+DEPENDS=('php >= 5.4.15-1')
 
 # Description
 
@@ -62,6 +62,7 @@ SRCCOPY[0]="PHP"
 build0()
 {
 phpize
+CPPFLAGS="-I${SYS_DIR[include]}/pcre" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \

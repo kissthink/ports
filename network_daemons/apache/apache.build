@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=apache
 VERSION=2.4.4
-BUILD=1
+BUILD=2
 DEPENDS=('apr >= 1.4.6-1' 'expat >= 2.1.0-1' 'pcre >= 8.32-1')
 OPTDEPENDS=('file >= 5.14-1' 'openssl >= 1.0.1e-1' 'lua >= 5.2.2-1')
 

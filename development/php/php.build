@@ -5,10 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=php
-VERSION=5.3.17
+VERSION=5.4.15
 BUILD=1
-DEPENDS=('libxml >= 2.8.0-1')
-OPTDEPENDS=('curl >= 7.28.0-1')
+DEPENDS=('libxml >= 2.9.0-1')
+OPTDEPENDS=('curl >= 7.29.0-1' 'gnutls >= 3.1.10-1' 'openssl >= 1.0.1e-1' 'gdbm >= 1.10-1' 'enchant >= 1.6.0-1' 'libxslt >= 1.1.28-1')
 
 # Description
 
@@ -34,6 +34,43 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+# Create php-fpm's run directory if it isn't there
+
+if [ -d run/php-fpm ]; then
+  install -m 0755 -d run/php-fpm
+fi
+
+# Keep same perms on rc.php-fpm.new
+
+if [ -e etc/rc.d/rc.php-fpm ]; then
+  cp -a etc/rc.d/rc.php-fpm etc/rc.d/rc.php-fpm.new.incoming
+  cat etc/rc.d/rc.php-fpm.new > etc/rc.d/rc.php-fpm.new.incoming
+  mv etc/rc.d/rc.php-fpm.new.incoming etc/rc.d/rc.php-fpm.new
+fi
+
+config etc/php-fpm.conf.new
+config etc/php.d/php.ini.new
+config etc/apache/extra/httpd-mod_php.conf.new
+config etc/conf.d/php.conf.new
+config etc/rc.d/rc.php-fpm.new
+EOF
+
 # Sources
 
 SRCNAME[0]=${NAME}
@@ -48,13 +85,17 @@ extensions="--enable-bcmath=shared \
 	--enable-ctype=shared \
 	--enable-dba=shared \
 	--enable-exif=shared \
+	--enable-fpm \
 	--enable-ftp=shared \
 	--enable-gd-native-ttf \
 	--enable-gd-jis-conv \
+	--enable-hash \
 	--enable-json=shared \
 	--enable-mbregex=shared \
 	--enable-mbstring=shared \
+	--enable-mod_charset \
 	--enable-pdo=shared \
+	--enable-dom=shared \
 	--enable-phar \
 	--enable-posix=shared \
 	--enable-session \
@@ -69,72 +110,83 @@ extensions="--enable-bcmath=shared \
 	--enable-tokenizer=shared \
 	--enable-wddx=shared \
 	--enable-xml=shared \
+	--enable-xmlreader=shared \
 	--enable-zip=shared \
-	--with-bz2=shared,/usr \
-	--with-curl=shared,/usr \
+	--with-fpm-user=apache \
+	--with-fpm-group=apache \
+	--with-bz2=shared,${SYS_DIR[usr]} \
+	--with-curl=shared,${SYS_DIR[usr]} \
 	--with-curlwrappers \
-	--with-db4=/usr \
-	--with-enchant=shared,/usr \
-	--with-freetype-dir=/usr \
+	--with-db4=${SYS_DIR[usr]} \
+	--with-enchant=shared,${SYS_DIR[usr]} \
+	--with-freetype-dir=${SYS_DIR[usr]} \
 	--with-gd=shared \
-	--with-gdbm=shared,/usr \
-	--with-gettext=shared,/usr \
-	--with-gmp=shared,/usr \
+	--with-gdbm=shared,${SYS_DIR[usr]} \
+	--with-gettext=shared,${SYS_DIR[usr]} \
+	--with-gmp=shared,${SYS_DIR[usr]} \
 	--with-iconv=shared \
-	--with-jpeg-dir=shared,/usr \
-	--with-ldap=shared \
-	--with-libxml-dir=/usr \
-	--with-mhash=shared,/usr \
+	--with-jpeg-dir=shared,${SYS_DIR[usr]} \
+	--with-libxml-dir=${SYS_DIR[usr]} \
+	--with-mhash=shared,${SYS_DIR[usr]} \
 	--with-mysql=shared,mysqlnd \
-	--with-mysql-sock=/run/mariadb/mariadb.sock \
+	--with-mysql-sock=${SYS_DIR[run]}/mariadb/mariadb.sock \
 	--with-mysqli=shared,mysqlnd \
 	--with-openssl=shared \
+	--with-pcre-dir=${SYS_DIR[usr]} \
+	--with-pcre-regex=${SYS_DIR[usr]} \
 	--with-pdo-mysql=shared,mysqlnd \
-	--with-pdo-sqlite=shared \
-	--with-png-dir=shared,/usr \
-	--with-readline=shared,/usr \
+	--with-pdo-sqlite=shared,${SYS_DIR[usr]} \
+	--with-png-dir=shared,${SYS_DIR[usr]} \
+	--with-readline=shared,${SYS_DIR[usr]} \
 	--with-regex=php \
-	--with-sqlite=shared \
-	--with-sqlite3=shared \
-	--with-xpm-dir=/usr \
-	--with-xsl=shared,/usr \
-	--with-zlib=/usr \
+	--with-snmp=shared,${SYS_DIR[usr]} \
+	--with-sqlite3=shared,${SYS_DIR[usr]} \
+	--with-t1lib=${SYS_DIR[usr]} \
+	--with-vpx-dir=${SYS_DIR[usr]} \
+	--with-xpm-dir=${SYS_DIR[usr]} \
+	--with-xsl=shared,${SYS_DIR[usr]} \
+	--with-zlib=shared,${SYS_DIR[usr]} \
 	"
 #FIXME: some PHP extensions are missing
-# --with-imap-ssl=/usr \ # Requires Alpine's c-client.a
-# --with-imap=/usr \
-# --with-t1lib=/usr \
-# --with-mm=/usr \
-# --with-snmp=shared,/usr \
-# --with-pspell=shared,/usr \
+# --with-mm=${SYS_DIR[usr]} \
+# --with-ldap=shared \
+# --with-imap-ssl=${SYS_DIR[usr]} \ # Requires Alpine's c-client.a
+# --with-imap=${SYS_DIR[usr]} \
 # --enable-simplexml=shared \ # Cannot build SPL as a module
-# --with-pcre-dir=/usr \
-# --with-pcre-regex=/usr \
+# --enable-intl=shared \ # Requires ICU which is a fat dependency we don't want
+# --with-mcrypt=${SYS_DIR[usr]} \ # Requires mcrypt.h
+# --with-pspell=shared,${SYS_DIR[usr]} \ # Requires pspell
 
 #FIXME: SQLite3 won't compile and break the build with -ffast-math
 export O_FLAGS="${FLAGS//-ffast-math}"
 
-export EXTENSION_DIR="/usr/lib$(libdirsuffix)/plugins/php"
-#export PEAR_INSTALLDIR="/usr/share/pear"
+export EXTENSION_DIR="${SYS_DIR[lib]}/plugins/php"
+#export PEAR_INSTALLDIR="${SYS_DIR[share]}/pear"
 
-CFLAGS="${O_FLAGS} -I/usr/include/apr-1" CXXFLAGS="${O_FLAGS} -I/usr/include/apr-1" \
+CPPFLAGS="-I${SYS_DIR[include]}/apr-1 -I${SYS_DIR[include]}/sqlite-3" \
+CFLAGS="${O_FLAGS}" CXXFLAGS="${O_FLAGS}" \
 ./configure \
  ${*} \
- --prefix=/usr \
- --sysconfdir=/etc \
- --libdir=/usr/share/php \
+ --build="${ARCH}-slackware-linux" \
+ --prefix="${SYS_DIR[usr]}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[share]}/php" \
  --mandir="${SYS_DIR[man]}" \
- --with-config-file-scan-dir=/etc/php.d \
- --with-config-file-path=/etc/php.d \
+ --localstatedir="${SYS_DIR[var]}" \
+ --datarootdir="${SYS_DIR[share]}" \
+ --datadir="${SYS_DIR[share]}" \
+ --with-config-file-scan-dir="${SYS_DIR[etc]}/php.d" \
+ --with-config-file-path="${SYS_DIR[etc]}/php.d" \
  --without-pear \
  --disable-rpath \
  --disable-debug \
  --disable-magic-quotes \
  --disable-safe-mode \
+ --disable-sigchild \
+ --enable-maintainer-zts \
  --enable-inline-optimization \
  --enable-static=no \
  --enable-shared=yes \
- --enable-sigchild \
  --enable-filter \
  --enable-zend-multibyte \
  --with-pic \
@@ -150,32 +202,49 @@ CFLAGS="${O_FLAGS} -I/usr/include/apr-1" CXXFLAGS="${O_FLAGS} -I/usr/include/apr
 
 build0()
 {
-#FIXME: config files should be generated to include proper paths
-sed -i "s:@LIBDIR@:lib$(libdirsuffix):g" php.ini-* mod_php.conf.example
 #FIXME: Apache config file hack
 (
-install.dir ${PKG}/etc/apache
-install.dat apache.hack ${PKG}/etc/apache/httpd.conf
+install.dir ${PKG}${SYS_DIR[etc]}/apache
+install.dat apache.hack ${PKG}${SYS_DIR[etc]}/apache/httpd.conf
 )
 # apache2 + cli build
 configure \
- --with-apxs2=/usr/bin/apxs \
+ --with-apxs2="${SYS_DIR[bin]}/apxs" \
  --enable-pcntl
 make ${JOBS} install INSTALL_ROOT="${PKG}"
 make install-cli INSTALL_ROOT="${PKG}"
 #make install-pear INSTALL_ROOT="${PKG}"
 changelog NEWS
-install.dat doinst.sh ${PKG}/install
-install.dir ${PKG}/etc/php.d
-install.dat php.ini-* ${PKG}/etc/php.d
-install.cfg php.ini-development ${PKG}/etc/php.d/php.ini.new
-install.dir ${PKG}/etc/apache/extra
-install.dat mod_php.conf.example \
- ${PKG}/etc/apache/extra/httpd-mod_php.conf.new
+install.dir ${PKG}${SYS_DIR[etc]}/{php,tmpfiles,conf,rc}.d
+install.cfg php.ini-* ${PKG}${SYS_DIR[etc]}/php.d
+install.cfg php.ini-development ${PKG}${SYS_DIR[etc]}/php.d/php.ini.new
+install.dir ${PKG}${SYS_DIR[etc]}/apache/extra
+install.cfg mod_php.conf.example \
+ ${PKG}${SYS_DIR[etc]}/apache/extra/httpd-mod_php.conf.new
+mv \
+ ${PKG}${SYS_DIR[etc]}/php-fpm.conf.default \
+ ${PKG}${SYS_DIR[etc]}/php-fpm.conf.new
+install.cfg sapi/fpm/init.d.php-fpm ${PKG}${SYS_DIR[etc]}/rc.d/rc.php-fpm.new
+install.cfg php-fpm.conf.tmpfiles ${PKG}${SYS_DIR[etc]}/tmpfiles.d/php-fpm.conf
+install.dir ${PKG}${SYS_DIR[var]}/lib/php
+chgrp apache ${PKG}${SYS_DIR[var]}/lib/php
+chmod 0770 ${PKG}${SYS_DIR[var]}/lib/php
+install.cfg php.conf.d ${PKG}${SYS_DIR[etc]}/conf.d/php.conf.new
+install.dir ${PKG}${SYS_DIR[systemdsystemscriptdir]}
+install.bin cleanphpsession ${PKG}${SYS_DIR[systemdsystemscriptdir]}
+install.dir ${PKG}${SYS_DIR[systemdsystemunitdir]}
+install.cfg sapi/fpm/php-fpm.service ${PKG}${SYS_DIR[systemdsystemunitdir]}
+install.dir ${PKG}${SYS_DIR[etc]}/cron.daily
+(
+  cd ${PKG}${SYS_DIR[etc]}/cron.daily
+  ln -sf ${SYS_DIR[share]}/systemd/script/cleanphpsession php
+)
+config ${PKG}${SYS_DIR[etc]}/php-fpm.conf
 chmod 0755 \
- ${PKG}/usr/bin/php \
- ${PKG}/usr/lib$(libdirsuffix)/plugins/php/*
+ ${PKG}${SYS_DIR[bin]}/php \
+ ${PKG}${SYS_DIR[lib]}/plugins/php/*
 rm -f \
- ${PKG}/etc/php.d/*~ \
- ${PKG}/etc/apache/httpd*
+ ${PKG}${SYS_DIR[var]}/run \
+ ${PKG}${SYS_DIR[etc]}/php.d/*~ \
+ ${PKG}${SYS_DIR[etc]}/apache/httpd*
 }

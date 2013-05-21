@@ -114,7 +114,6 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-proxy \
  --enable-proxy-http \
  --enable-proxy-ftp \
- --enable-proxy-balancer \
  --enable-proxy-connect \
  --enable-cache \
  --enable-mem-cache \
@@ -126,7 +125,6 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-authz-dbd \
  --enable-authz-dbm \
  --enable-dav-fs \
- --disable-speling \
  --disable-ldap \
  --with-libxml2 \
  --with-pcre="${SYS_DIR[usr]}"

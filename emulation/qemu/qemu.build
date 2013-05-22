@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=qemu
-VERSION=1.4.1
+VERSION=1.5.0
 BUILD=1
-DEPENDS=('glib >= 2.36.0-1' 'sdl >= 1.2.15-1' 'curl >= 7.29.0-1')
+DEPENDS=('glib >= 2.36.0-1' 'sdl >= 1.2.15-1' 'curl >= 7.29.0-1' 'gtk+ >= 2.24.17-1' 'vte >= 0.28.2-1')
 
 # Description
 
@@ -62,7 +62,6 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --docdir="${SYS_DIR[html]}/${SRCNAME[0]}" \
  --libexecdir="${SYS_DIR[lib]}/exec" \
  --audio-drv-list="alsa sdl" \
- --audio-card-list="ac97 es1370 sb16 cs4231a adlib gus hda" \
  --enable-tcg-interpreter \
  --disable-vnc-tls \
  --disable-vnc-sasl \

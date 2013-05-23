@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=asunder
-VERSION=2.2
-BUILD=2
-DEPENDS=('gtk+ >= 2.24.14-1' 'cdparanoia >= 10.2-1' 'libcddb >= 1.3.2-1')
+VERSION=2.3
+BUILD=1
+DEPENDS=('gtk+ >= 2.24.17-1' 'cdparanoia >= 10.2-1' 'libcddb >= 1.3.2-1')
 
 # Description
 

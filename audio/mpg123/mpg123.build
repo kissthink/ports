@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=mpg123
-VERSION=1.15.3
+VERSION=1.15.4
 BUILD=1
 
 # Description
@@ -49,6 +49,8 @@ case "$(cpufamily ${ARCH})" in
     CPU="x86-64"
   ;;
 esac
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.{in,am}
+sed -i 's|$(libdir)/@PACKAGE@|$(libdir)/plugins/@PACKAGE@|g' $(find . -name "Makefile.in")
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \

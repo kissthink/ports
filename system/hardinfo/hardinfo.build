@@ -1,0 +1,58 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=hardinfo
+VERSION=20130409
+BUILD=1
+DEPENDS=('gtk+ >= 2.24.17-1' 'libsoup >= 2.42.0-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: hardinfo
+${NAME}:
+${NAME}: An application that gathers information about your system's hardware
+${NAME}: and operating system, performs benchmarks and generates printable
+${NAME}: reports.
+${NAME}:
+${NAME}: Homepage: http://hardinfo.berlios.de
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+SRCCOPY[0]="GPL2"
+
+build0()
+{
+(
+  install.dir build
+  cd build
+  cmake \
+  -DCMAKE_CXX_FLAGS:STRING="${FLAGS}" \
+  -DCMAKE_C_FLAGS:STRING="${FLAGS}" \
+  -DCMAKE_VERBOSE_MAKEFILE:BOOL="on" \
+  -DCMAKE_INSTALL_PREFIX:PATH="${SYS_DIR[usr]}" \
+  -DCMAKE_INSTALL_LIBDIR:PATH="lib" \
+  ..
+  make ${JOBS}
+  make install DESTDIR="${PKG}"
+)
+}

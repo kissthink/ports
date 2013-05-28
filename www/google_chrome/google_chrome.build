@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=google_chrome
-VERSION=26.0.1410.43
+VERSION=27.0.1453.93
 BUILD=1
-DEPENDS=('gtk+ >= 2.24.14-1' 'seamonkey_solibs >= 2.15-1' 'gconf >= 3.2.6-1')
+DEPENDS=('gtk+ >= 2.24.17-1' 'seamonkey_solibs >= 2.16.2-1' 'gconf >= 3.2.6-1')
 
 # Description
 

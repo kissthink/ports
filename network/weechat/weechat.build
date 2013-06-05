@@ -5,10 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=weechat
-VERSION=0.4.0
-BUILD=2
-DEPENDS=('gnutls >= 3.1.10-1' 'curl >= 7.29.0-1')
-OPTDEPENDS=('perl >= 5.2.13-1' 'python >= 2.6.6-1' 'ruby >= 1.9.1_p431-1' 'tcl >= 8.5.9-1')
+VERSION=0.4.1
+BUILD=1
+DEPENDS=('gnutls >= 3.2.1-1' 'curl >= 7.29.0-1')
+OPTDEPENDS=('perl >= 5.18.0-1' 'python >= 2.7.4-1' 'ruby >= 2.0.0.195-1' 'lua >= 5.2.2-1')
 
 # Description
 
@@ -44,8 +44,7 @@ SRCCOPY[0]="GPL3"
 build0()
 {
 cmake \
--DCMAKE_CXX_FLAGS:STRING="${FLAGS}" \
--DCMAKE_C_FLAGS:STRING="${FLAGS}" \
+-DCMAKE_C_FLAGS:STRING="${FLAGS} -I${SYS_DIR[include]}/x86_64-linux/ruby-2.0" \
 -DCMAKE_VERBOSE_MAKEFILE:BOOL="on" \
 -DCMAKE_INSTALL_PREFIX:PATH="${SYS_DIR[usr]}" \
 -DLIBDIR:PATH="${SYS_DIR[lib]}" \
@@ -60,9 +59,6 @@ doc AUTHORS NEWS
 changelog ChangeLog 
 install.dir ${PKG}${SYS_DIR[share]}/applications
 install.dat weechat.desktop ${PKG}${SYS_DIR[share]}/applications
-install.dir ${PKG}${SYS_DIR[share]}/icons/hicolor/32x32/apps
-install.dat weechat_icon_32.png \
- ${PKG}${SYS_DIR[share]}/icons/hicolor/32x32/apps/weechat.png
 (
   cd ${PKG}${SYS_DIR[bin]}
   ln -sf weechat-curses weechat

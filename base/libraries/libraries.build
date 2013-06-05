@@ -89,7 +89,7 @@ changelog ChangeLog
 }
 
 SRCNAME[1]=gmp
-SRCVERS[1]=5.1.1
+SRCVERS[1]=5.1.2
 SRCPACK[1]=ftp://ftp.gmplib.org/pub/gmp-${SRCVERS[1]}/${SRCNAME[1]}-${SRCVERS[1]}.tar.xz
 SRCCOPY[1]="GPL3 LGPL3"
 
@@ -150,7 +150,7 @@ rm -rf \
 }
 
 SRCNAME[3]=libidn
-SRCVERS[3]=1.26
+SRCVERS[3]=1.27
 SRCPACK[3]=http://ftp.gnu.org/gnu/libidn/${SRCNAME[3]}-${SRCVERS[3]}.tar.gz
 SRCCOPY[3]="GPL2 LGPL3"
 
@@ -226,7 +226,7 @@ rm -f ${PKG}${SYS_DIR[lib]}/libaio.a
 }
 
 SRCNAME[6]=nettle
-SRCVERS[6]=2.6
+SRCVERS[6]=2.7.1
 SRCPACK[6]=http://www.lysator.liu.se/~nisse/archive/${SRCNAME[6]}-${SRCVERS[6]}.tar.gz
 SRCCOPY[6]="LGPL21"
 
@@ -314,13 +314,14 @@ changelog CHANGES
 }
 
 SRCNAME[9]=p11-kit
-SRCVERS[9]=0.18.0
+SRCVERS[9]=0.18.3
 SRCPACK[9]=http://p11-glue.freedesktop.org/releases/${SRCNAME[9]}-${SRCVERS[9]}.tar.gz
 SRCCOPY[9]="BSD3"
 
 build9()
 {
 sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' p11-kit/Makefile.in
+sed -i 's|${libdir}/p11-kit|${libdir}/exec/p11-kit|g' configure
 LIBTASN1_CFLAGS="-I${PKG}${SYS_DIR[include]}/tasn1" \
 LIBTASN1_LIBS="-L${PKG}${SYS_DIR[lib]} -ltasn1" \
 CPPFLAGS="-I${PKG}${SYS_DIR[include]}/tasn1" \

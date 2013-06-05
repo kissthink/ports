@@ -6,10 +6,10 @@ source /usr/src/ports/Build/build.sh
 
 NAME=git
 MAJOR=1.8
-VERSION=${MAJOR}.2
+VERSION=${MAJOR}.3
 BUILD=1
-DEPENDS=('openssl >= 1.0.1e-1' 'curl >= 7.29.0-1' 'expat >= 2.1.0-1' 'pcre >= 8.32-1' 'perl >= 5.12.3-1')
-OPTDEPENDS=('python >= 2.6.6-1')
+DEPENDS=('openssl >= 1.0.1e-1' 'curl >= 7.29.0-1' 'expat >= 2.1.0-1' 'pcre >= 8.33-1' 'perl >= 5.18.0-1')
+OPTDEPENDS=('python >= 2.7.4-1')
 
 # Description
 
@@ -72,10 +72,10 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --libexecdir="${SYS_DIR[lib]}/exec" \
  --datadir="${SYS_DIR[share]}/application-data" \
  --htmldir="${SYS_DIR[html]}/git" \
- --with-perl="/usr/bin/perl" \
- --with-python="/usr/bin/python" \
- --with-pager="/usr/bin/less" \
- --with-editor="/usr/bin/vim" \
+ --with-perl="${SYS_DIR[bin]}/perl" \
+ --with-python="${SYS_DIR[bin]}/python" \
+ --with-pager="${SYS_DIR[bin]}/less" \
+ --with-editor="${SYS_DIR[bin]}/vim" \
  --with-openssl \
  --with-libpcre \
  --with-curl \
@@ -101,7 +101,7 @@ install.dat contrib/emacs/*.el ${PKG}${SYS_DIR[share]}/emacs/site-lisp
 install.dir ${PKG}${SYS_DIR[share]}/bash-completion/completions
 install.dat contrib/completion/git-completion.bash ${PKG}${SYS_DIR[share]}/bash-completion/completions/git
 rm -rf \
- ${PKG}${SYS_DIR[lib]}64/perl5/?.??.? \
+ ${PKG}${SYS_DIR[lib]}/plugins \
  ${PKG}${SYS_DIR[bin]}/gitk \
  ${PKG}${SYS_DIR[share]}/{gitweb,gitk,git-gui}
 }

@@ -1,0 +1,126 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=perl
+MAJOR=5
+VERSION=${MAJOR}.18.0
+BUILD=1
+OPTDEPENDS=('libdb >= 5.3.21-1' 'gdbm >= 1.10-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: perl (Practical Extraction and Report Language)
+${NAME}:
+${NAME}: Larry Wall's "Practical Extraction and Report Language". Perl is a
+${NAME}: language optimized for scanning arbitrary text files, extracting
+${NAME}: information from those text files, and printing reports based on that
+${NAME}: information. It's also a good language for many system management
+${NAME}: tasks. The language is intended to be practical (easy to use,
+${NAME}: efficient, complete) rather than beautiful (tiny, elegant, minimal).
+${NAME}:
+${NAME}: Homepage: http://www.perl.org
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=http://www.cpan.org/src/${MAJOR}.0/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="GPL1 ARTISTIC-PERL"
+
+build0()
+{
+case "$(uname -m)" in
+  x86)
+    ARCH_OPTS=""
+  ;;
+  x86_64)
+    ARCH_OPTS="-Dcccdlflags='-fPIC'"
+  ;;
+esac
+./Configure \
+ -Doptimize="${FLAGS}" \
+ -Dlddlflags="-shared ${LDFLAGS}" \
+ -Uldflags="${LDFLAGS}" \
+ -Dusethreads \
+ -Duseithreads \
+ -Duseshrplib \
+ -Ubincompat5005 \
+ -Dprefix="${SYS_DIR[usr]}" \
+ -Dvendorprefix="${SYS_DIR[usr]}" \
+ -Dsiteprefix="${SYS_DIR[usr]}/local" \
+ -Dprivlib="${SYS_DIR[share]}/perl/${MAJOR}" \
+ -Darchlib="${SYS_DIR[lib]}/plugins/perl/${MAJOR}" \
+ -Dscriptdir="${SYS_DIR[lib]}/exec/perl/${MAJOR}" \
+ -Dvendorlib="${SYS_DIR[share]}/perl/${MAJOR}" \
+ -Dvendorarch="${SYS_DIR[lib]}/plugins/perl/${MAJOR}" \
+ -Dvendorscript="${SYS_DIR[lib]}/exec/perl/${MAJOR}" \
+ -Dsitearch="${SYS_DIR[usr]}/local/lib/plugins/perl/${MAJOR}" \
+ -Dsitelib="${SYS_DIR[usr]}/local/share/perl/${MAJOR}" \
+ -Dsitescript="${SYS_DIR[usr]}/local/lib/exec/perl/${MAJOR}" \
+ -Dinc_version_list="none" \
+ -Dman1ext="1" \
+ -Dman3ext="3" \
+ -Dpager="/usr/bin/less -isr" \
+ -des \
+ ${ARCH_OPTS}
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS
+install.dir ${PKG}${SYS_DIR[etc]}/profile.d
+install.bin perl.{sh,csh} ${PKG}${SYS_DIR[etc]}/profile.d
+(
+  cd ${PKG}${SYS_DIR[lib]}
+  ln -sf ${SYS_DIR[lib]}/plugins/perl/${MAJOR}/CORE/libperl.so
+)
+(
+  cd ${PKG}${SYS_DIR[bin]}
+  ln -sf perl${VERSION} perl
+)
+(
+  cd ${PKG}${SYS_DIR[lib]}/exec/perl/${MAJOR}
+  ln -sf c2ph pstruct
+  ln -sf s2p psed
+)
+(
+  cd ${PKG}${SYS_DIR[man]}/man1
+  echo ".so man1/c2ph.1" > pstruct.1
+  echo ".so man1/s2p.1" > psed.1
+)
+# Set no mail address since bug reports should go to the bug tracker
+# and not someone's email.
+sed -e "/^cf_email=/ s/'.*'/''/" \
+    -e "/^perladmin=/ s/'.*'/''/" \
+    -i ${PKG}${SYS_DIR[lib]}/plugins/perl/${MAJOR}/Config_heavy.pl
+# Set CPAN default config to use the site directories.
+sed -e '/(makepl_arg =>/   s/""/"INSTALLDIRS=site"/' \
+    -e '/(mbuildpl_arg =>/ s/""/"installdirs=site"/' \
+    -i ${PKG}${SYS_DIR[share]}/perl/${MAJOR}/CPAN/FirstTime.pm
+# Set CPANPLUS default config to use the site directories.
+sed -e "/{'makemakerflags'}/ s/'';/'INSTALLDIRS=site';/" \
+    -e "/{'buildflags'}/     s/'';/'installdirs=site';/" \
+    -i ${PKG}${SYS_DIR[share]}/perl/${MAJOR}/CPANPLUS/Config.pm
+# Cleanup
+(
+  cd ${PKG}${SYS_DIR[share]}/perl/${MAJOR}
+  mv pod ..
+  find . -name '*.pod' -delete
+  mv ../pod .
+)
+find ${PKG}${SYS_DIR[lib]} -name '*.pod' -delete
+find ${PKG} -name '.packlist' -delete
+rm -rf ${PKG}${SYS_DIR[usr]}/local
+}

@@ -5,8 +5,8 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=sensors
-VERSION=3.3.3
-BUILD=2
+VERSION=3.3.4
+BUILD=1
 
 # Description
 

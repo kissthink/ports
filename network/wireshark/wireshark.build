@@ -5,10 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=wireshark
-VERSION=1.8.5
+VERSION=1.10.0
 BUILD=1
-DEPENDS=('glib >= 2.34.3-1' 'tcpip >= 20130127-1' 'gnutls >= 3.1.6-1' 'geoip >= 1.4.6')
-OPTDEPENDS=('gtk+ >= 3.6.4-1')
+DEPENDS=('glib >= 2.36.0-1' 'tcpip >= 20130209-1' 'gnutls >= 3.2.1-1' 'geoip >= 1.4.6')
+OPTDEPENDS=('gtk+ >= 3.8.0-1')
 
 # Description
 
@@ -34,6 +34,22 @@ ${NAME}: Homepage: http://www.wireshark.org
 ${NAME}:
 EOF
 
+cat > ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+if [ -x ${SYS_DIR[bin]}/update-desktop-database ]; then
+  ${SYS_DIR[bin]}/update-desktop-database -q
+fi
+
+if [ -x ${SYS_DIR[bin]}/gtk-update-icon-cache ]; then
+  ${SYS_DIR[bin]}/gtk-update-icon-cache -q -t -f ${SYS_DIR[share]}/icons/hicolor
+fi
+
+if [ -x ${SYS_DIR[sbin]}/setcap ]; then
+  ${SYS_DIR[sbin]}/setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' usr/bin/dumpcap
+fi
+EOF
+
 # Sources
 
 SRCNAME[0]=${NAME}
@@ -43,11 +59,12 @@ SRCCOPY[0]="GPL2 BSD3"
 
 build0()
 {
-CPPFLAGS="-I/usr/include/gcrypt -I/usr/include/gpg-error" \
+CPPFLAGS="-I${SYS_DIR[include]}/gcrypt -I${SYS_DIR[include]}/gpg-error" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
+ --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
  --prefix="${SYS_DIR[usr]}" \
@@ -64,7 +81,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --with-gcrypt=yes \
  --with-ssl \
  --with-pcap-remote
-make ${JOBS}
+make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS

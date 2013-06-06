@@ -5,8 +5,8 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=fs_fat
-VERSION=3.0.16
-BUILD=2
+VERSION=3.0.18
+BUILD=1
 
 # Description
 
@@ -36,7 +36,7 @@ EOF
 
 SRCNAME[0]=dosfstools
 SRCVERS[0]=${VERSION}
-SRCPACK[0]=http://www.daniel-baumann.ch/software/dosfstools/${SRCNAME[0]}-${SRCVERS[0]}.orig.tar.xz
+SRCPACK[0]=http://daniel-baumann.ch/files/software/dosfstools/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
 SRCCOPY[0]="GPL3"
 
 build0()
@@ -47,16 +47,20 @@ changelog ChangeLog
 (
   cd ${PKG}${SYS_DIR[man]}/man8
   rm -f {mkfs,fsck}.{msdos,vfat}.8
-  echo ".so man8/mkdosfs.8" > mkfs.msdos.8
-  echo ".so man8/mkdosfs.8" > mkfs.vfat.8
-  echo ".so man8/dosfsck.8" > fsck.msdos.8
-  echo ".so man8/dosfsck.8" > fsck.vfat.8
+  rm -f {mkdosfs,dosfslabel,dosfsck}.8
+  echo ".so man8/mkfs.fat.8" > mkfs.msdos.8
+  echo ".so man8/mkfs.fat.8" > mkfs.vfat.8
+  echo ".so man8/mkfs.fat.8" > mkdosfs.8
+  echo ".so man8/fsck.fat.8" > fsck.msdos.8
+  echo ".so man8/fsck.fat.8" > fsck.vfat.8
+  echo ".so man8/fsck.fat.8" > dosfsck.8
+  echo ".so man8/fatlabel.8" > dosfslabel.8
 )
 rm -rf ${PKG}${SYS_DIR[doc]}/${SRCNAME[0]}
 }
 
 SRCNAME[1]=fatsort
-SRCVERS[1]=0.9.17.269
+SRCVERS[1]=1.1.331
 SRCPACK[1]=${URL[sf]}/fatsort/${SRCNAME[1]}-${SRCVERS[1]}.tar.gz
 SRCCOPY[1]="GPL2"
 

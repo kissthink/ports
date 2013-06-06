@@ -5,10 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=hplip
-VERSION=3.12.11
+VERSION=3.13.5
 BUILD=1
-DEPENDS=('ghostscript >= 9.02-1' 'snmp >= 5.7.2-1' 'dbus >= 1.4.24-1')
-OPTDEPENDS=('usb >= 1.0.14-1' 'cups >= 1.6.1-1' 'python >= 2.6.6-1')
+DEPENDS=('ghostscript >= 9.06-1' 'snmp >= 5.7.2-1' 'dbus >= 1.6.8-1')
+OPTDEPENDS=('usb >= 1.0.15-1' 'cups >= 1.6.2-1' 'python >= 2.7.4-1')
 
 # Description
 
@@ -35,8 +35,10 @@ ${NAME}:
 EOF
 
 cat >> ${PKG}/install/doinst.sh <<EOF
-if [ -x /usr/bin/update-desktop-database ]; then
-  /usr/bin/update-desktop-database /usr/share/applications >/dev/null 2>&1
+#!/bin/sh
+
+if [ -x usr/bin/update-desktop-database ]; then
+  usr/bin/update-desktop-database usr/share/applications >/dev/null 2>&1
 fi
 EOF
 
@@ -49,6 +51,13 @@ SRCCOPY[0]="GPL2 BSD3 MIT"
 
 build0()
 {
+find . -type f -exec sed -i 's~^#.*env python~#!/usr/bin/env python2~' {} +
+find . -name "*.py" -exec sed -i '1s|#!/usr/bin/python|#!/usr/bin/python2|' {} +
+sed -i 's|python ./print.py|python2 ./print.py|' scan.py
+sed -i 's|python ./testpage.py|python2 ./testpage.py|' setup.py
+sed -i 's|python ./setup.py|python2 ./setup.py|' ui4/devmgr5.py ui4/nodevicesdialog.py 
+sed -i 's|python %HOME%|python2 %HOME%|' base/utils.py
+sed -i 's|python ./plugin.py|python2 ./plugin.py|' base/pkit.py
 # https://bugs.archlinux.org/task/30085 - hack found in Gentoo
 # Use system foomatic-rip for hpijs driver instead of foomatic-rip-hplip
 # The hpcups driver does not use foomatic-rip
@@ -61,6 +70,8 @@ build0()
   done
 )
 #LIBS="-Wl,--as-needed $(pkg-config libusb --libs)"
+export PYTHON=python2
+sed -i 's|/usr/lib/systemd/system|/usr/share/systemd/system|g' Makefile.{am,in}
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -82,9 +93,9 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-foomatic-rip-hplip-install \
  --enable-foomatic-ppd-install \
  --enable-foomatic-drv-install \
- --enable-pp-build \
  --enable-hpcups-install \
  --enable-new-hpcups \
+ --enable-pp-build \
  --enable-cups-ppd-install \
  --enable-cups-drv-install \
  --enable-hpijs-install \
@@ -97,8 +108,12 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-policykit \
  --enable-udev-acl-rules
 #FIXME: --enable-scan-build when we have sane
+#FIXME: PAM
 make ${JOBS}
-make install DESTDIR="${PKG}" rulesdir="$(pkg-config udev --variable=udevdir)/rules.d"
+make install DESTDIR="${PKG}" rulesdir="${SYS_DIR[udevrules]}"
+mv \
+ ${PKG}${SYS_DIR[etc]}/cron.daily/hplip_cron \
+ ${PKG}${SYS_DIR[etc]}/cron.daily/hplip
 # Log dir should not be world writeable
 chmod 775 \
   ${PKG}${SYS_DIR[var]}/log/{hp,hp/tmp}

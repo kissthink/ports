@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=cryptmount
-VERSION=4.3
+VERSION=4.4
 BUILD=1
 DEPENDS=('lvm >= 2.02.98-1' 'libgcrypt >= 1.5.0-1')
 
@@ -62,6 +62,7 @@ SRCCOPY[0]="GPL2"
 build0()
 {
 sed -i 's|$(libdir)/@PACKAGE@|$(libdir)/plugins/@PACKAGE@|g' $(find . -name "Makefile.in")
+sed -i 's|/usr/lib/systemd/system|/usr/share/systemd/system|g' sysinit/Makefile.{in,am}
 CPPFLAGS="-I${SYS_DIR[include]}/gpg-error -I${SYS_DIR[include]}/gcrypt" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
@@ -71,7 +72,8 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --mandir="${SYS_DIR[man]}" \
  --sysconfdir="${SYS_DIR[etc]}" \
  --libdir="${SYS_DIR[lib]}" \
- --localstatedir="${SYS_DIR[var]}"
+ --localstatedir="${SYS_DIR[var]}" \
+ --with-systemd
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS

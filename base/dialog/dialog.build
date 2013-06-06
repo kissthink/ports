@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=dialog
-VERSION=1.2.20121230
+VERSION=1.2.20130523
 BUILD=1
 
 # Description
@@ -54,7 +54,7 @@ EOF
 # Sources
 
 SRCNAME[0]=${NAME}
-SRCVERS[0]=1.2-20121230
+SRCVERS[0]=1.2-20130523
 SRCPACK[0]=http://invisible-island.net/datafiles/release/${SRCNAME[0]}-${SRCVERS[0]}.tgz
 SRCCOPY[0]="LGPL21"
 

@@ -6,9 +6,9 @@ source /usr/src/ports/Build/build.sh
 
 NAME=libgsf
 MAJOR=1.14
-VERSION=${MAJOR}.25
+VERSION=${MAJOR}.26
 BUILD=1
-DEPENDS=('glib >= 2.34.3-1' 'libxml >= 2.9.0-1')
+DEPENDS=('glib >= 2.36.0-1' 'libxml >= 2.9.0-1')
 
 # Description
 
@@ -59,6 +59,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --with-html-dir="${SYS_DIR[html]}" \
  --without-python \
  --with-bz2
+#FIXME: python subpackage
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS

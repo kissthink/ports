@@ -25,21 +25,35 @@
 
 SRCPKG="${SRCPACK[${source}]##*/}"
 SRCURL="${SRCPACK[${source}]%/*}"
+SRCSCH="${SRCPACK[${source}]%://*}"
 
 debug "SRCPKG=${SRCPKG}"
 debug "SRCURL=${SRCURL}"
+debug "SRCSCH=${SRCSCH}"
 
 if [ ! -e "${SRCPKG}" ]; then
   if [[ "${SRCURL}" ]]; then
     info "Downloading ${SRCPACK[${source}]}"
-    src.download ${SRCPACK[${source}]}
-    # Throw a newline because curl doesn't
-    echo
-    # Since curl returns 0 even when it failed to download something, then just
-    # check again if we can find the source again.
-    if [ ! -e "${SRCPKG}" ]; then
-      abort "No source"
-    fi
+    case "${SRCSCH}" in
+      'git')
+        pushd "${BUILD[dir]}" >/dev/null
+	src.download.git ${SRCPACK[${source}]}
+	checkstatus ${?}
+	popd >/dev/null
+	SRCROOT[${source}]="${SRCPKG%*.git}"
+	SRCOPTS[${source}]="${SRCOPTS[${source}]} nounpack"
+      ;;
+      *)
+        src.download ${SRCPACK[${source}]}
+        # Throw a newline because curl doesn't
+        echo
+        # Since curl returns 0 even when it failed to download something, then
+        # just check if we can find the source.
+        if [ ! -e "${SRCPKG}" ]; then
+	  abort "No source"
+	fi
+      ;;
+    esac
   else
     abort "No source"
   fi

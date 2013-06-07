@@ -30,6 +30,7 @@ shopt -s expand_aliases
 alias host.arch='uname -m'
 
 alias src.download='curl -f -# -O -L'
+alias src.download.git='git clone --depth 0'
 alias src.unpack='bsdtar xf'
 alias src.checksum='sha256sum'
 alias src.patch='patch -p1 -s -f'

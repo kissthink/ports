@@ -39,7 +39,7 @@ function dir.make()
 
 function config()
 {
-  for file in "${*}"; do
+  for file in ${*}; do
     mv "${file}" "${file}.new"
   done 
 }

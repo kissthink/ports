@@ -1,0 +1,118 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=cyrus_sasl
+VERSION=2.1.26
+BUILD=1
+DEPENDS=('openssl >= 1.0.1e-1')
+OPTDEPENDS=('gdbm >= 1.10-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: cyrus_sasl
+${NAME}:
+${NAME}: A framework for authentication and data security in Internet
+${NAME}: Protocols. It decouples authentication mechanisms from application
+${NAME}: protocols, in theory allowing any authentication mechanism supported
+${NAME}: by SASL to be used in any application protocol that uses SASL.
+${NAME}:
+${NAME}: Homepage: http://cyrusimap.org
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+config etc/rc.d/rc.saslauthd.new
+config etc/conf.d/saslauthd.conf.new
+EOF
+
+# Sources
+
+SRCNAME[0]=cyrus-sasl
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=ftp://ftp.cyrusimap.org/cyrus-sasl/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+
+build0()
+{
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.{in,am}
+sed -i 's|/usr/lib/sasl2|/usr/lib/plugins/sasl2|g' configure configure.in
+sed -i 's|$(prefix)/lib/sasl2|$(prefix)/lib/plugins/sasl2|g' plugins/Makefile.{in,am}
+CFLAGS="${FLAGS} -fPIC" CXXFLAGS="${FLAGS} -fPIC" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix="${SYS_DIR[usr]}" \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --sbindir="${SYS_DIR[bin]}" \
+ --disable-macos-framework \
+ --disable-otp \
+ --disable-srp \
+ --disable-srp-setpass \
+ --disable-krb4 \
+ --disable-passdss \
+ --disable-ldapdb \
+ --enable-alwaystrue \
+ --enable-checkapop \
+ --enable-auth-sasldb \
+ --enable-cram \
+ --enable-digest \
+ --enable-gssapi \
+ --enable-plain \
+ --enable-anon \
+ --enable-login \
+ --enable-ntlm \
+ --enable-sql \
+ --with-plugindir="${SYS_DIR[lib]}/plugins/sasl2" \
+ --with-configdir="${SYS_DIR[etc]}/sasl2" \
+ --with-saslauthd="${SYS_DIR[run]}/saslauthd" \
+ --with-dbpath="${SYS_DIR[var]}/lib/sasldb" \
+ --with-devrandom="/dev/urandom" \
+ --with-dblib="gdbm" \
+#FIXME: PAM --with-pam
+# --with-ldap
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS
+changelog NEWS
+license COPYING
+install.dir ${PKG}${SYS_DIR[systemdsystemunitdir]}
+install.dat saslauthd.service ${PKG}${SYS_DIR[systemdsystemunitdir]}
+install.dir ${PKG}${SYS_DIR[conf]}
+install.cfg saslauthd.conf.d ${PKG}${SYS_DIR[conf]}/saslauthd.conf.new
+install.dir ${PKG}${SYS_DIR[etc]}/{tmpfiles,rc}.d
+install.cfg saslauthd.conf.tmpfiles ${PKG}${SYS_DIR[etc]}/tmpfiles.d/saslauthd.conf
+install.dat rc.saslauthd.new ${PKG}${SYS_DIR[etc]}/rc.d
+}

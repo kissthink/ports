@@ -5,8 +5,8 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=compface
-VERSION=1.5.2
-BUILD=2
+VERSION=1.5.2.$(date +%Y%m%d)
+BUILD=3
 
 # Description
 
@@ -36,7 +36,7 @@ EOF
 
 SRCNAME[0]=${NAME}
 SRCVERS[0]=${VERSION}
-SRCPACK[0]=http://ftp.xemacs.org/pub/xemacs/aux/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCPACK[0]=git://github.com/cjsthompson/${SRCNAME[0]}.git
 
 build0()
 {

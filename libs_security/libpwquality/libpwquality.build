@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=libpwquality
 VERSION=1.2.1
-BUILD=3
-DEPENDS=('cracklib >= 2.8.22-1')
+BUILD=4
+DEPENDS=('pam >= 1.1.6-1' 'cracklib >= 2.8.22-1')
 
 # Description
 

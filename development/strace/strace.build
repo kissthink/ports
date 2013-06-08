@@ -5,8 +5,8 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=strace
-VERSION=4.7
-BUILD=2
+VERSION=4.8
+BUILD=1
 
 # Description
 

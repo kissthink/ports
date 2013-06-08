@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=libpwquality
 VERSION=1.2.1
-BUILD=2
+BUILD=3
 DEPENDS=('cracklib >= 2.8.22-1')
 
 # Description
@@ -74,14 +74,13 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --libdir="${SYS_DIR[lib]}" \
  --localstatedir="${SYS_DIR[var]}" \
  --includedir="${SYS_DIR[include]}/pwquality" \
+ --with-securedir="${SYS_DIR[lib]}/plugins/security" \
  --enable-python-bindings=no \
- --enable-pam=no
-#FIXME: PAM
+ --enable-pam=yes
+#FIXME: python subpackage
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-mv \
- ${PKG}${SYS_DIR[etc]}/security/pwquality.conf \
- ${PKG}${SYS_DIR[etc]}/security/pwquality.conf.new
+config ${PKG}${SYS_DIR[etc]}/security/pwquality.conf
 }

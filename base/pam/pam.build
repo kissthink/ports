@@ -1,0 +1,168 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=pam
+VERSION=1.1.6
+BUILD=1
+DEPENDS=('cracklib >= 2.8.22-1' 'libdb >= 5.3.21-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: pam (pluggable authentication modules)
+${NAME}:
+${NAME}: PAM is a system security tool that allows system administrators to
+${NAME}: set authentication policy without having to recompile programs that
+${NAME}: handle authentication.
+${NAME}:
+${NAME}: Homepage: http://www.us.kernel.org/pub/linux/libs/pam/index.html
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+if [ ! -d run/faillock ]; then
+  install -m 0755 -d run/faillock
+fi
+
+if [ ! -e var/log/tallylog ]; then
+  install -m 0600 /dev/null var/log/tallylog
+fi
+
+config etc/security/access.conf.new
+config etc/security/group.conf.new
+config etc/security/limits.conf.new
+config etc/security/namespace.conf.new
+config etc/security/namespace.init.new
+config etc/security/pam_env.conf.new
+config etc/security/time.conf.new
+config etc/default/passwd.new
+config etc/environment.new
+config etc/pam.d/other.new
+config etc/pam.d/system-auth.new
+config etc/pam.d/system-local-login.new
+config etc/pam.d/system-login.new
+config etc/pam.d/system-remote-login.new
+config etc/pam.d/system-services.new
+EOF
+
+#TODO: when switching to PAM remember to enable /usr/bin/login in 'util-linux'
+#      and disable /usr/bin/login in 'shadow'.
+
+#NOTE: Maybe /etc/environment should be in another package
+
+# Sources
+
+SRCNAME[0]=Linux-PAM
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=https://fedorahosted.org/releases/l/i/linux-pam/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCCOPY[0]="BSD3 GPL2"
+
+build0()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-rpath \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix="${SYS_DIR[usr]}" \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --sbindir="${SYS_DIR[sbin]}" \
+ --disable-audit \
+ --disable-selinux \
+ --disable-prelude \
+ --enable-securedir="${SYS_DIR[lib]}/plugins/security" \
+ --enable-isadir="../../${SYS_DIR[lib]}/plugins/security" 
+make ${JOBS}
+make install DESTDIR="${PKG}" SCONFIGDIR="${SYS_DIR[etc]}/security"
+doc AUTHORS
+changelog NEWS
+config ${PKG}${SYS_DIR[etc]}/security/{access,group,limits,namespace,pam_env,time}.conf
+config ${PKG}${SYS_DIR[etc]}/security/namespace.init
+config ${PKG}${SYS_DIR[etc]}/environment
+install.dir ${PKG}${SYS_DIR[etc]}/tmpfiles.d
+install.cfg pam.conf.tmpfiles ${PKG}${SYS_DIR[etc]}/tmpfiles.d/pam.conf
+chmod 4755 ${PKG}${SYS_DIR[sbin]}/unix_chkpwd
+chmod 0700 ${PKG}${SYS_DIR[sbin]}/unix_update
+rm -rf \
+ ${PKG}${SYS_DIR[var]} \
+ ${PKG}${SYS_DIR[doc]}/Linux-PAM
+# Compatibility stuff
+(
+  cd ${PKG}${SYS_DIR[lib]}/plugins/security
+  ln -s pam_unix.so pam_unix_acct.so
+  ln -s pam_unix.so pam_unix_auth.so
+  ln -s pam_unix.so pam_unix_passwd.so
+  ln -s pam_unix.so pam_unix_session.so
+)
+}
+
+SRCNAME[1]=pam_unix2
+SRCVERS[1]=2.9.1
+SRCPACK[1]=http://archlinux.c3sl.ufpr.br/other/pam_unix2/${SRCNAME[1]}-${SRCVERS[1]}.tar.bz2
+SRCCOPY[1]="GPL2"
+
+build1()
+{
+sed -i 's|$(libdir)/security|$(libdir)/plugins/security|g' src/Makefile.{in,am}
+LDFLAGS="-L${PKG}${SYS_DIR[lib]}" \
+CPPFLAGS="-I${PKG}${SYS_DIR[include]}" \
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-rpath \
+ --prefix="${SYS_DIR[usr]}" \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}"
+make ${JOBS}
+make install DESTDIR="${PKG}"
+doc AUTHORS THANKS
+changelog NEWS
+config ${PKG}${SYS_DIR[etc]}/default/passwd
+}
+
+SRCNAME[2]=tightware-pam-policy
+SRCVERS[2]=$(date +%Y%m%d)
+SRCPACK[2]=git://github.com/cjsthompson/${SRCNAME[2]}.git
+
+build2()
+{
+make install DESTDIR="${PKG}"
+config ${PKG}${SYS_DIR[etc]}/pam.d/{other,system-*}
+}

@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=jack
 VERSION=1.9.9.5
-BUILD=1
+BUILD=2
 DEPENDS=('libsamplerate >= 0.1.8-1' 'celt >= 0.11.3-1')
 
 # Description
@@ -56,6 +56,6 @@ doc README
 changelog ChangeLog
 install.dir ${PKG}${SYS_DIR[udevrules]}
 install.dat 40-hpet-permissions.rules ${PKG}${SYS_DIR[udevrules]}
-install.dir ${PKG}${SYS_DIR[etc]}/limits.d
-install.dat 99-audio.conf ${PKG}${SYS_DIR[etc]}/limits.d
+install.dir ${PKG}${SYS_DIR[etc]}/security/limits.d
+install.dat 99-audio.conf ${PKG}${SYS_DIR[etc]}/security/limits.d
 }

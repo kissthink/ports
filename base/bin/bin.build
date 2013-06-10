@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=bin
 VERSION=$(date +%Y%m%d)
-BUILD=1
+BUILD=2
 DEPENDS=('udev >= 173-1' 'pam >= 1.1.6-1')
 OPTDEPENDS=('libxml >= 2.9.0-2' 'xz >= 5.0.4-1' 'bzip2 >= 1.0.6-1')
 
@@ -289,12 +289,15 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-libmount \
  --enable-libuuid \
  --enable-agetty \
+ --enable-chfn-chsh \
+ --enable-line \
  --enable-mesg \
  --enable-newgrp \
  --enable-raw \
  --enable-rename \
  --enable-reset \
  --enable-schedutils \
+ --enable-tunelp \
  --enable-vipw \
  --enable-wall \
  --enable-write \
@@ -812,7 +815,6 @@ make install DESTDIR="${PKG}"
 doc README
 changelog ChangeLog
 }
-
 
 SRCNAME[24]=slackwareutils
 SRCVERS[24]=$(date +%Y%m%d)

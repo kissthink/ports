@@ -6,8 +6,8 @@ source /usr/src/ports/Build/build.sh
 
 NAME=bin
 VERSION=$(date +%Y%m%d)
-BUILD=3
-DEPENDS=('udev >= 173-1')
+BUILD=1
+DEPENDS=('udev >= 173-1' 'pam >= 1.1.6-1')
 OPTDEPENDS=('libxml >= 2.9.0-2' 'xz >= 5.0.4-1' 'bzip2 >= 1.0.6-1')
 
 # Description
@@ -70,18 +70,40 @@ fi
 config etc/rc.d/rc.serial.new
 config etc/serial.conf.new
 config etc/conf.d/dircolors.conf.new
+config etc/login.defs.new
+config etc/default/useradd.new
+config etc/pam.d/chage.new
+config etc/pam.d/chfn.new
+config etc/pam.d/chgpasswd.new
+config etc/pam.d/chpasswd.new
+config etc/pam.d/chsh.new
+config etc/pam.d/groupadd.new
+config etc/pam.d/groupdel.new
+config etc/pam.d/groupmems.new
+config etc/pam.d/groupmod.new
+config etc/pam.d/login.new
+config etc/pam.d/newusers.new
+config etc/pam.d/passwd.new
+config etc/pam.d/shadow.new
+config etc/pam.d/su.new
+config etc/pam.d/su-l.new
+config etc/pam.d/useradd.new
+config etc/pam.d/userdel.new
+config etc/pam.d/usermod.new
+config var/log/faillog.new
+rm -f var/log/faillog.new
 
 # Install texinfo files
 
 install_info coreutils grep sed find find-maint which
 EOF
 
-#NOTE: maybe merge moreutils, shadow, kmod and gzip ?
+#NOTE: maybe merge moreutils, kmod and gzip ?
 
 # Sources
 
 SRCNAME[0]=attr
-SRCVERS[0]=2.4.46
+SRCVERS[0]=2.4.47
 SRCPACK[0]=http://download.savannah.gnu.org/releases/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.src.tar.gz
 SRCCOPY[0]="GPL2 LGPL21"
 
@@ -100,7 +122,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --libexecdir="${SYS_DIR[lib]}" \
  --localstatedir="${SYS_DIR[var]}"
 make ${JOBS}
-make install install-lib install-dev DIST_ROOT="${PKG}"
+make install install-lib install-dev DESTDIR="${PKG}"
 changelog doc/CHANGES
 for i in get list multi remove set; do
   man="attr_${i}.3"
@@ -116,7 +138,7 @@ rm -rf \
 }
 
 SRCNAME[1]=acl
-SRCVERS[1]=2.2.51
+SRCVERS[1]=2.2.52
 SRCPACK[1]=http://download.savannah.gnu.org/releases/${SRCNAME[1]}/${SRCNAME[1]}-${SRCVERS[1]}.src.tar.gz
 SRCCOPY[1]="GPL2 LGPL21"
 
@@ -137,7 +159,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --libexecdir="${SYS_DIR[lib]}" \
  --localstatedir="${SYS_DIR[var]}"
 make ${JOBS}
-make install install-lib install-dev DIST_ROOT="${PKG}"
+make install install-lib install-dev DESTDIR="${PKG}"
 changelog doc/CHANGES
 rm -f ${PKG}${SYS_DIR[man]}/man3/acl_extended_file_nofollow.3
 echo ".so man3/acl_extended_file.3" > ${PKG}${SYS_DIR[man]}/man3/acl_extended_file_nofollow.3
@@ -180,6 +202,7 @@ SRCCOPY[3]="GPL2"
 
 build3()
 {
+sed -i 's|$(LIBDIR)/security|$(LIBDIR)/plugins/security|g' pam_cap/Makefile
 make ${JOBS} CFLAGS="${FLAGS}" lib="lib"
 make install DESTDIR="${PKG}" \
  RAISE_SETFCAP="no" MANDIR="${PKG}${SYS_DIR[man]}" \
@@ -190,17 +213,59 @@ chmod 0755 ${PKG}${SYS_DIR[lib]}/libcap.so.?.??
 rm -f ${PKG}${SYS_DIR[lib]}/libcap.a
 }
 
-SRCNAME[4]=util-linux
-SRCVERS[4]=2.22.2
-SRCPACK[4]=http://www.kernel.org/pub/linux/utils/${SRCNAME[4]}/v${SRCVERS[4]}/${SRCNAME[4]}-${SRCVERS[4]}.tar.xz
-SRCCOPY[4]="GPL3 GPL2 LGPL2 LGPL21 BSD4"
+SRCNAME[4]=shadow
+SRCVERS[4]=4.1.5.1
+SRCPACK[4]=http://pkg-shadow.alioth.debian.org/releases/${SRCNAME[4]}-${SRCVERS[4]}.tar.bz2
 
 build4()
 {
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-rpath \
+ --enable-static=no \
+ --enable-shared=yes \
+ --prefix="${SYS_DIR[usr]}" \
+ --mandir="${SYS_DIR[man]}" \
+ --docdir="${SYS_DIR[doc]}/${SRCNAME[4]}-${SRCVERS[4]}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --without-selinux \
+ --without-audit \
+ --without-libcrack \
+ --with-libpam \
+ --with-group-name-max-length=32
+make ${JOBS}
+make install DESTDIR="${PKG}"
+changelog NEWS
+license COPYING
+install.dir ${PKG}${SYS_DIR[var]}/log
+touch ${PKG}${SYS_DIR[var]}/log/faillog.new
+install.bin adduser ${PKG}${SYS_DIR[sbin]}
+#FIXME: compat
+(
+  cd ${PKG}${SYS_DIR[bin]}
+  ln -s ${SYS_DIR[sbin]}/faillog
+  ln -s ${SYS_DIR[sbin]}/lastlog
+  mv newgrp sg
+)
+install.dir ${PKG}/sbin
+(
+  cd ${PKG}/sbin
+  ln -s ${SYS_DIR[sbin]}/nologin
+)
+}
+
+SRCNAME[5]=util-linux
+SRCVERS[5]=2.23.1
+SRCPACK[5]=http://www.kernel.org/pub/linux/utils/${SRCNAME[5]}/v${SRCVERS[5]}/${SRCNAME[5]}-${SRCVERS[5]}.tar.xz
+SRCCOPY[5]="GPL3 GPL2 LGPL2 LGPL21 BSD4"
+
+build5()
+{
 sed -i 's|$(usrlib_execdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
-#FIXME: PAM: undisable su, sulogin, login when switching
-#FIXME: when switching to PAM -> --enable-login-utils and fix up 'shadow'
-#FIXME: --enable-socket-activation --> when switching to systemd
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -217,9 +282,6 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --bindir="${SYS_DIR[bin]}" \
  --sbindir="${SYS_DIR[sbin]}" \
  --with-systemdsystemunitdir="${SYS_DIR[systemdsystemunitdir]}" \
- --disable-login \
- --disable-su \
- --disable-sulogin \
  --disable-uuidd \
  --disable-last \
  --enable-fs-paths-default="/usr/sbin:/sbin:/sbin/fs.d:/sbin/fs" \
@@ -228,18 +290,22 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-libuuid \
  --enable-agetty \
  --enable-mesg \
+ --enable-newgrp \
  --enable-raw \
  --enable-rename \
  --enable-reset \
  --enable-schedutils \
+ --enable-vipw \
  --enable-wall \
  --enable-write \
  --enable-use-tty-group
+#FIXME: Remove in 'last' from sysvinit ? (--disable-last)
+#FIXME: systemd --enable-socket-activation --> when switching to systemd
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-rm -rf ${PKG}${SYS_DIR[man]}/ru
+#rm -rf ${PKG}${SYS_DIR[man]}/ru
 #FIXME: compat
 (
   cd ${PKG}${SYS_DIR[bin]}
@@ -247,7 +313,8 @@ rm -rf ${PKG}${SYS_DIR[man]}/ru
   ln -sf ${SYS_DIR[sbin]}/readprofile
   ln -sf ${SYS_DIR[sbin]}/tunelp
   ln -sf ${SYS_DIR[sbin]}/raw
-  cd ${PKG}/usr/sbin
+  ln -sf ${SYS_DIR[sbin]}/sulogin
+  cd ${PKG}${SYS_DIR[sbin]}
   ln -sf hwclock clock
   ln -sf ${SYS_DIR[bin]}/mount
   ln -sf ${SYS_DIR[bin]}/umount
@@ -286,15 +353,16 @@ rm -rf ${PKG}${SYS_DIR[man]}/ru
   ln -sf ${SYS_DIR[sbin]}/wipefs
   ln -sf ${SYS_DIR[sbin]}/pivot_root
   ln -sf ${SYS_DIR[sbin]}/blockdev
+  ln -sf ${SYS_DIR[sbin]}/sulogin
 )
 }
 
-SRCNAME[5]=procps-ng
-SRCVERS[5]=3.3.6
-SRCPACK[5]=${URL[sf]}/${SRCNAME[5]}/Production/${SRCNAME[5]}-${SRCVERS[5]}.tar.xz
-SRCCOPY[5]="GPL2 LGPL2"
+SRCNAME[6]=procps-ng
+SRCVERS[6]=3.3.8
+SRCPACK[6]=${URL[sf]}/${SRCNAME[6]}/Production/${SRCNAME[6]}-${SRCVERS[6]}.tar.xz
+SRCCOPY[6]="GPL2 LGPL2"
 
-build5()
+build6()
 {
 sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' proc/Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
@@ -319,6 +387,7 @@ make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
 #FIXME: everything should end up in /usr not /usr/usr
+#FIXME: systemd (--with-systemd)
 mv ${PKG}${SYS_DIR[usr]}/usr/bin/* ${PKG}${SYS_DIR[bin]}
 rm -rf ${PKG}${SYS_DIR[usr]}/usr
 (
@@ -327,12 +396,12 @@ rm -rf ${PKG}${SYS_DIR[usr]}/usr
 )
 }
 
-SRCNAME[6]=procinfo-ng
-SRCVERS[6]=2.0.304
-SRCPACK[6]=${URL[sf]}/procinfo-ng/${SRCNAME[6]}/${SRCVERS[6]}/${SRCNAME[6]}-${SRCVERS[6]}.tar.bz2
-SRCCOPY[6]="GPL2 LGPL21"
+SRCNAME[7]=procinfo-ng
+SRCVERS[7]=2.0.304
+SRCPACK[7]=${URL[sf]}/procinfo-ng/${SRCNAME[7]}/${SRCVERS[7]}/${SRCNAME[7]}-${SRCVERS[7]}.tar.bz2
+SRCCOPY[7]="GPL2 LGPL21"
 
-build6()
+build7()
 {
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
@@ -346,12 +415,12 @@ make ${JOBS}
 make install DESTDIR="${PKG}"
 }
 
-SRCNAME[7]=psmisc
-SRCVERS[7]=22.20
-SRCPACK[7]=${URL[sf]}/psmisc/${SRCNAME[7]}/${SRCNAME[7]}-${SRCVERS[7]}.tar.gz
-SRCCOPY[7]="GPL2"
+SRCNAME[8]=psmisc
+SRCVERS[8]=22.20
+SRCPACK[8]=${URL[sf]}/psmisc/${SRCNAME[8]}/${SRCNAME[8]}-${SRCVERS[8]}.tar.gz
+SRCCOPY[8]="GPL2"
 
-build7()
+build8()
 {
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
@@ -370,12 +439,12 @@ changelog ChangeLog
 echo ".so man1/pstree.1" > ${PKG}${SYS_DIR[man]}/man1/pstree.x11.1
 }
 
-SRCNAME[8]=sysfsutils
-SRCVERS[8]=2.1.0
-SRCPACK[8]=${URL[sf]}/linux-diag/${SRCNAME[8]}-${SRCVERS[8]}.tar.gz
-SRCCOPY[8]="GPL2 LGPL21"
+SRCNAME[9]=sysfsutils
+SRCVERS[9]=2.1.0
+SRCPACK[9]=${URL[sf]}/linux-diag/${SRCNAME[9]}-${SRCVERS[9]}.tar.gz
+SRCCOPY[9]="GPL2 LGPL21"
 
-build8()
+build9()
 {
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
@@ -394,12 +463,12 @@ doc AUTHORS CREDITS docs/libsysfs.txt
 changelog ChangeLog
 }
 
-SRCNAME[9]=inotify-tools
-SRCVERS[9]=3.14
-SRCPACK[9]=http://github.com/downloads/rvoicilas/${SRCNAME[9]}/${SRCNAME[9]}-${SRCVERS[9]}.tar.gz
-SRCCOPY[9]="GPL2"
+SRCNAME[10]=inotify-tools
+SRCVERS[10]=3.14
+SRCPACK[10]=http://github.com/downloads/rvoicilas/${SRCNAME[10]}/${SRCNAME[10]}-${SRCVERS[10]}.tar.gz
+SRCCOPY[10]="GPL2"
 
-build9()
+build10()
 {
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
@@ -415,15 +484,15 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
-rm -rf ${PKG}${SYS_DIR[doc]}/${SRCNAME[9]}
+rm -rf ${PKG}${SYS_DIR[doc]}/${SRCNAME[10]}
 }
 
-SRCNAME[10]=less
-SRCVERS[10]=457
-SRCPACK[10]=http://www.greenwoodsoftware.com/less/${SRCNAME[10]}-${SRCVERS[10]}.tar.gz
-SRCCOPY[10]="GPL3 BSD2"
+SRCNAME[11]=less
+SRCVERS[11]=458
+SRCPACK[11]=http://www.greenwoodsoftware.com/less/${SRCNAME[11]}-${SRCVERS[11]}.tar.gz
+SRCCOPY[11]="GPL3 BSD2"
 
-build10()
+build11()
 {
 chmod 0644 *
 chmod 0755 configure mkinstalldirs *.sh
@@ -443,12 +512,12 @@ changelog NEWS
 install.bin lesspipe.sh ${PKG}${SYS_DIR[bin]}
 }
 
-SRCNAME[11]=tree
-SRCVERS[11]=1.6.0
-SRCPACK[11]=ftp://mama.indstate.edu/linux/tree/${SRCNAME[11]}-${SRCVERS[11]}.tgz
-SRCCOPY[11]="GPL2"
+SRCNAME[12]=tree
+SRCVERS[12]=1.6.0
+SRCPACK[12]=ftp://mama.indstate.edu/linux/tree/${SRCNAME[12]}-${SRCVERS[12]}.tgz
+SRCCOPY[12]="GPL2"
 
-build11()
+build12()
 {
 make ${JOBS} OPTS="${FLAGS}"
 make install prefix="${PKG}${SYS_DIR[usr]}" MANDIR="${PKG}${SYS_DIR[man]}/man1"
@@ -456,12 +525,12 @@ doc README
 changelog CHANGES
 }
 
-SRCNAME[12]=which
-SRCVERS[12]=2.20
-SRCPACK[12]=http://carlo17.home.xs4all.nl/${SRCNAME[12]}/${SRCNAME[12]}-${SRCVERS[12]}.tar.gz
-SRCCOPY[12]="GPL3"
+SRCNAME[13]=which
+SRCVERS[13]=2.20
+SRCPACK[13]=http://carlo17.home.xs4all.nl/${SRCNAME[13]}/${SRCNAME[13]}-${SRCVERS[13]}.tar.gz
+SRCCOPY[13]="GPL3"
 
-build12()
+build13()
 {
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
@@ -479,12 +548,12 @@ doc AUTHORS
 changelog NEWS
 }
 
-SRCNAME[13]=libarchive
-SRCVERS[13]=3.1.2
-SRCPACK[13]=http://libarchive.googlecode.com/files/${SRCNAME[13]}-${SRCVERS[13]}.tar.gz
-SRCCOPY[13]="BSD2"
+SRCNAME[14]=libarchive
+SRCVERS[14]=3.1.2
+SRCPACK[14]=http://libarchive.googlecode.com/files/${SRCNAME[14]}-${SRCVERS[14]}.tar.gz
+SRCCOPY[14]="BSD2"
 
-build13()
+build14()
 {
 sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
@@ -504,7 +573,8 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-bsdtar=shared \
  --enable-bsdcpio=shared \
  --without-expat \
- --without-openssl
+ --without-openssl \
+ --without-lzo2
 #NOTE: can it replace uu{en,de}code ?
 #FIXME: Use CMake
 #cmake \
@@ -522,11 +592,11 @@ make install DESTDIR="${PKG}"
 changelog NEWS
 }
 
-SRCNAME[14]=debianutils
-SRCVERS[14]=4.3.4
-SRCPACK[14]=http://ftp.de.debian.org/debian/pool/main/d/${SRCNAME[14]}/${SRCNAME[14]}_${SRCVERS[14]}.tar.gz
+SRCNAME[15]=debianutils
+SRCVERS[15]=4.3.4
+SRCPACK[15]=http://ftp.de.debian.org/debian/pool/main/d/${SRCNAME[15]}/${SRCNAME[15]}_${SRCVERS[15]}.tar.gz
 
-build14()
+build15()
 {
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
@@ -547,12 +617,12 @@ rm -f \
  ${PKG}${SYS_DIR[man]}/??/man{1,8}/{run-parts,installkernel}.?
 }
 
-SRCNAME[15]=coreutils
-SRCVERS[15]=8.21
-SRCPACK[15]=http://ftp.gnu.org/gnu/${NAME}/${SRCNAME[15]}-${SRCVERS[15]}.tar.xz
-SRCCOPY[15]="GPL3"
+SRCNAME[16]=coreutils
+SRCVERS[16]=8.21
+SRCPACK[16]=http://ftp.gnu.org/gnu/${NAME}/${SRCNAME[16]}-${SRCVERS[16]}.tar.xz
+SRCCOPY[16]="GPL3"
 
-build15()
+build16()
 {
 FORCE_UNSAFE_CONFIGURE=1 \
 DEFAULT_POSIX2_VERSION=199209 \
@@ -592,12 +662,12 @@ rm -rf \
  ${PKG}${SYS_DIR[share]}/locale/*/LC_TIME
 }
 
-SRCNAME[16]=findutils
-SRCVERS[16]=4.4.2
-SRCPACK[16]=${URL[gnu]}/${SRCNAME[16]}/${SRCNAME[16]}-${SRCVERS[16]}.tar.gz
-SRCCOPY[16]="GPL3"
+SRCNAME[17]=findutils
+SRCVERS[17]=4.4.2
+SRCPACK[17]=${URL[gnu]}/${SRCNAME[17]}/${SRCNAME[17]}-${SRCVERS[17]}.tar.gz
+SRCCOPY[17]="GPL3"
 
-build16()
+build17()
 {
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
@@ -616,12 +686,12 @@ doc AUTHORS THANKS
 changelog NEWS
 }
 
-SRCNAME[17]=grep
-SRCVERS[17]=2.14
-SRCPACK[17]=${URL[gnu]}/${SRCNAME[17]}/${SRCNAME[17]}-${SRCVERS[17]}.tar.xz
-SRCCOPY[17]="GPL3"
+SRCNAME[18]=grep
+SRCVERS[18]=2.14
+SRCPACK[18]=${URL[gnu]}/${SRCNAME[18]}/${SRCNAME[18]}-${SRCVERS[18]}.tar.xz
+SRCCOPY[18]="GPL3"
 
-build17()
+build18()
 {
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
@@ -641,12 +711,12 @@ doc AUTHORS THANKS
 changelog NEWS
 }
 
-SRCNAME[18]=sed
-SRCVERS[18]=4.2.2
-SRCPACK[18]=${URL[gnu]}/${SRCNAME[18]}/${SRCNAME[18]}-${SRCVERS[18]}.tar.bz2
-SRCCOPY[18]="GPL3 FDL13"
+SRCNAME[19]=sed
+SRCVERS[19]=4.2.2
+SRCPACK[19]=${URL[gnu]}/${SRCNAME[19]}/${SRCNAME[19]}-${SRCVERS[19]}.tar.bz2
+SRCCOPY[19]="GPL3 FDL13"
 
-build18()
+build19()
 {
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
@@ -665,12 +735,12 @@ doc AUTHORS THANKS
 changelog NEWS
 }
 
-SRCNAME[19]=adjtimex
-SRCVERS[19]=1.29
-SRCPACK[19]=http://security.ubuntu.com/ubuntu/pool/universe/a/${SRCNAME[19]}/${SRCNAME[19]}_${SRCVERS[19]}.orig.tar.gz
-SRCCOPY[19]="GPL2"
+SRCNAME[20]=adjtimex
+SRCVERS[20]=1.29
+SRCPACK[20]=http://security.ubuntu.com/ubuntu/pool/universe/a/${SRCNAME[20]}/${SRCNAME[20]}_${SRCVERS[20]}.orig.tar.gz
+SRCCOPY[20]="GPL2"
 
-build19()
+build20()
 {
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
@@ -692,12 +762,12 @@ ln -sf ${SYS_DIR[sbin]}/adjtimex
 )
 }
 
-SRCNAME[20]=setserial
-SRCVERS[20]=2.17
-SRCPACK[20]=${URL[sf]}/${SRCNAME[20]}/${SRCNAME[20]}-${SRCVERS[20]}.tar.gz
-SRCCOPY[20]="GPL2"
+SRCNAME[21]=setserial
+SRCVERS[21]=2.17
+SRCPACK[21]=${URL[sf]}/${SRCNAME[21]}/${SRCNAME[21]}-${SRCVERS[21]}.tar.gz
+SRCCOPY[21]="GPL2"
 
-build20()
+build21()
 {
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
@@ -715,11 +785,11 @@ install.dat rc.serial ${PKG}${SYS_DIR[etc]}/rc.d/rc.serial.new
 install.dat serial.conf ${PKG}${SYS_DIR[etc]}/serial.conf.new
 }
 
-SRCNAME[21]=net-tools
-SRCVERS[21]=20130121
-SRCPACK[21]=http://www.tazenda.demon.co.uk/phil/${SRCNAME[21]}/${SRCNAME[21]}-${SRCVERS[21]}.tar.xz
+SRCNAME[22]=net-tools
+SRCVERS[22]=20130121
+SRCPACK[22]=http://www.tazenda.demon.co.uk/phil/${SRCNAME[22]}/${SRCNAME[22]}-${SRCVERS[22]}.tar.xz
 
-build21()
+build22()
 {
 make version.h
 make ${JOBS} CFLAGS="${FLAGS}"
@@ -730,12 +800,35 @@ make install-hostname \
  SBINDIR="${SYS_DIR[sbin]}"
 }
 
-SRCNAME[22]=slackwareutils
-SRCVERS[22]=1.0.2
-SRCPACK[22]=http://github.com/downloads/cjsthompson/${SRCNAME[22]}/${SRCNAME[22]}-${SRCVERS[22]}.tar.xz
+SRCNAME[23]=mkpwd
+SRCVERS[23]=0.8
+SRCPACK[23]=http://www.o-schroeder.de/download/${SRCNAME[23]}-$(echo ${SRCVERS[23]} | tr . -).tgz
+SRCROOT[23]=${SRCNAME[23]}
 
-build22()
+build23()
+{
+make FLAGS="${FLAGS}"
+make install DESTDIR="${PKG}"
+doc README
+changelog ChangeLog
+}
+
+
+SRCNAME[24]=slackwareutils
+SRCVERS[24]=$(date +%Y%m%d)
+SRCPACK[24]=git://github.com/cjsthompson/${SRCNAME[24]}.git
+
+build24()
 {
 make ${JOBS} CFLAGS="${FLAGS}"
 make install DESTDIR="${PKG}" MANDIR="${SYS_DIR[man]}/man1"
+}
+
+SRCNAME[25]=tightware-config
+SRCVERS[25]=$(date +%Y%m%d)
+SRCPACK[25]=git://github.com/cjsthompson/${SRCNAME[25]}.git
+
+build25()
+{
+make install-bin-package DESTDIR="${PKG}" EXT=".new"
 }

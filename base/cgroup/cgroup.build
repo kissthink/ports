@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=cgroup
 VERSION=0.38
-BUILD=2
+BUILD=3
 
 # Description
 
@@ -100,22 +100,26 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --sysconfdir="${SYS_DIR[etc]}" \
  --libdir="${SYS_DIR[lib]}" \
  --localstatedir="${SYS_DIR[var]}" \
- --enable-cgred-socket="/run/cgred/cgred.socket" \
- --enable-pam=no
+ --enable-cgred-socket="${SYS_DIR[run]}/cgred/cgred.socket" \
+ --enable-pam-module-dir="${SYS_DIR[lib]}/plugins/security" \
+ --enable-pam=yes
 #FIXME: systemd --enable-opaque-hierarchy="name:systemd"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc README{,_{daemon,systemd}}
-install.dir ${PKG}/etc/{rc.d,cgroup,tmpfiles.d}
-install.dat cgroup.conf.tmpfiles ${PKG}/etc/tmpfiles.d/cgroup.conf
-install.dat scripts/init.d/cgconfig ${PKG}/etc/rc.d/rc.cgconfig.new
-install.dat scripts/init.d/cgred ${PKG}/etc/rc.d/rc.cgred.new
-install.dat samples/cgred.conf ${PKG}/etc/cgroup/cgred.conf.new
-install.dat samples/cgconfig.conf ${PKG}/etc/cgroup/cgconfig.conf.new
-install.dat samples/cgrules.conf ${PKG}/etc/cgroup/cgrules.conf.new
-install.dat samples/cgsnapshot_blacklist.conf ${PKG}/etc/cgroup/cgsnapshot_blacklist.conf.new
+install.dir ${PKG}${SYS_DIR[etc]}/{rc.d,cgroup,tmpfiles.d}
+install.dat cgroup.conf.tmpfiles ${PKG}${SYS_DIR[etc]}/tmpfiles.d/cgroup.conf
+install.dat scripts/init.d/cgconfig ${PKG}${SYS_DIR[etc]}/rc.d/rc.cgconfig.new
+install.dat scripts/init.d/cgred ${PKG}${SYS_DIR[etc]}/rc.d/rc.cgred.new
+install.dat samples/cgred.conf ${PKG}${SYS_DIR[etc]}/cgroup/cgred.conf.new
+install.dat samples/cgconfig.conf ${PKG}${SYS_DIR[etc]}/cgroup/cgconfig.conf.new
+install.dat samples/cgrules.conf ${PKG}${SYS_DIR[etc]}/cgroup/cgrules.conf.new
+install.dat samples/cgsnapshot_blacklist.conf ${PKG}${SYS_DIR[etc]}/cgroup/cgsnapshot_blacklist.conf.new
 install.dir ${PKG}${SYS_DIR[systemdsystemunitdir]}
 install.dat dist/cgconfig.service ${PKG}${SYS_DIR[systemdsystemunitdir]}
-#FIXME: PAM
-rm -rf ${PKG}${SYS_DIR[lib]}/security
+(
+  cd ${PKG}${SYS_DIR[lib]}/plugins/security
+  rm -f pam_cgroup.so pam_cgroup.so.0
+  mv pam_cgroup.so.0.0.0 pam_cgroup.so
+)
 }

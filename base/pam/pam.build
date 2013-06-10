@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=pam
 VERSION=1.1.6
-BUILD=1
+BUILD=3
 DEPENDS=('cracklib >= 2.8.22-1' 'libdb >= 5.3.21-1')
 
 # Description
@@ -53,10 +53,6 @@ if [ ! -d run/faillock ]; then
   install -m 0755 -d run/faillock
 fi
 
-if [ ! -e var/log/tallylog ]; then
-  install -m 0600 /dev/null var/log/tallylog
-fi
-
 config etc/security/access.conf.new
 config etc/security/group.conf.new
 config etc/security/limits.conf.new
@@ -72,6 +68,8 @@ config etc/pam.d/system-local-login.new
 config etc/pam.d/system-login.new
 config etc/pam.d/system-remote-login.new
 config etc/pam.d/system-services.new
+config var/log/tallylog.new
+rm -f var/log/tallylog.new
 EOF
 
 #TODO: when switching to PAM remember to enable /usr/bin/login in 'util-linux'
@@ -115,10 +113,11 @@ config ${PKG}${SYS_DIR[etc]}/security/namespace.init
 config ${PKG}${SYS_DIR[etc]}/environment
 install.dir ${PKG}${SYS_DIR[etc]}/tmpfiles.d
 install.cfg pam.conf.tmpfiles ${PKG}${SYS_DIR[etc]}/tmpfiles.d/pam.conf
+install.dir ${PKG}${SYS_DIR[var]}/log
+install -m 0600 /dev/null ${PKG}${SYS_DIR[var]}/log/tallylog.new
 chmod 4755 ${PKG}${SYS_DIR[sbin]}/unix_chkpwd
 chmod 0700 ${PKG}${SYS_DIR[sbin]}/unix_update
 rm -rf \
- ${PKG}${SYS_DIR[var]} \
  ${PKG}${SYS_DIR[doc]}/Linux-PAM
 # Compatibility stuff
 (
@@ -157,12 +156,11 @@ changelog NEWS
 config ${PKG}${SYS_DIR[etc]}/default/passwd
 }
 
-SRCNAME[2]=tightware-pam-policy
+SRCNAME[2]=tightware-config
 SRCVERS[2]=$(date +%Y%m%d)
 SRCPACK[2]=git://github.com/cjsthompson/${SRCNAME[2]}.git
 
 build2()
 {
-make install DESTDIR="${PKG}"
-config ${PKG}${SYS_DIR[etc]}/pam.d/{other,system-*}
+make install-pam-package DESTDIR="${PKG}" EXT=".new"
 }

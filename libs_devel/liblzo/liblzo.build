@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=liblzo
 VERSION=2.06
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -47,7 +47,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-dependency-tracking \
  --disable-silent-rules \
  --enable-static=yes \
- --enable-shared=no \
+ --enable-shared=yes \
  --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
  --sysconfdir="${SYS_DIR[etc]}" \

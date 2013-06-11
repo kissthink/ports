@@ -1,0 +1,77 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=libnspr
+VERSION=4.9.6
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: libnspr (Netscape portable runtime)
+${NAME}:
+${NAME}: A library that provides platform independence for non-GUI operating
+${NAME}: system facilities. These facilities include threads, thread
+${NAME}: synchronization, normal file and network I/O, interval timing and
+${NAME}: calendar time, basic memory management (malloc and free) and shared
+${NAME}: library linking.
+${NAME}:
+${NAME}: Homepage: http://www.mozilla.org/projects/nspr
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=nspr
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=ftp://ftp.mozilla.org/pub/mozilla.org/nspr/releases/v${SRCVERS[0]}/src/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="MPL2"
+
+build0()
+{
+case "$(uname -m)" in
+  x86_64)
+    ARCH_FLAGS="--enable-64bit"
+  ;;
+esac
+cd mozilla/nsprpub
+sed -i 's|$(libdir)/pkgconfig|$(datadir)/pkgconfig|g' config/Makefile.in
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-debug \
+ --enable-static=no \
+ --enable-shared=yes \
+ --enable-optimize \
+ --prefix="${SYS_DIR[usr]}" \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --includedir="${SYS_DIR[include]}/nspr" \
+ --localstatedir="${SYS_DIR[var]}" \
+ ${ARCH_FLAGS}
+make ${JOBS}
+make install DESTDIR="${PKG}"
+(
+  cd ${PKG}${SYS_DIR[share]}/pkgconfig
+  ln -sf nspr.pc mozilla-nspr.pc
+)
+chmod 0644 ${PKG}${SYS_DIR[lib]}/*.a
+rm -rf \
+ ${PKG}${SYS_DIR[bin]}/{compile-et.pl,prerr.properties} \
+ ${PKG}${SYS_DIR[share]}/aclocal \
+ ${PKG}${SYS_DIR[include]}/nspr/md
+}

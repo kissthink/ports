@@ -5,8 +5,8 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=flac
-VERSION=1.2.1
-BUILD=2
+VERSION=1.3.0
+BUILD=1
 DEPENDS=('libogg >= 1.3.0-1')
 
 # Description
@@ -37,16 +37,20 @@ EOF
 
 SRCNAME[0]=${NAME}
 SRCVERS[0]=${VERSION}
-SRCPACK[0]=${URL[sf]}/${NAME}/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCPACK[0]=http://downloads.xiph.org/releases/flac/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
 SRCCOPY[0]="GPL2 LGPL21 FDL12"
 
 build0()
 {
 sed -i 's|$(libdir)/pkgconfig|$(datadir)/pkgconfig|g' */*/Makefile.in
+sed -i 's|$(datadir)/doc/$(PACKAGE)-$(VERSION)/html|$(datarootdir)/html/$(PACKAGE)|g' $(find doc -name "Makefile.in")
+sed -i 's|$(datadir)/doc/$(PACKAGE)-$(VERSION)|$(datadir)/doc/$(PACKAGE)|g' $(find doc -name "Makefile.in")
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
+ --disable-silent-rules \
+ --disable-rpath \
  --enable-static=no \
  --enable-shared=yes \
  --prefix="${SYS_DIR[usr]}" \
@@ -58,8 +62,10 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-thorough-tests \
  --disable-oggtest \
  --enable-sse
-make ${JOBS}
+make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
-rm -rf ${PKG}${SYS_DIR[html]}
+rm -rf \
+ ${PKG}${SYS_DIR[html]} \
+ ${PKG}${SYS_DIR[doc]}/${SRCNAME[0]}
 }

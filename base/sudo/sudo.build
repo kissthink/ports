@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=sudo
-VERSION=1.8.6p7
+VERSION=1.8.6p8
 BUILD=1
 
 # Description
@@ -48,6 +48,8 @@ config() {
   # Otherwise, we leave the .new copy for the admin to consider...
 }
 
+config etc/pam.d/sudo.new
+config etc/pam.d/sudo-i.new
 config etc/sudoers.new
 rm -f etc/sudoers.new
 EOF
@@ -70,7 +72,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --mandir="${SYS_DIR[man]}" \
  --sysconfdir="${SYS_DIR[etc]}" \
  --libdir="${SYS_DIR[lib]}" \
- --libexecdir="${SYS_DIR[lib]}"/plugins/sudo \
+ --libexecdir="${SYS_DIR[lib]}/plugins/sudo" \
  --localstatedir="${SYS_DIR[var]}" \
  --sbindir="${SYS_DIR[sbin]}" \
  --with-timedir="${SYS_DIR[run]}/sudo" \
@@ -81,15 +83,16 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --with-ignore-dot \
  --with-tty-tickets \
  --with-env-editor \
- --disable-pam-session \
- --with-pam=no \
-#FIXME: pam (--with-pam-login)
+ --with-pam \
+ --with-pam-login
 #NOTE: --with-linux-audit ?
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc doc/CONTRIBUTORS doc/UPGRADE doc/sample.{sudo.conf,sudoers}
 changelog NEWS
-install.dir ${PKG}${SYS_DIR[etc]}/tmpfiles.d
+install.dir ${PKG}${SYS_DIR[etc]}/{tmpfiles,pam}.d
+install.dat sudo.pam ${PKG}${SYS_DIR[etc]}/pam.d/sudo.new
+install.dat sudo.pam ${PKG}${SYS_DIR[etc]}/pam.d/sudo-i.new
 install.dat sudo.conf.tmpfiles ${PKG}${SYS_DIR[etc]}/tmpfiles.d/sudo.conf
 (
   cd ${PKG}${SYS_DIR[bin]}

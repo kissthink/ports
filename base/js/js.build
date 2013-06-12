@@ -5,7 +5,8 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=js
-VERSION=1.8.5
+MAJOR=17.0
+VERSION=${MAJOR}.0
 BUILD=1
 DEPENDS=('libnspr >= 4.9.6-1')
 
@@ -26,7 +27,7 @@ ${NAME}: The SpiderMonkey JavaScript (ECMAScript 5) interpreter and libraries.
 ${NAME}: It includes a just-in-time (JIT) compiler for a significant speed
 ${NAME}: increase.
 ${NAME}: 
-${NAME}: Homepage: https://developer.mozilla.org/En/SpiderMonkey/1.8.5
+${NAME}: Homepage: https://developer.mozilla.org/En/SpiderMonkey/17
 ${NAME}:
 ${NAME}:
 ${NAME}:
@@ -35,12 +36,13 @@ EOF
 
 # Sources
 
-SRCNAME[0]=${NAME}
+SRCNAME[0]=mozjs
 SRCVERS[0]=${VERSION}
-SRCPACK[0]=http://ftp.mozilla.org/pub/mozilla.org/js/${SRCNAME[0]}${SRCVERS[0]//./}-1.0.0.tar.gz
+SRCPACK[0]=http://ftp.mozilla.org/pub/mozilla.org/js/${SRCNAME[0]}${SRCVERS[0]}.tar.gz
+SRCROOT[0]=${SRCNAME[0]}${SRCVERS[0]}
 SRCCOPY[0]="MPL"
 
-#NOTE: glibc needs to be installed in /usr/lib
+#NOTE: glibc (libpthread) needs to be installed in /usr/lib
 #      https://bugzilla.mozilla.org/show_bug.cgi?id=514393
 
 build0()
@@ -60,7 +62,13 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-readline
 make ${JOBS}
 make install DESTDIR="${PKG}"
-install.bin shell/js ${PKG}${SYS_DIR[bin]}
-chmod 0644 ${PKG}${SYS_DIR[include]}/js/*
+find ${PKG}${SYS_DIR[include]} -type f -exec chmod 0644 {} +
+chmod 0644 ${PKG}${SYS_DIR[share]}/pkgconfig/*.pc
+(
+  cd ${PKG}${SYS_DIR[bin]}
+  ln -sf js17 js
+  cd ${PKG}${SYS_DIR[lib]}
+  ln -sf libmozjs-${MAJOR}.so libmozjs.so
+)
 rm -f ${PKG}${SYS_DIR[lib]}/*.a
 }

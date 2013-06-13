@@ -1,0 +1,117 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=nss
+VERSION=3.14.3
+NSPRVER=4.9.6
+BUILD=1
+DEPENDS=('libnspr >= 4.9.6-1' 'sqlite >= 3.7.16.1-1')
+OPTIONS="nostrip"
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: nss (network security services)
+${NAME}:
+${NAME}: A set of libraries designed to support cross-platform development of
+${NAME}: security-enabled client and server applications. Applications built
+${NAME}: with NSS can support SSL v2 and v3, TLS, PKCS #5, PKCS #7, PKCS #11,
+${NAME}: PKCS #12, S/MIME, X.509 v3 certificates, and other security
+${NAME}: standards.
+${NAME}:
+${NAME}: Homepage: http://www.mozilla.org/projects/security/pki/nss
+${NAME}:
+${NAME}:
+EOF
+
+# NOTE: http://wiki.cacert.org/NSSLib
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=ftp://ftp.mozilla.org/pub/security/nss/releases/NSS_${SRCVERS[0]//./_}_RTM/src/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCCOPY[0]="MPL2 GPL2"
+
+build0()
+{
+export BUILD_OPT="1"
+export PKG_CONFIG_ALLOW_SYSTEM_LIBS="1"
+export PKG_CONFIG_ALLOW_SYSTEM_CFLAGS="1"
+export NSS_USE_SYSTEM_SQLITE="1"
+export NSS_ENABLE_ECC="1"
+export NSPR_INCLUDE_DIR=$(pkg-config --cflags-only-I nspr | sed 's/-I//')
+export NSPR_LIB_DIR=$(pkg-config --libs-only-L nspr | sed 's/-L.//')
+export XCFLAGS="${CFLAGS}"
+case "$(uname -m)" in
+  x86_64)
+    export USE_64="1"
+  ;;
+esac
+make -C mozilla/security/coreconf
+make -C mozilla/security/dbm
+make -C mozilla/security/nss
+# Install libraries
+install.dir ${PKG}${SYS_DIR[lib]}
+for lib in softokn3 freebl3 nss3 nssutil3 ssl3 smime3 nssckbi nssdbm3; do
+  install.bin mozilla/dist/*.OBJ/lib/lib${lib}.so ${PKG}${SYS_DIR[lib]}
+done
+install.dat mozilla/dist/*.OBJ/lib/*.chk ${PKG}${SYS_DIR[lib]}
+install.dat mozilla/dist/*.OBJ/lib/libcrmf.a ${PKG}${SYS_DIR[lib]}
+# Install programs
+install.dir ${PKG}${SYS_DIR[bin]}
+for bin in certutil cmsutil crlutil modutil pk12util shlibsign signtool signver ssltap; do
+  install.bin mozilla/dist/*.OBJ/bin/${bin} ${PKG}${SYS_DIR[bin]}
+done
+# Install headers
+install.dir ${PKG}${SYS_DIR[include]}/nss
+install.dat mozilla/dist/public/nss/*.h ${PKG}${SYS_DIR[include]}/nss
+# Install build support files
+install.dir ${PKG}${SYS_DIR[share]}/pkgconfig
+sed nss.pc.in \
+ -e "s|@libdir@|${SYS_DIR[lib]}|g" \
+ -e "s|@prefix@|${SYS_DIR[usr]}|g" \
+ -e "s|@exec_prefix@|${SYS_DIR[usr]}|g" \
+ -e "s|@includedir@|${SYS_DIR[include]}/nss|g" \
+ -e "s|@NSS_VERSION@|${SRCVERS[0]}|g" \
+ -e "s|@NSPR_VERSION@|${NSPRVER}|g" \
+ > ${PKG}${SYS_DIR[share]}/pkgconfig/nss.pc
+(
+  cd ${PKG}${SYS_DIR[share]}/pkgconfig
+  ln -sf nss.pc mozilla-nss.pc
+)
+VERSFILE="mozilla/security/nss/lib/nss/nss.h"
+LIBMAJOR="$(grep "#define.*NSS_VMAJOR" ${VERSFILE} | awk '{print $3}')"
+LIBMINOR="$(grep "#define.*NSS_VMINOR" ${VERSFILE} | awk '{print $3}')"
+LIBPATCH="$(grep "#define.*NSS_VPATCH" ${VERSFILE} | awk '{print $3}')"
+sed nss-config.in \
+ -e "s|@prefix@|${SYS_DIR[usr]}|g" \
+ -e "s|@MOD_MAJOR_VERSION@|${LIBMAJOR}|g" \
+ -e "s|@MOD_MINOR_VERSION@|${LIBMINOR}|g" \
+ -e "s|@MOD_PATCH_VERSION@|${LIBPATCH}|g" \
+ > ${PKG}${SYS_DIR[bin]}/nss-config
+chmod 0755 ${PKG}${SYS_DIR[bin]}/nss-config
+strip ${PKG}${SYS_DIR[bin]}/*
+(
+  cd ${PKG}${SYS_DIR[lib]}
+  install.dir nostrip
+  for file in *.chk; do
+    library="${file%.chk}.so"
+    mv ${library} nostrip
+  done
+  strip --strip-unneeded ${PKG}${SYS_DIR[lib]}/*.so*
+  mv nostrip/*.so .
+  rm -rf nostrip
+)
+}

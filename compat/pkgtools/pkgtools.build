@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=pkgtools
 VERSION=14.0
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -45,12 +45,38 @@ make install DESTDIR="${PKG}"
 install.dir ${PKG}/sbin
 (
   cd ${PKG}/sbin
-  ln -sf /usr/sbin/makebootdisk
-  ln -sf /usr/sbin/makepkg
-  ln -sf /usr/sbin/removepkg
-  ln -sf /usr/sbin/installpkg
-  ln -sf /usr/sbin/explodepkg
-  ln -sf /usr/sbin/pkgtool
-  ln -sf /usr/sbin/upgradepkg
+  ln -sf ${SYS_DIR[sbin]}/makebootdisk
+  ln -sf ${SYS_DIR[sbin]}/makepkg
+  ln -sf ${SYS_DIR[sbin]}/removepkg
+  ln -sf ${SYS_DIR[sbin]}/installpkg
+  ln -sf ${SYS_DIR[sbin]}/explodepkg
+  ln -sf ${SYS_DIR[sbin]}/pkgtool
+  ln -sf ${SYS_DIR[sbin]}/upgradepkg
 )
+}
+
+SRCNAME[1]=tar
+SRCVERS[1]=1.13
+SRCPACK[1]=${URL[gnu]}/${SRCNAME[1]}/${SRCNAME[1]}-${SRCVERS[1]}.tar.gz
+SRCCOPY[1]="GPL2"
+
+build1()
+{
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-nls \
+ --prefix="${SYS_DIR[usr]}" \
+ --mandir="${SYS_DIR[man]}" \
+ --infodir="${SYS_DIR[info]}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --program-prefix="g" \
+ --program-suffix="-${SRCVERS[1]}"
+make ${JOBS} V=1
+install.dir ${PKG}${SYS_DIR[bin]}
+install.bin src/tar ${PKG}${SYS_DIR[bin]}/gtar-${SRCVERS[1]}
+install.dir ${PKG}${SYS_DIR[man]}/man1
+echo ".so man1/gtar.1" > ${PKG}${SYS_DIR[man]}/man1/gtar-${SRCVERS[1]}.1
 }

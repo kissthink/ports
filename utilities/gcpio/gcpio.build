@@ -4,10 +4,10 @@
 
 source /usr/src/ports/Build/build.sh
 
-NAME=cpio
+NAME=gcpio
 VERSION=2.11
-BUILD=2
-OPTDEPENDS=('tar >= 1.26-1')
+BUILD=1
+OPTDEPENDS=('gtar >= 1.26-1')
 
 # Description
 
@@ -33,9 +33,26 @@ ${NAME}: Homepage: http://www.gnu.org/software/cpio
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+install_info()
+{
+  for file in "\${*}"; do
+    if [ -x usr/bin/install-info ]; then
+      usr/bin/install-info --info-dir=usr/share/info usr/share/info/\${file}.info.xz 2> /dev/null
+    fi
+  done
+}
+
+# Install texinfo files
+
+install_info cpio
+EOF
+
 # Sources
 
-SRCNAME[0]=${NAME}
+SRCNAME[0]=cpio
 SRCVERS[0]=${VERSION}
 SRCPACK[0]=${URL[gnu]}/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
 SRCCOPY[0]="GPL3"
@@ -48,26 +65,25 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-dependency-tracking \
  --disable-silent-rules \
  --disable-rpath \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
  --infodir="${SYS_DIR[info]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --with-rmt=/usr/lib$(libdirsuffix)/exec/rmt \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --with-rmt="${SYS_DIR[lib]}/exec/rmt" \
  --enable-mt
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS THANKS
 changelog NEWS
-rmdir ${PKG}/usr/libexec
-mv ${PKG}/usr/bin/mt{,-GNU}
-mv ${PKG}${SYS_DIR[man]}/man1/mt{,-GNU}.1
-#FIXME: compat
 (
-  install.dir ${PKG}/bin
-  cd ${PKG}/bin
-  ln -sf /usr/bin/cpio
-  ln -sf /usr/bin/mt-GNU
+  cd ${PKG}${SYS_DIR[bin]}
+  mv cpio gcpio
+  mv mt gmt
+  cd ${PKG}${SYS_DIR[man]}/man1
+  mv cpio.1 gcpio.1
+  mv mt.1 gmt.1
 )
+rmdir ${PKG}${SYS_DIR[usr]}/libexec
 }

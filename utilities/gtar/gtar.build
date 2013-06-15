@@ -4,9 +4,9 @@
 
 source /usr/src/ports/Build/build.sh
 
-NAME=tar
+NAME=gtar
 VERSION=1.26
-BUILD=2
+BUILD=1
 
 # Description
 
@@ -32,9 +32,26 @@ ${NAME}:
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+install_info()
+{
+  for file in "\${*}"; do
+    if [ -x usr/bin/install-info ]; then
+      usr/bin/install-info --info-dir=usr/share/info usr/share/info/\${file}.info.xz 2> /dev/null
+    fi
+  done
+}
+
+# Install texinfo files
+
+install_info tar
+EOF
+
 # Sources
 
-SRCNAME[0]=${NAME}
+SRCNAME[0]=tar
 SRCVERS[0]=${VERSION}
 SRCPACK[0]=${URL[gnu]}/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
 SRCCOPY[0]="GPL3"
@@ -48,62 +65,29 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --disable-dependency-tracking \
  --disable-silent-rules \
  --disable-rpath \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
  --infodir="${SYS_DIR[info]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --libexecdir=/usr/lib$(libdirsuffix)/exec \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --libexecdir="${SYS_DIR[lib]}/exec" \
  --enable-backup-scripts
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS THANKS
 changelog NEWS
 install.dir ${PKG}${SYS_DIR[man]}/man{1,8}
-install.man doc/tar.1 ${PKG}${SYS_DIR[man]}/man1
+install.man doc/tar.1 ${PKG}${SYS_DIR[man]}/man1/gtar.1
 install.man doc/rmt.8 ${PKG}${SYS_DIR[man]}/man8
-#FIXME:compat
 (
-  install.dir ${PKG}/usr/{sbin,bin}
-  cd ${PKG}/usr/sbin
-  ln -sf /usr/lib$(libdirsuffix)/exec/rmt
-  cd ${PKG}/usr/bin
-  ln -sf tar tar-${SRCVERS[0]}
-
-  install.dir ${PKG}/{sbin,bin}
-  cd ${PKG}/bin
-  ln -sf /usr/bin/tar
-  ln -sf /usr/bin/tar tar-${SRCVERS[0]}
-  cd ${PKG}/sbin
-  ln -sf /usr/lib$(libdirsuffix)/exec/rmt
+  cd ${PKG}${SYS_DIR[bin]}
+  mv tar gtar
 )
-}
-
-SRCNAME[1]=${NAME}
-SRCVERS[1]=1.13
-SRCPACK[1]=${URL[gnu]}/${SRCNAME[1]}/${SRCNAME[1]}-${SRCVERS[1]}.tar.gz
-SRCCOPY[1]="GPL2"
-
-build1()
-{
-CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
-./configure \
- --build="${ARCH}-slackware-linux" \
- --disable-nls \
- --prefix=/usr \
- --mandir="${SYS_DIR[man]}" \
- --infodir="${SYS_DIR[info]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var
-make ${JOBS} V=1
-install.dir ${PKG}/usr/bin
-install.bin src/tar ${PKG}/usr/bin/tar-${SRCVERS[1]}
-#FIXME:compat
+#FIXME: compat
 (
-  install.dir ${PKG}/bin
-  cd ${PKG}/bin
-  ln -sf /usr/bin/tar-${SRCVERS[1]}
+  install.dir ${PKG}${SYS_DIR[sbin]}
+  cd ${PKG}${SYS_DIR[sbin]}
+  ln -sf ${SYS_DIR[lib]}/exec/rmt rmt
 )
 }

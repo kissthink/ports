@@ -7,7 +7,7 @@ source /usr/src/ports/Build/build.sh
 NAME=nano
 MAJOR=2.2
 VERSION=${MAJOR}.6
-BUILD=1
+BUILD=2
 
 # Description
 
@@ -22,7 +22,7 @@ cat > ${PKG}/install/slack-desc <<EOF
 $(padd)|-----handy-ruler------------------------------------------------------|
 ${NAME}: GNU nano (text editor)
 ${NAME}:
-${NAME}: GNU nano is a drop-in replacement for pico (the MUA Pine's editor).
+${NAME}: GNU nano is a drop-in replacement for pico (the Pine MUA's editor).
 ${NAME}: The difference is that nano has more features such as syntax
 ${NAME}: highlighting and it is distributed under the terms of the GNU General
 ${NAME}: Public License.
@@ -31,6 +31,36 @@ ${NAME}: Homepage: http://www.nano-editor.org
 ${NAME}:
 ${NAME}:
 ${NAME}:
+EOF
+
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+config() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  # If there's no config file by that name, mv it over:
+  if [ ! -r \$OLD ]; then
+    mv \$NEW \$OLD
+  elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then
+    # toss the redundant copy
+    rm \$NEW
+  fi
+  # Otherwise, we leave the .new copy for the admin to consider...
+}
+
+install_info()
+{
+  for file in "\${*}"; do
+    if [ -x usr/bin/install-info ]; then
+      usr/bin/install-info --info-dir=usr/share/info usr/share/info/\${file}.info.xz 2> /dev/null
+    fi
+  done
+}
+
+install_info nano
+
+config etc/nanorc.new
 EOF
 
 # Sources
@@ -46,26 +76,24 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
- --prefix=/usr \
+ --disable-rpath \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
  --infodir="${SYS_DIR[info]}" \
- --sysconfdir=/etc/conf.d \
- --datadir=/usr/share/application-data \
- --localedir=/usr/share/locale \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --datadir="${SYS_DIR[share]}/application-data" \
+ --localedir="${SYS_DIR[share]}/locale" \
+ --libdir="${SYS_DIR[lib]}" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --disable-wrapping-as-root \
  --enable-utf8
-# --enable-altrcname=nano.conf
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS THANKS UPGRADE
 changelog NEWS
-install.dir ${PKG}/usr/share/html/${NAME}
-install.doc doc/faq.html \
- ${PKG}/usr/share/html/${NAME}
-rm -rf \
- ${PKG}/usr/share/application-data/nano/man-html
-install.dir ${PKG}/etc/conf.d
-install.doc doc/nanorc.sample \
- ${PKG}/etc/conf.d/nano.conf.sample
+install.dir ${PKG}${SYS_DIR[etc]}
+install.doc doc/nanorc.sample ${PKG}${SYS_DIR[etc]}/nanorc.new
+install.dir ${PKG}${SYS_DIR[html]}/${NAME}
+install.doc doc/faq.html ${PKG}${SYS_DIR[html]}/${NAME}
+rm -rf ${PKG}${SYS_DIR[share]}/application-data/nano/man-html
 }

@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=google_chrome
-VERSION=27.0.1453.110
+VERSION=28.0.1500.45
 BUILD=1
-DEPENDS=('gtk+ >= 2.24.17-1' 'seamonkey_solibs >= 2.16.2-1' 'gconf >= 3.2.6-1')
+DEPENDS=('gtk+ >= 2.24.17-1' 'nss >= 3.14.3-1' 'gconf >= 3.2.6-1')
 
 # Description
 
@@ -34,6 +34,8 @@ ${NAME}:
 EOF
 
 cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
 ( cd opt/google/chrome ; chmod 4755 chrome-sandbox )
 EOF
 

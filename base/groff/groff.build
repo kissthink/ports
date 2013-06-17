@@ -26,7 +26,7 @@ ${NAME}: The groff package provides versions of troff, nroff, eqn, tbl and
 ${NAME}: other Unix text-formatting utilities. Groff is used to 'compile' man
 ${NAME}: pages stored in groff/nroff format into a form which can be printed
 ${NAME}: or displayed on the screen. These man pages are stored in compressed
-${NAME}: form in the /usr/man/man? directories.
+${NAME}: form in the /usr/share/man/man? directories.
 ${NAME}:
 ${NAME}: Homepage: http://www.gnu.org/software/groff
 ${NAME}:

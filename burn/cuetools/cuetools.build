@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=cuetools
 VERSION=1.3.1
-BUILD=3
+BUILD=4
 
 # Description
 
@@ -66,7 +66,7 @@ SRCCOPY[1]="GPL2"
 build1()
 {
 make ${JOBS} OPTS="${FLAGS}"
-make install DESTDIR="${PKG}"
+make install DESTDIR="${PKG}" MAN_DIR="${SYS_DIR[man]}"
 changelog ChangeLog
 }
 
@@ -92,7 +92,7 @@ SRCCOPY[3]="GPL2"
 build3()
 {
 make ${JOBS} CFLAGS+="${FLAGS}"
-make install PREFIX="${SYS_DIR[usr]}" DESTDIR="${PKG}"
+make install DESTDIR="${PKG}" PREFIX="${SYS_DIR[usr]}" MANDIR="${SYS_DIR[man]}"
 changelog Release-Notes
 rm -rf ${PKG}${SYS_DIR[doc]}/vobcopy
 }

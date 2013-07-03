@@ -6,9 +6,9 @@ source /usr/src/ports/Build/build.sh
 
 NAME=networkmanagerapplet
 MAJOR=0.9
-VERSION=${MAJOR}.8.0
+VERSION=${MAJOR}.8.2
 BUILD=1
-DEPENDS=('gtk+ >= 3.8.0-1' 'networkmanager >= 0.9.8.0-1' 'libnotify >= 0.7.5-1' 'gnome_keyring >= 3.8.0-1' 'iso_codes >= 3.32.2-1')
+DEPENDS=('gtk+ >= 3.8.0-1' 'networkmanager >= 0.9.8.2-1' 'libnotify >= 0.7.5-1' 'libsecret >= 0.14-1' 'iso_codes >= 3.32.2-1')
 
 # Description
 
@@ -39,16 +39,16 @@ cat > ${PKG}/install/doinst.sh <<EOF
 
 # Compile settings data schemas
 
-if [ -x ${SYS_DIR[bin]}/glib-compile-schemas ]; then
-  ${SYS_DIR[bin]}/glib-compile-schemas ${SYS_DIR[share]}/glib-2.0/schemas
+if [ -x usr/bin/glib-compile-schemas ]; then
+  usr/bin/glib-compile-schemas usr/share/glib-2.0/schemas
 fi
 
-if [ -x ${SYS_DIR[bin]}/update-desktop-database ]; then
-  ${SYS_DIR[bin]}/update-desktop-database -q
+if [ -x usr/bin/update-desktop-database ]; then
+  usr/bin/update-desktop-database -q
 fi
 
-if [ -x ${SYS_DIR[bin]}/gtk-update-icon-cache ]; then
-  ${SYS_DIR[bin]}/gtk-update-icon-cache -q -t -f ${SYS_DIR[share]}/icons/hicolor
+if [ -x usr/bin/gtk-update-icon-cache ]; then
+  usr/bin/gtk-update-icon-cache -q -t -f usr/share/icons/hicolor
 fi
 EOF
 

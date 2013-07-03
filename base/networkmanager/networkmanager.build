@@ -6,9 +6,9 @@ source /usr/src/ports/Build/build.sh
 
 NAME=networkmanager
 MAJOR=0.9
-VERSION=${MAJOR}.8.0
+VERSION=${MAJOR}.8.2
 BUILD=1
-DEPENDS=('glib >= 2.36.0-1' 'dbus >= 1.6.8-1' 'udev >= 173-1' 'gnutls >= 3.1.10-1' 'tcpip >= 20130209-1' 'libsoup >= 2.42.0-1')
+DEPENDS=('glib >= 2.36.0-1' 'dbus >= 1.6.8-1' 'udev >= 173-1' 'gnutls >= 3.2.1-1' 'tcpip >= 20130209-1' 'libsoup >= 2.42.0-1')
 OPTDEPENDS=('ppp >= 2.4.5-1' 'wireless >= 20130324-1')
 
 # Description
@@ -62,6 +62,10 @@ preserve_perms() {
   config \${NEW}
 }
 
+if [ ! -d run/networkmanager ]; then
+  install -d -m 0755 run/networkmanager
+fi
+
 if [ -e etc/HOSTNAME ]; then
   sed -i "s|@myhostname@|\$(cat etc/HOSTNAME | cut -f1 -d .)|g" \
     etc/NetworkManager/NetworkManager.conf.new
@@ -83,6 +87,7 @@ build0()
 sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' $(find . -name "Makefile.in")
 sed -i 's|pkglibdir = $(libdir)/@PACKAGE@|pkglibdir = $(libdir)/plugins/@PACKAGE@|g' $(find . -name "Makefile.in")
 sed -i 's|$(UDEV_BASE_DIR)/rules.d|$(UDEV_BASE_DIR)|g' callouts/Makefile.in
+sed -i 's|CKDB_PATH=/var/run/ConsoleKit/database|CKDB_PATH=/run/consolekit/database|g' configure
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -122,4 +127,7 @@ install.dir ${PKG}${SYS_DIR[etc]}/rc.d
 install.dat rc.networkmanager.new ${PKG}${SYS_DIR[etc]}/rc.d
 install.cfg NetworkManager.conf.new ${PKG}${SYS_DIR[etc]}/NetworkManager
 rmdir ${PKG}${SYS_DIR[lib]}/plugins/NetworkManager
+rm -rf \
+ ${PKG}${SYS_DIR[var]}/run \
+ ${PKG}${SYS_DIR[html]}/libnm-*
 }

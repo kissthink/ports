@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=llvm
-VERSION=3.2
+VERSION=3.3
 BUILD=1
-DEPENDS=('libraries >= 20130211-1')
+DEPENDS=('libraries >= 20130606-1')
 
 # Description
 
@@ -33,9 +33,11 @@ ${NAME}: Homepage: http://llvm.org
 ${NAME}:
 EOF
 
+PYTHONSITEDIR="${SYS_DIR[lib]}/python2.7/site-packages"
+
 # Sources
 
-SRCNAME[0]=clang
+SRCNAME[0]=cfe
 SRCVERS[0]=${VERSION}
 SRCPACK[0]=http://llvm.org/releases/${SRCNAME[0]}-${SRCVERS[0]}.src.tar.gz
 SRCROOT[0]=${NAME}-${VERSION}.src
@@ -44,7 +46,7 @@ SRCOPTS[0]="nosrcroot"
 build0()
 {
   install.dir tools
-  mv clang-${VERSION}.src tools/clang
+  mv cfe-${VERSION}.src tools/clang
 }
 
 SRCNAME[1]=compiler-rt
@@ -68,9 +70,8 @@ build2()
 {
 # Fix insecure rpath
 sed -i 's|$(RPATH) -Wl,$(\(ToolDir\|LibDir\|ExmplDir\))||g' Makefile.rules
-# Drop "svn" suffix from version string
-sed -i 's|3\.2svn|3.2|g' configure
 #FIXME: convert to CMake one of these days
+CPPFLAGS="$(pkg-config --cflags libffi)" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -82,31 +83,29 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --sysconfdir="${SYS_DIR[etc]}" \
  --libdir="${SYS_DIR[lib]}" \
  --localstatedir="${SYS_DIR[var]}" \
- --with-c-include-dirs="${SYS_DIR[lib]}64/gcc/x86_64-slackware-linux/4.7.2/include:${SYS_DIR[usr]}/local/include:${SYS_DIR[include]}"
  --with-binutils-include="${SYS_DIR[usr]}/include" \
  --with-udis86="${SYS_DIR[usr]}" \
+ --with-python="${SYS_DIR[bin]}/python2" \
  --disable-docs \
  --disable-expensive-checks \
  --disable-debug-runtime \
  --disable-assertions \
+ --enable-experimental-targets="R600" \
  --enable-shared \
  --enable-optimized \
  --enable-libffi \
  --enable-bindings=none \
- --enable-targets=all \
- --enable-cxx11
+ --enable-targets=all
 make ${JOBS} VERBOSE=1 REQUIRES_RTTI=1
 make install DESTDIR="${PKG}"
 doc CREDITS.TXT
 license LICENSE.TXT
-# Install also the clang-analyzer
-install.dir ${PKG}${SYS_DIR[share]}/application-data/clang-analyzer
-for f in scan-{build,view}; do
-  mv tools/clang/tools/${f} ${PKG}${SYS_DIR[share]}/application-data/clang-analyzer
-  ln -s ${SYS_DIR[share]}/application-data/clang-analyzer/${f}/${f} ${PKG}${SYS_DIR[bin]}/${f}
-done
-install.man tools/clang/tools/scan-build/scan-build.1 ${PKG}${SYS_DIR[man]}/man1
-rm -f ${PKG}${SYS_DIR[share]}/application-data/clang-analyzer/scan-build/scan-build.1
+# GCC headers
+(
+  cd ${PKG}${SYS_DIR[lib]}/clang/${SRCVERS[2]}
+  ln -s ${SYS_DIR[lib]}64/gcc/x86_64-slackware-linux/4.8.0/include
+  ln -s ${SYS_DIR[lib]}64/gcc/x86_64-slackware-linux/4.8.0/include-fixed
+)
 # LTO
 #FIXME: lib64
 install.dir ${PKG}${SYS_DIR[lib]}64/bfd-plugins
@@ -114,9 +113,33 @@ install.dir ${PKG}${SYS_DIR[lib]}64/bfd-plugins
   cd ${PKG}${SYS_DIR[lib]}64/bfd-plugins
   ln -sf ${SYS_DIR[lib]}/LLVMgold.so
 )
+#FIXME Where is LLVMgold.so?
 # Clean up cruft
 rm -f \
  ${PKG}${SYS_DIR[lib]}/*LLVMHello.* \
  ${PKG}${SYS_DIR[html]}
 chmod -x ${PKG}${SYS_DIR[lib]}/*.a
+#FIXME: this should end up in a subpackage
+# Install also the clang-analyzer
+install.dir ${PKG}${PYTHONSITEDIR}/clang-analyzer
+for f in scan-{build,view}; do
+  cp -r tools/clang/tools/${f} ${PKG}${PYTHONSITEDIR}/clang-analyzer
+  ln -s ${PYTHONSITEDIR}/clang-analyzer/${f}/${f} ${PKG}${SYS_DIR[bin]}/${f}
+done
+install.dir ${PKG}${SYS_DIR[man]}/man1
+install.man tools/clang/tools/scan-build/scan-build.1 ${PKG}${SYS_DIR[man]}/man1
+rm -f ${PKG}${PYTHONSITEDIR}/clang-analyzer/scan-build/scan-build.{1,bat}
+(
+  cd ${PKG}${PYTHONSITEDIR}/clang-analyzer/scan-build
+  ln -sf ${SYS_DIR[bin]}/clang
+)
+# Use Python 2
+sed -i \
+ -e 's|env python$|&2|' \
+ -e 's|/usr/bin/python$|&2|' \
+ "${PKG}${PYTHONSITEDIR}/clang-analyzer/scan-view/scan-view" \
+ "${PKG}${PYTHONSITEDIR}/clang-analyzer/scan-build/set-xcode-analyzer"
+# Compile Python scripts
+python2 -m compileall "${PKG}${PYTHONSITEDIR}/clang-analyzer"
+python2 -O -m compileall "${PKG}${PYTHONSITEDIR}/clang-analyzer"
 }

@@ -1,0 +1,49 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=unpaper
+VERSION=1.1
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: unpaper
+${NAME}:
+${NAME}: A post-processing tool for scanned sheets of paper, especially for
+${NAME}: book pages that have been scanned from previously created 
+${NAME}: photocopies. The main purpose is to make scanned book pages better 
+${NAME}: readable on screen after conversion to PDF. Additionally, unpaper
+${NAME}: might be useful to enhance the quality of scanned pages before
+${NAME}: performing optical character recognition (OCR).
+${NAME}:
+${NAME}: Homepage: http://unpaper.berlios.de
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION//./_}
+SRCPACK[0]=${URL[sf]}/unpaper.berlios/${SRCNAME[0]}-${SRCVERS[0]}.tgz
+SRCCOPY[0]="GPL2"
+SRCOPTS[0]="nosrcroot"
+
+build0()
+{
+make clean
+make ${JOBS} CFLAGS="${FLAGS}"
+make install DESTDIR="${PKG}"
+doc readme.txt
+}

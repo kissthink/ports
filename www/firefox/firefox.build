@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=firefox
-VERSION=22.0
+VERSION=23.0.1
 BUILD=1
 DEPENDS=('gtk+ >= 2.24.17-1')
 

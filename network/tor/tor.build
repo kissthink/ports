@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=tor
 VERSION=0.2.3.25
-BUILD=1
+BUILD=2
 DEPENDS=('libevent >= 2.0.21-1' 'openssl >= 1.0.1e-1')
 
 # Description
@@ -49,6 +49,19 @@ config() {
   # Otherwise, we leave the .new copy for the admin to consider...
 }
 
+preserve_perms() {
+  NEW="\$1"
+  OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"
+  if [ -e \$OLD ]; then
+    cp -a \$OLD \${NEW}.incoming
+    cat \$NEW > \${NEW}.incoming
+    mv \${NEW}.incoming \$NEW
+  fi
+  config \$NEW
+}
+
+preserve_perms etc/rc.d/rc.tor.new
+config etc/logrotate.d/tor.new
 config etc/tor/torrc.new
 config etc/tor/tor-tsocks.conf.new
 config etc/tor/torsocks.conf.new
@@ -104,6 +117,9 @@ install -m 0700 -d ${PKG}${SYS_DIR[var]}/lib/tor
 install.dir ${PKG}${SYS_DIR[systemdsystemunitdir]}
 install.dat tor.service ${PKG}${SYS_DIR[systemdsystemunitdir]}
 install.cfg torrc ${PKG}${SYS_DIR[etc]}/tor
+install.dir ${PKG}${SYS_DIR[etc]}/{rc,logrotate}.d
+install.bin rc.tor ${PKG}${SYS_DIR[etc]}/rc.d/rc.tor.new
+install.dat tor.logrotate ${PKG}${SYS_DIR[etc]}/logrotate.d/tor.new
 config ${PKG}${SYS_DIR[etc]}/tor/tor{rc,-tsocks.conf}
 rm -rf ${PKG}${SYS_DIR[doc]}/tor
 }

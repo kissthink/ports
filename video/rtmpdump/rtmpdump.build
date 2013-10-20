@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=rtmpdump
-VERSION=20121230
+VERSION=20131020
 BUILD=1
-DEPENDS=('gnutls >= 3.1.9-1')
+DEPENDS=('gnutls >= 3.2.2-1')
 
 # Description
 
@@ -37,7 +37,7 @@ EOF
 
 SRCNAME[0]=${NAME}
 SRCVERS[0]=${VERSION}
-SRCPACK[0]=${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
+SRCPACK[0]=git://git.ffmpeg.org/rtmpdump.git
 SRCCOPY[0]="GPL2"
 
 build0()

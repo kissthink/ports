@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=libsodium
-VERSION=0.4.2
+VERSION=0.4.5
 BUILD=1
 
 # Description
@@ -41,6 +41,7 @@ SRCCOPY[0]="ISC"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.{in,am}
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \

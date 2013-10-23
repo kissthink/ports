@@ -7,7 +7,7 @@ source /usr/src/ports/Build/build.sh
 NAME=tox
 VERSION=$(date +%Y%m%d)
 BUILD=1
-DEPENDS=('libsodium >= 0.4.2-1' 'libconfig >= 1.4.9-1')
+DEPENDS=('libsodium >= 0.4.5-1')
 
 # Description
 

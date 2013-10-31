@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=google_chrome
-VERSION=29.0.1547.65
+VERSION=30.0.1599.114
 BUILD=1
 DEPENDS=('gtk+ >= 2.24.17-1' 'nss >= 3.14.3-1' 'gconf >= 3.2.6-1')
 

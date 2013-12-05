@@ -55,7 +55,10 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --mandir="${SYS_DIR[man]}" \
  --sysconfdir="${SYS_DIR[etc]}" \
  --libdir="${SYS_DIR[lib]}" \
- --localstatedir="${SYS_DIR[var]}"
+ --localstatedir="${SYS_DIR[var]}" \
+ --disable-testing \
+ --disable-tests \
+ --disable-ntox
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 }

@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=flare
-VERSION=0.18
+VERSION=0.19
 BUILD=1
 DEPENDS=('sdl >= 1.2.15-1')
 
@@ -36,9 +36,9 @@ EOF
 # Sources
 
 SRCNAME[0]=${NAME}
-SRCVERS[0]=v018
-SRCPACK[0]=https://github.com/downloads/clintbellanger/flare/${SRCNAME[0]}_src_${SRCVERS[0]}.tar.gz
-SRCROOT[0]="${SRCNAME[0]}_src_${SRCVERS[0]}"
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=${URL[sf]}/flare-game/Linux/${SRCNAME[0]}.${SRCVERS[0]}.tar.gz
+SRCROOT[0]="${SRCNAME[0]}.${SRCVERS[0]}"
 SRCCOPY[0]="GPL3"
 
 build0()

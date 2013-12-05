@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=flare
 VERSION=0.19
-BUILD=1
+BUILD=2
 DEPENDS=('sdl >= 1.2.15-1')
 
 # Description
@@ -53,4 +53,9 @@ cmake \
 .
 make ${JOBS}
 make install DESTDIR="${PKG}"
+sed 's|@FLARE_EXECUTABLE_PATH@|flare|g' distribution/flare.desktop.in > flare.desktop
+install.dir ${PKG}${SYS_DIR[share]}/applications
+install.dat flare.desktop ${PKG}${SYS_DIR[share]}/applications
+install.dir ${PKG}${SYS_DIR[share]}/icons/hicolor/scalable/apps
+install.dat distribution/flare_logo.svg ${PKG}${SYS_DIR[share]}/icons/hicolor/scalable/apps/flare.svg
 }

@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=glib
-MAJOR=2.36
-VERSION=${MAJOR}.0
-BUILD=2
+MAJOR=2.38
+VERSION=${MAJOR}.2
+BUILD=1
 DEPENDS=('libraries >= 20130211-1')
 OPTIONS="symprepend"
 
@@ -51,7 +51,7 @@ sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 export PKG_CONFIG_PATH="${PKG}${SYS_DIR[share]}/pkgconfig"
 export LD_LIBRARY_PATH="${PKG}${SYS_DIR[lib]}"
 export LDFLAGS="-L${PKG}${SYS_DIR[lib]}"
-export CPPFLAGS="-I${SYS_DIR[include]}/libelf -I${PKG}${SYS_DIR[include]}/gio-unix-2.0 -I${PKG}${SYS_DIR[include]}/glib-2.0 -I${PKG}${SYS_DIR[include]}/$(uname -m)/glib-2.0"
+export CPPFLAGS="-I${SYS_DIR[include]}/libelf -I${PKG}${SYS_DIR[include]}/gio-unix-2.0 -I${PKG}${SYS_DIR[include]}/glib-2.0 -I${PKG}${SYS_DIR[include]}/$(uname -m)-linux/glib-2.0"
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -97,7 +97,7 @@ rm -rf \
 }
 
 SRCNAME[1]=${NAME}-networking
-SRCVERS[1]=${MAJOR}.0
+SRCVERS[1]=${VERSION}
 SRCPACK[1]=${URL[gnome]}/${SRCNAME[1]}/${MAJOR}/${SRCNAME[1]}-${SRCVERS[1]}.tar.xz
 SRCCOPY[1]="LGPL2"
 

@@ -5,8 +5,8 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=taglib
-VERSION=1.8
-BUILD=2
+VERSION=1.9.1
+BUILD=1
 
 # Description
 

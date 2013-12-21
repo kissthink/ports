@@ -67,7 +67,7 @@ EOF
 # Sources
 
 SRCNAME[0]=zlib
-SRCVERS[0]=1.2.7
+SRCVERS[0]=1.2.8
 SRCPACK[0]=http://zlib.net/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
 SRCCOPY[0]="GPL3 LGPL3"
 
@@ -89,7 +89,7 @@ changelog ChangeLog
 }
 
 SRCNAME[1]=gmp
-SRCVERS[1]=5.1.2
+SRCVERS[1]=5.1.3
 SRCPACK[1]=ftp://ftp.gmplib.org/pub/gmp-${SRCVERS[1]}/${SRCNAME[1]}-${SRCVERS[1]}.tar.xz
 SRCCOPY[1]="GPL3 LGPL3"
 
@@ -150,7 +150,7 @@ rm -rf \
 }
 
 SRCNAME[3]=libidn
-SRCVERS[3]=1.27
+SRCVERS[3]=1.28
 SRCPACK[3]=http://ftp.gnu.org/gnu/libidn/${SRCNAME[3]}-${SRCVERS[3]}.tar.gz
 SRCCOPY[3]="GPL2 LGPL3"
 
@@ -183,7 +183,7 @@ rm -rf ${PKG}${SYS_DIR[info]}
 }
 
 SRCNAME[4]=libtasn1
-SRCVERS[4]=3.3
+SRCVERS[4]=3.4
 SRCPACK[4]=http://ftp.gnupg.org/pub/gnutls/${SRCNAME[4]}/${SRCNAME[4]}-${SRCVERS[4]}.tar.gz
 SRCCOPY[4]="LGPL21 GPL3"
 
@@ -314,7 +314,7 @@ changelog CHANGES
 }
 
 SRCNAME[9]=p11-kit
-SRCVERS[9]=0.18.3
+SRCVERS[9]=0.20.1
 SRCPACK[9]=http://p11-glue.freedesktop.org/releases/${SRCNAME[9]}-${SRCVERS[9]}.tar.gz
 SRCCOPY[9]="BSD3"
 
@@ -324,6 +324,8 @@ sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' p11-kit/Makefile.in
 sed -i 's|${libdir}/p11-kit|${libdir}/exec/p11-kit|g' configure
 LIBTASN1_CFLAGS="-I${PKG}${SYS_DIR[include]}/tasn1" \
 LIBTASN1_LIBS="-L${PKG}${SYS_DIR[lib]} -ltasn1" \
+LIBFFI_CFLAGS="-I${PKG}${SYS_DIR[include]}/$(uname -m)-linux/libffi-${SRCVERS[7]}" \
+LIBFFI_LIBS="-L${PKG}${SYS_DIR[lib]} -lffi" \
 CPPFLAGS="-I${PKG}${SYS_DIR[include]}/tasn1" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \

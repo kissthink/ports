@@ -48,6 +48,8 @@ EOF
 configure()
 {
 sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
+sed -i 's|${libdir}/glib-2.0/include|${includedir}/glib-2.0/include|g' glib-2.0.pc.in
+sed -i "s|/glib-2.0/include|/$(uname -m)-linux/glib-2.0|g" glib-2.0.pc.in
 export PKG_CONFIG_PATH="${PKG}${SYS_DIR[share]}/pkgconfig"
 export LD_LIBRARY_PATH="${PKG}${SYS_DIR[lib]}"
 export LDFLAGS="-L${PKG}${SYS_DIR[lib]}"

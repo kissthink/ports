@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=freetype
-VERSION=2.4.12
+VERSION=2.5.2
 BUILD=1
-DEPENDS=('bzip2 >= 1.0.6-1')
+DEPENDS=('bzip2 >= 1.0.6-1' 'libpng >= 1.5.14-1')
 
 # Description
 
@@ -43,6 +43,8 @@ SRCCOPY[0]="GPL2"
 build0()
 {
 sed -i 's|$(libdir)/pkgconfig|$(datadir)/pkgconfig|g' builds/unix/install.mk
+LIBPNG_CFLAGS="-I${SYS_DIR[include]}/libpng15" \
+LIBPNG_LDFLAGS="-lpng15" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \

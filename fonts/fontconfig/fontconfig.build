@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=fontconfig
-VERSION=2.10.91
-BUILD=4
-DEPENDS=('libxml >= 2.9.0-2')
+VERSION=2.11.0
+BUILD=1
+DEPENDS=('libxml >= 2.9.1-1' 'freetype >= 2.5.2-1' 'xz >= 5.0.4-1')
 
 # Description
 
@@ -54,12 +54,13 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --libdir="${SYS_DIR[lib]}" \
  --localstatedir="${SYS_DIR[var]}" \
  --docdir="${SYS_DIR[html]}/fontconfig" \
+ --with-pkgconfigdir="${SYS_DIR[share]}/pkgconfig" \
  --with-xmldir="${SYS_DIR[share]}/dtds" \
  --with-templatedir="${SYS_DIR[share]}/fonts/config" \
  --with-baseconfigdir="${SYS_DIR[etc]}/fonts" \
  --with-configdir="${SYS_DIR[etc]}/fonts.d" \
- --with-default-fonts=/usr/share/fonts \
- --with-add-fonts=/usr/share/fonts \
+ --with-default-fonts="${SYS_DIR[share]}/fonts" \
+ --with-add-fonts="${SYS_DIR[share]}/fonts" \
  --enable-libxml2 \
  --enable-iconv
 make ${JOBS} V=1
@@ -91,11 +92,5 @@ install.bin setup.05.fontconfig ${PKG}${SYS_DIR[var]}/log/setup
   done
 )
 rm -rf ${PKG}${SYS_DIR[html]}
-mv \
- ${PKG}${SYS_DIR[etc]}/fonts/fonts.conf \
- ${PKG}${SYS_DIR[etc]}/fonts/fonts.conf.new
-#FIXME: patch was sent upstream to add a --with-pkgconfigdir switch
-mv \
- ${PKG}${SYS_DIR[lib]}/pkgconfig \
- ${PKG}${SYS_DIR[share]}
+config ${PKG}${SYS_DIR[etc]}/fonts/fonts.conf
 }

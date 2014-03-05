@@ -7,7 +7,7 @@ source /usr/src/ports/Build/build.sh
 NAME=pidgin_tox
 VERSION=$(date +%Y%m%d)
 BUILD=1
-DEPENDS=('tox >= 20131205-1')
+DEPENDS=('tox >= 20140305-1')
 
 # Description
 

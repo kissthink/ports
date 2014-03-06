@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=gnutls
 MAJOR=3.2
-VERSION=${MAJOR}.8
+VERSION=${MAJOR}.12
 BUILD=1
 DEPENDS=('libraries >= 20131221-1')
 
@@ -60,6 +60,7 @@ CFLAGS="${FLAGS} ${INCLUDE}" CXXFLAGS="${FLAGS} ${INCLUDE}" \
  --libdir="${SYS_DIR[lib]}" \
  --localstatedir="${SYS_DIR[var]}" \
  --with-html-dir="${SYS_DIR[html]}"
+# --with-default-trust-store-pkcs11 ?
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS THANKS

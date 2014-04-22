@@ -8,6 +8,7 @@ NAME=tox
 VERSION=$(date +%Y%m%d)
 BUILD=1
 DEPENDS=('libsodium >= 0.4.5-1')
+OPTDEPENDS=('libopus >= 1.1-1' 'libvpx >= 1.3.0-1')
 
 # Description
 

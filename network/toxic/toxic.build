@@ -7,7 +7,7 @@ source /usr/src/ports/Build/build.sh
 NAME=toxic
 VERSION=$(date +%Y%m%d)
 BUILD=1
-DEPENDS=('tox >= 20140305-1')
+DEPENDS=('tox >= 20140422-1')
 
 # Description
 

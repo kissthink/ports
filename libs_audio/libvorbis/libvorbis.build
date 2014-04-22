@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=libvorbis
-VERSION=1.3.3
-BUILD=2
-DEPENDS=('libogg >= 1.3.0-1')
+VERSION=1.3.4
+BUILD=1
+DEPENDS=('libogg >= 1.3.1-1')
 
 # Description
 
@@ -41,6 +41,8 @@ SRCPACK[0]=http://downloads.xiph.org/releases/vorbis/${SRCNAME[0]}-${SRCVERS[0]}
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.{am,in}
+sed -i 's|$(datadir)/doc/$(PACKAGE)-$(VERSION)|$(datadir)/html/$(PACKAGE)|g' doc/Makefile.{am,in} doc/{libvorbis,vorbis{enc,file}}/Makefile.{am,in}
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -60,4 +62,5 @@ make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog CHANGES
 license COPYING
+rm -rf ${PKG}${SYS_DIR[html]}
 }

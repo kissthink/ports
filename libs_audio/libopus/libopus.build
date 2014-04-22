@@ -5,8 +5,8 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=libopus
-VERSION=1.0.2
-BUILD=3
+VERSION=1.1
+BUILD=1
 
 # Description
 
@@ -62,8 +62,8 @@ rm -rf ${PKG}${SYS_DIR[doc]}/${SRCNAME[0]}
 }
 
 SRCNAME[1]=opusfile
-SRCVERS[1]=0.2
-SRCPACK[1]=http://downloads.xiph.org/releases/${SRCNAME[1]}/${SRCNAME[1]}-${SRCVERS[1]}.tar.gz
+SRCVERS[1]=0.5
+SRCPACK[1]=https://ftp.mozilla.org/pub/mozilla.org/${SRCNAME[1]}/${SRCNAME[1]}-${SRCVERS[1]}.tar.gz
 SRCCOPY[1]="BSD3"
 
 build1()

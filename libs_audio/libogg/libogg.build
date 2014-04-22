@@ -5,8 +5,8 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=libogg
-VERSION=1.3.0
-BUILD=2
+VERSION=1.3.1
+BUILD=1
 
 # Description
 
@@ -51,7 +51,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --sysconfdir="${SYS_DIR[etc]}" \
  --libdir="${SYS_DIR[lib]}" \
  --localstatedir="${SYS_DIR[var]}" \
- --htmldir="${SYS_DIR[html]}/${NAME}"
+ --docdir="${SYS_DIR[html]}/${NAME}"
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS

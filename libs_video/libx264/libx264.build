@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=libx264
-VERSION=20130206
+VERSION=20140422
 BUILD=1
-DEPENDS=('xorg_libs >= 7.7-3')
+DEPENDS=('xorg_libs >= 7.7-4')
 
 # Description
 
@@ -43,6 +43,7 @@ SRCCOPY[0]="GPL2"
 
 build0()
 {
+sed -i 's|$(libdir)/pkgconfig|/usr/share/pkgconfig|g' Makefile
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --prefix="${SYS_DIR[usr]}" \
@@ -50,10 +51,8 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --includedir="${SYS_DIR[include]}/x264" \
  --extra-cflags="${FLAGS}" \
  --enable-shared \
- --enable-pic \
- --enable-visualize
+ --enable-pic
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
-#rm -f ${PKG}${SYS_DIR[lib]}/*.a
 }

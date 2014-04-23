@@ -5,8 +5,8 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=libdvd
-VERSION=4.2.0
-BUILD=2
+VERSION=4.9.9
+BUILD=1
 
 # Description
 
@@ -35,16 +35,18 @@ EOF
 # Sources
 
 SRCNAME[0]=libdvdcss
-SRCVERS[0]=1.2.12
+SRCVERS[0]=1.2.13
 SRCPACK[0]=http://download.videolan.org/pub/${SRCNAME[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
+SRCCOPY[0]="GPL2"
 
 build0()
 {
-sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' src/Makefile.in
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.{am,in}
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
+ --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
  --prefix="${SYS_DIR[usr]}" \
@@ -56,38 +58,45 @@ make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
+rm -rf ${PKG}${SYS_DIR[doc]}/${SRCNAME[0]}
 }
 
 SRCNAME[1]=libdvdread
-SRCVERS[1]=4.2.0
-SRCPACK[1]=http://www.mplayerhq.hu/MPlayer/releases/dvdnav/${SRCNAME[1]}-${SRCVERS[1]}.tar.bz2
+SRCVERS[1]=4.9.9
+SRCPACK[1]=http://dvdnav.mplayerhq.hu/releases/${SRCNAME[1]}-${SRCVERS[1]}.tar.xz
 SRCCOPY[1]="GPL2"
 
 build1()
 {
-sed -i 's|$(libdir)/pkgconfig|/usr/share/pkgconfig|g' Makefile
-./configure2 \
- --extra-cflags="${FLAGS}" \
- --disable-debug \
- --disable-opts \
- --disable-static \
- --enable-shared \
+sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.{am,in}
+CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
+./configure \
+ --build="${ARCH}-slackware-linux" \
+ --disable-dependency-tracking \
+ --disable-silent-rules \
+ --enable-static=no \
+ --enable-shared=yes \
  --prefix="${SYS_DIR[usr]}" \
+ --mandir="${SYS_DIR[man]}" \
+ --sysconfdir="${SYS_DIR[etc]}" \
  --libdir="${SYS_DIR[lib]}" \
- --shlibdir="${SYS_DIR[lib]}"
-make ${JOBS}
+ --localstatedir="${SYS_DIR[var]}"
+make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS README
 changelog ChangeLog
+rm -rf ${PKG}${SYS_DIR[doc]}/${SRCNAME[1]}
 }
 
 SRCNAME[2]=libdvdnav
-SRCVERS[2]=4.2.0
-SRCPACK[2]=http://www.mplayerhq.hu/MPlayer/releases/dvdnav/${SRCNAME[2]}-${SRCVERS[2]}.tar.bz2
+SRCVERS[2]=4.2.1
+SRCPACK[2]=http://www.mplayerhq.hu/MPlayer/releases/dvdnav/${SRCNAME[2]}-${SRCVERS[2]}.tar.xz
 
 build2()
 {
 sed -i 's|$(libdir)/pkgconfig|/usr/share/pkgconfig|g' Makefile
+DVDREAD_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
+DVDREAD_LIBS="-L${PKG}${SYS_DIR[lib]}" \
 ./configure2 \
  --extra-cflags="${FLAGS}" \
  --disable-debug \
@@ -97,7 +106,7 @@ sed -i 's|$(libdir)/pkgconfig|/usr/share/pkgconfig|g' Makefile
  --prefix="${SYS_DIR[usr]}" \
  --libdir="${SYS_DIR[lib]}" \
  --shlibdir="${SYS_DIR[lib]}" \
- --with-dvdread-config="${PKG}${SYS_DIR[bin]}/dvdread-config"
+ --with-dvdread="${PKG}${SYS_DIR[usr]}"
 make ${JOBS} \
  DVDREAD_CFLAGS="-I${PKG}${SYS_DIR[include]}" \
  DVDREAD_LIBS="-L${PKG}${SYS_DIR[lib]}"

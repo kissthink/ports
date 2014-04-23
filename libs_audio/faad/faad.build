@@ -8,7 +8,7 @@ NAME=faad
 MAJOR=2
 MINOR=7
 VERSION=${MAJOR}.${MINOR}
-BUILD=2
+BUILD=3
 
 # Description
 

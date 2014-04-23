@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=autotools
 VERSION=2.69
-BUILD=6
+BUILD=7
 DEPENDS=('perl_xmlparser >= 2.41-1' 'm4 >= 1.4.16-1')
 
 # Description
@@ -84,7 +84,7 @@ rm -f ${PKG}${SYS_DIR[info]}/standards.info*
 }
 
 SRCNAME[1]=automake
-SRCVERS[1]=1.13.3
+SRCVERS[1]=1.14.1
 SRCPACK[1]=${URL[gnu]}/${SRCNAME[1]}/${SRCNAME[1]}-${SRCVERS[1]}.tar.xz
 SRCCOPY[1]="GPL2"
 

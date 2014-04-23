@@ -5,9 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=libmikmod
-VERSION=3.2.0
+VERSION=3.3.6
 BUILD=1
-DEPENDS=('audiofile >= 0.3.4-1')
+DEPENDS=('sound >= 1.0.27-1')
+# 'sdl >= 1.2.15-1' 'libopenal >= 1.15.1-1' 'xorg_libs >= 7.7-1'
 
 # Description
 
@@ -33,33 +34,47 @@ ${NAME}: Homepage: http://mikmod.shlomifish.org
 ${NAME}:
 EOF
 
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+install_info()
+{
+  for file in "\${*}"; do
+    if [ -x usr/bin/install-info ]; then
+      usr/bin/install-info --info-dir=usr/share/info usr/share/info/\${file}.info.xz 2> /dev/null
+    fi
+  done
+}
+
+# Install texinfo files
+
+install_info mikmod
+EOF
+
 # Sources
 
 SRCNAME[0]=${NAME}
 SRCVERS[0]=${VERSION}
-SRCPACK[0]=/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
+SRCPACK[0]=${URL[sf]}/mikmod/${SRCNAME[0]}/${SRCVERS[0]}/${SRCNAME[0]}-${SRCVERS[0]}.tar.gz
 SRCCOPY[0]="LGPL21 LGPL2"
 
 build0()
 {
-CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
-./configure \
- --build="${ARCH}-slackware-linux" \
- --disable-dependency-tracking \
- --enable-static=no \
- --enable-shared=yes \
- --prefix=/usr \
- --mandir="${SYS_DIR[man]}" \
- --infodir="${SYS_DIR[info]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix) \
- --localstatedir=/var \
- --enable-oss=no
+cmake \
+-DCMAKE_CXX_FLAGS:STRING="${FLAGS}" \
+-DCMAKE_C_FLAGS:STRING="${FLAGS}" \
+-DCMAKE_VERBOSE_MAKEFILE:BOOL="on" \
+-DCMAKE_INSTALL_PREFIX:PATH="${SYS_DIR[usr]}" \
+-DENABLE_STATIC:BOOL="off" \
+-DENABLE_DL:BOOL="on" \
+-DENABLE_RPATH:BOOL="off" \
+-DENABLE_OPENAL:BOOL="off" \
+-DENABLE_SDL:BOOL="off" \
+-DENABLE_OSS:BOOL="off" \
+-DENABLE_ESD:BOOL="off" \
+CMakeLists.txt
 make ${JOBS}
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog NEWS
-install.dir ${PKG}${SYS_DIR[html]}/libmikmod
-install.dat docs/*.html ${PKG}${SYS_DIR[html]}/libmikmod
-chmod 0755 ${PKG}/usr/lib*/*.so*
 }

@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=libwavpack
-VERSION=4.60.1
+VERSION=4.70.0
 BUILD=1
 
 # Description

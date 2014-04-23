@@ -5,8 +5,8 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=libao
-VERSION=1.1.0
-BUILD=2
+VERSION=1.2.0
+BUILD=1
 
 # Description
 
@@ -47,6 +47,7 @@ sed -i 's|$(libdir)/pkgconfig|$(datarootdir)/pkgconfig|g' Makefile.in
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
+ --disable-silent-rules \
  --disable-dependency-tracking \
  --enable-static=no \
  --enable-shared=yes \
@@ -57,10 +58,12 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --localstatedir="${SYS_DIR[var]}" \
  --enable-alsa \
  --enable-alsa-mmap
-make ${JOBS}
+make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog CHANGES
-rm -rf ${PKG}${SYS_DIR[html]}
+rm -rf \
+ ${PKG}${SYS_DIR[html]} \
+ ${PKG}${SYS_DIR[lib]}/ckport
 ( cd ${PKG}${SYS_DIR[lib]} ; find . -name liboss.so -exec rm -f '{}' \; )
 }

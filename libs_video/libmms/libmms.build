@@ -5,9 +5,8 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=libmms
-VERSION=0.6.2
-BUILD=2
-DEPENDS=('glib >= 2.34.3-1')
+VERSION=0.6.4
+BUILD=1
 
 # Description
 
@@ -59,4 +58,3 @@ make install DESTDIR="${PKG}"
 doc AUTHORS
 changelog ChangeLog
 }
-

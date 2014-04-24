@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=gst_libav
-VERSION=1.0.6
+VERSION=1.2.4
 BUILD=1
-DEPENDS=('gstreamer >= 1.0.6')
+DEPENDS=('gstreamer >= 1.2.4')
 
 # Description
 

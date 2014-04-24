@@ -5,10 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=gst_plugins_bad
-VERSION=1.0.6
+VERSION=1.2.4
 BUILD=1
-DEPENDS=('gstreamer >= 1.0.6-1')
-OPTDEPENDS=('mpg123 >= 1.15.3-1' 'libxvidcore >= 1.3.2-1' 'libdvd >= 4.2.0-1' 'libsndfile >= 1.0.25-1' 'libmodplug >= 0.8.8.4-1' 'libmpcdec >= 1.2.6-1' 'libcdaudio >= 0.99.12p2-1' 'libopus >= 1.0.2-1' 'celt >= 0.11.3-1' 'libschroedinger >= 1.0.11-1' 'faad >= 2.7-1' 'libgsm >= 1.0.13-1' 'libdca >= 0.0.5-1' 'liblrdf >= 0.5.0-1' 'libmimic >= 1.0.4-1' 'libopenal >= 1.15.1-1' 'libsoundtouch >= 1.7.1-1' 'jasper >= 1.900.1-1' 'librsvg >= 2.37.0-1' 'libexif >= 0.6.21-1' 'libkate >= 0.4.1-1' 'libvdpau >= 0.6-1' 'libmms >= 0.6.2-1' 'rtmpdump >= 20121230-1' 'curl >= 7.29.0-1' 'neon >= 0.29.6-1' 'libmusicbrainz >= 2.1.5-1' 'libofa >= 0.9.3-1' 'sdl >= 1.2.15-1' 'bzip2 >= 1.0.6-1')
+DEPENDS=('gstreamer >= 1.2.4-1')
+OPTDEPENDS=('mpg123 >= 1.19.0-1' 'libxvidcore >= 1.3.2-1' 'libdvd >= 4.9.9-1' 'libsndfile >= 1.0.25-1' 'libmodplug >= 0.8.8.4-1' 'libmpcdec >= 1.2.6-1' 'libcdaudio >= 0.99.12p2-1' 'libopus >= 1.1-1' 'celt >= 0.11.3-1' 'libschroedinger >= 1.0.11-1' 'faad >= 2.7-1' 'libgsm >= 1.0.13-1' 'libdca >= 0.0.5-1' 'liblrdf >= 0.5.0-1' 'libmimic >= 1.0.4-1' 'libopenal >= 1.15.1-1' 'libsoundtouch >= 1.7.1-1' 'jasper >= 1.900.1-1' 'librsvg >= 2.37.0-1' 'libexif >= 0.6.21-1' 'libkate >= 0.4.1-1' 'libvdpau >= 0.6-1' 'libmms >= 0.6.4-1' 'rtmpdump >= 20121230-1' 'curl >= 7.29.0-1' 'neon >= 0.29.6-1' 'libmusicbrainz >= 2.1.5-1' 'libofa >= 0.9.3-1' 'sdl >= 1.2.15-1' 'bzip2 >= 1.0.6-1')
 
 # Description
 

@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=mpg123
-VERSION=1.15.4
+VERSION=1.19.0
 BUILD=1
 
 # Description
@@ -55,6 +55,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
+ --disable-silent-rules \
  --enable-static=no \
  --enable-shared=yes \
  --enable-debug=no \
@@ -74,7 +75,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --with-optimization=2 \
  --with-cpu="${CPU}" \
  --with-module-suffix=".so"
-make ${JOBS}
+make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 changelog NEWS
 license COPYING

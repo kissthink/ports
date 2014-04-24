@@ -1,0 +1,65 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=font_ttf_novamono
+VERSION=$(date "+%Y%m%d")
+ARCH=noarch
+BUILD=1
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: font_ttf_novamono
+${NAME}:
+${NAME}: A monospaced font based on NovaCut.
+${NAME}:
+${NAME}: Homepage: http://www.google.com/fonts/specimen/Nova+Mono
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+cat >> ${PKG}/install/doinst.sh <<EOF
+#!/bin/sh
+
+# Update the X font indexes:
+if [ -x /usr/bin/mkfontdir ]; then
+(
+  cd ${SYS_DIR[share]}/fonts/OTF
+  mkfontscale .
+  mkfontdir .
+)
+fi
+
+if [ -x /usr/bin/fc-cache ]; then
+  /usr/bin/fc-cache -f
+fi
+EOF
+
+# Sources
+
+SRCNAME[0]=Nova_Mono
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=/${SRCNAME[0]}.zip
+SRCOPTS[0]="nosrcroot"
+SRCCOPY[0]="OFL11"
+
+build0()
+{
+install.dir ${PKG}${SYS_DIR[share]}/fonts/TTF
+install.dat NovaMono.ttf ${PKG}${SYS_DIR[share]}/fonts/TTF
+}

@@ -5,10 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=audacious
-VERSION=3.3.4
-BUILD=2
-DEPENDS=('gtk+ >= 3.8.0-1' 'dbus_glib >= 0.100-1')
-OPTDEPENDS=('mpg123 >= 1.15.3-1' 'ffmpeg >= 1.2-1' 'curl >= 7.29.0-1' 'libcdio >= 0.90-1')
+VERSION=3.5
+BUILD=1
+DEPENDS=('gtk+ >= 3.8.0-1' 'dbus_glib >= 0.100.2-1')
+OPTDEPENDS=('mpg123 >= 1.19.0-1' 'ffmpeg >= 2.2.1-1' 'curl >= 7.36.0-1' 'libcdio >= 0.92-1' 'libsidplayfp >= 1.4.1-1')
 
 # Description
 
@@ -92,6 +92,7 @@ SRCCOPY[2]="GPL3"
 
 build2()
 {
+sed -i '' 
 sed -i 's|${datadir}/icons|${datarootdir}/icons|g' pixmaps/Makefile
 sed -i 's|${datadir}/pixmaps|${datarootdir}/pixmaps|g' configure
 sed -i 's|${datadir}/applications|${datarootdir}/applications|g' configure Makefile src/audacious/Makefile
@@ -112,6 +113,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --libdir="${SYS_DIR[lib]}" \
  --localstatedir="${SYS_DIR[var]}" \
  --datadir="${SYS_DIR[share]}/application-data" \
+ --with-pkgconfigdir="${SYS_DIR[share]}/pkgconfig" \
  --with-regexlib=gnu
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"

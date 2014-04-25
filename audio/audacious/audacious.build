@@ -98,6 +98,7 @@ sed -i 's|${datadir}/pixmaps|${datarootdir}/pixmaps|g' configure
 sed -i 's|${datadir}/applications|${datarootdir}/applications|g' configure Makefile src/audacious/Makefile
 sed -i 's|$datadir/locale|$datarootdir/locale|g' configure
 sed -i 's|plugindir="$libdir/audacious"|plugindir="$libdir/plugins/audacious"|g' configure
+sed -i 's|${libdir}/${PACKAGE_NAME}|${libdir}/plugins/${PACKAGE_NAME}|g' buildsys.mk.in
 sed -i 's|${libdir}/pkgconfig|${datarootdir}/pkgconfig|g' Makefile
 PKG_CONFIG_PATH="${PKG}${SYS_DIR[share]}/pkgconfig" \
 LIBMCS_CFLAGS="-I${PKG}${SYS_DIR[include]} -I${PKG}${SYS_DIR[include]}/libmowgli" \

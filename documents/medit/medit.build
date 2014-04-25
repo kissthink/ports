@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=medit
-VERSION=1.1.1
-BUILD=2
-DEPENDS=('gtk+ >= 2.24.17-1' 'expat >= 2.1.0-1' 'libxml >= 2.9.0-1')
+VERSION=1.2.0
+BUILD=1
+DEPENDS=('gtk+ >= 2.24.17-1' 'expat >= 2.1.0-1' 'libxml >= 2.9.1-1')
 
 # Description
 

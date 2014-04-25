@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=kmod
-VERSION=14
+VERSION=17
 BUILD=1
 DEPENDS=('xz >= 5.0.4-1')
 
@@ -75,6 +75,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --libdir="${SYS_DIR[lib]}" \
  --includedir="${SYS_DIR[include]}/kmod" \
  --localstatedir="${SYS_DIR[var]}" \
+ --with-bashcompletiondir="${SYS_DIR[bashcompletiondir]}" \
  --with-html-dir="${SYS_DIR[html]}" \
  --with-rootprefix="" \
  --with-zlib \

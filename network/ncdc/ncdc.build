@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=ncdc
-VERSION=1.17
+VERSION=1.19.1
 BUILD=1
-DEPENDS=('glib >= 2.36.0-1' 'bzip2 >= 1.0.6-1' 'sqlite >= 3.7.16.1-1' 'gnutls >= 3.2.1-1')
+DEPENDS=('glib >= 2.38.2-1' 'bzip2 >= 1.0.6-1' 'sqlite >= 3.7.16.1-1' 'gnutls >= 3.2.12-1')
 
 # Description
 

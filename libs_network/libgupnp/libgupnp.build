@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=libgupnp
-VERSION=0.20.1
+VERSION=0.20.10
 BUILD=1
-DEPENDS=('glib >= 2.36.0-1' 'libsoup >= 2.42.0-1')
+DEPENDS=('glib >= 2.38.2-1' 'libsoup >= 2.46.0-1')
 
 # Description
 
@@ -62,7 +62,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 }
 
 SRCNAME[0]=gssdp
-SRCVERS[0]=0.14.2
+SRCVERS[0]=0.14.7
 SRCPACK[0]=${GUPNPREPO}/${SRCNAME[0]}-${SRCVERS[0]}.tar.xz
 SRCCOPY[0]="LGPL2"
 
@@ -99,7 +99,7 @@ rm -rf \
 }
 
 SRCNAME[2]=gupnp-igd
-SRCVERS[2]=0.2.2
+SRCVERS[2]=0.2.3
 SRCPACK[2]=${GUPNPREPO}/${SRCNAME[2]}-${SRCVERS[2]}.tar.xz
 SRCCOPY[2]="LGPL21"
 

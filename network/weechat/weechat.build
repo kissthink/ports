@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=weechat
-VERSION=0.4.1
+VERSION=0.4.3
 BUILD=1
-DEPENDS=('gnutls >= 3.2.1-1' 'curl >= 7.29.0-1')
+DEPENDS=('gnutls >= 3.2.12-1' 'curl >= 7.36.0-1')
 OPTDEPENDS=('perl >= 5.18.0-1' 'python >= 2.7.4-1' 'ruby >= 2.0.0.195-1' 'lua >= 5.2.2-1')
 
 # Description
@@ -59,12 +59,4 @@ doc AUTHORS NEWS
 changelog ChangeLog 
 install.dir ${PKG}${SYS_DIR[share]}/applications
 install.dat weechat.desktop ${PKG}${SYS_DIR[share]}/applications
-(
-  cd ${PKG}${SYS_DIR[bin]}
-  ln -sf weechat-curses weechat
-)
-(
-  cd ${PKG}${SYS_DIR[man]}/man1
-  echo ".so man1/weechat-curses.1" > ${PKG}${SYS_DIR[man]}/man1/weechat.1
-)
 }

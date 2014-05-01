@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=hexchat
-VERSION=2.9.5
-BUILD=2
-DEPENDS=('gtk+ >= 2.24.17-1' 'openssl >= 1.0.1e-1' 'libntlm >= 1.3-1' 'dbus_glib >= 0.100.2-1')
+VERSION=2.9.6.1
+BUILD=1
+DEPENDS=('gtk+ >= 2.24.17-1' 'openssl >= 1.0.1g-1' 'libntlm >= 1.3-1' 'dbus_glib >= 0.100.2-1')
 
 # Description
 
@@ -43,9 +43,8 @@ SRCCOPY[0]="GPL2"
 build0()
 {
 chmod 0755 configure
-sed -i 's|${libdir}/hexchat|${libdir}/plugins/hexchat|g' configure
-sed -i 's|$(hexchatlibdir)/plugins|$(hexchatlibdir)|g' $(find plugins -name "Makefile.in")
-CPPFLAGS="-I${SYS_DIR[include]}/ntlm" \
+sed -i 's|${libdir}/hexchat/plugins|${libdir}/plugins/hexchat|g' configure
+CPPFLAGS="-I${SYS_DIR[include]}/ntlm -I${SYS_DIR[include]}/canberra" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
@@ -61,6 +60,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --libdir="${SYS_DIR[lib]}" \
  --includedir="${SYS_DIR[include]}/hexchat" \
  --localstatedir="${SYS_DIR[var]}" \
+ --with-pkgconfigdir="${SYS_DIR[share]}/pkgconfig" \
  --enable-shm \
  --enable-ntlm
 make ${JOBS}

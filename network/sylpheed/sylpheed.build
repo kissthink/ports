@@ -5,11 +5,11 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=sylpheed
-MAJOR=3.3
-VERSION=${MAJOR}.0
-BUILD=2
-DEPENDS=('gtk+ >= 2.24.14-1' 'openssl >= 1.0.1d-1' 'gpgme >= 1.3.2-1')
-OPTDEPENDS=('sqlite >= 3.7.15.2-1')
+MAJOR=3.4
+VERSION=${MAJOR}.1
+BUILD=1
+DEPENDS=('gtk+ >= 2.24.17-1' 'openssl >= 1.0.1g-1' 'gpgme >= 1.3.2-1')
+OPTDEPENDS=('sqlite >= 3.7.16.1-1')
 
 # Description
 
@@ -40,7 +40,7 @@ EOF
 SRCNAME[0]=${NAME}
 SRCVERS[0]=${VERSION}
 SRCPACK[0]=http://sylpheed.sraoss.jp/${SRCNAME[0]}/v${MAJOR}/${SRCNAME[0]}-${SRCVERS[0]}.tar.bz2
-SRCROOT[0]=${SRCNAME[0]}-${MAJOR}.0
+SRCROOT[0]=${SRCNAME[0]}-${SRCVERS[0]}
 SRCCOPY[0]="GPL2 LGPL21"
 
 build0()
@@ -58,11 +58,14 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --sysconfdir="${SYS_DIR[conf]}" \
  --libdir="${SYS_DIR[lib]}" \
  --localstatedir="${SYS_DIR[var]}" \
- --with-plugindir="${SYS_DIR[lib]}/exec/sylpheed" \
+ --with-plugindir="${SYS_DIR[lib]}/plugins/sylpheed" \
+ --with-themedir="${SYS_DIR[share]}/application-data/sylpheed/icons" \
  --with-manualdir="${SYS_DIR[html]}/sylpheed_manual" \
  --with-faqdir="${SYS_DIR[html]}/sylpheed_faq" 
 make ${JOBS} V=1
+( cd plugin/attachment_tool ; make ${JOBS} V=1)
 make install DESTDIR="${PKG}"
+( cd plugin/attachment_tool ; make install-plugin DESTDIR="${PKG}" )
 doc AUTHORS
 changelog NEWS
 install.dir ${PKG}${SYS_DIR[share]}/icons/hicolor/{64x64,128x128}/apps
@@ -71,7 +74,7 @@ install.dat sylpheed-64x64.png ${PKG}${SYS_DIR[share]}/icons/hicolor/64x64/apps/
 }
 
 SRCNAME[1]=sylfilter
-SRCVERS[1]=0.7
+SRCVERS[1]=0.8
 SRCPACK[1]=http://sylpheed.sraoss.jp/${SRCNAME[1]}/src/${SRCNAME[1]}-${SRCVERS[1]}.tar.gz
 SRCCOPY[1]="BSD3"
 

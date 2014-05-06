@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=tor
-VERSION=0.2.3.25
-BUILD=2
-DEPENDS=('libevent >= 2.0.21-1' 'openssl >= 1.0.1e-1')
+VERSION=0.2.4.21
+BUILD=1
+DEPENDS=('libevent >= 2.0.21-1' 'openssl >= 1.0.1g-1')
 
 # Description
 
@@ -63,7 +63,6 @@ preserve_perms() {
 preserve_perms etc/rc.d/rc.tor.new
 config etc/logrotate.d/tor.new
 config etc/tor/torrc.new
-config etc/tor/tor-tsocks.conf.new
 config etc/tor/torsocks.conf.new
 
 # If the tor users/groups don't exist add them
@@ -101,6 +100,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
+ --disable-silent-rules \
  --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
  --sysconfdir="${SYS_DIR[etc]}" \
@@ -109,7 +109,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 # --enable-upnp
 # --enable-nat-pmp
 # --with-syslog-facility="LOG_DAEMON"
-make ${JOBS}
+make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 changelog ReleaseNotes
 license LICENSE
@@ -125,7 +125,7 @@ rm -rf ${PKG}${SYS_DIR[doc]}/tor
 }
 
 SRCNAME[1]=torsocks
-SRCVERS[1]=1.3.$(date +%Y%m%d)
+SRCVERS[1]=2.0.0.$(date +%Y%m%d)
 SRCPACK[1]=git://git.torproject.org/torsocks.git
 SRCCOPY[1]="GPL2"
 
@@ -141,7 +141,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --enable-shared=yes \
  --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
- --sysconfdir="${SYS_DIR[etc]}/tor" \
+ --sysconfdir="${SYS_DIR[etc]}" \
  --libdir="${SYS_DIR[lib]}" \
  --localstatedir="${SYS_DIR[var]}" \
  --datadir="${SYS_DIR[doc]}/torsocks"

@@ -5,7 +5,7 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=google_chrome
-VERSION=33.0.1750.152
+VERSION=35.0.1916.114
 BUILD=1
 DEPENDS=('gtk+ >= 2.24.17-1' 'nss >= 3.14.3-1' 'gconf >= 3.2.6-1')
 
@@ -53,9 +53,6 @@ build0()
 # Symlink the startup script
 install.dir ${PKG}${SYS_DIR[bin]}
 ( cd ${PKG}${SYS_DIR[bin]}; ln -sf /opt/google/chrome/google-chrome )
-# Install properly the desktop file
-install.dir ${PKG}${SYS_DIR[share]}/applications
-( cd ${PKG}${SYS_DIR[share]}/applications ; ln -sf /opt/google/chrome/google-chrome.desktop )
 # Install properly the icon
 install.dir ${PKG}${SYS_DIR[share]}/icons/hicolor
 for size in 256 128 64 48 32 24 22 16; do
@@ -63,12 +60,7 @@ for size in 256 128 64 48 32 24 22 16; do
   install.dir ${dir}
   ( cd ${dir} ; ln -sf /opt/google/chrome/product_logo_${size}.png google-chrome.png )
 done
-# Add a symlink for libbz2.so.1.0 as it doesn't link against libbz2.so.1 as it
-# should
-( cd ${PKG}/opt/google/chrome ; ln -sf ${SYS_DIR[lib]}/libbz2.so.1 libbz2.so.1.0 )
-# Delete superfluous stuff
 rm -rf \
  ${PKG}${SYS_DIR[etc]} \
- ${PKG}${SYS_DIR[share]}/gnome-control-center \
- ${PKG}/opt/google/chrome/google-chrome.desktop{~,.orig}
+ ${PKG}${SYS_DIR[share]}/gnome-control-center
 }

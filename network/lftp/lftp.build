@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=lftp
-VERSION=4.4.6
+VERSION=4.5.2
 BUILD=1
-DEPENDS=('gnutls >= 3.1.10-1')
+DEPENDS=('gnutls >= 3.1.12-1')
 
 # Description
 

@@ -5,9 +5,9 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=rdesktop
-VERSION=1.7.1
-BUILD=2
-DEPENDS=('xorg_libs >= 7.7-3' 'openssl >= 1.0.1c-1' 'sound >= 1.0.26-1')
+VERSION=1.8.2
+BUILD=1
+DEPENDS=('xorg_libs >= 7.7-4' 'openssl >= 1.0.1g-1' 'sound >= 1.0.27-1' 'libsamplerate >= 0.1.8-1')
 
 # Description
 
@@ -51,6 +51,9 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --libdir="${SYS_DIR[lib]}" \
  --localstatedir="${SYS_DIR[var]}" \
  --datadir="${SYS_DIR[share]}/application-data" \
+ --disable-credssp \
+ --disable-smartcard \
+ --with-libvncserver \
  --with-sound=alsa \
  --with-ipv6
 make ${JOBS}

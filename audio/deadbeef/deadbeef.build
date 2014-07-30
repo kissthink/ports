@@ -5,10 +5,10 @@
 source /usr/src/ports/Build/build.sh
 
 NAME=deadbeef
-VERSION=0.5.6
+VERSION=0.6.1
 BUILD=1
-DEPENDS=('gtk+ >= 3.4.3-1' 'sound >= 1.0.26-1')
-OPTDEPENDS=('flac >= 1.2.1-1' 'libvorbis >= 1.3.2-1' 'libmad >= 0.15.1b-1' 'ffmpeg >= 0.10.3-1' 'libsndfile >= 1.0.25-1' 'wavpack >= 4.60.1-1' 'faad >= 2.7-1' 'libjpeg >= 1.2.0-1' 'libpng >= 1.5.13-1' 'libcdio >= 0.83-1' 'libcddb >= 1.3.2-1' 'curl >= 7.28.0-1' 'openssl >= 0.9.8x-1' 'dbus >= 1.4.20-1' 'libzip >= 0.10-1')
+DEPENDS=('gtk+ >= 3.8.0-1' 'sound >= 1.0.27-1')
+OPTDEPENDS=('flac >= 1.3.0-1' 'libvorbis >= 1.3.4-1' 'libmad >= 0.15.1b-1' 'ffmpeg >= 2.2.1-1' 'libsndfile >= 1.0.25-1' 'wavpack >= 4.70.0-1' 'faad >= 2.7-1' 'libjpeg >= 1.3.0-1' 'libpng >= 1.5.14-1' 'libcdio >= 0.92-1' 'libcddb >= 1.3.2-1' 'curl >= 7.36.0-1' 'openssl >= 1.0.1g-1' 'dbus >= 1.6.8-1' 'libzip >= 0.11.1-1')
 
 # Description
 
@@ -43,26 +43,25 @@ SRCCOPY[0]="GPL2 LGPL21"
 
 build0()
 {
-CPPFLAGS="-I/usr/include/mad -I/usr/include/sndfile -I/usr/include/zip -I/usr/lib64/libzip/include" \
+CPPFLAGS="-I${SYS_DIR[include]}/mad -I${SYS_DIR[include]}/sndfile -I${SYS_DIR[include]}/zip -I${SYS_DIR[include]}/x86_64/libzip" \
 CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
 ./configure \
  --build="${ARCH}-slackware-linux" \
  --disable-dependency-tracking \
- --disable-silent-rules \
+ --disable-rpath \
  --enable-static=no \
  --enable-shared=yes \
- --prefix=/usr \
+ --prefix="${SYS_DIR[usr]}" \
  --mandir="${SYS_DIR[man]}" \
  --docdir="${SYS_DIR[doc]}/${SRCNAME[0],,}-${SRCVERS[0]}" \
- --sysconfdir=/etc \
- --libdir=/usr/lib$(libdirsuffix)/plugins \
- --localstatedir=/var \
+ --sysconfdir="${SYS_DIR[etc]}" \
+ --libdir="${SYS_DIR[lib]}/plugins" \
+ --localstatedir="${SYS_DIR[var]}" \
+ --disable-oss \
  --disable-gtk2 \
  --enable-gtk3
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
 changelog ChangeLog
-rm -f \
- ${PKG}/usr/lib$(libdirsuffix)/plugins/deadbeef/oss.* \
- ${DOC}/COPYING*
+rm -f ${DOC}/COPYING*
 }

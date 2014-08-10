@@ -1,0 +1,65 @@
+#!/bin/bash
+#
+# Maintainer: Christoph J. Thompson <cjsthompson@gmail.com>
+
+source /usr/src/ports/Build/build.sh
+
+NAME=utox
+VERSION=$(date +%Y%m%d)
+BUILD=1
+DEPENDS=('tox >= 20140805-1' 'xorg_libs >= 7.7-1' 'fontconfig >= 2.11.0-1' 'v4l_utils >= 1.0.1-1' 'dbus >= 1.6.8-1')
+
+# Description
+
+cat > ${PKG}/install/slack-desc <<EOF
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in. You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+$(padd)|-----handy-ruler------------------------------------------------------|
+${NAME}: uTox
+${NAME}:
+${NAME}: A Tox client for X.
+${NAME}:
+${NAME}: Homepage: https://github.com/notsecure/uTox
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+${NAME}:
+EOF
+
+# Sources
+
+SRCNAME[0]=${NAME}
+SRCVERS[0]=${VERSION}
+SRCPACK[0]=git://github.com/notsecure/uTox
+SRCCOPY[0]="GPL3"
+
+build0()
+{
+make ${JOBS} OPTFLAGS="${FLAGS}"
+make install DESTDIR="${PKG}${SYS_DIR[usr]}"
+doc README.md
+install.dir ${PKG}${SYS_DIR[share]}/applications
+cat > ${PKG}${SYS_DIR[share]}/applications/utox.desktop <<EOF
+Version=1.0
+
+Type=Application
+
+Name=uTox
+Comment=A tox client 
+Comment[de]=Ein tox Client
+Comment[fr]=Un client tox
+
+Categories=Network;InstantMessaging;
+
+Exec=utox
+Terminal=false
+StartupNotify=false
+EOF
+}

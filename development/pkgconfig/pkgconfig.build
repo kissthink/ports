@@ -6,7 +6,7 @@ source /usr/src/ports/Build/build.sh
 
 NAME=pkgconfig
 VERSION=0.28
-BUILD=2
+BUILD=3
 
 # Description
 
@@ -55,7 +55,7 @@ CFLAGS="${FLAGS}" CXXFLAGS="${FLAGS}" \
  --libdir="${SYS_DIR[lib]}" \
  --localstatedir="${SYS_DIR[var]}" \
  --with-internal-glib \
- --with-pc-path=/usr/share/pkgconfig \
+ --with-pc-path="${SYS_DIR[lib]}/pkgconfig" \
  --disable-host-tool
 make ${JOBS} V=1
 make install DESTDIR="${PKG}"
